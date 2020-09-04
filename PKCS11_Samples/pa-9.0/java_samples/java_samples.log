@@ -1,0 +1,434 @@
+Buildfile: /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build.xml
+
+clean:
+   [delete] Deleting directory /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build
+
+compile:
+    [mkdir] Created dir: /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build/classes
+    [javac] /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build.xml:42: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+    [javac] Compiling 13 source files to /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build/classes
+
+jar:
+    [mkdir] Created dir: /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build/jar
+      [jar] Building jar: /home/ycao/git-repo/pkcs11_samples/pa-9.0/java_samples/build/jar/vpkcs11_sample.jar
+
+run:
+     [java] Start FindDeleteKey ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] The key is found: vpkcs11_java_test_key; Deleting key...
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_DestroyObject(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_DestroyObject(PKCS11.java:1658)
+     [java] 	at com.vormetric.pkcs11.sample.FindDeleteKey.main(Unknown Source)
+     [java] Start CreateKey ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] There is a key with same name already exists in DSM, Please run FindDeleteKey to delete it from DSM.
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End CreateKey.
+     [java] Start FindDeleteKey ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] The key is found: vpkcs11_java_test_key; Deleting key...
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_DestroyObject(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_DestroyObject(PKCS11.java:1658)
+     [java] 	at com.vormetric.pkcs11.sample.FindDeleteKey.main(Unknown Source)
+     [java] Start CreateObject ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] There is a key with same name already exists in DSM, Please run Vpkcs11_sample_find_delete_key to delete it from DSM.
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End CreateObject.
+     [java] Start FindExportKey ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Successfully found source key. Handle = 1
+     [java] Successfully found wrapping key. Handle = 2
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_WrapKey(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_WrapKey(PKCS11.java:1839)
+     [java] 	at com.vormetric.pkcs11.sample.FindExportKey.main(Unknown Source)
+     [java] Start CreateKeypairSignMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Removed existing keypair
+     [java] Keypair successfully Generated. Public Key Handle: 3 Private Key Handle: 4
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_SignInit(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_SignInit(PKCS11.java:1761)
+     [java] 	at com.vormetric.pkcs11.sample.CreateKeypairSignMessage.main(Unknown Source)
+     [java] Start EncryptDecryptMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] CBC PAD mode selected
+     [java] plaintext byte length: 35
+     [java] C_EncryptInit success.
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_BUFFER_TOO_SMALL
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_Encrypt(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_Encrypt(PKCS11.java:1694)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.encryptDecryptBuf(Unknown Source)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.main(Unknown Source)
+     [java] java.lang.NullPointerException
+     [java] 	at java.lang.String.<init>(String.java:491)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.main(Unknown Source)
+     [java] Start EncryptDecryptMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] CTR mode selected
+     [java] plaintext byte length: 35
+     [java] C_EncryptInit success.
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_BUFFER_TOO_SMALL
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_Encrypt(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_Encrypt(PKCS11.java:1694)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.encryptDecryptBuf(Unknown Source)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.main(Unknown Source)
+     [java] java.lang.NullPointerException
+     [java] 	at java.lang.String.<init>(String.java:491)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMessage.main(Unknown Source)
+     [java] Start EncryptDecryptMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] FPE/FF1 mode selected
+     [java] 
+     [java] PlainText: 3596 097 314
+     [java] plaintext byte length: 12
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 12
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 12
+     [java] Encrypted Text =  8413 992 384
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 12
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 12
+     [java] Decrypted Text = 3596 097 314
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 592047
+     [java] plaintext byte length: 6
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 6
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 6
+     [java] Encrypted Text =  712828
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 6
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 6
+     [java] Decrypted Text = 592047
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 3515 667
+     [java] plaintext byte length: 8
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 8
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 8
+     [java] Encrypted Text =  8462 902
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 8
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 8
+     [java] Decrypted Text = 3515 667
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 37 367
+     [java] plaintext byte length: 6
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 6
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 6
+     [java] Encrypted Text =  71 251
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 6
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 6
+     [java] Decrypted Text = 37 367
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] Fpe mode only supports input length >= 2.
+     [java] 
+     [java] PlainText: 4 24567
+     [java] plaintext byte length: 7
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 7
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 7
+     [java] Encrypted Text =  8 05002
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 7
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 7
+     [java] Decrypted Text = 4 24567
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 699
+     [java] plaintext byte length: 3
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 3
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 3
+     [java] Encrypted Text =  126
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 3
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 3
+     [java] Decrypted Text = 699
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] Fpe mode only supports input length >= 2.
+     [java] Fpe mode only supports input length >= 2.
+     [java] 
+     [java] PlainText: 8 2
+     [java] plaintext byte length: 3
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 3
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 3
+     [java] Encrypted Text =  5 2
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 3
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 3
+     [java] Decrypted Text = 8 2
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] Fpe mode only supports input length >= 2.
+     [java] 
+     [java] PlainText: 738
+     [java] plaintext byte length: 3
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 3
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 3
+     [java] Encrypted Text =  845
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 3
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 3
+     [java] Decrypted Text = 738
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 373 856845
+     [java] plaintext byte length: 10
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 10
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 10
+     [java] Encrypted Text =  040 448908
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 10
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 10
+     [java] Decrypted Text = 373 856845
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 6735 85
+     [java] plaintext byte length: 7
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 7
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 7
+     [java] Encrypted Text =  5833 15
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 7
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 7
+     [java] Decrypted Text = 6735 85
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 7373
+     [java] plaintext byte length: 4
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 4
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 4
+     [java] Encrypted Text =  5181
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 4
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 4
+     [java] Decrypted Text = 7373
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 37385 6 858
+     [java] plaintext byte length: 11
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 11
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 11
+     [java] Encrypted Text =  35550 5 755
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 11
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 11
+     [java] Decrypted Text = 37385 6 858
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 42626
+     [java] plaintext byte length: 5
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 5
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 5
+     [java] Encrypted Text =  37846
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 5
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 5
+     [java] Decrypted Text = 42626
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 6262 747
+     [java] plaintext byte length: 8
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 8
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 8
+     [java] Encrypted Text =  9721 244
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 8
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 8
+     [java] Decrypted Text = 6262 747
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 7247
+     [java] plaintext byte length: 4
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 4
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 4
+     [java] Encrypted Text =  3026
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 4
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 4
+     [java] Decrypted Text = 7247
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 272
+     [java] plaintext byte length: 3
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 3
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 3
+     [java] Encrypted Text =  513
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 3
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 3
+     [java] Decrypted Text = 272
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 22
+     [java] plaintext byte length: 2
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 2
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 2
+     [java] Encrypted Text =  10
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 2
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 2
+     [java] Decrypted Text = 22
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] 
+     [java] PlainText: 85879 8969
+     [java] plaintext byte length: 10
+     [java] C_EncryptInit success.
+     [java] C_Encrypt success. Encrypted data len = 10
+     [java] C_Encrypt 2nd call succeed. Encrypted data len = 10
+     [java] Encrypted Text =  91825 7581
+     [java] C_DecryptInit success.
+     [java] C_Decrypt success. Decrypted data length = 10
+     [java] C_Decrypt 2nd call succeed. Decrypted data length = 10
+     [java] Decrypted Text = 85879 8969
+     [java] === plainText and decryptedTextStr are equal !!!===
+     [java] Fpe mode only supports input length >= 2.
+     [java] Skipped Line Count = 5
+     [java] Unmatched Error Line Count = 0
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End EncryptDecryptMessage.
+     [java] Start EncryptDecryptFile ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_DestroyObject(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_DestroyObject(PKCS11.java:1658)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptFile.main(Unknown Source)
+     [java] Start EncryptDecryptMetaData ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] C_EncryptInit succeed
+     [java] plaintext = Plain text message to be encrypted.
+     [java] plaintext length = 35 plaintext byte length: 35
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_BUFFER_TOO_SMALL
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_Encrypt(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_Encrypt(PKCS11.java:1694)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptMetaData.main(Unknown Source)
+     [java] Start EncryptDecryptFileMeta ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_DestroyObject(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_DestroyObject(PKCS11.java:1658)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptFileMeta.main(Unknown Source)
+     [java] Start EncryptDecryptAsymmetricKey ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] sun.security.pkcs11.wrapper.PKCS11Exception: CKR_GENERAL_ERROR
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11.C_DestroyObject(Native Method)
+     [java] 	at sun.security.pkcs11.wrapper.PKCS11$SynchronizedPKCS11.C_DestroyObject(PKCS11.java:1658)
+     [java] 	at com.vormetric.pkcs11.sample.EncryptDecryptAsymmetricKey.main(Unknown Source)
+     [java] Start TestKeyAttributes ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Removed existing keypair
+     [java] Current End Date: year: 2020 month: 8 day: 29
+     [java] Before generating Key. Key Handle: 0
+     [java] Key successfully Generated. Key Handle: 2
+     [java] Key successfully Generated. Key Handle: 2
+     [java] Attr type: CKA_LABEL Value: java_test_key_sym
+     [java] Attr type: CKA_CLASS Value: 4
+     [java] Attr type: CKA_KEY_TYPE Value: 31
+     [java] Attr type: CKA_END_DATE Value: 29.8.2020 (DD.MM.YYYY)
+     [java] Attr type: CKA_LABEL Value: java_test_key_sym
+     [java] Attr type: CKA_CLASS Value: 4
+     [java] Attr type: CKA_KEY_TYPE Value: 31
+     [java] Attr type: CKA_END_DATE Value: 29.8.2020 (DD.MM.YYYY)
+     [java] The key : java_test_key_sym still exists in DSM.
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End TestKeyAttributes.
+     [java] Start DigestMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] SHA256 mode selected
+     [java] digest = af524f77d016a7f62d246d45225d9543c624cda5dc59d806a8bfd2e7125a9ffc
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End DigestMessage.
+     [java] Start DigestMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] SHA384 mode selected
+     [java] digest = 4ca427293443ade27c6e350c6224298da25a38d2a9aee39994889e5716aaa7512698959cb51a0cde651acc8e8ecf62c3
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End DigestMessage.
+     [java] Start DigestMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] SHA512 mode selected
+     [java] digest = 81ca6a72107522103e364cd0b8c5f654f4bbbc081a3fb92651d43f1c6c426654d1ca404665d8c9c5a86e26725da78b857976ee24cf7024110d1053177d22dad5
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End DigestMessage.
+     [java] Start DigestMessage ...
+     [java] Loading the Vormetric PKCS11 library from : /opt/CipherTrust/CAE/pkcs11/lib/libcaepkcs11.so
+     [java] Session successfully opened. Handle: 1
+     [java] Successfully Logged in
+     [java] Key successfully Found. Key Handle: 1
+     [java] HMAC_SHA256 mode selected
+     [java] digest = 90694c51d3a382870fcdeb11d1f2d1c537be498318591bf9ab34418f32c53dd7
+     [java] Successfully logged out.
+     [java] Successfully closed session.
+     [java] End DigestMessage.
+
+main:
+
+BUILD SUCCESSFUL
+Total time: 12 seconds
