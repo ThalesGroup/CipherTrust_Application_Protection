@@ -1,4 +1,4 @@
-# vts_tokenize
+# tokenize
 
 Tokenize a given data or plaintext string using the tokengroup and tokentemplate.
 
@@ -48,7 +48,7 @@ Tokenize a given data or plaintext string using the tokengroup and tokentemplate
 }
 ```
 
-# vts_detokenize
+# detokenize
 
 Detokenize a given token using the tokengroup and tokentemplate.
 

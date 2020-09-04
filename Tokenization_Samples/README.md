@@ -1,6 +1,6 @@
 # VTS samples
 
-## vts_tokenize
+## tokenize
 
 Tokenize a given data or plaintext string using the tokengroup and tokentemplate.
 
@@ -10,18 +10,18 @@ Tokenize a given data or plaintext string using the tokengroup and tokentemplate
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/vts_tokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/tokenize.py
 
 **Syntax** :
 
 ```
-$ python vts_tokenize.py -d -u <username>:<password> -l <vts URL> -p <data or plaintext string> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
+$ python tokenize.py -d -u <username>:<password> -l <vts URL> -p <data or plaintext string> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
 ```
 
 **Example** :
 
 ```
-$ python vts_tokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python tokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
@@ -38,7 +38,7 @@ Completed write text to file name token.
 
 #
 
-## vts_detokenize
+## detokenize
 
 Detokenize a given token using the tokengroup and tokentemplate.
 
@@ -48,18 +48,18 @@ Detokenize a given token using the tokengroup and tokentemplate.
 
 **data** : `The detokenized sensitive data. May be masked depending on the configuration. The data string is case-sensitive and limited to 128K characters.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/vts_detokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/detokenize.py
 
 **Syntax** :
 
 ```
-$ python vts_detokenize.py -d -u <username>:<password> -l <vts URL> -I <inputFile> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
+$ python detokenize.py -d -u <username>:<password> -l <vts URL> -I <inputFile> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
 ```
 
 **Example** :
 
 ```
-$ python vts_detokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python detokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
