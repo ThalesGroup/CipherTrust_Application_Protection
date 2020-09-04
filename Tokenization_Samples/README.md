@@ -10,7 +10,7 @@ Tokenize a given data or plaintext string using the tokengroup and tokentemplate
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/tokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/tokenize.py
 
 **Syntax** :
 
@@ -48,7 +48,7 @@ Detokenize a given token using the tokengroup and tokentemplate.
 
 **data** : `The detokenized sensitive data. May be masked depending on the configuration. The data string is case-sensitive and limited to 128K characters.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/detokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/detokenize.py
 
 **Syntax** :
 
@@ -78,4 +78,4 @@ Completed write text to file name raw.
 
 ## Tokenization/Detokenization api details
 
-https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/api.md
+https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/api.md

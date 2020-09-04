@@ -23,4 +23,4 @@
 `CTS also includes data encryption, decryption, sign, and verify services which can be tied to specific keys and user permissions. They can also be integrated into a developer’s application using the Vormetric Cryptographic REST APIs.`
 
 ## link to Tokenization Samples README.md
-https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/README.md
+https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/README.md
