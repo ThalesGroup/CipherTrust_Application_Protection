@@ -21,7 +21,7 @@ $ python tokenize.py -d -u <username>:<password> -l <vts URL> -p <data or plaint
 **Example** :
 
 ```
-$ python tokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python tokenize.py -d -u <username>:<password> -l https://192.0.2.0/vts -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
@@ -59,7 +59,7 @@ $ python detokenize.py -d -u <username>:<password> -l <vts URL> -I <inputFile> -
 **Example** :
 
 ```
-$ python detokenize.py -d -u root:ca\$hcow -l https://192.0.2.0/vts -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python detokenize.py -d -u <username>:<password> -l https://192.0.2.0/vts -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
