@@ -3,10 +3,10 @@ import org.apache.commons.cli.*;
 
 public class CTSSample {
     public static void main( String[] args ) throws ParseException {
-        // URL of CTS Host, ex: https://<CTS_HOST>/vts/rest/v2.0/
-        Option httpsURLOpt = Option.builder("l")
-        .longOpt("httpurl")
-        .desc("https URL for tokenization/detokenization")
+        // CTS host name or IP for tokenization/detokenization
+        Option hostOpt = Option.builder("l")
+        .longOpt("host")
+        .desc("CTS host name or IP for tokenization/detokenization")
         .required(true)
         .hasArg(true)
         .build();
@@ -58,7 +58,7 @@ public class CTSSample {
         .build();
 
         Options options = new Options();
-        options.addOption(httpsURLOpt);
+        options.addOption(hostOpt);
         options.addOption(credOpt);
         options.addOption(filePathOpt);
         options.addOption(dataOpt);
@@ -70,7 +70,8 @@ public class CTSSample {
         try {
             CommandLineParser parser = new DefaultParser();
             CommandLine cmd = parser.parse(options, args);
-            String https_url = cmd.getOptionValue("l");
+            String host = cmd.getOptionValue("l");
+            String https_url = "https://" + host + "/vts/rest/v2.0/";
             String credentialRaw = cmd.getOptionValue("u");
             String tokenGroup = cmd.getOptionValue("g");
             String tokenTemplate = cmd.getOptionValue("t");
