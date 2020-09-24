@@ -10,19 +10,19 @@ Tokenize/detokenize a given data or plaintext string using the tokengroup and to
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/CTS-Samples/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetok.java
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetok.java
 
 **Syntax** :
 
 ```
 $ mvn compile
-$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l 'https://<CTS_HOST>/vts/rest/v2.0/' -u <username>:<password> -g <tokengroup> -t <tokentemplate> -i <data or plaintext string>"
+$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l <CTS_HOST> -u <username>:<password> -g <tokengroup> -t <tokentemplate> -i <data or plaintext string>"
 ```
 
 **Example** :
 
 ```
-$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l 'https://<CTS_HOST>/vts/rest/v2.0/' -u <username>:<password> -g FF1_Tok_Group -t FF1_Tok_Template -i 9453677629008564"
+$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l <CTS_HOST> -u <username>:<password> -g FF1_Tok_Group -t FF1_Tok_Template -i 9453677629008564"
 ```
 
 ## Output
@@ -49,19 +49,19 @@ Tokenize/detokenize a given bulk data or plaintext string from file using the to
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/CTS-Samples/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetokBulk.java
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetokBulk.java
 
 **Syntax** :
 
 ```
 $ mvn compile
-$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l 'https://<CTS_HOST>/vts/rest/v2.0/' -u <username>:<password> -g <tokengroup> -t <tokentemplate> -f <data or plaintext string file>"
+$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l <CTS_HOST> -u <username>:<password> -g <tokengroup> -t <tokentemplate> -f <data or plaintext string file>"
 ```
 
 **Example** :
 
 ```
-$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l 'https://<CTS_HOST>/vts/rest/v2.0/' -u <username>:<password> -g FF1_Tok_Group -t FF1_Tok_Template -i src/main/java/com/thales/cts/samples/input.txt"
+$ mvn exec:java -Dexec.mainClass="com.thales.cts.samples.CTSSample" -Dexec.args=" -l <CTS_HOST> -u <username>:<password> -g FF1_Tok_Group -t FF1_Tok_Template -i src/main/java/com/thales/cts/samples/input.txt"
 ```
 
 ## Output
@@ -80,4 +80,4 @@ Bulk Detokenize response: [{"data":"9453677629008564","status":"Succeed"},{"data
 
 ## Tokenization/Detokenization api details
 
-https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/api.md
+https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/api.md
