@@ -1,5 +1,14 @@
 # Tokenization Samples
 
+## Prerequesties
+
+- Python v2.7.x up.
+- rfc3339 python library.
+- requests python library.
+- eventlet python library.
+- Access to CipherTrust Manager.
+- Tokengroup and Tokentemplate present in CipherTrust Manager.
+
 ## Tokenize
 
 Tokenize a given data or plaintext string using the tokengroup and tokentemplate.
