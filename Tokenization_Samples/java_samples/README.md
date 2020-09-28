@@ -10,7 +10,7 @@ Tokenize/detokenize a given data or plaintext string using the tokengroup and to
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetok.java
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/java_samples/src/main/java/com/thales/cts/samples/TokDetok.java
 
 **Syntax** :
 
@@ -49,7 +49,7 @@ Tokenize/detokenize a given bulk data or plaintext string from file using the to
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/cts-app/src/main/java/com/thales/cts/samples/TokDetokBulk.java
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/java_samples/src/main/java/com/thales/cts/samples/TokDetokBulk.java
 
 **Syntax** :
 
