@@ -66,11 +66,8 @@ while len(args) > 0:
     elif args[0] == "-l":  # check if option URL define
         if ((len(args) == 1) or (args[1].startswith("-"))):
             usage("\nMissing VTS url.\n")
-        if (re.match("https?:\/\/.*\/vts", args[1])):
-            p11url = args[1]
-            args = args[2:]
-        else:
-            usage("\nURL is not correct: https://<vts-server/vts")
+        p11url = args[1]
+        args = args[2:]
     elif args[0] == "-tg":  # check if option tokengroup define
         if ((len(args) == 1) or (args[1].startswith("-"))):
             usage("\nMissing tokengroup.\n")
@@ -108,7 +105,7 @@ if (("P11_URL" in os.environ) and (p11url == None)):
     p11url = os.environ["P11_URL"]
 elif (p11url == None):
     usage("\nURL not define or missing P11_URL environment variable: https://<vts-server/vts.\n")
-
+p11url = "https://" + p11url + "/vts"
 # Check username and password if exist in system environment or not
 if (("P11_UNAME_PWD" in os.environ) and (p11user == None)):
     p11user = os.environ["P11_UNAME_PWD"]
