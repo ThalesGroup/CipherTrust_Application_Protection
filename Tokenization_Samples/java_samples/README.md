@@ -1,5 +1,13 @@
 # CTS Java samples
 
+## Prerequesties
+
+- Java 1.8 and above.
+- Apache Maven 3.6.0 and above.
+- Access to CipherTrust Manager.
+- Access to CipherTrust Tokenization Server.
+- Tokengroup and Tokentemplate present in CipherTrust Tokenization Server.
+
 ## Tokenize/detokenize
 
 Tokenize/detokenize a given data or plaintext string using the tokengroup and tokentemplate.

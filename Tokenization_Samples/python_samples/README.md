@@ -7,7 +7,8 @@
 - requests python library.
 - eventlet python library.
 - Access to CipherTrust Manager.
-- Tokengroup and Tokentemplate present in CipherTrust Manager.
+- Access to CipherTrust Tokenization Server.
+- Tokengroup and Tokentemplate present in CipherTrust Tokenization Server.
 
 ## Tokenize
 

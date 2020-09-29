@@ -1,5 +1,12 @@
 # CTS CURL samples
 
+## Prerequesties
+
+- cURL 7.58.0 and above.
+- Access to CipherTrust Manager.
+- Tokengroup and Tokentemplate present in CipherTrust Manager.
+- Access to CipherTrust Tokenization Server.
+
 ## Tokenize
 
 Tokenize a given data or plaintext string using the tokengroup and tokentemplate.
@@ -62,4 +69,4 @@ curl --location --request  POST -k 'https://<CTS_HOST>/vts/rest/v2.0/detokenize'
 
 ## Tokenization/Detokenization api details
 
-https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/TOK-2779/Tokenization_Samples/api.md
+https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/api.md
