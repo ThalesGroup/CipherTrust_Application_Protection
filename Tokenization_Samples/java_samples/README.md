@@ -5,8 +5,8 @@
 - Java 1.8 and above.
 - Apache Maven 3.6.0 and above.
 - Access to CipherTrust Manager.
-- Tokengroup and Tokentemplate present in CipherTrust Manager.
 - Access to CipherTrust Tokenization Server.
+- Tokengroup and Tokentemplate present in CipherTrust Tokenization Server.
 
 ## Tokenize/detokenize
 
