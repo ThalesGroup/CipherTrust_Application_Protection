@@ -6,7 +6,7 @@
 - rfc3339 python library.
 - requests python library.
 - eventlet python library.
-- Access to CipherTrust Manager.
+- Access to CipherTrust Manager(CTS).
 - Access to CipherTrust Tokenization Server.
 - Tokengroup and Tokentemplate present in CipherTrust Tokenization Server.
 
