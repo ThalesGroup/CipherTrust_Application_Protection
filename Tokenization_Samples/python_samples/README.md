@@ -20,18 +20,18 @@ Tokenize a given data or plaintext string using the tokengroup and tokentemplate
 
 **data** : `The data string to tokenize. The argument considers case and is limited to 128K.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/tokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/tokenizeSample.py
 
 **Syntax** :
 
 ```
-$ python tokenize.py -d -u <username>:<password> -l <vts URL> -p <data or plaintext string> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
+$ python tokenizeSample.py -d -u <username>:<password> -l <vts URL> -p <data or plaintext string> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
 ```
 
 **Example** :
 
 ```
-$ python tokenize.py -d -u <username>:<password> -l https://192.0.2.0/vts -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python tokenizeSample.py -d -u <username>:<password> -l 192.0.2.0 -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
@@ -58,18 +58,18 @@ Detokenize a given token using the tokengroup and tokentemplate.
 
 **data** : `The detokenized sensitive data. May be masked depending on the configuration. The data string is case-sensitive and limited to 128K characters.`
 
-**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/detokenize.py
+**github link** : https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/detokenizeSample.py
 
 **Syntax** :
 
 ```
-$ python detokenize.py -d -u <username>:<password> -l <vts URL> -I <inputFile> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
+$ python detokenizeSample.py -d -u <username>:<password> -l <vts URL> -I <inputFile> -O <outputFile> -tg <tokengroup> -tt <tokentemplate>
 ```
 
 **Example** :
 
 ```
-$ python detokenize.py -d -u <username>:<password> -l https://192.0.2.0/vts -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python detokenizeSample.py -d -u <username>:<password> -l 192.0.2.0 -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
