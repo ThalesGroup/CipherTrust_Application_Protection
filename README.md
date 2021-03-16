@@ -19,3 +19,5 @@ Cryptographic services - `CTS also includes data encryption, decryption, sign, a
 [**Python Tokenization Samples**](https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/README.md "Python Tokenization Samples README.md")
 
 [**Java Tokenization Samples**](https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/java_samples/README.md "Java Tokenization Samples README.md")
+
+## External Samples
