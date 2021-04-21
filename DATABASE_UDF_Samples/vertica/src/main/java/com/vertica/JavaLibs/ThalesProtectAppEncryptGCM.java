@@ -22,8 +22,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
-/* This sample Database User Defined Function(UDF) for Vertica is an example of how to use Thales Cipher Trust Manager Protect Application
- * to protect sensitive data in a column.  This example uses CBC-GCM mode of encryption. This example encrypts data in a column or whatever
+/* This sample Database User Defined Function(UDF) for Vertica is an example of how to use Thales CipherTrust Manager Protect Application
+ * to protect sensitive data in a column.  This example uses AES-GCM mode of encryption. This example encrypts data in a column or whatever
  * is passed to the function. It normally would be used by an ETL process to protect data for one time loads into a database or 
  * as data is captured at it source.  
 *  
@@ -105,8 +105,7 @@ public class ThalesProtectAppEncryptGCM extends ScalarFunctionFactory {
 					
 					byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
 					results = IngrianProvider.byteArray2Hex(outbuf);
-					//results = new String(outbuf);
-		//			srvInterface.log("results ." + results);		
+		
 				} catch (NoSuchAlgorithmException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
