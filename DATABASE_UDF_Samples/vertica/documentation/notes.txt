@@ -1,0 +1,48 @@
+1.) place source code at
+/opt/vertica/sdk/examples/JavaUDx/ScalarFunctions/com/vertica/JavaLibs
+Make sure package name is com.vertica.JavaLibs
+
+2.) Deploy jar files
+contents of 
+
+[root@localhost examples]# cd /opt/vertica/bin
+[root@localhost bin]# ls
+admintools                           gson-2.1.jar                    rsync                vertica-udx-Java.jar
+adminTools                           guava-20.0.jar                  scrutinize           vertica-udx-Python
+apikeymgr                            help                            TXTlcheck.py         vertica-udx-Python.map
+asm-1.0.2.jar                        Ingrianlog4j-api-2.10.0.jar     validators.sh        vertica-udx-R
+bcpkix-jdk15on-157.jar               Ingrianlog4j-core-2.10.0.jar    vbr                  vertica-udx-R.map
+bcprov-jdk15to18-165.jar             IngrianNAE-8.12.1.000.jar       vbr.py               vertica-udx-zygote
+bootstrap-catalog                    IngrianNAE.properties           vbr_worker.py        vertica-udx-zygote.map
+check-auth-config                    IngrianNAE.properties.main-net  vcpuperf             vioperf
+commons-codec-1.7.jar                javax.ws.rs-api-2.0-m10.jar     vertica              vnetperf
+commons-collections4-4.1.jar         json-path-0.8.1.jar             VerticaSDK.jar       vnetperf_helper
+commons-lang-2.6.jar                 json-smart-2.1.0.jar            vertica-udx-C++      vsql
+d237f83d0a61c3594829a574c63530b.dat  kill_spread                     vertica-udx-C++.map  vstack
+diagnostics                          lchk.sh                         VerticaUDxFence.jar
+extract-snapshot                     psql                            vertica-udx-Java
+
+[root@localhost bin]# cd /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.262.b10-0.el7_8.x86_64/jre/lib/ext
+[root@localhost ext]# ls
+bcpkix-jdk15on-157.jar        commons-lang3-3.1.jar        Ingrianlog4j-core-2.10.0.jar    localedata.jar       sunpkcs11.jar
+bcprov-jdk15to18-165.jar      dnsns.jar                    IngrianNAE-8.12.1.000.jar       meta-index           zipfs.jar
+cldrdata.jar                  gson-2.1.jar                 IngrianNAE.properties           nashorn.jar
+commons-codec-1.10.jar        guava-20.0.jar               IngrianNAE.properties.main-net  sunec.jar
+commons-collections4-4.1.jar  Ingrianlog4j-api-2.10.0.jar  jaccess.jar                     sunjce_provider.jar
+[root@localhost ext]#
+
+3.) Build UDF's
+
+logon as dbadmin
+1.) [dbadmin@localhost examples]$ vsql -f JavaFunctions_del.sql
+logon as root.
+cd /opt/vertica/sdk/examples/build
+2.) rm JavaScalar.jar
+cd /opt/vertica/sdk/examples
+3.) make JavaFunctions
+logon as dbadmin
+4.) [dbadmin@localhost examples]$ vsql -f JavaFunctions_create.sql
+UDF's should now show in Vertica
+
+
+
