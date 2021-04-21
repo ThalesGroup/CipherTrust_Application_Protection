@@ -421,7 +421,7 @@ public class CipherTrustManagerHelper {
 		else
 			throw new RuntimeException("valid values for data type are: digit,alphabet,alphanumeric");
 		
-		//String tkn = awsresrest.getToken("Vormetric123!", "C:\\keystore\\cm_keystoreone");
+		//String tkn = awsresrest.getToken("SuperSecret23!", "C:\\keystore\\cm_keystoreone");
 		String tkn = awsresrest.getToken();
 		Calendar calendar = Calendar.getInstance();
 
@@ -557,10 +557,10 @@ public class CipherTrustManagerHelper {
 				 * "' is woken after sleeping for " + wait + " mseconds");
 				 */
 			} else if (action.equalsIgnoreCase("mac")) {
-				// admin Vormetric123! hmacsha256-1 1
+				// admin SuperSecret23! hmacsha256-1 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
 				// 192.168.159.160 mac
-				// admin Vormetric123! rsa-key5 1
+				// admin SuperSecret23! rsa-key5 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
 				// 192.168.159.160 sign
 				value = this.cmRESTMac("na", sensitive, action);
