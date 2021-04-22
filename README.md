@@ -4,7 +4,7 @@
 
 `The CipherTrust Application Protection provides a framework to deliver application-layer encryption such as column- or field-level encryption in databases, Big Data, or PaaS applications. CipherTrust Application Protection also provides a standards-based API to do cryptographic and encryption key management operations into existing corporate`
 
-This repository will hold code samples that you can use in your environment
+This repository will hold code samples and/or integrations that you can use in your environment
 
 [Tokenization](tokenization): Samples or integrations related to any form of tokenization, reversible or irreversible
 
