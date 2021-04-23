@@ -4,18 +4,12 @@
 
 `The CipherTrust Application Protection provides a framework to deliver application-layer encryption such as column- or field-level encryption in databases, Big Data, or PaaS applications. CipherTrust Application Protection also provides a standards-based API to do cryptographic and encryption key management operations into existing corporate`
 
-## Examples
+This repository will hold code samples and/or integrations that you can use in your environment
 
-**CipherTrust Tokenization Server**
+[Tokenization](tokenization): Samples or integrations related to any form of tokenization, reversible or irreversible
 
-`The CipherTrust Tokenization Server package is a platform-independent virtual appliance that comprises three security services:`
+[PKCS11](pkcs11): Samples or integrations using the PKCS11 provider of CipherTrust Application Data Protection product line (SDKs to embed encryption, tokenization and key operations directly in your application)
 
-Tokenization service - `Tokenization is used for replacing sensitive data with tokenized, or encrypted, data. Data masking can be applied to any detokenized data to hide sections of the data from different groups of users.`
+[REST](rest): Samples or integrations using the REST web services provider of CipherTrust Application Data Protection Web Services product line as well as CipherTrust Vaulted Tokenization and CipherTrust Vaultless Tokenization products
 
-Key management services - `Using the key provider and repository, users-- whether human or machine-- can be granted permission to create, modify, find, import, export, and/or destroy encryption keys. The Vormetric Key Management REST APIs are used to integrate this functionality into a developer’s application.`
-
-Cryptographic services - `CTS also includes data encryption, decryption, sign, and verify services which can be tied to specific keys and user permissions. They can also be integrated into a developer’s application using the Vormetric Cryptographic REST APIs.`
-
-[**Python Tokenization Samples**](https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/python_samples/README.md "Python Tokenization Samples README.md")
-
-[**Java Tokenization Samples**](https://github.com/thalescpl-io/CipherTrust_Application_Protection/blob/master/Tokenization_Samples/java_samples/README.md "Java Tokenization Samples README.md")
+[Database](database): Samples or integrations to your database applications using UDFs or extensions to incorporate encryption, tokenization and key operations directly in your database
