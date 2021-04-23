@@ -1,12 +1,5 @@
 ############################
-# Vertica Analytic Database
-#
-# Makefile to build example user defined functions
-#
-# To run under valgrind:
-#   make RUN_VALGRIND=1 run
-#
-# Copyright (c) 2005 - 2016 Hewlett Packard Enterprise Development LP 
+# Makefile to build custom user defined functions
 ############################
 
 ## Set to the location of the SDK installation
