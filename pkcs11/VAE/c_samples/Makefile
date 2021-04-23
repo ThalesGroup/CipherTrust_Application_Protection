@@ -1,129 +1,138 @@
-
-# How far from the bottom are we in the directory structure?
+#*************************************************************************
+#*                                                                      **
+#* Copyright(c) 2012 - 2014                       Confidential Material **
+#*                                                                      **
+#* This file is the property of Vormetric Inc.                          **
+#* The contents are proprietary and confidential.                       **
+#* Unauthorized use, duplication, or dissemination of this document,    **
+#* in whole or in part, is forbidden without the express consent of     **
+#* Vormetric, Inc..                                                     **
+#*                                                                      **
+#*************************************************************************
 #
-TOP_DIR = ../../../..
-
-# ----- Begin Boilerplate
-
+# This Makefile helps to build samples on *unix system
+# Usage : gmake  -- to make the sample binaries
+# Usage : gmake clean  -- to clean up the *.o and executables 
+# Usage : gmake PASSWORD='your-pin-here' run  -- to run the sample, make sure to replace 'your-pin-here'
 #
-# Set up Vormetric environment
-#
-include $(TOP_DIR)/mk/Make.rules
+UNAME = $(shell uname)
+CCFLAGS =
 
-ifeq (,$(findstring _obj_,$(CURDIR)))
-include $(TOP_DIR)/mk/target.mk
-else
-include $(TOP_DIR)/mk/build.rules
+ifeq ($(UNAME),AIX)
+  CCFLAGS := -maix64 -pthread
+endif
+ifeq ($(UNAME),HP-UX)
+  CCFLAGS := -mlp64 -pthread
+endif
 
-VPATH = $(SRCDIR)
+CC = gcc $(CCFLAGS)
+LD = gcc $(CCFLAGS) -g -o
+LIBDL = -ldl
 
-# ----- End Boilerplate
+CFLAGS = -g
+LDFLAGS = $(LIBDL)
 
 #
 # Executables
 #
-CRKEY = vpkcs11_sample_create_key$(EXE_EXT)
-ENCDEC = vpkcs11_sample_encrypt_decrypt$(EXE_EXT)
-DELKEY = vpkcs11_sample_find_delete_key$(EXE_EXT)
-EXPKEY = vpkcs11_sample_find_export_key$(EXE_EXT)
-CRSIGN = vpkcs11_sample_keypair_create_sign$(EXE_EXT)
-CROBJ = vpkcs11_sample_create_object$(EXE_EXT)
-ATTRS = vpkcs11_sample_attributes$(EXE_EXT)
-DIGEST = vpkcs11_sample_digest$(EXE_EXT)
-SIGNVERIFY = vpkcs11_sample_sign_verify$(EXE_EXT)
-RANDFPE = vpkcs11_sample_random_fpe$(EXE_EXT)
-GENRANDOM = vpkcs11_sample_gen_random$(EXE_EXE)
-RENEWCERT = vpkcs11_sample_renew_cert$(EXE_EXE)
-CLI = vpkcs11_sample_cli$(EXE_EXE)
-KEYSTATES = vpkcs11_sample_key_states$(EXE_EXT)
-KEYIMPORT = vpkcs11_sample_import_key$(EXE_EXT)
-VERSIONFIND = vpkcs11_test_version_find$(EXE_EXT)
+CRKEY = vpkcs11_sample_create_key
+ENCDEC = vpkcs11_sample_encrypt_decrypt
+DELKEY = vpkcs11_sample_find_delete_key
+EXPKEY = vpkcs11_sample_find_export_key
+CRSIGN = vpkcs11_sample_keypair_create_sign
+CROBJ = vpkcs11_sample_create_object
+ATTRS = vpkcs11_sample_attributes
+DIGEST = vpkcs11_sample_digest
+SIGNVERIFY = vpkcs11_sample_sign_verify
+RANDFPE = vpkcs11_sample_random_fpe
+GENRANDOM = vpkcs11_sample_gen_random
+RENEWCERT = vpkcs11_sample_renew_cert
+CLI = vpkcs11_sample_cli$
+KEYSTATES = vpkcs11_sample_key_states
+KEYIMPORT = vpkcs11_sample_import_key
+VERSIONFIND = vpkcs11_test_version_find
 
-#IMEXPORTOBJ = vpkcs11_sample_key_import_export$(EXE_EXT)
-#PERFTESTOBJ = vpkcs11_sample_perf_test$(EXE_EXT)
-ENCDEC_MULTI = vpkcs11_sample_en_decrypt_multipart$(EXE_EXT)
-META_LOGGING = vpkcs11_sample_metadata_logging$(EXE_EXT)
-
-HELPEROBJ = vpkcs11_sample_helper.$(OBJ_EXT)
-
+HELPEROBJ = vpkcs11_sample_helper.o
 #
 # .c files to build
-# Executables
-SRCS = vpkcs11_sample_create_key.c vpkcs11_sample_create_object.c vpkcs11_sample_encrypt_decrypt.c vpkcs11_sample_find_delete_key.c vpkcs11_sample_find_export_key.c vpkcs11_sample_keypair_create_sign.c vpkcs11_sample_en_decrypt_multipart.c vpkcs11_sample_metadata_logging.c vpkcs11_sample_digest.c vpkcs11_sample_sign_verify.c vpkcs11_sample_renew_cert.c vpkcs11_sample_attributes.c vpkcs11_sample_key_states.c vpkcs11_sample_import_key.c vpkcs11_test_version_find.c vpkcs11_sample_helper.c
+#
+SRCS = $(shell find . -name 'vpkcs11_sample_*.c')
 
-SRCS+= vpkcs11_sample_cli.c
+OBJS = $(SRCS:.c=.o)
+OBJ_EXT = o
 
-SRCS2 = $(SRCS:%.c=$(SRCDIR)/%.c)
-
-OBJS = $(SRCS:.c=.$(OBJ_EXT))
-LDFLAGS += -g -I$(SRCDIR)/../../src
-PROD = pkcs11
 
 all: $(OBJS) $(CRKEY) $(ENCDEC) $(DELKEY) $(EXPKEY) $(CRSIGN) $(CROBJ) $(KEYIMPORT) $(ENCDEC_MULTI) $(META_LOGGING) $(ATTRS) $(DIGEST) $(KEYSTATES) $(GENRANDOM) $(RENEWCERT) $(SIGNVERIFY) $(VERSIONFIND)
 
 
 $(ENCDEC_MULTI): vpkcs11_sample_en_decrypt_multipart.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
-$(CRKEY): vpkcs11_sample_create_key.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $< $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+$(CRKEY): vpkcs11_sample_create_key.o $(HELPEROBJ) 
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(ENCDEC): vpkcs11_sample_encrypt_decrypt.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $< $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(DELKEY): vpkcs11_sample_find_delete_key.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ)  $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(EXPKEY): vpkcs11_sample_find_export_key.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(CRSIGN): vpkcs11_sample_keypair_create_sign.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(CROBJ): vpkcs11_sample_create_object.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(KEYIMPORT): vpkcs11_sample_import_key.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(META_LOGGING): vpkcs11_sample_metadata_logging.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(KEYSTATES): vpkcs11_sample_key_states.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(GENRAND): vpkcs11_sample_gen_random.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(RANDFPE): vpkcs11_sample_random_fpe.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(ATTRS): vpkcs11_sample_attributes.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(DIGEST): vpkcs11_sample_digest.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(SIGNVERIFY): vpkcs11_sample_sign_verify.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(GENRANDOM): vpkcs11_sample_gen_random.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(RENEWCERT): vpkcs11_sample_renew_cert.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $<  $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
 $(VERSIONFIND): vpkcs11_test_version_find.$(OBJ_EXT) $(HELPEROBJ)
-	$(LD) $(OUTE)$@ $< $(HELPEROBJ) $(LDFLAGS) $(LIBDL)
+	$(LD) $@ $@.o $(HELPEROBJ) $(LDFLAGS)
 
-$(CLI):
-	echo	$(LD) $(OUTE)$@ -DTHALES_CLI_MODE $(SRCS2) $(LDFLAGS) $(LIBDL)
-	$(LD) $(OUTE)$@ -DTHALES_CLI_MODE $(SRCS2) $(LDFLAGS) $(LIBDL)
 
-#$(PERFTESTOBJ): vpkcs11_sample_perf_test.$(OBJ_EXT)
-#	$(LD) $(OUTE)$@ $< $(LDFLAGS) $(LIBDL)
+clean:
+	$(RM) $(OBJS) $(CRKEY) $(ENCDEC) $(DELKEY) $(EXPKEY) $(CRSIGN) $(CROBJ) $(KEYIMPORT) $(ENCDEC_MULTI) $(META_LOGGING) $(ATTRS) $(DIGEST) $(KEYSTATES) $(GENRANDOM) $(RENEWCERT) $(SIGNVERIFY) $(VERSIONFIND)
 
-#----- Begin Boilerplate
-include $(TOP_DIR)/mk/build.suffix.rules
-endif
-# ----- End Boilerplate
+run:
+	./vpkcs11_sample_find_delete_key -p ${PASSWORD} -k testkey
+	./vpkcs11_sample_create_key -p ${PASSWORD} -k testkey
+	./vpkcs11_sample_find_delete_key -p ${PASSWORD} -k testkey2
+	./vpkcs11_sample_create_object -p ${PASSWORD} -k testkey2
+	./vpkcs11_sample_find_delete_key -p ${PASSWORD} -k testkey2
+	./vpkcs11_sample_keypair_create_sign -p ${PASSWORD} -k testRSAkey
+	./vpkcs11_sample_encrypt_decrypt -p ${PASSWORD} -k testkey3
+	./vpkcs11_sample_en_decrypt_multipart -p ${PASSWORD} -k testkey4 -f ./vpkcs11_sample_create_key
+	./vpkcs11_sample_create_object -p ${PASSWORD} -k wrappingKey
+	./vpkcs11_sample_find_export_key -p ${PASSWORD} -k testkey -w wrappingKey
+	./vpkcs11_sample_attributes -p ${PASSWORD} -k testRSAkey
+	./vpkcs11_sample_digest -p ${PASSWORD} -k testkey3
