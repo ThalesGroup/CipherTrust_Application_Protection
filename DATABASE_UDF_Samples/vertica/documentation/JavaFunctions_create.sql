@@ -1,9 +1,7 @@
 /*****************************
- * Vertica Analytic Database
  *
- * Example SQL for User Defined Scalar Functions
+ * Build UDF's 
  *
- * Copyright (c) 2005 - 2016 Hewlett Packard Enterprise Development LP 
  */
 
 
