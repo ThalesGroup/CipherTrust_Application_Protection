@@ -1,0 +1,86 @@
+<project name="vpkcs11_sample" basedir="." default="main">
+
+    <property name="src.dir" value="src"/>
+
+    <property name="build.dir" value="build"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+    <property name="json.jar" value="$(lib.dir)/javax.json-1.0.jar"/>
+    <property name="profiles.jar" value ="$(lib.dir)/profiles.jar"/>
+
+    <property name="PIN" value="Admin123!"/>
+    <property name="IMPKEYNAME" value="vpkcs11_java_test_key_"/>
+    <property name="SourceFile" value="build.xml"/>
+
+    <property name="PropertiesFile" value="properties.json"/>
+    <property name="InputFile" value="digits-input.txt"/>
+    <property name="DecryptedOutputFile" value="decrypted-output.txt"/>
+    <property name="ProfileName" value="default"/>
+
+    <property name="EncryptDecryptMessage" value="com.vormetric.pkcs11.sample.EncryptDecryptMessage"/>
+    <property name="EncryptDecryptFPEwProfile" value="com.vormetric.pkcs11.sample.EncryptDecryptFPEwProfile"/>
+
+	<path id="id.compile.classpath">
+		<fileset dir="lib" includes="*.jar" />
+		<pathelement path="${jar.dir}/${ant.project.name}.jar"/>
+	</path>
+
+    <path id="profiles.classpath">
+        <pathelement path="$(profiles.jar)" />
+        <pathelement path="${json.jar}" />
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="util/${build.dir}"/>
+        <delete file="build.xml.dec"/>
+        <delete file="build.xml.enc"/>
+        <delete>
+            <fileset dir="${basedir}" includes="*.dat"/>
+        </delete>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <javac classpathref="id.compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}">
+            <classpath path="${lib.dir}/profiles.jar" />            
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        
+        <java classpathref="id.compile.classpath" classname="${EncryptDecryptMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-f"/>
+            <arg value="${SourceFile}"/>
+        </java>
+
+        <java classpathref="id.compile.classpath" classname="${EncryptDecryptFPEwProfile}" fork="true">
+
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-f"/>
+            <arg value="${PropertiesFile}"/>
+            <arg value="-i"/>
+            <arg value="${InputFile}"/>
+            <arg value="-pn"/>
+            <arg value="${ProfileName}"/>
+            <arg value="-d"/>
+            <arg value="${DecryptedOutputFile}"/>
+        </java>
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+    <target name="main" depends="clean,run"/>
+
+</project>
