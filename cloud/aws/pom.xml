@@ -1,0 +1,45 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>okhttp</groupId>
+  <artifactId>kylp</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+      <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.11.245</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+  <dependencies>
+  <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+        </dependency>
+  	<dependency>
+  		<groupId>com.squareup.okhttp3</groupId>
+  		<artifactId>mockwebserver</artifactId>
+  		<version>4.7.2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.jayway.jsonpath</groupId>
+  		<artifactId>json-path</artifactId>
+  		<version>2.4.0</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>mysql</groupId>
+  		<artifactId>mysql-connector-java</artifactId>
+  		<version>8.0.20</version>
+  	</dependency>
+  	    <dependency>
+    	<groupId>com.thales.cm.rest</groupId>
+    	<artifactId>cmhelper</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
