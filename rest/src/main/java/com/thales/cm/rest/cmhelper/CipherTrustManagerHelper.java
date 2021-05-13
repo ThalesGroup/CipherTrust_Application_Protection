@@ -47,23 +47,21 @@ import okhttp3.Response;
 *     
  */
 public class CipherTrustManagerHelper {
-	String token = null;
-	String key = null;
-	String cmipaddress;
-	String refreshtoken;
-	String keystorepwd;
-	String username;
-	String password;
-	String dataformat;
+	public String token = null;
+	public String key = null;
+	public String cmipaddress;
+	public String refreshtoken;
+	public String keystorepwd;
+	public String username;
+	public String password;
+	public String dataformat;
 
 	public static final String endbracket = "}";
 	public static final int digitblocklen = 56;
 	public static final int alphablocklen = 32;
-	public static final StringBuffer numberPattern = new StringBuffer("01234567890123456789012345678901024567896743678905435667");
-	public static final StringBuffer stringPattern = new StringBuffer("asdfghjklzxcvbnmqwertyuioplkjhgf");
-	// "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	public static final StringBuffer combinedPattern = new StringBuffer("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-
+	public static final StringBuffer numberPattern = new StringBuffer("01234567890123456789012345678901024567896743678905435678");
+	public static final StringBuffer stringPattern =   new StringBuffer("asdfghjklzxcvbnmqwertyuioplkjhgf");
+	public static final StringBuffer combinedPattern = new StringBuffer("abcdefghijklmnopqrstuvwxyz012345");
 	public static final String quote = "\"";
 	public static final String comma = ",";
 	public static final int wait = 60000;
@@ -90,6 +88,7 @@ public class CipherTrustManagerHelper {
 	public static final MediaType JSONOCTET = MediaType.get("application/octet-stream");
 	public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	public static final MediaType JSONTXT = MediaType.get("text/plain");
+	
 	OkHttpClient client = getUnsafeOkHttpClient();
 
 	private String posttext(String url, String text) throws IOException {
@@ -421,7 +420,7 @@ public class CipherTrustManagerHelper {
 		else
 			throw new RuntimeException("valid values for data type are: digit,alphabet,alphanumeric");
 		
-		//String tkn = awsresrest.getToken("SuperSecret23!", "C:\\keystore\\cm_keystoreone");
+		//String tkn = awsresrest.getToken("Vormetric123!", "C:\\keystore\\cm_keystoreone");
 		String tkn = awsresrest.getToken();
 		Calendar calendar = Calendar.getInstance();
 
@@ -539,7 +538,6 @@ public class CipherTrustManagerHelper {
 				 sensitive = randomAlpha(25);
 			else
 				 sensitive = randomAlphaNumeric(25);			
-			// sensitive = "BYEY3B7GXWLJ5GODPJU9YIA9W";
 			System.out.println("original value = " + sensitive);
 			if (action.equalsIgnoreCase("encrypt")) {
 
@@ -557,10 +555,10 @@ public class CipherTrustManagerHelper {
 				 * "' is woken after sleeping for " + wait + " mseconds");
 				 */
 			} else if (action.equalsIgnoreCase("mac")) {
-				// admin SuperSecret23! hmacsha256-1 1
+				// admin Vormetric123! hmacsha256-1 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
 				// 192.168.159.160 mac
-				// admin SuperSecret23! rsa-key5 1
+				// admin Vormetric123! rsa-key5 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
 				// 192.168.159.160 sign
 				value = this.cmRESTMac("na", sensitive, action);
