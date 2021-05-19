@@ -13,25 +13,3 @@ CT-VL
 * aws-cts-deploy.sh - create CTS clsuter in AWS using AWS CLI
 * create-cts-assets.sh - create VTS assets such as masks, users, tokentemplates etc.
 * thales-cm-vaultless-tokenization-automation.pdf - documentation of the above
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-"README.md" 15L, 364C
-
