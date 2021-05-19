@@ -3,7 +3,7 @@
 Integrations or Sample Code for customers wanting to use tokenization as a way to protect data
 
 * CipherTrust Vaultless Tokenization (CT-VL)
-** Vormetric Tokenization Server (VTS) (legacy)
+  * Vormetric Tokenization Server (VTS) (legacy)
 
 ## Sample Code
 
