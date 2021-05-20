@@ -1,0 +1,6 @@
+echo system timezone --set America/New_York | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo system hostname --set $vtsnewnodename | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo icapi set --IP $cmip --port $vtsport --user $vtscmuser | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo icapi register --host $newvtsip --user $cmadminuser | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo cluster apiadmin --setpassword $APIADMIN_PW | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo cluster apiadmin --setpassword $APIADMIN_PW | sshpass -e ssh cliadmin@$vtsprimarynode

@@ -1,0 +1,4 @@
+echo icapi test --server_connection | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo cluster remotejoin $vtsnewnodeip | sshpass -e ssh cliadmin@$vtsprimarynode
+echo cluster adpiadmin --diable | sshpass -e ssh cliadmin@$vtsprimarynode
+echo cluster adpiadmin --diable | sshpass -e ssh cliadmin@$vtsnewnodeip

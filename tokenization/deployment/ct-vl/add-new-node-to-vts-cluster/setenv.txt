@@ -1,0 +1,9 @@
+export cmip=<ip_address>
+export vtsprimarynode=<ip_address>
+export vtsport=9005
+export vtscmuser=cmadmin
+export cmadminuser=admin
+export APIADMIN_PW=Yoursupersecret123!
+export vtsnewnodename=vtsnode2
+export vtsnewnodeip=<ip_address>
+export vtsseedkey=vts-seed-key

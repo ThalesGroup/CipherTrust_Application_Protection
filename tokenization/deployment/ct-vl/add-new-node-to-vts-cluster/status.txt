@@ -1,0 +1,2 @@
+echo cluster show --nodeip | sshpass -e ssh cliadmin@$vtsnewnodeip
+echo cluster show --status | sshpass -e ssh cliadmin@$vtsnewnodeip
