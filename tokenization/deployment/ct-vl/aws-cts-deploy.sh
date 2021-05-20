@@ -2,6 +2,7 @@
 # AWS DSM instance create script 
 start_time="$(date -u +%s)"
 
+# Change awsRegionName to your AWS Region
 awsRegionName=us-east-1 
 jumpRemoteMGMTSGName=JumpHost-Remote-Mgmt-sg
 jumpclusterSGName=JumpHost-2-Cluster-sg
