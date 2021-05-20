@@ -1,11 +1,11 @@
-# CTS CURL samples
+# CT-VL/CTS/CTS CURL samples
 
 ## Prerequesties
 
 - cURL 7.58.0 and above.
 - Access to CipherTrust Manager.
 - Tokengroup and Tokentemplate present in CipherTrust Manager.
-- Access to CipherTrust Tokenization Server.
+- Access to CipherTrust Vaultless Tokenization (CT-VL/CTS/VTS) Server.
 
 ## Tokenize
 

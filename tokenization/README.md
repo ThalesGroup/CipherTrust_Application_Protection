@@ -11,5 +11,5 @@ CT-VL
 
 * [Java](java_samples)
 * [Python](python_samples)
-* [Curl](CTS_CURL_samples.md)
-* [API Reference](api.md)
+* [cURL](curl_samples)
+* [API Reference](api_reference)
