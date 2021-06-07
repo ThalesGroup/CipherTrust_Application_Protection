@@ -23,13 +23,13 @@ namespace Vormetric.Pkcs11Sample
        	         't','a',' ','5','4','3','2','1' };
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
                     
@@ -58,17 +58,17 @@ namespace Vormetric.Pkcs11Sample
                     uint keySize = (uint)keyValue.Length;
                     uint genAction = 3;
                     uint mechType = (uint)CKM.CKM_AES_CBC_PAD;
-                    Mechanism mechanism;
+                    IMechanism mechanism;
 
                     session.Login(CKU.CKU_USER, pin);
 
-                    ObjectHandle srcKey = Helpers.FindKey(session, keyLabel, keyType);
+                    IObjectHandle srcKey = Helpers.FindKey(session, keyLabel, keyType);
                     if (srcKey == null && keyType == (uint)CKO.CKO_SECRET_KEY)
                     {
                         srcKey = Helpers.CreateKeyObject(session, keyLabel, new string(keyValue), keySize);
                     }
 
-                    ObjectHandle wrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyType);
+                    IObjectHandle wrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyType);
                     if (wrappingKey == null)
                     {
                         if (genWrappingKey == true)
@@ -76,7 +76,7 @@ namespace Vormetric.Pkcs11Sample
                         else
                         {
                             Console.WriteLine("Use no wrapping key!");
-                            wrappingKey = new ObjectHandle();
+                            wrappingKey = session.Factories.ObjectHandleFactory.Create();
                         }
                     }
 
@@ -88,7 +88,7 @@ namespace Vormetric.Pkcs11Sample
                         mechType |= (uint)formatType | (uint)CKA.CKA_THALES_DEFINED;        
                     }
 
-                    mechanism = new Mechanism(mechType, iv);
+                    mechanism = session.Factories.MechanismFactory.Create(mechType, iv);
                     
                     if (srcKey != null)
                     {                                                    
