@@ -12,13 +12,13 @@ namespace Vormetric.Pkcs11Sample
     {
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
                     string keyValue = new string((char[])inputParams[1]);
@@ -33,32 +33,32 @@ namespace Vormetric.Pkcs11Sample
                     Helpers.CleanupKey( session, keyLabel );
 
                     // Prepare attribute template that defines search criteria
-                    List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();                    
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+                    List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();                    
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
 
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE, keyValue));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE_LEN, keySize));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, keyValue));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
-                    objectAttributes.Add(new ObjectAttribute(CKA.CKA_END_DATE, endTime));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
 
                     // Generate symetric key
-                    ObjectHandle createdKey = session.CreateObject(objectAttributes);
+                    IObjectHandle createdKey = session.CreateObject(objectAttributes);
                     if (null != createdKey)
                     {
                         Console.WriteLine(keyLabel + " key created!");
                     }
 
-                    List<ObjectAttribute> getAttributes;
-                    List<ObjectAttribute> objAttributes = new List<ObjectAttribute>();
+                    List<IObjectAttribute> getAttributes;
+                    List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
 
                     List<CKA> attrNames = new List<CKA>();
 

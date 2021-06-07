@@ -26,7 +26,7 @@
 using System;
 using System.Text;
 using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.LowLevelAPI;
+//using Net.Pkcs11Interop.LowLevelAPI;
 using System.Collections.Generic;
 using Net.Pkcs11Interop.Common;
 
@@ -42,10 +42,10 @@ namespace Vormetric.Pkcs11Sample
         /// </summary>
         /// <param name='pkcs11'>Initialized PKCS11 wrapper</param>
         /// <returns>First slot with token present</returns>
-        public static Slot GetUsableSlot(Net.Pkcs11Interop.HighLevelAPI.Pkcs11 pkcs11)
+        public static ISlot GetUsableSlot(IPkcs11Library pkcs11Library)
         {
             // Get list of available slots
-            List<Slot> slots = pkcs11.GetSlotList(false);
+            List<ISlot> slots = pkcs11Library.GetSlotList(SlotsType.WithOrWithoutTokenPresent);
 
             if ((null != slots) && (slots.Count > 0))
                 // Let's use first slot with token present
@@ -95,24 +95,23 @@ namespace Vormetric.Pkcs11Sample
             return formatType;
         }
 
-        public static ObjectHandle FindKey(Session session, string keyLabel)
-        {            
-            ObjectHandle key = null;
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_CACHE_CLEAR, true));
+        public static IObjectHandle FindKey(ISession session, string keyLabel)
+        {          
+            IObjectHandle key = null;
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
 
             // Initialize searching
-            session.FindObjectsInit(objectAttributes);
-
+            session.FindObjectsInit(objectAttributes);           
             // Get search results
-            List<ObjectHandle> foundObjects = session.FindObjects(1);
+            List<IObjectHandle> foundObjects = session.FindObjects(1);
 
             // Terminate searching
             session.FindObjectsFinal();
 
-            foreach (ObjectHandle handle in foundObjects)
+            foreach (IObjectHandle handle in foundObjects)
             {
                 Console.WriteLine("Found key with label: " + keyLabel + "!");
                 return handle;
@@ -121,24 +120,24 @@ namespace Vormetric.Pkcs11Sample
             return key;
         }
 
-        public static ObjectHandle FindKey(Session session, string keyLabel, uint keyType)
+        public static IObjectHandle FindKey(ISession session, string keyLabel, uint keyType)
         {
-            ObjectHandle key = null;
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, keyType));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_CACHE_CLEAR, true));
+            IObjectHandle key = null;
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, keyType));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
 
             // Get search results
-            List<ObjectHandle> foundObjects = session.FindObjects(1);
+            List<IObjectHandle> foundObjects = session.FindObjects(1);
 
             // Terminate searching
             session.FindObjectsFinal();
 
-            foreach (ObjectHandle handle in foundObjects)
+            foreach (IObjectHandle handle in foundObjects)
             {
                 Console.WriteLine("Found key with label: " + keyLabel + "!");
                 return handle;
@@ -147,29 +146,28 @@ namespace Vormetric.Pkcs11Sample
             return key;
         }
 
-        public static ObjectHandle CreateKeyObject(Session session, string keyLabel, string keyValue, uint keySize)
+        public static IObjectHandle CreateKeyObject(ISession session, string keyLabel, string keyValue, uint keySize)
         {
-            ObjectHandle key = null;
             // Prepare attribute template that defines search criteria
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_APPLICATION, Settings.ApplicationName));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
 
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE, keyValue));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE_LEN, keySize));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, keyValue));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
 
             // Import symetric key object          
 
-            key = session.CreateObject(objectAttributes);
+            IObjectHandle key = session.CreateObject(objectAttributes);
             if (null != key)
             {
                 Console.WriteLine(keyLabel + " key created!");
@@ -177,27 +175,27 @@ namespace Vormetric.Pkcs11Sample
             return key;
         }
 
-        public static void CleanupKey(Session session, string keyLabel)
+        public static void CleanupKey(ISession session, string keyLabel)
         {
             
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
 
             // Get search results
-            List<ObjectHandle> foundObjects = session.FindObjects(2);
+            List<IObjectHandle> foundObjects = session.FindObjects(2);
 
             // Terminate searching
             session.FindObjectsFinal();
 
-            foreach (ObjectHandle handle in foundObjects)
+            foreach (IObjectHandle handle in foundObjects)
             {
                 const uint KeyStateDeactivated = 3;
-                List<ObjectAttribute> objAttributes = new List<ObjectAttribute>();
-                objAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
+                List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
+                objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
                 session.SetAttributeValue(handle, objAttributes);
 
                 session.DestroyObject(handle);
@@ -209,19 +207,19 @@ namespace Vormetric.Pkcs11Sample
         /// Migrate symmetric key.
         /// </summary>
         /// <param name='session'>Read-write session with user logged in</param>
-        public static bool MigrateKey(Session session, string keyLabel, uint genAction)
+        public static bool MigrateKey(ISession session, string keyLabel, uint genAction)
         {
             // genAction: versionMigrate...2
 
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
 
             // Get search results
-            List<ObjectHandle> foundObjects = session.FindObjects(2);
+            List<IObjectHandle> foundObjects = session.FindObjects(2);
 
             // Terminate searching
             session.FindObjectsFinal();
@@ -230,10 +228,10 @@ namespace Vormetric.Pkcs11Sample
             if (foundObjects.Count == 0) {
                 return false;
             }
-            foreach (ObjectHandle handle in foundObjects)
+            foreach (IObjectHandle handle in foundObjects)
             {
-              List<ObjectAttribute> objectAttributesNew = new List<ObjectAttribute>();
-              objectAttributesNew.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_VERSION_ACTION, genAction));
+              List<IObjectAttribute> objectAttributesNew = new List<IObjectAttribute>();
+              objectAttributesNew.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_VERSION_ACTION, genAction));
 
               session.SetAttributeValue(handle, objectAttributesNew);
             }
@@ -245,7 +243,7 @@ namespace Vormetric.Pkcs11Sample
         /// </summary>
         /// <param name='session'>Read-write session with user logged in</param>
         /// <returns>Object handle</returns>
-        public static ObjectHandle GenerateKey(Session session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false)
+        public static IObjectHandle GenerateKey(ISession session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false)
         {
             // genAction: 0, 1, 2, or 3.  versionCreate...0, versionRotate...1, versionMigrate...2, nonVersionCreate...3 (default)
 
@@ -262,30 +260,30 @@ namespace Vormetric.Pkcs11Sample
             }
             Console.WriteLine("...end time is " + endTime.ToString() );
 
-            List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE_LEN, keySize));
+            List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_ALWAYS_SENSITIVE, bAlwSen));
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_NEVER_EXTRACTABLE, bNevExtr));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, bAlwSen));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_NEVER_EXTRACTABLE, bNevExtr));
 
-            objectAttributes.Add(new ObjectAttribute(CKA.CKA_END_DATE, endTime));
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
 
             if (preActive == true)
-                objectAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_ACTIVATION_DATE, activateTime));
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_ACTIVATION_DATE, activateTime));
                        
             if (genAction < 3)
-                objectAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_VERSION_ACTION, genAction));
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_VERSION_ACTION, genAction));
 
             // Specify key generation mechanism
 
-            Mechanism mechanism = new Mechanism(CKM.CKM_AES_KEY_GEN);
+            IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_KEY_GEN);
 
             // Generate key
             return session.GenerateKey(mechanism, objectAttributes);
@@ -297,52 +295,54 @@ namespace Vormetric.Pkcs11Sample
         /// <param name='session'>Read-write session with user logged in</param>
         /// <param name='publicKeyHandle'>Output parameter for public key object handle</param>
         /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
-        public static void GenerateKeyPair(Session session, out ObjectHandle publicKeyHandle, out ObjectHandle privateKeyHandle, string keyPairLabel)
+        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, string keyPairLabel)
         {
             // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
             // byte[] ckaId = session.GenerateRandom(20);
-            
+
             // Prepare attribute template of new public key
-            List<ObjectAttribute> publicKeyAttributes = new List<ObjectAttribute>();
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, false));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyPairLabel));
-            //publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_VERIFY_RECOVER, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_MODULUS_BITS, 2048));
-            publicKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00}));
-      
+            List<IObjectAttribute> publicKeyAttributes = new List<IObjectAttribute>();
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyPairLabel));
+            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY_RECOVER, true));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
+            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
+
             // Prepare attribute template of new private key
-            List<ObjectAttribute> privateKeyAttributes = new List<ObjectAttribute>();
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_PRIVATE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyPairLabel));
-            //privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_ID, ckaId));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SENSITIVE, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_SIGN_RECOVER, true));
-            privateKeyAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+            List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyPairLabel));
+            //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SENSITIVE, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN_RECOVER, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
 
             // Specify key generation mechanism
-            Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
-            
+            IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
+
             // Generate key pair
             session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
-        }      
+        }
 
-        public static void PrintAttributes(List<ObjectAttribute> objectAttributes)
+
+
+        public static void PrintAttributes(List<IObjectAttribute> objectAttributes)
         {
             byte[] valArray;
             string str, name;
             long epoch_time;
             bool bval;
-            DateTime?  date;
+            DateTime? date;
 
-            foreach (ObjectAttribute attr in objectAttributes)
+            foreach (IObjectAttribute attr in objectAttributes)
             {
                 try
                 {
@@ -353,21 +353,22 @@ namespace Vormetric.Pkcs11Sample
                         case (uint)CKA.CKA_CLASS: // converting its value to an uint fails for inexplicable reasons
                             break;
                         case (uint)CKA.CKA_KEY_TYPE:
-                            switch(attr.GetValueAsUint()) {
-                              case  0: Console.WriteLine(name + " : RSA"); break;
-                              case 31: Console.WriteLine(name + " : AES"); break;
-                              default: Console.WriteLine(name + " : " + attr.GetValueAsUint() ); break;
+                            switch (attr.GetValueAsUlong())
+                            {
+                                case 0: Console.WriteLine(name + " : RSA"); break;
+                                case 31: Console.WriteLine(name + " : AES"); break;
+                                default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
                             }
                             break;
                         case (uint)CKA.CKA_MODULUS_BITS:
                         case (uint)CKA.CKA_ID:
-                            Console.WriteLine(name + " : " + attr.GetValueAsUint());
+                            Console.WriteLine(name + " : " + attr.GetValueAsUlong());
                             break;
                         case (uint)CKA.CKA_LABEL:
                             Console.WriteLine(name + " : " + attr.GetValueAsString());
                             break;
                         case (uint)CKA.CKA_END_DATE:
-                            date = attr.GetValueAsDateTime();                            
+                            date = attr.GetValueAsDateTime();
                             Console.WriteLine(name + " : " + date.ToString());
                             break;
 
@@ -379,8 +380,8 @@ namespace Vormetric.Pkcs11Sample
 
                         case (uint)CKA.CKA_THALES_OBJECT_CREATE_DATE_EL:
                         case (uint)CKA.CKA_THALES_KEY_DEACTIVATION_DATE_EL:
-                            epoch_time = attr.GetValueAsUint();
-                            date = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(epoch_time*1000);
+                            epoch_time = (long)attr.GetValueAsUlong();
+                            date = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(epoch_time * 1000);
                             Console.WriteLine(name + " : " + date.ToString());
                             break;
 

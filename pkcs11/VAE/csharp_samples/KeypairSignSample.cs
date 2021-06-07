@@ -29,18 +29,18 @@ namespace Vormetric.Pkcs11Sample
             if (inputParams.Length >= 5)
                 nodelete     = Convert.ToBoolean(inputParams[4]);
 
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     // Login as normal user
-                    Mechanism mechanismSgn, mechanismVfy;
-                    ObjectHandle publicKeyHandle;
-                    ObjectHandle privateKeyHandle;
+                    IMechanism mechanismSgn, mechanismVfy;
+                    IObjectHandle publicKeyHandle;
+                    IObjectHandle privateKeyHandle;
                     Net.Pkcs11Interop.Common.CKM ulHeaderSgn = 0;
                     Net.Pkcs11Interop.Common.CKM ulHeaderVfy = 0;
 
@@ -51,12 +51,12 @@ namespace Vormetric.Pkcs11Sample
                     if (string.IsNullOrEmpty(opName))
                         opName = "RSA";
 
-                    if      (opName.Equals("SHA512-HMAC")) {mechanismSgn = new Mechanism(ulHeaderSgn|CKM.CKM_SHA512_HMAC); mechanismVfy = new Mechanism(ulHeaderVfy|CKM.CKM_SHA512_HMAC);}
-                    else if (opName.Equals("SHA384-HMAC")) {mechanismSgn = new Mechanism(ulHeaderSgn|CKM.CKM_SHA384_HMAC); mechanismVfy = new Mechanism(ulHeaderVfy|CKM.CKM_SHA384_HMAC);}
-                    else if (opName.Equals("SHA256-HMAC")) {mechanismSgn = new Mechanism(ulHeaderSgn|CKM.CKM_SHA256_HMAC); mechanismVfy = new Mechanism(ulHeaderVfy|CKM.CKM_SHA256_HMAC);}
-                    else if (opName.Equals("SHA224-HMAC")) {mechanismSgn = new Mechanism(ulHeaderSgn|CKM.CKM_SHA224_HMAC); mechanismVfy = new Mechanism(ulHeaderVfy|CKM.CKM_SHA224_HMAC);}
-                    else if (opName.Equals("SHA1-HMAC"))   {mechanismSgn = new Mechanism(ulHeaderSgn|CKM.CKM_SHA_1_HMAC);  mechanismVfy = new Mechanism(ulHeaderVfy|CKM.CKM_SHA_1_HMAC); }
-                    else if (opName.Equals("RSA"))         mechanismSgn = mechanismVfy = new Mechanism(CKM.CKM_RSA_PKCS);
+                    if      (opName.Equals("SHA512-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA512_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA512_HMAC);}
+                    else if (opName.Equals("SHA384-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA384_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA384_HMAC);}
+                    else if (opName.Equals("SHA256-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA256_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA256_HMAC);}
+                    else if (opName.Equals("SHA224-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA224_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA224_HMAC);}
+                    else if (opName.Equals("SHA1-HMAC"))   {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA_1_HMAC);  mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA_1_HMAC); }
+                    else if (opName.Equals("RSA"))         mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
                     else {
                         Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, and RSA are supported"); 
                         return false;
@@ -122,8 +122,8 @@ namespace Vormetric.Pkcs11Sample
                         
                         if (publicKeyHandle == privateKeyHandle)
                         {
-                            List<ObjectAttribute> objAttributes = new List<ObjectAttribute>();
-                            objAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
+                            List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
+                            objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
                             session.SetAttributeValue(publicKeyHandle, objAttributes);
                         }
 

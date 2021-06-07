@@ -22,13 +22,13 @@ namespace Vormetric.Pkcs11Sample
        	         't','a',' ','5','4','3','2','1' };
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
                     uint keySize = 32;                    
@@ -48,7 +48,7 @@ namespace Vormetric.Pkcs11Sample
                     int flength = (int)fs.Length;
                     int readCnt;
                     int sumRead = 0;
-                    Mechanism mechanism;
+                    IMechanism mechanism;
 
                     byte[] wrappedKey = new byte[flength];
 
@@ -63,7 +63,7 @@ namespace Vormetric.Pkcs11Sample
 
                     session.Login(CKU.CKU_USER, pin);
 
-                    ObjectHandle srcKey = Helpers.FindKey(session, keyLabel, keyClass);
+                    IObjectHandle srcKey = Helpers.FindKey(session, keyLabel, keyClass);
                     if (srcKey != null)
                     {
                         Console.WriteLine("Found existing key on DSM! Please use new key name.");
@@ -71,9 +71,9 @@ namespace Vormetric.Pkcs11Sample
                         return false;
                     }
 
-                    ObjectHandle unwrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyClass);
+                    IObjectHandle unwrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyClass);
                     
-                    List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
+                    List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
 
                     if (wrappingKeyClass != (uint)CKO.CKO_SECRET_KEY && unwrappingKey != null)
                     {
@@ -84,45 +84,45 @@ namespace Vormetric.Pkcs11Sample
                     {
                         // Prepare attribute template that defines search criteria
                         
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
 
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_VALUE_LEN, keySize));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_DERIVE, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
                         
                     }
                     else if(formatType != 0)
                     {
                         mechType |= (uint)formatType | (uint)CKA.CKA_THALES_DEFINED;
 
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, keyClass));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, keyClass));
 
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_RSA));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (ulong)CKK.CKK_RSA));
 
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_TOKEN, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_ENCRYPT, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_DECRYPT, true));                       
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_WRAP, true));
-                        objectAttributes.Add(new ObjectAttribute(CKA.CKA_UNWRAP, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));                       
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
                     }
 
-                    mechanism = new Mechanism(mechType, iv);
+                    mechanism = session.Factories.MechanismFactory.Create(mechType, iv);
 
                     if (wrappedKeyLen != 0) {
 
                         if (null == unwrappingKey)
-                            unwrappingKey = new ObjectHandle();
-                        ObjectHandle importKey = session.UnwrapKey(mechanism, unwrappingKey, wrappedKey, objectAttributes);
+                            unwrappingKey = session.Factories.ObjectHandleFactory.Create();
+                        IObjectHandle importKey = session.UnwrapKey(mechanism, unwrappingKey, wrappedKey, objectAttributes);
 
                         Console.WriteLine("Successfully unwrapped and imported key into DSM!! Key handle: " + importKey.ObjectId);
                     }

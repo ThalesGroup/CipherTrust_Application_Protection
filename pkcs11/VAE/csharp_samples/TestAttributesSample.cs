@@ -12,13 +12,13 @@ namespace Vormetric.Pkcs11Sample
     {        
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     // Login as normal user
                     string pin = Convert.ToString(inputParams[0]);
@@ -38,24 +38,24 @@ namespace Vormetric.Pkcs11Sample
 
                     session.Login(CKU.CKU_USER, pin);
                     // Generate key pair
-                    ObjectHandle keyHandle = null;
-                    ObjectHandle privateKeyHandle = null;                    
+                    IObjectHandle keyHandle = null;
+                    IObjectHandle privateKeyHandle = null;                    
 
-                    List<ObjectAttribute> getAttributes;
+                    List<IObjectAttribute> getAttributes;
 
-                    List<ObjectAttribute> findAttributes = new List<ObjectAttribute>();                    
-                    findAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
+                    List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();                    
+                    findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                     
                     if(symmetric == false)
-                        findAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
                     else
-                        findAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
 
                     // Initialize searching
                     session.FindObjectsInit(findAttributes);
 
                     // Get search results
-                    List<ObjectHandle> foundObjects = session.FindObjects(1);
+                    List<IObjectHandle> foundObjects = session.FindObjects(1);
 
                     // Terminate searching
                     session.FindObjectsFinal();
@@ -84,9 +84,9 @@ namespace Vormetric.Pkcs11Sample
                             Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel);
                         else {
 
-                            findAttributes = new List<ObjectAttribute>();
-                            findAttributes.Add(new ObjectAttribute(CKA.CKA_CLASS, (uint)CKO.CKO_PRIVATE_KEY));
-                            findAttributes.Add(new ObjectAttribute(CKA.CKA_LABEL, keyLabel));
+                            findAttributes = new List<IObjectAttribute>();
+                            findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PRIVATE_KEY));
+                            findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
                             session.FindObjectsInit(findAttributes);
 
@@ -135,8 +135,8 @@ namespace Vormetric.Pkcs11Sample
                         {
                             Console.WriteLine("\n\nAbout to set the end time to a new value...");
                             DateTime endTime = DateTime.UtcNow.AddDays(30);
-                            List<ObjectAttribute> objAttributes = new List<ObjectAttribute>();
-                            objAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_DEACTIVATION_DATE, endTime));
+                            List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
+                            objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_DEACTIVATION_DATE, endTime));
                             session.SetAttributeValue(keyHandle, objAttributes);
 
                             Console.WriteLine(symmetric ? "\n\nAttributes of symmetric key (again):" : "\n\nAttributes of public key (again):");

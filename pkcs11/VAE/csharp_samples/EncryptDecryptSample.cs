@@ -31,20 +31,20 @@ namespace Vormetric.Pkcs11Sample
 
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);                
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = null;
                     string keyLabel = null;
 
                     string opName = null;
                     string headermode = null;
-                    ObjectHandle generatedKey = null;
+                    IObjectHandle generatedKey = null;
                     string inputFileName = null;
                     string encryptedFileName = "encrypted.txt";
                     string decryptedFileName = "decrypted.txt";
@@ -128,12 +128,12 @@ namespace Vormetric.Pkcs11Sample
                     if(string.IsNullOrEmpty(opName))
                         opName = "CBC_PAD";
 
-                    ObjectHandle foundSymmKey = null;
-                    ObjectHandle publicKey = null;
-                    ObjectHandle privateKey = null;
+                    IObjectHandle foundSymmKey = null;
+                    IObjectHandle publicKey = null;
+                    IObjectHandle privateKey = null;
 
-                    Mechanism encmechanism = null;
-                    Mechanism decmechanism = null;
+                    IMechanism encmechanism = null;
+                    IMechanism decmechanism = null;
 
                     byte[] iv = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
                     string sourceText = "This is Unencrypted Source Text.";
@@ -143,7 +143,7 @@ namespace Vormetric.Pkcs11Sample
                     session.Login(CKU.CKU_USER, pin);
 
                     // Prepare attribute template that defines search criteria
-                    List<ObjectAttribute> objectAttributes = new List<ObjectAttribute>();
+                    List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
 
                     if (opName.Equals("RSA"))
                     {
@@ -333,8 +333,8 @@ namespace Vormetric.Pkcs11Sample
                             System.Buffer.BlockCopy(bytes, 0, niv, tweak.Length + 4, 4);
                             System.Buffer.BlockCopy(charSetArray, 0, niv, tweak.Length + 8, charSetArray.Length);
                         }
-                        encmechanism = new Mechanism(CKM.CKM_THALES_FPE, niv);
-                        decmechanism = new Mechanism(CKM.CKM_THALES_FPE, niv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FPE, niv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FPE, niv);
                     }
                     else if (opName.Equals("FF1")) {
                         byte[] tweak = encoding.GetBytes(tweakStr);
@@ -362,40 +362,40 @@ namespace Vormetric.Pkcs11Sample
 
                         //Console.WriteLine("FF1 control structure has been set up, radix is " + radix);
                         //Console.WriteLine("FF1 control structure has been set up: " + BitConverter.ToString(niv));
-                        encmechanism = new Mechanism(CKM.CKM_THALES_FF1, niv);
-                        decmechanism = new Mechanism(CKM.CKM_THALES_FF1, niv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                     }
 
                     // Specify encryption mechanism with initialization vector as parameter
                     else if (opName.Equals("CBC_PAD"))
                     {
-                        encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD|ulHeaderEnc, iv);
-                        decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD|ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD|ulHeaderDec, iv);
                     }
                     else if (opName.Equals("CBC"))
                     {
-                        encmechanism = new Mechanism(CKM.CKM_AES_CBC|ulHeaderEnc, iv);
-                        decmechanism = new Mechanism(CKM.CKM_AES_CBC|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC|ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC|ulHeaderDec, iv);
                     }
                     else if (opName.Equals("CTR"))
                     {
-                        encmechanism = new Mechanism(CKM.CKM_AES_CTR|ulHeaderEnc, iv);
-                        decmechanism = new Mechanism(CKM.CKM_AES_CTR|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR|ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR|ulHeaderDec, iv);
                     }
                     else if (opName.Equals("ECB"))
                     {
-                        encmechanism = new Mechanism(CKM.CKM_AES_ECB|ulHeaderEnc);
-                        decmechanism = new Mechanism(CKM.CKM_AES_ECB|ulHeaderDec);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB|ulHeaderEnc);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB|ulHeaderDec);
                     }
                     else if (opName.Equals("RSA"))
                     {
-                        encmechanism = new Mechanism(CKM.CKM_RSA_PKCS, iv);
-                        decmechanism = new Mechanism(CKM.CKM_RSA_PKCS, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS, iv);
                     }
                     else
                     {
-                        encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD, iv);
-                        decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv);
                     }
 
                     if (!String.IsNullOrEmpty(inputFileName))
@@ -519,14 +519,16 @@ namespace Vormetric.Pkcs11Sample
 
                     if (null != generatedKey)
                     {
-                        List<ObjectAttribute> objAttributes = new List<ObjectAttribute>();
-                        objAttributes.Add(new ObjectAttribute(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
+                        List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
+                        objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
                         session.SetAttributeValue(generatedKey, objAttributes);
 
                         session.DestroyObject(generatedKey);
                     }
+
                     session.Logout();
                 }
+                
             }
             return true;
         }
