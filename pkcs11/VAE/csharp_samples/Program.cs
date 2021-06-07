@@ -65,7 +65,7 @@ namespace Vormetric.Pkcs11Sample
         }
 
         public static void Main(string[] args)
-        {          
+        {
             string optArg;
             string charSetInput = null;
             char charSetChoc = '\0';
@@ -95,7 +95,8 @@ namespace Vormetric.Pkcs11Sample
             bool bNevExtr = false;
             string newkeyLabel = keyLabel + "_imp";
 
-            for (int i = 0; i < args.Length; i++) {
+            for (int i = 0; i < args.Length; i++)
+            {
                 optArg = args[i];
                 if (optArg.StartsWith("-"))
                 {
@@ -108,14 +109,14 @@ namespace Vormetric.Pkcs11Sample
                                 if (optArg[2] == 'e' || optArg[2] == 'p')
                                     bNevExtr = true;
                             }
-                            else if (i+1 < args.Length && !args[i+1].StartsWith("-"))
+                            else if (i + 1 < args.Length && !args[i + 1].StartsWith("-"))
                                 nodelete = Convert.ToBoolean(args[++i]);
                             else
                                 nodelete = true;
                             break;
                         case 'g':
 
-                            if (i < args.Length-1 && uint.TryParse(args[i + 1], out genAction))
+                            if (i < args.Length - 1 && uint.TryParse(args[i + 1], out genAction))
                                 i++;
                             else
                                 genWrappingKey = true;
@@ -124,7 +125,8 @@ namespace Vormetric.Pkcs11Sample
                             pin = args[++i];
                             break;
                         case 'a':
-                            if (optArg.Length > 2) {
+                            if (optArg.Length > 2)
+                            {
                                 if (optArg[2] == 's')
                                     bAlwSen = true;
                             }
@@ -145,18 +147,18 @@ namespace Vormetric.Pkcs11Sample
                             if (i < args.Length - 1)
                                 wrappingKeyLabel = Helpers.ParseKeyClass(args[++i], ref wrappingKeyType);
                             break;
-
+                        //Changes option "c" to "S" according to V6.4.3.4
                         case 'S':
                             keyType = (uint)CKO.CKO_PUBLIC_KEY;
                             formatType = (uint)CKA.CKA_THALES_PEM_FORMAT;
                             if (i < args.Length - 1)
-                                keyLabel = args[++i];                            
+                                keyLabel = args[++i];
                             break;
                         case 'v':
                             keyType = (uint)CKO.CKO_PRIVATE_KEY;
                             formatType = (uint)CKA.CKA_THALES_PEM_FORMAT;
                             if (i < args.Length - 1)
-                                keyLabel = args[++i];                           
+                                keyLabel = args[++i];
                             break;
 
                         case 'F':
@@ -167,10 +169,10 @@ namespace Vormetric.Pkcs11Sample
                             if (i < args.Length - 1)
                                 opName = args[++i];
                             break;
-
+                        //Changes option "S" to "c" according to V6.4.3.4
                         case 'c':
                         case 'l':
-                        case 'r':                        
+                        case 'r':
                             charSetChoc = optArg[1];
                             if (i < args.Length - 1)
                                 charSetInput = args[++i];
@@ -189,24 +191,25 @@ namespace Vormetric.Pkcs11Sample
                             newkeyfile = true;
                             break;
                         case 'T':
-                            if (i < args.Length-1)
+                            if (i < args.Length - 1)
                                 tweakInput = args[++i];
                             break;
                         case 'H':
-                            if(i < args.Length-1)
+                            if (i < args.Length - 1)
                                 headerMode = args[++i]; // v1.5, v2.1, v2.7
                             break;
                         case 'm':
                             if (i < args.Length - 1)
                                 needmetadata = Convert.ToBoolean(args[++i]); // true or false
                             break;
-                        case 'h':                                                    
+                        case 'h':
                         default:
                             Usage();
                             break;
                     }
                 }
-                else {
+                else
+                {
                     Usage();
                 }
             }
@@ -216,11 +219,11 @@ namespace Vormetric.Pkcs11Sample
 
             char[] keyValue =  {
                  't','h','i','s',' ','i','s',' ',
-       	         'm','y',' ','s','a','m','p','l',
+                    'm','y',' ','s','a','m','p','l',
                  'e',' ','k','e','y',' ','d','a',
-       	         't','a',' ','5','4','3','2','1' };
-          
-            
+                    't','a',' ','5','4','3','2','1' };
+
+
             ISample sample;
             // Used to check properly execution of test case and set Environment.ExitCode
             Environment.ExitCode = 0;
@@ -235,7 +238,7 @@ namespace Vormetric.Pkcs11Sample
                             wrappingKeyLabel = "vpkcs11_dotnet_wrapping_key";
 
                         sample = new CreateKeySample();
-                        sample.Run(new object[] { pin, keyLabel, 0, preactive, nodelete, bAlwSen, bNevExtr });                        
+                        sample.Run(new object[] { pin, keyLabel, 0, preactive, nodelete, bAlwSen, bNevExtr });
                         sample.Run(new object[] { pin, wrappingKeyLabel, 0, preactive, nodelete, bAlwSen, bNevExtr });
 
                         sample = new CreateObjectSample();

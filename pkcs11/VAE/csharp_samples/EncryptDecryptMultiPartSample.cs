@@ -14,13 +14,13 @@ namespace Vormetric.Pkcs11Sample
     {
         public bool Run(object[] inputParams)
         {
-            using (Pkcs11 pkcs11 = new Pkcs11(Settings.Pkcs11LibraryPath, false))
+            using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
-                Slot slot = Helpers.GetUsableSlot(pkcs11);
+                ISlot slot = Helpers.GetUsableSlot(pkcs11Library);
 
                 // Open RW session
-                using (Session session = slot.OpenSession(false))
+                using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
                     string keyLabel = Convert.ToString(inputParams[1]);
@@ -34,7 +34,7 @@ namespace Vormetric.Pkcs11Sample
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
                       
-                    ObjectHandle foundKey = Helpers.FindKey(session, keyLabel);
+                    IObjectHandle foundKey = Helpers.FindKey(session, keyLabel);
                     if (foundKey == null) {
                         uint keySize = 32;
                         foundKey = Helpers.GenerateKey(session, keyLabel, keySize);
@@ -44,23 +44,23 @@ namespace Vormetric.Pkcs11Sample
                     byte[] iv = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
                     // Specify encryption mechanism with initialization vector as parameter
-                    Mechanism encmechanism;
-                    Mechanism decmechanism;
+                    IMechanism encmechanism;
+                    IMechanism decmechanism;
                     if (headerMode == null || headerMode.Length < 4) headerMode = "none";
                     switch (headerMode[3])
                     {
-                        case '5': encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED, iv); 
-                                  decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
+                        case '5': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED, iv); 
+                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
                                   break;
-                        case '1': encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED, iv);
-                                  decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
+                        case '1': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED, iv);
+                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
                                   break;
-                        case '7': encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED, iv);
-                                  decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
+                        case '7': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED, iv);
+                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
                                   break;
                         case 'e': // last letter of 'none'
-                        default:  encmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD, iv); 
-                                  decmechanism = new Mechanism(CKM.CKM_AES_CBC_PAD, iv); 
+                        default:  encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv); 
+                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv); 
                                   break;
                     }
                     
@@ -99,7 +99,11 @@ namespace Vormetric.Pkcs11Sample
                     // Do something interesting with decrypted data
                     if (FilesAreEqual(new FileInfo(pathSource), new FileInfo(pathDeCipherSource)))
                     {
-                        Console.WriteLine("Source and Decrypted Data Matches!");
+                        Console.WriteLine("Source and Decrypted Data Matches!!!!!");
+                    }                   
+                    else
+                    {
+                        Console.WriteLine("Source and Decrypted Data not Matches!!!!!");
                     }
                     session.Logout();                    
                 }
@@ -134,5 +138,7 @@ namespace Vormetric.Pkcs11Sample
 
             return true;
         }
+
+       
     }
 }
