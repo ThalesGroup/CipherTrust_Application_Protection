@@ -420,7 +420,7 @@ public class CipherTrustManagerHelper {
 		else
 			throw new RuntimeException("valid values for data type are: digit,alphabet,alphanumeric");
 		
-		//String tkn = awsresrest.getToken("Vormetric123!", "C:\\keystore\\cm_keystoreone");
+		//String tkn = awsresrest.getToken("Yoursupersecretpwd", "C:\\keystore\\cm_keystoreone");
 		String tkn = awsresrest.getToken();
 		Calendar calendar = Calendar.getInstance();
 
