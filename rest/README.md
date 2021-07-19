@@ -10,6 +10,6 @@ Integrations or Sample Code for applications using REST calls to our web service
 * CipherTrust Vaultless Tokenization (CT-VL)
 **SafeNet Vaultless Tokenization (SVT) (legacy)
 ** Vormetric Tokenization Server (VTS) (legacy)
-
+** CipherTrust Manager REST API 
 ## Sample Code
 
