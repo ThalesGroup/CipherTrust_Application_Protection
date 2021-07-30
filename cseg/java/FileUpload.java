@@ -186,9 +186,9 @@ public class FileUpload {
 		}
 		
 		if (buffer.length() != 0) {
-			System.err.println("java -jar FileUpload.jar url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
+			System.err.println("java FileUpload url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
 			 + " bucket=bucketName region=region user=KeyManagerUserName password=KeyManagerPassword"
-			 + " key=keyName fileName=filename filepath=filepath  [clientSide=isClientSide] [transformation=transformation] [alias=certalias]"
+			 + " key=keyName fileName=filename filepath=filepath [isClientSide=isClientSide] [transformation=transformation] [alias=certalias]"
 			 + " [certPassword=certPassword] [canKeyRotate=canKeyRotate]");
 			System.exit(-1);
 		}

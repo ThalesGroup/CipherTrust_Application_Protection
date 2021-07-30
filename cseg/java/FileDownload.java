@@ -169,7 +169,7 @@ public class FileDownload {
 		}
 		
 		if (buffer.length() != 0) {
-			System.err.println("java -jar FileDownload.jar url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
+			System.err.println("java FileDownload url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
 			 + " bucket=bucketName region=region user=KeyManagerUserName password=KeyManagerPassword"
 			 + " key=keyName fileName=filename destination=destinationFile  [clientSide=isClientSide] [transformation=transformation] [alias=certalias]"
 			 + " [certPassword=certPassword] [version=version]");
