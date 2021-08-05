@@ -54,8 +54,6 @@ File: ECCSignSample.java
 Usage: java ECCSignSample user password keyname
 This sample demonstrates how to perform Sign and SignVerify operations using ECC key.
 
-
-
 File: FileEncryptionDecryptionSampleUsingRSA.java
 Usage: java FileEncryptionDecryptionSampleUsingRSA userName password asymKeyName fileToEncrypt encryptedFile decryptedFile
 This sample shows how to encrypt/decrypt a file using RSA Algorithm.
@@ -100,9 +98,6 @@ File: SignSample.java
 Usage: java SignSample user password keyname [saltlength]
 This sample shows how to sign data and verify signature using CADP JCE.
 
-File: WrapKeySample.java
-Usage: java WrapKeySample user password keyToWrapName wrappingKeyName groupName
-This sample shows how to wrap a key for export from the Key Manager using the CADP JCE.
 
 File: CryptoTool.java 
 
