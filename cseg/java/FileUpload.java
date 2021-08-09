@@ -27,6 +27,11 @@ import org.apache.http.util.EntityUtils;
  * User should take care of the parameter used in this sample. If any other
  * client is used then parameter name should be same.
  * 
+ * Note: To run the samples, download and add the following jars as well as CADP JCE jars into the java classpath:
+ *	     a) httpclient-4.5.1.jar
+ *	     b) httpcore-4.4.4.jar
+ *	     c) httpmime-4.5.1.jar
+ *	     d) commons-logging-1.1.1.jar
  */
 public class FileUpload {
 
@@ -186,9 +191,9 @@ public class FileUpload {
 		}
 		
 		if (buffer.length() != 0) {
-			System.err.println("java -jar FileUpload.jar url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
+			System.err.println("java FileUpload url=webserviceurl awsKey=accessKey awsSecretKey=secretKey"
 			 + " bucket=bucketName region=region user=KeyManagerUserName password=KeyManagerPassword"
-			 + " key=keyName fileName=filename filepath=filepath  [clientSide=isClientSide] [transformation=transformation] [alias=certalias]"
+			 + " key=keyName fileName=filename filepath=filepath [isClientSide=isClientSide] [transformation=transformation] [alias=certalias]"
 			 + " [certPassword=certPassword] [canKeyRotate=canKeyRotate]");
 			System.exit(-1);
 		}
