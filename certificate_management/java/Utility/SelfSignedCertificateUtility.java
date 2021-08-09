@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//For Oracle Java
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.CertificateAlgorithmId;
 import sun.security.x509.CertificateExtensions;
@@ -33,6 +34,22 @@ import sun.security.x509.KeyUsageExtension;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
+
+//For IBM Java, comment the Oracle Java imports 
+//and uncomment the below imports. 
+/*import com.ibm.security.x509.AlgorithmId;
+import com.ibm.security.x509.CertificateAlgorithmId;
+import com.ibm.security.x509.CertificateExtensions;
+import com.ibm.security.x509.CertificateIssuerName;
+import com.ibm.security.x509.CertificateSerialNumber;
+import com.ibm.security.x509.CertificateSubjectName;
+import com.ibm.security.x509.CertificateValidity;
+import com.ibm.security.x509.CertificateVersion;
+import com.ibm.security.x509.CertificateX509Key;
+import com.ibm.security.x509.KeyUsageExtension;
+import com.ibm.security.x509.X500Name;
+import com.ibm.security.x509.X509CertImpl;
+import com.ibm.security.x509.X509CertInfo;*/
 
 import com.ecc.security.nae.NAEECIESUtils;
 import com.ingrian.security.nae.NAEException;
@@ -70,11 +87,11 @@ public class SelfSignedCertificateUtility {
 			usage();
 
 		try {
-			Map<String, String> certificateProeprties = readPropertiesFrom(file);
+			Map<String, String> certificateProperties = readPropertiesFrom(file);
 			if (certPass != null)
-				certificateProeprties.put("CertPassword", certPass);
+				certificateProperties.put("CertPassword", certPass);
 
-			validateProperties(certificateProeprties);
+			validateProperties(certificateProperties);
 
 			NAESession session = null;
 			PrivateKey privateKey = null;
@@ -87,17 +104,17 @@ public class SelfSignedCertificateUtility {
 				NAEPrivateKey private1 = NAEKey.getPrivateKey(key, session);
 				NAEPublicKey public1 = NAEKey.getPublicKey(key, session);
 				
-				privateKey = getPrivateKey(private1, certificateProeprties.get("Algorithm"));
-				publicKey = getPublicKey(public1, certificateProeprties.get("Algorithm"));
+				privateKey = getPrivateKey(private1, certificateProperties.get("Algorithm"));
+				publicKey = getPublicKey(public1, certificateProperties.get("Algorithm"));
 			} finally {
 				if (session != null)
 					session.closeSession();
 			}
 
 			X509Certificate cert = generateCertificate(publicKey, privateKey,
-					certificateProeprties);
-			storeCertificateInPFX(privateKey, cert, certificateProeprties);
-			System.out.println("certificate is stored successfully at " + certificateProeprties.get("Destination"));
+					certificateProperties);
+			storeCertificateInPFX(privateKey, cert, certificateProperties);
+			System.out.println("certificate is stored successfully at " + certificateProperties.get("Destination"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -374,19 +391,19 @@ public class SelfSignedCertificateUtility {
 	 **/
 	private static Map<String, String> readPropertiesFrom(String fileName)
 			throws IOException {
-		Map<String, String> certificateProeprties = new HashMap<String, String>();
-		BufferedReader buffReader = new BufferedReader(new FileReader(fileName));
+		Map<String, String> certificateProperties = new HashMap<String, String>();
+		try(BufferedReader buffReader = new BufferedReader(new FileReader(fileName))){
 		String buffer = null;
-		while ((buffer = buffReader.readLine()) != null) {
-			if (buffer.startsWith("#") || buffer.trim().length() == 0)
-				continue;
-			String[] temp = buffer.split("=");
-			if (temp.length == 1)
-				continue;
-			certificateProeprties.put(temp[0], temp[1]);
+			while ((buffer = buffReader.readLine()) != null) {
+				if (buffer.startsWith("#") || buffer.trim().length() == 0)
+					continue;
+				String[] temp = buffer.split("=");
+				if (temp.length == 1)
+					continue;
+				certificateProperties.put(temp[0], temp[1]);
+			}
 		}
-		buffReader.close();
-		return certificateProeprties;
+		return certificateProperties;
 	}
 
 	public static void usage() {
