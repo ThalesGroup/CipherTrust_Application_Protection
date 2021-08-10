@@ -118,7 +118,7 @@ class CryptoMultiThreadedHmac
         string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var cadpPackage = Path.Combine(path, ".nuget", "packages", "cadp.netcore");
         var highestPackage = Directory.GetDirectories(cadpPackage).Select(x => Path.GetFileName(x)).OrderByDescending(e => new Version(e)).First();
-        propertyFilePath = Path.Combine(cadpPackage, highestPackage, "CADP.NETCore_Properties.xml");
+        propertyFilePath = Path.Combine(cadpPackage, highestPackage, "content", "CADP.NETCore_Properties.xml");
 
         NaeHmacKey key = null;
         /*Read Username and password*/
