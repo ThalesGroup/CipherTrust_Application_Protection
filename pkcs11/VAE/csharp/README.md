@@ -79,4 +79,11 @@ dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
 
 The program VPkcs11_Sample consists of the main program whose source code can be found in Program.cs and ten other source code files.
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 
-Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings and helper functions, respectively.
+Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings, Native PKCS11 library path and helper functions, respectively.
+## Native PKCS11 library path(Default path)
+### For windows:
+    C:\Program Files\Vormetric\DataSecurityExpert\Agent\pkcs11\bin\vorpkcs11.dll
+### For Linux:
+    /opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so
+    
+
