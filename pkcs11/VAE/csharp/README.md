@@ -86,4 +86,10 @@ Two other source files, Settings.cs and Sample_Helpers.cs, contain global settin
 ### For Linux:
     /opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so
     
-
+Uncomment the following lines from Settings.cs to generate the PKCS11 interop level log
+```
+SimplePkcs11InteropLoggerFactory simpleLoggerFactory = new SimplePkcs11InteropLoggerFactory();
+simpleLoggerFactory.EnableFileOutput("log.txt");
+simpleLoggerFactory.MinLogLevel = Pkcs11InteropLogLevel.Error;
+Pkcs11InteropLoggerFactory.SetLoggerFactory(simpleLoggerFactory);
+```
