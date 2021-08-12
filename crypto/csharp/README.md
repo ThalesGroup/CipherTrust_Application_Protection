@@ -1,6 +1,6 @@
 # Integration/Sample Code for C#/.NET Core
 
-## Overview
+## Overview:
 The following samples show how to perform crypto operations with various ciphers, sign and verify data and much more.
 
 * CryptoOpRijndael.cs
@@ -21,16 +21,16 @@ The following samples show how to perform crypto operations with various ciphers
 ## Prerequisites: 
 In order to run C# samples, 
 1. .NET Core 3.1 or higher must be installed.
-1. CADP.NetCore.nupkg must be installed.
+1. CADP.NetCore NuGet package must be installed.
 
 ## Usage: 
-1. Before using these cs files, create the console application.
+1. Before using these cs files, create the console application. Let's say `SampleApp`
 1. Add the required cs files to the project.
-1. Add the CADP.NetCore.nupkg to the project and build the project.
+1. Add the CADP.NetCore NuGet package to the project and build. using command `dotnet build -c Release`
 1. Use either of the following commands to execute the project.
-    * Use `dotnet run` command to run the project at a terminal prompt or within IDE.
-    * Use `dotnet` command to run using the `fileName.dll` at a terminal prompt. Example: `dotnet CryptoOpRijndael.dll`
-    * [Windows Only] Use `fileName.exe` to run the code at a terminal prompt. Example: `CryptoOpRSAEncDec.exe` 
+    * `dotnet run` command to run the project at a terminal prompt.
+    * `dotnet` command to run `SampleApp.dll` at location `\bin\Release\netcoreapp3.1` using terminal. Example: `dotnet SampleApp.dll`
+    * [Windows Only] `SampleApp.exe` to run the code at a terminal prompt. Example: `SampleApp.exe`  
 
 ## More Information
 For more information on CADP for .NET Core, refer to the CADP for .NET Core user guide at [ThalesDocs.com](www.thalesdocs.com/ctp/con/cadp/dotnetcore/index.html).
