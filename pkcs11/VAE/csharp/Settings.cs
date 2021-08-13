@@ -46,15 +46,9 @@ namespace Vormetric.Pkcs11Sample
         /// Factories to be used by Developer and Pkcs11Interop library
         /// </summary>
         public static Pkcs11InteropFactories Factories = new Pkcs11InteropFactories();
-        /// <summary>
-        /// Relative name or absolute path of unmanaged PKCS#11 library provided by smartcard or HSM vendor.
-        /// </summary>
-        
-           
-        public static string Pkcs11LibraryPath = @"/opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so";
-    
-        //public static string Pkcs11LibraryPath = @"c:\Program Files\Vormetric\DataSecurityExpert\Agent\pkcs11\bin\vorpkcs11.dll";
-        /// <summary>
+        public static string Pkcs11LibraryPath = string.Empty;
+
+         /// <summary>
         /// Type of application that will be using PKCS#11 library.
         /// When set to AppType.MultiThreaded unmanaged PKCS#11 library performs locking to ensure thread safety.
         /// </summary>
@@ -122,10 +116,10 @@ namespace Vormetric.Pkcs11Sample
         static Settings()
         {
             // Uncomment following three lines to enable managed logging via System.Diagnostics.Trace class
-            SimplePkcs11InteropLoggerFactory simpleLoggerFactory = new SimplePkcs11InteropLoggerFactory();
-            simpleLoggerFactory.EnableFileOutput("log.txt");//.EnableDiagnosticsTraceOutput();
-            simpleLoggerFactory.MinLogLevel = Pkcs11InteropLogLevel.Debug;
-            Pkcs11InteropLoggerFactory.SetLoggerFactory(simpleLoggerFactory);
+            //SimplePkcs11InteropLoggerFactory simpleLoggerFactory = new SimplePkcs11InteropLoggerFactory();
+            //simpleLoggerFactory.EnableFileOutput("log.txt");//.EnableDiagnosticsTraceOutput();
+            //simpleLoggerFactory.MinLogLevel = Pkcs11InteropLogLevel.Error;
+            //Pkcs11InteropLoggerFactory.SetLoggerFactory(simpleLoggerFactory);
             // Uncomment following three lines to enable unmanaged logging via PKCS11-LOGGER library
             // System.Environment.SetEnvironmentVariable("PKCS11_LOGGER_LIBRARY_PATH", Pkcs11LibraryPath);
             // System.Environment.SetEnvironmentVariable("PKCS11_LOGGER_LOG_FILE_PATH", @"c:\pkcs11-logger.txt");
@@ -142,6 +136,18 @@ namespace Vormetric.Pkcs11Sample
                 InitArgs81 = new LLA81.CK_C_INITIALIZE_ARGS();
                 InitArgs81.Flags = CKF.CKF_OS_LOCKING_OK;
             }
+
+            /// <summary>
+            /// Relative name or absolute path of unmanaged PKCS#11 library provided by smartcard or HSM vendor.
+            /// </summary>
+            if (Platform.IsWindows)
+            {
+                Pkcs11LibraryPath = @"C:\Program Files\Vormetric\DataSecurityExpert\Agent\pkcs11\bin\vorpkcs11.dll";
+            }
+            else if (Platform.IsLinux)
+            {
+                Pkcs11LibraryPath = @"/opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so";
+            }
             // Convert strings to byte arrays
             SecurityOfficerPinArray = ConvertUtils.Utf8StringToBytes(SecurityOfficerPin);
             NormalUserPinArray = ConvertUtils.Utf8StringToBytes(NormalUserPin);
@@ -156,6 +162,8 @@ namespace Vormetric.Pkcs11Sample
             pkcs11UriBuilder.Object = ApplicationName;
 
             PrivateKeyUri = pkcs11UriBuilder.ToString();
+
+            
         }
         
 
