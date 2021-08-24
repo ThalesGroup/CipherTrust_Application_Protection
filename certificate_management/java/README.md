@@ -1,8 +1,8 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
-###Certificate Types:
+### Certificate Types:
 
 Following *certificates* and *CA samples* are available in the **Certificate_Types** directory:
 
@@ -12,7 +12,7 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
 1.  sample_ca.crt
 
 
-###Samples:
+### Samples:
 
 **File:** *CertCreationAndSignSample.java*
 
@@ -44,7 +44,7 @@ This sample shows how to sign the CSR that is generated using the user's private
 After the details are provided, the Key Manager will sign the request and return the signed document.
 
 
-###Utility :
+### Utility :
 
 **File:** *SelfSignedCertificateUtility.java*
 
@@ -53,7 +53,7 @@ After the details are provided, the Key Manager will sign the request and return
 This sample generates a self-signed certificate with the specified properties such as *KeyUsage*, *Validity*, and *Algorithm* etc. in the *details.properties* file.
 
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -64,7 +64,7 @@ To use these sample files, user must have
 - ***CADP JCE Jar*** files in the java classpath..
     
 
-##More Information
+## More Information
 
 For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
 

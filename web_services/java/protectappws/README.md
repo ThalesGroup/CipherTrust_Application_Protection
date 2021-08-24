@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 ### SOAP WebService Samples:
 
@@ -55,7 +55,7 @@ This sample shows how to *calculate hmac* of data using a *SOAP* stateful web se
 This sample shows how to *sign and verify* data using **RSA**.
 
 
-###REST WebService Samples:
+### REST WebService Samples:
 
 **File:** *Restful_EncryptSample.java*
 
@@ -63,7 +63,7 @@ This sample shows how to *sign and verify* data using **RSA**.
 
 This sample shows how to *encrypt* a data using a *restful* web service.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -74,7 +74,7 @@ To use these sample files, user must have
 - ***protectappwsClientStub.jar*** and ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on *WebService*, refer to the *CADP JCE WebService User Guide*.
 

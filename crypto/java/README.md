@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 
 **File:** *AESGCMEncryptionDecryptionSample.java*
@@ -181,7 +181,7 @@ Supported Options:
 
 
 
-###Samples in FPE directory:
+### Samples in FPE directory:
 
 **File:** *FF1EncryptionDecryptionSample.java*
 
@@ -199,7 +199,7 @@ This sample shows how to *encrypt and decrypt* data using the **FF1** algorithm.
 
 This sample shows how to *encrypt and decrypt* data using **FPE**.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -210,7 +210,7 @@ To use these sample files, user must have
 - ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
 

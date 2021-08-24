@@ -1,6 +1,6 @@
 # Tomcat Servlet Sample Code for Java
 
-##Contents
+## Contents
 
 - Overview
 - System Requirements
@@ -11,14 +11,14 @@
 - Stopping the Servlet
 
 
-##Overview
+## Overview
 
 This servlet allows you to *encrypt* and *decrypt* a "**Hello servlet**" string.
 It prompts the user to enter *NAE username, password, and key name* and verifies that these values exist on Key Manager. 
 It *encrypts* and *decrypts* the string, and then *displays* the registered JCE providers.
 
 
-##System Requirements
+## System Requirements
 
 - [Apache Ant](http://ant.apache.org)
 - [Apache Tomcat](http://tomcat.apache.org) 
@@ -26,7 +26,7 @@ It *encrypts* and *decrypts* the string, and then *displays* the registered JCE 
 - JDK 1.8 or higher
 
 
-##Prerequisites
+## Prerequisites
 
 To use this sample, ensure that the following conditions are met:
 
@@ -36,7 +36,7 @@ To use this sample, ensure that the following conditions are met:
 
 
 
-##Configuring the Servlet
+## Configuring the Servlet
 
 To configure servlet:
 
@@ -82,7 +82,7 @@ To configure servlet:
 
 
 
-##Running the Servlet
+## Running the Servlet
 
 
 To run the servlet:
@@ -102,7 +102,7 @@ To run the servlet:
 
 
 
-##Running the Servlet with Java Security Manager
+## Running the Servlet with Java Security Manager
 
  
 
@@ -160,7 +160,7 @@ To run the Tomcat servlet using Java security manager:
    available at: *http://localhost:8080/sample/Hello*
 
 
-##Stopping the Servlet
+## Stopping the Servlet
 
 
 To undeploy the sample, run "**ant remove**" command.
@@ -173,7 +173,7 @@ To shut down Tomcat:
    On Unix machines, run 
   *$CATALINA_HOME/bin/shutdown.sh*        
 
-##More Information
+## More Information
 
 For more information on *CADP JCE* and *CryptoTool*, refer to the *CADP JCE User Guide*.
 

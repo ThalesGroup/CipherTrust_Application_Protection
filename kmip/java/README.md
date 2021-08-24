@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 **File:** *KMIPBatchSample.java*
 
@@ -140,7 +140,7 @@ This sample shows how to *register* and *export* a KMIPSecretData managed object
 
 This sample is used to test *Key Wrap/Unwrap* functionality using *KMIP*.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -151,7 +151,7 @@ To use these sample files, user must have
 - ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on *KMIP* samples, refer to the *CADP JCE User Guide*.
 

@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 
 **File:** *FileUpload.java* 
@@ -17,7 +17,7 @@ User can also use any other client. However, user must take care of the paramete
 This sample shows how to *download* file from **AWS S3 Server** using *Thales Cloud Web Services*. In this sample, we demonstrate how to use *Http Client*. 
 User can also use any other client. However, user must take care of the parameters used in this sample. If any other client is used, then parameters name should be same.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -32,7 +32,7 @@ To use these sample files,
     - **commons-logging-1.1.1.jar**
 
 
-##More Information
+## More Information
 For more information on CSEG WebService, refer to the *CADP JCE CSEG WebService User Guide*.
 
 

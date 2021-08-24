@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 **File:** *MultiplePropertyFileSample.java*
 
@@ -11,7 +11,7 @@ pointing to one properties file and another is using global properties file.
 *Local session* is creating a new key and *export* that key to *global session* using *import/export* APIs. To validate *sharing* between Key Managers,
 one sample data will be encrypted with *local session* key and decrypted by the *global session* key.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -22,7 +22,7 @@ To use the sample file, user must have
 - ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
 

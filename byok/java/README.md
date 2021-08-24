@@ -27,7 +27,7 @@ To use this sample file, user must have
 - ***CADP JCE Jar*** files in the java classpath.
 
 
-##More Information
+## More Information
 
 - For more information on CADP JCE, refer to the *CADP JCE User Guide* .
 - For detailed information on byok samples and parameters, refer to *CADP JCE BYOK Integration Guide*.

@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 **File:**  *ECCKeySample.java*
 
@@ -74,7 +74,7 @@ This sample shows how to use different *key operations* for *symmetric keys*:
 
 This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP JCE**.
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -85,7 +85,7 @@ To use these sample files, user must have
 - ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
 

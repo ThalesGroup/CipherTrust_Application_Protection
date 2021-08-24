@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-##Overview:
+## Overview:
 
 **File:** *JavaUtilLogger.java*
 
@@ -18,7 +18,7 @@ This sample shows how to create a *Message Authentication Code(MAC)* and how to 
 **Note:** *JavaUtilLogger* class provides the custom logging configurations. The *CustomLoggerSample* class will use these custom configurations to log the messages in the log file or on the console.
 
 
-##Prerequisites: 
+## Prerequisites: 
 
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
@@ -29,7 +29,7 @@ To use these sample files, user must have
 - ***CADP JCE Jar*** files in the java classpath.
     
 
-##More Information
+## More Information
 
 For more information on *custom/external logger*, refer to the *CADP JCE User Guide*.
 
