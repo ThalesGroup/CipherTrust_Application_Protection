@@ -14,7 +14,7 @@ import com.ingrian.security.nae.NAESession;
 /**
  * This sample shows how to perform crypto-operations(Encrypt and Decrypt)
  * using AES-GCM mode. IV and AAD should be passed in the Hexadecimal in this
- * sample.
+ * sample. authTagLength should be between 32 to 128 and must be multiple of 8.
  *   File Name: AESGCMEncryptionDecryptionSample.java
  */
 public class AESGCMEncryptionDecryptionSample {

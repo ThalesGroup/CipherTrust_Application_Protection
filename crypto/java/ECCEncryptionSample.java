@@ -15,6 +15,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample demonstrates how to perform encryption/decryption using the ECC key.
+ * Note: The key needs to have the encrypt/decrypt permission.
  * 
  */
 public class ECCEncryptionSample {

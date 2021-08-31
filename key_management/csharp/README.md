@@ -1,6 +1,6 @@
 # Integration/Sample Code for C#/.NET Core
 
-## Overview:
+## Overview
 The following samples shows how to manage keys.
 
 * NaeKeyManagement.cs

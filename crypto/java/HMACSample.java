@@ -28,7 +28,7 @@ public class HMACSample
     {
 	if (args.length != 3)
 	{
-            System.err.println("Usage: java HMACSample user password keyname");
+            System.err.println("Usage: java HMACSample user password hmacKeyName");
             System.exit(-1);
 	} 
         String username  = args[0];

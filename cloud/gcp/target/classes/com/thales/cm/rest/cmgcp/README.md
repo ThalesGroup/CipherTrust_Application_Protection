@@ -2,7 +2,7 @@
 This repository will hold code samples and/or integrations that you can use in your environment for GCP PAAS Services.
 GCPBigQueryCipherTrustREST for GCP Big Query
 
-Usage Usage: java GCPBigQueryCipherTrustREST userid password keyname ctmip 
+Usage Usage: java GCPBigQueryCipherTrustREST userid <password> <keyname> ctmip 
 
 Change the connectionUrl to be your Big Query instance
 

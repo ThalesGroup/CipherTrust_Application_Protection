@@ -17,6 +17,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to encrypt and decrypt data using RSA key.
+ * Note: Use the RSA key which has encrypt and decrypt permission.
  */
 public class RSAEncryptionSample {
     
@@ -25,7 +26,7 @@ public class RSAEncryptionSample {
 	if (args.length != 3)
         {
             System.err.println("Usage: java RSAEncryptionSample user password keyname");
-            System.exit(-1);
+		    System.exit(-1);
 	} 
         String username  = args[0];
         String password  = args[1];

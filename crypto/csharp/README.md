@@ -1,6 +1,6 @@
 # Integration/Sample Code for C#/.NET Core
 
-## Overview:
+## Overview
 The following samples show how to perform crypto operations with various ciphers, sign and verify data and much more.
 
 * CryptoOpRijndael.cs

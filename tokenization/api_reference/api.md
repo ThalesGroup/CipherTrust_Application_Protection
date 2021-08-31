@@ -6,7 +6,7 @@ Tokenize a given data or plaintext string using the tokengroup and tokentemplate
 
 **Method** : `POST`
 
-**Auth required** : `A valid user name and password must be passed as an argument. The values are case sensitive`
+**Auth required** : `A valid user name and <password> must be passed as an argument. The values are case sensitive`
 
 **Data constraints**
 
@@ -56,7 +56,7 @@ Detokenize a given token using the tokengroup and tokentemplate.
 
 **Method** : `POST`
 
-**Auth required** : `A valid user name and password must be passed as an argument. The values are case sensitive`
+**Auth required** : `A valid user name and <password> must be passed as an argument. The values are case sensitive`
 
 **Data constraints**
 
