@@ -15,30 +15,29 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
 
 1. Create a Certificate Signing Request (CSR) and Use it for Signing
 
-This sample first creates a CSR request on the Key Manager with the existing key pair and then uses the CSR data from the Key Manager to get the CSR signed by the CA present on the Key Manager.
+  This sample first creates a CSR request on the Key Manager with the existing key pair and then uses the CSR data from the Key Manager to get the CSR signed by the CA present on the Key Manager.
 
-* File: 
-[*CertCreationAndSignSample.java*](CertCreationAndSignSample.java)
-
-* Usage:
-```shell
-java CertCreationAndSignSample <username> <password> <keyname> -cn <cnName> -country <countryName> -ca <caName> -expiry <expiryTime>
-```
+  * File: [*CertCreationAndSignSample.java*](CertCreationAndSignSample.java)
+  * Usage:
+  ```shell
+  java CertCreationAndSignSample <username> <password> <keyname> -cn <cnName> -country <countryName> -ca <caName> -expiry <expiryTime>
+  ```
 
 2. How to Import/Export Certificates
 
-This sample shows how to use different certificate operations:
-- *Import and export* certificate and its private key (if present)
-- *Export* CA certificate and certificate chain.
+  This sample shows how to use different certificate operations:
+  - *Import and export* certificate and its private key (if present)
+  - *Export* CA certificate and certificate chain.
   
-**Note:** The imported certificates must have any of the following format:  `PKCS#1`, `PKCS#8`, or `PKCS#12`. 
+  **Note:** The imported certificates must have any of the following format:  `PKCS#1`, `PKCS#8`, or `PKCS#12`. 
 
-* File: [*CertSample.java*](CertSample.java)
-* Usage: 
-```shell
-java CertSample <username> <password> <filename> <certName> <caName> <pkcs12Password> 
-```
-**Note:** <pkcs12Password> can be null if cert data is in PKCS#1 format
+  * File: [*CertSample.java*](CertSample.java)
+  * Usage: 
+  ```shell
+  java CertSample <username> <password> <filename> <certName> <caName> <pkcs12Password> 
+  ```
+  
+  **Note:** <pkcs12Password> can be null if cert data is in PKCS#1 format
 
 1. Signing a CSR
 
