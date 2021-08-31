@@ -1,35 +1,39 @@
-# Sample Code for Java
+# Sample Code for Custom Loggers in Java
 
-## Overview:
+## Overview
 
-**File:** *JavaUtilLogger.java*
+## Samples
 
-*JavaUtilLogger* provides custom logging implementation of IngrianLogging using the java logging framework.It provides implementation of the *IngrianLogService* interface.
-User can configure the file and console handler's properties in the *log.properties* file. 
-It will create a log file in the current working directory.
+1. Custom Logger
 
+    *JavaUtilLogger* provides custom logging implementation of IngrianLogging using the java logging framework. It provides implementation of the *IngrianLogService* interface.
+    User can configure the file and console handler's properties in the *log.properties* file. 
+    It will create a log file in the current working directory.
 
-**File:** *CustomLoggerSample.java*
+    * File: [*JavaUtilLogger.java*](JavaUtilLogger.java)
 
-*`Usage: java CustomLoggerSample user password keyname`*
+1. Using a Custom Logger
 
-This sample shows how to create a *Message Authentication Code(MAC)* and how to *verify* it using the **CADP JCE Custom Logging** configurations.
+    This sample shows how to create a *Message Authentication Code(MAC)* and how to *verify* it using the **CADP JCE Custom Logging** configurations.
 
-**Note:** *JavaUtilLogger* class provides the custom logging configurations. The *CustomLoggerSample* class will use these custom configurations to log the messages in the log file or on the console.
+    **Note:** *JavaUtilLogger* class provides the custom logging configurations. The *CustomLoggerSample* class will use these custom configurations to log the messages in the log file or on the console.
 
+    * File: [*CustomLoggerSample.java*](CustomLoggerSample.java)
+    * Usage: 
+    ```shell
+    java CustomLoggerSample <username> <password> <keyname>
+    ```
 
 ## Prerequisites: 
 
-All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
+All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- **CADP JCE** installed and configured.
-- A ***javac*** compiler to compile the samples.
-- ***CADP JCE Jar*** files in the java classpath.
+- `CADP JCE` installed and configured.
+- A `javac` compiler in path to compile the sample. 
     
-
 ## More Information
 
-For more information on *custom/external logger*, refer to the *CADP JCE User Guide*.
+For more information on custom/external loggers, refer to the `CADP JCE User Guide`.
 

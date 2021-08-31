@@ -1,18 +1,22 @@
-# Sample Code for Java
+# Sample Code for Bring Your Own Key (BYOK) in Java
 
+## Overview
 
-## Overview:
+## Samples
 
-**File :** *ByokSample.java*
+1. Wrap key for use with a Cloud Service Provider (CSP)
 
-*`Usage:
-java ByokSample -cloudName [AWS|Salesforce|GoogleCloud] -userName <userName> -password <password> -aesKeyName <aes-256 Key Name> [-publicKeyPath <public key path>] -wrappedKeyPath <wrapped key path> [-wrappingKeyName RSA KeyName] [-outputFormat base64] -wrappingAlgo [SHA1|SHA256|PKCS1.5] [-hash256Path filePath]`*
+    This sample shows how to use the *BYOK* feature with a CSP (AWS|Salesforce|GoogleCloud) with the Key Manager and CADP JCE. 
 
-**Note :** The -hash256Path parameter is specific to `Salesforce` only.
+    The sample shows how to wrap the AES Key with the specified public key and a specific algorithm. It will produce a wrapped key that can be used for the encryption/decryption in the cloud.
 
-This sample shows how to use the *BYOK* feature of clouds 
-(`AWS|Salesforce|GoogleCloud`) with Key Manager and CADP JCE . 
-It wraps the AES Key with the specified public key and algorithm and produces a wrapped key that is used for the encryption/decryption on the cloud.
+    * File: [*ByokSample.java*](ByokSample.java)
+    * Usage:
+    ```shell
+    java ByokSample -cloudName <AWS|Salesforce|GoogleCloud> -userName <username> -password <password> -aesKeyName <aes-256KeyName> [-publicKeyPath <publicKeyPath>] -wrappedKeyPath <wrappedKeyPath> [-wrappingKeyName <RSAKeyName>] [-outputFormat <base64>] -wrappingAlgo <SHA1|SHA256|PKCS1.5> [-hash256Path <filePath>]
+    ```
+
+    **Note:** The -hash256Path parameter is specific to *Salesforce* only.
 
 ## Prerequisites: 
 
@@ -20,14 +24,9 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
 To use this sample file, user must have
 
-- **CADP JCE** installed and configured.
-
-- A ***javac*** compiler to compile the sample. 
-
-- ***CADP JCE Jar*** files in the java classpath.
-
+- `CADP JCE` installed and configured.
+- A `javac` compiler in path to compile the sample. 
 
 ## More Information
 
-- For more information on CADP JCE, refer to the *CADP JCE User Guide* .
-- For detailed information on byok samples and parameters, refer to *CADP JCE BYOK Integration Guide*.
+For more information on CADP JCE and samples, refer to the `CADP JCE User Guide`.

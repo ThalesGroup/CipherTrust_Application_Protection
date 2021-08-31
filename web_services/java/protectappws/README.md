@@ -1,12 +1,12 @@
 # Sample Code for Java
 
-## Overview:
+## Overview
 
 ### SOAP WebService Samples:
 
 **File:** *CertImportExportSample.java*
 
-*`Usage: java CertImportExportSample user password fileName certName certIsDeletable certIsExportable`*
+*`Usage: java CertImportExportSample user <password> fileName certName certIsDeletable certIsExportable`*
 
 This sample shows how to perform different *certificate operations*: 
 
@@ -18,19 +18,19 @@ This sample shows how to perform different *certificate operations*:
 
 **File:** *KeyImportExportSample.java*
 
-*`Usage: java KeyImportExportSample user password keyname algo keyBytes isDeletable isexportable`*
+*`Usage: java KeyImportExportSample user <password> <keyname> algo keyBytes isDeletable isexportable`*
 
 This samples shows how to *import and export* the key from the Key Manager using *SOAP* web service.
 
 **File:** *Session_EncryptSample.java*
 
-*`Usage: java Session_EncryptSample user password keyname plaintext [transformation] [key_iv]`*
+*`Usage: java Session_EncryptSample user <password> <keyname> plaintext [transformation] [key_iv]`*
 
 This sample shows how to *encrypt* a data using a *SOAP* stateful web service.
 
 **File:** *Session_FPEEncryptSample.java*
 
-*`Usage: java Session_FPEEncryptSample user password keyname plaintext tweakData [tweakAlgo] [keyIv]`*
+*`Usage: java Session_FPEEncryptSample user <password> <keyname> plaintext tweakData [tweakAlgo] [keyIv]`*
 
 **Note:** If optional parameters are used, then *both* must be specified.
 
@@ -38,19 +38,19 @@ This sample shows how to *encrypt* a data using a *FPE SOAP* stateful web servic
 
 **File:** *Session_GetAllUsersInfo.java*
 
-*`Usage: java Session_GetAllUsersInfo user password`*
+*`Usage: java Session_GetAllUsersInfo user <password>`*
 
 This sample shows the *information of all users* using a *SOAP* stateful web service.
 
 **File:** *Session_HMACSample.java*
 
-*`Usage: java Session_HMACSample user password keyname messageText`*
+*`Usage: java Session_HMACSample user <password> <keyname> messageText`*
 
 This sample shows how to *calculate hmac* of data using a *SOAP* stateful web service.
 
 **File:** *Session_RSASample.java*
 
-*`Usage: java Session_RSASample user password keyname messageText transformation`*
+*`Usage: java Session_RSASample user <password> <keyname> messageText transformation`*
 
 This sample shows how to *sign and verify* data using **RSA**.
 
@@ -59,7 +59,7 @@ This sample shows how to *sign and verify* data using **RSA**.
 
 **File:** *Restful_EncryptSample.java*
 
-*`Usage: java Restful_EncryptSample user password keyname plaintext [transformation] [key_iv]`*
+*`Usage: java Restful_EncryptSample user <password> <keyname> plaintext [transformation] [key_iv]`*
 
 This sample shows how to *encrypt* a data using a *restful* web service.
 

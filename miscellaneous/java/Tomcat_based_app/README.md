@@ -2,21 +2,19 @@
 
 ## Contents
 
-- Overview
-- System Requirements
-- Prerequisites
-- Configuring the Servlet 
-- Running the Servlet
-- Running the Servlet with Java Security Manager
-- Stopping the Servlet
-
+- [Overview](#Overview)
+- [System Requirements](#System-Requirements)
+- [Prerequisites](#Prerequisites)
+- [Configuring the Servlet](#Configuring-the-Servlet)
+- [Running the Servlet](#Running-the-Servlet)
+- [Running the Servlet with Java Security Manager](#Running-the-Servlet-with-Java-Security-Manager)
+- [Stopping the Servlet](#Stopping-the-Servlet)
 
 ## Overview
 
 This servlet allows you to *encrypt* and *decrypt* a "**Hello servlet**" string.
-It prompts the user to enter *NAE username, password, and key name* and verifies that these values exist on Key Manager. 
+It prompts the user to enter *NAE <username>, <password>, and key name* and verifies that these values exist on Key Manager. 
 It *encrypts* and *decrypts* the string, and then *displays* the registered JCE providers.
-
 
 ## System Requirements
 
@@ -25,7 +23,6 @@ It *encrypts* and *decrypts* the string, and then *displays* the registered JCE 
 - CADP JCE
 - JDK 1.8 or higher
 
-
 ## Prerequisites
 
 To use this sample, ensure that the following conditions are met:
@@ -33,8 +30,6 @@ To use this sample, ensure that the following conditions are met:
 1. **CADP JCE** must be installed. You can use the *CryptoTool* utility to verify the installation.
    
 2. NAE User and Key must be created on Key Manager. 
-
-
 
 ## Configuring the Servlet
 
@@ -53,13 +48,11 @@ To configure servlet:
 2. Add the following lines to the tomcat *conf/tomcat-users.xml* file:
 
 	    <role rolename="manager-script"/>
-    	<user username="tomcat" password="tomcat" roles="manager-script"/>
+    	<user <username>="tomcat" <password>="tomcat" roles="manager-script"/>
 	
-3. Run the "**ant dist**" command to build the war file. This creates a dist directory in parallel to the src directory
-   and place the sample.war file in it. By default, **CADP JCE** related jar files and IngrianNAE.properties file are copied to the WEB-INF/lib folder. 
+3. Run the "**ant dist**" command to build the war file. This creates a dist directory in parallel to the src directory and place the sample.war file in it. By default, **CADP JCE** related jar files and IngrianNAE.properties file are copied to the WEB-INF/lib folder. 
    
-    **Note:** If you don’t want these jars to be included in the WEB-INF/lib folder of sample.war file, please do the following 
-   and run "**ant dist**" command again to build the war file:
+**Note:** If you don’t want these jars to be included in the WEB-INF/lib folder of sample.war file, please do the following and run "**ant dist**" command again to build the war file:
 
 	a) Comment out the following lines in *build.xml* and place these jars in the Java classpath of Tomcat server (set *CLASSPATH*=<%path%> in setenv.bat file of the tomcat bin folder).
 	
@@ -80,10 +73,7 @@ To configure servlet:
     	 </listener-class>
     	 </listener> 
 
-
-
 ## Running the Servlet
-
 
 To run the servlet:
 
@@ -100,12 +90,7 @@ To run the servlet:
 3. Run the "**ant install**" command to deploy the sample. The sample servlet will be
    available at:  *http://localhost:8080/sample/Hello*
 
-
-
 ## Running the Servlet with Java Security Manager
-
- 
-
 
 To run the Tomcat servlet using Java security manager:
 
@@ -159,9 +144,7 @@ To run the Tomcat servlet using Java security manager:
 5. Run the "**ant install**" command to deploy the sample. The sample servlet will be
    available at: *http://localhost:8080/sample/Hello*
 
-
 ## Stopping the Servlet
-
 
 To undeploy the sample, run "**ant remove**" command.
 

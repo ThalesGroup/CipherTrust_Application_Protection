@@ -1,6 +1,6 @@
 # Sample Code for Certificate Management in Java
 
-## Overview:
+## Overview
 
 ### Certificate Types:
 

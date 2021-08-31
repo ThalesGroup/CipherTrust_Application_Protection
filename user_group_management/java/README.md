@@ -1,6 +1,6 @@
 # Sample Code for Java
 
-## Overview:
+## Overview
 
 **File:** *AdminRequestSample.java*
 

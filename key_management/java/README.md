@@ -1,91 +1,120 @@
-# Sample Code for Java
+# Sample Code for Key Management Operations in Java
 
-## Overview:
+## Overview
 
-**File:**  *ECCKeySample.java*
+## Samples
 
-*`Usage: java ECCKeySample user password keyName groupName`*
+1. Key Operations on an ECC key
 
 This sample shows how to perform the following *key operations* using the **ECC** keys:
 
-1. *Create* an ECC key pair with the group permissions. 
-1. *Export* public key data.
-1. *Export* private key data.
-1. *Delete* the key pair from Key Manager.
-1. *Import* the key pair back to Key Manager.
-1. *Export* private key data in **PEM-PKCS#8** and **PEM-SEC1** format.
+    1. *Create* an ECC key pair with the group permissions. 
+    1. *Export* public key data.
+    1. *Export* private key data.
+    1. *Delete* the key pair from Key Manager.
+    1. *Import* the key pair back to Key Manager.
+    1. *Export* private key data in **PEM-PKCS#8** and **PEM-SEC1** format.
 
-**File:** *HKDFSecretKeySample.java*
+    * File: [*ECCKeySample.java*](ECCKeySample)
+    * Usage: 
+    ```shell
+    java ECCKeySample <username> <password> <keyname> <groupName>
+    ```
 
-*`Usage: java HKDFSecretKeySample user password masterKeyName aesKeyName_1 aesKeyName_2 hmacKeyName_1 hmacKeyName_2`*
+1. Creating Derived Keys from Master Key
 
-This sample shows how to create **AES** and **HmacSHA256 key** using Key Derivation Function (**KDF**) based on a Hash-based Message Authentication Code (**HMAC**) using a Master Key 
-present on the Key Manager. It illustrates that two keys created using HKDF have the same key data using *Encryption/Decryption* and *MAC/MACVerfiy* operations.
+    This sample shows how to create **AES** and **HmacSHA256 key** using Key Derivation Function (**KDF**) based on a Hash-based Message Authentication Code (**HMAC**) using a Master Key present on the Key Manager. It illustrates that two keys created using HKDF have the same key data using *Encryption/Decryption* and *MAC/MACVerfiy* operations.
 
-**File:** *IngrianKeySample.java*
+    * File: [*HKDFSecretKeySample.java*](HKDFSecretKeySample.java)
+    * Usage: 
+    ```shell
+    java HKDFSecretKeySample <username> <password> <masterKeyName> <aesKeyName_1> <aesKeyName_2> <hmacKeyName_1> <hmacKeyName_2>
+    ```
 
-*`Usage: java IngrianKeySample user password keyname group`*
+1. Additional Key Features/Attributes
 
-This sample shows how to use additional *key features* defined by **CADP JCE**:
+    This sample shows how to use additional *key features* defined by **CADP JCE**:
+    1. *Create* an **AES** key with custom attributes 
+    1. *Add* and *delete* key's custom attributes
+    1. *Create* a new version of key on Key Manager
+    1. *Modify* version of key
 
-1. *Create* an **AES** key with custom attributes 
-1. *Add* and *delete* key's custom attributes
-1. *Create* a new version of key on Key Manager
-1. *Modify* version of key
+    **File:** *IngrianKeySample.java*
+    * Usage: 
+    ```shell
+    java IngrianKeySample <username> <password> <keyname> <groupName>
+    ```
 
-**File:** *KeyNameSample.java*
+1. Get Keys of an Owner or Global
 
-*`Usage: java KeyNameSample -user [userName] -password [password] -attr [attributName] -attrV [attributeValue] -fingerprint [fingerprint] -offset [keyOffset] -max [maxKeys]`*
+    This sample shows how to fetch *owner keys* and *global keys*.
 
-This sample shows how to fetch *owner keys* and *global keys*.
+    * File: [*KeyNameSample.java*](KeyNameSample.java)
+    * Usage: 
+    ```shell
+    java <keyname>Sample -user <username> -password <password> -attr <attributeName> -attrV <attributeValue> -fingerprint <fingerprint> -offset <keyOffset> -max <maxKeys>
+    ```
 
-**File:** *KeyPermissionsSample.java*
+1. Get Group Permissions of a Key
 
-*`Usage: java KeyPermissionsSample user password keyname group`*
+    This sample shows the *group permissions* linked to any key.
 
-This sample shows the *group permissions* linked to any key.
+    * File: [*KeyPermissionsSample.java*](KeyPermissionsSample.java)
+    * Usage: 
+    ```shell
+    java KeyPermissionsSample <username> <password> <keyname> <groupname>
+    ```
 
-**File:** *RSAKeySample.java*
+1. Working with Asymmetric Keys
 
-*`Usage: java RSAKeySample user password keyname group`*
+    This sample shows how to use different *key operations* for *asymmetric keys*:
 
-This sample shows how to use different *key operations* for *asymmetric keys*:
+    1. *Create* an **RSA** key pair with the group permissions
+    1. *Export* public key and private key data
+    1. *Delete* the key pair from Key Manager
+    1. *Import* the key pair back to Key Manager
 
-1. *Create* an **RSA** key pair with the group permissions
-1. *Export* public key and private key data
-1. *Delete* the key pair from Key Manager
-1. *Import* the key pair back to Key Manager
+    * File: [*RSAKeySample.java*](RSAKeySample.java)
+    * Usage: 
+    ```shell
+    java RSAKeySample <username> <password> <keyname> <groupname>
+    ```
 
-**File:** *SecretKeySample.java*
+1. Working with Symmetric Keys
 
-*`Usage: java SecretKeySample user password keyname group`*
+    This sample shows how to use different *key operations* for *symmetric keys*:
 
-This sample shows how to use different *key operations* for *symmetric keys*:
+    1. *Create* an ***AES*** key 
+    2. *Export* the key data from the Key Manager
+    1. *Clone* the key
+    1. *Delete* the key from Key Manager
+    1. *Import* the key back to Key Manager
 
-1. *Create* an ***AES*** key 
-2. *Export* the key data from the Key Manager
-3. *Clone* the key
-4. *Delete* the key from Key Manager
-5. *Import* the key back to Key Manager
+    * File: [*SecretKeySample.java*](SecretKeySample.java)
+    * Usage: 
+    ```shell
+    java SecretKeySample <username> <password> <keyname> <groupname>
+    ```
 
-**File:** *WrapKeySample.java*
+1. Uploading a file to Amazon AWS S3
 
-*`Usage: java WrapKeySample user password keyToWrapName wrappingKeyName groupName`*
+    This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP JCE**.
 
-This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP JCE**.
+    * File: [*WrapKeySample.java*](WrapKeySample.java)
+    * Usage: 
+    ```shell
+    java WrapKeySample <username> <password> <keyname> <wrappingKeyName> <groupname>
+    ```
 
 ## Prerequisites: 
 
-All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
+All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- **CADP JCE** installed and configured.
-- A ***javac*** compiler to compile the samples.
-- ***CADP JCE Jar*** files in the java classpath.
+- `CADP JCE` installed and configured.
+- A `javac` compiler in path to compile the sample. 
     
-
 ## More Information
 
-For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
-
+For more information on CADP JCE and samples, refer to the `CADP JCE User Guide`.

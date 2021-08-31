@@ -1,216 +1,287 @@
-# Sample Code for Java
+# Sample Code for Cryptographic Operations in Java
 
-## Overview:
+## Overview
 
+## Samples
 
-**File:** *AESGCMEncryptionDecryptionSample.java*
+1. Encrypt/Decrypt with AES-GCM
 
-*`Usage: java AESGCMEncryptionDecryptionSample user password keyname authTagLength iv aad data`*
+    This sample shows how to perform *crypto-operations (Encrypt and Decrypt)* in the  **AES-GCM** mode. 
 
-This sample shows how to perform *crypto-operations (Encrypt and Decrypt)* in the  **AES-GCM** mode. 
+    **Note:** For this sample, IV and AAD should be passed in the *hexadecimal* format.
 
-**Note:** For this sample, IV and AAD should be passed in the *hexadecimal* format.
+    * File: [*AESGCMEncryptionDecryptionSample.java*](AESGCMEncryptionDecryptionSample.java)
+    * Usage: 
+	```shell
+	java AESGCMEncryptionDecryptionSample <username> <password> <keyname> <authTagLength> <iv> <aad> <data>
+    ```
 
-**File:** *AESGCMUpdateSample.java*
+1. Using Update method with AES-GCM
 
-*`Usage: java AESGCMUpdateSample user password keyname authTagLength iv aad data`*
+    This sample shows how to perform *crypto operations* using update method in the `AES-GCM` mode.
 
-This sample shows how to perform *crypto operations* using update method in the **AES-GCM** mode.
- 
-**Note:** For this sample, IV and AAD should be passed in the *hexadecimal* format.
+    **Note:** For this sample, IV and AAD should be passed in the *hexadecimal* format.
 
-**File:** *BulkOperationSample.java*
+    * File: [*AESGCMUpdateSample.java*](AESGCMUpdateSample.java)
+    * Usage: 
+	````shell
+	java AESGCMUpdateSample <username> <password> <keyname> <authTagLength> <iv> <aad> <data>
+	```
 
-*`Usage: java BulkOperationSample username password keyname datafile`*
+1. Bulk Operations
 
-This samples show how to perform *bulk operations* using *different algorithms* on different types of data and algorithm data.
+    This samples show how to perform *bulk operations* using *different algorithms* on different types of data and algorithm data.
 
-**File:** *CachingSample.java*
+    * File: [*BulkOperationSample.java*](BulkOperationSample.java)
+    * Usage: 
+	```shell
+	java BulkOperationSample <username> <password> <keyname> <datafile>
+	```
 
-*`Usage: java CachingSample user password keyname`*
+1. Encrypt/Decrypt with AES-GCM in Local mode
 
-This sample shows how to *encrypt and decrypt* data using **CADP JCE** in the *local mode*.
+    This sample shows how to *encrypt and decrypt* data using `CADP JCE` in the *local mode*.
 
-**File:** *CMSSignSample.java*
+    * File: [*CachingSample.java*](CachingSample.java)
+    * Usage: 
+	```shell
+	java CachingSample <username> <password> <keyname>
+	```
 
-*`Usage: java CMSSignSample user password keyname caName`*
+1. CMS Sign Data and Verify
 
-This sample shows how to perform *CMS sign data and verify signature* using **CADP JCE**.
+    This sample shows how to perform *CMS sign data and verify signature* using `CADP JCE`.
 
-**File:** *CryptoDataUtilitySample.java*
+    * File: [*CMSSignSample.java*](CMSSignSample.java)
+    * Usage: 
+	``shell
+	java CMSSignSample <username> <password> <keyname> <caName>
+	```
 
-*`Usage: java CryptoDataUtilitySample username password keyname transformation text`*
+1. Encryption Utility
 
-This sample tests the *encryption utility*.
+    This sample tests the *encryption utility*.
 
-**File:** *ECCEncryptionSample.java*
+    * File: [*CryptoDataUtilitySample.java*](CryptoDataUtilitySample.java)
+    * Usage: 
+	```shell
+	java CryptoDataUtilitySample <username> <password> <keyname> <textToTransform>
+	```
 
-*`Usage: java ECCEncryptionSample user password keyname`*
 
-This sample demonstrates how to perform *encryption/decryption* using the **ECC** key.
+1. Encrypt/Decrypt with ECC
 
-**File:** *ECCSignSample.java*
+    This sample demonstrates how to perform *encryption/decryption* using the **ECC** key.
 
-*`Usage: java ECCSignSample user password keyname`*
+    * File: [*ECCEncryptionSample.java*](ECCEncryptionSample.java)
+    * Usage: 
+	``shell
+	java ECCEncryptionSample <username> <password> <keyname>
+	```
 
-This sample demonstrates how to perform *Sign and SignVerify* operations using the **ECC** key.
+1. Sign/Verify with ECC
 
-**File:** *FileEncryptionDecryptionSampleUsingRSA.java*
+    This sample demonstrates how to perform *Sign and SignVerify* operations using the **ECC** key.
 
-*`Usage: java FileEncryptionDecryptionSampleUsingRSA userName password asymKeyName fileToEncrypt encryptedFile decryptedFile`*
+    * File: [*ECCSignSample.java*](ECCSignSample.java)
+    * Usage: 
+	```shell
+	java ECCSignSample <username> <password> <keyname>
+	```
 
-This sample shows how to *encrypt/decrypt* a file using the **RSA** Algorithm.
+1. Encrypt/Decrypt with RSA
 
-**File:** *FileEncryptionSample.java*
+    This sample shows how to *encrypt/decrypt* a file using the **RSA** algorithm.
 
-*`Usage: java FileEncryptionSample user password keyname fileToEncrypt encryptedFile decryptedFile`*
+    * File: [*FileEncryptionDecryptionSampleUsingRSAFileEncryptionDecryptionSampleUsingRSA.java)
+    * Usage: 
+	```shell
+	java FileEncryptionDecryptionSampleUsingRSA <username> <password> <asymKeyName> <fileToEncrypt> <encryptedFile> <decryptedFile>
+	```
 
-This sample shows how to *encrypt and decrypt* a file using **CADP JCE**.
+1. Encrypt/Decrypt a File
 
-**File:** *FileEncryptionSampleUsingARIA.java*
+    This sample shows how to *encrypt and decrypt* a file using **CADP JCE**.
 
-*`Usage: java FileEncryptionSampleUsingARIA user password keyname fileToEncrypt encryptedFile decryptedFile iv blockSize`*
+    * File: [*FileEncryptionSample.java*](FileEncryptionSample.java)
+    * Usage: 
+	```shell
+	java FileEncryptionSample user <password> <keyname> fileToEncrypt encryptedFile decryptedFile
+	```
 
-This sample shows how to perform *file encryption* operation using **ARIA** in the *local mode*.
+1. File Encryption using ARIA in Local mode
 
-**File:** *FileEncryptionSampleUsingGCM.java*
+    This sample shows how to perform *file encryption* operation using **ARIA** in the *local mode*.
 
-*`Usage: java FileEncryptionSampleUsingGCM user password keyname fileToEncrypt encryptedFile decryptedFile authTagLength iv aad blockSize`*
+    * File: [*FileEncryptionSampleUsingARIA.java*](FileEncryptionSampleUsingARIA.java)
+    * Usage:
+	```shell
+	java FileEncryptionSampleUsingARIA <username> <password> <keyname> <fileToEncrypt> <encryptedFile> <decryptedFile> <iv> <blockSize>
+	```
 
-This sample shows how to perform *file encryption* operation using **GCM** in the *local and remote* mode.
+1. File Encryption using AES-GCM in Local and Remote mode
 
-**File:** *FileEncryptionSampleUsingSEED.java*
+    This sample shows how to perform *file encryption* operation using **AES-GCM** in the *Local* and *Remote* mode.
 
-*`Usage: java FileEncryptionSampleUsingSEED user password keyname fileToEncrypt encryptedFile decryptedFile iv blockSize`*
+    * File: [*FileEncryptionSampleUsingGCM.java*](FileEncryptionSampleUsingGCM.java)
+    * Usage: 
+	```shell
+	java FileEncryptionSampleUsingGCM <username> <password> <keyname> <fileToEncrypt> <encryptedFile> <decryptedFile> <authTagLength> <iv> <aad> <blockSize>
+	```
 
-This sample shows how to perform *file encryption* operation using **SEED** in the *local* mode.
+1. File Encryption using SEED in Local mode
 
-**File:** *HMACSample.java*
+    This sample shows how to perform *file encryption* operation using **SEED** in the *Local* mode.
 
-*`Usage: java HMACSample user password keyname`*
+    * File: [*FileEncryptionSampleUsingSEED.java*](FileEncryptionSampleUsingSEED.java)
+    * Usage: 
+	```shell
+	java FileEncryptionSampleUsingSEED <username> <password> <keyname> fileToEncrypt encryptedFile decryptedFile iv blockSize
+	```
 
-This sample shows how to create a *Message Authentication Code(MAC)* and how to *verify* it using **CADP JCE**.
+1. HMAC/Verify
+
+    This sample shows how to create a *Message Authentication Code (MAC)* and how to *verify* it using **CADP JCE**.
+
+    * File: [*HMACSample.java*](HMACSample.java)
+    * Usage: 
+	```shell
+	java HMACSample <username> <password> <keyname>
+	```
+
+1. HMAC in MultiThreaded environment
+
+    This sample shows how to use *multiple threads* that share the *same session* and perform *MAC operations*.
+
+    * File: [*MultiThreadMacSample.java*](MultiThreadMacSample.java)
+    * Usage: 
+	```shell
+	java MultiThreadMacSample <username> <password> <mackeyname>
+	```
+
+1. Multithreading
+
+    This sample shows how to use *multiple threads* that share the *same session* using **CADP JCE**.
 
-**File:** *MultiThreadMacSample.java*
+    * File: [*MultiThreadSample.java*](MultiThreadSample.java)
+    * Usage: 
+	```shell
+	java MultiThreadSample <username> <password> <keyname>
+    ```
 
-*`Usage: java MultiThreadMacSample user password mackeyname`*
+1. Encrypt/Decrypt with RSA
 
-This sample shows how to use *multiple threads* that share the *same session* and perform *mac operations*.
+    This sample shows how to *encrypt and decrypt* data using the **RSA** key.
 
-**File:** *MultiThreadSample.java*
+    * File: [*RSAEncryptionSample.java*](RSAEncryptionSample.java)
+    * Usage: 
+	````shell
+	java RSAEncryptionSample <username> <password> <keyname>
+	```
 
-*`Usage: java MultiThreadSample user password keyname`*
+1. Encrypt/Decrypt a Secret Key
 
-This sample shows how to use *multiple threads* that share the *same session* using **CADP JCE**.
+    This sample shows how to *encrypt and decrypt* data using **CADP JCE**.
 
-**File:** *RSAEncryptionSample.java*
+    * File: [*SecretKeyEncryptionSample.java*](SecretKeyEncryptionSample.java)
+    * Usage: 
+	```shell
+	java SecretKeyEncryptionSample <username> <password> <keyname>
+	```
 
-*`Usage: java RSAEncryptionSample user password keyname`*
+1. Sign/Verify
 
-This sample shows how to *encrypt and decrypt* data using the **RSA** key.
+    This sample shows how to perform the *sign data* and *verify signature* operation using **CADP JCE**.
 
-**File:** *SecretKeyEncryptionSample.java*
+    * File: [*SignSample.java*](SignSample.java)
+    * Usage: 
+	```shell
+	java SignSample <username> <password> <keyname> [<saltlength>]
+	```
 
-*`Usage: java SecretKeyEncryptionSample user password keyname`*
+1. Utility to do various Cryptographic and Key Operations
 
-This sample shows how to *encrypt and decrypt* data using **CADP JCE**.
+    This sample is used to perform various *crypto* and *key management* operations offered by **CADP JCE**.
 
-**File:** *SignSample.java*
+    * File: [*CryptoTool.java*](CryptoTool.java)
+    * Usage: 
+	```shell
+	java CryptoTool <OPERATION> <options>
+	```
 
-*`Usage: java SignSample user password keyname [saltlength]`*
+	where `OPERATION` is one of the following supported operations:
+        * *Crypto*: `ENCRYPT`, `DECRYPT`, `MAC`, `MACV`, `SIGN`, `SIGNV`
+		* *Key Management*: `GENERATE`, `DELETE`, `EXPORT`, `IMPORT`, `LIST`
 
-This sample shows how to perform the *sign data* and *verify signature* operation using **CADP JCE**.
+    and `options` is one or many of the following:
+        * Authentication: `-auth <username:passwd>`
+        * Input File: `-in <filename>`
+		    * Default is standard input
+        * Input File: `-out <filename>`
+		    * Default is standard output
+        * Key: `-key <keyname>`
+        * Algorithm: `-alg <algoName>`
+        * Initialization Vector (IV): `-iv <value>`
+		    * Provide initialization vector when required (must be hex ASCII encoded)
+        * Signature: `-sig <value>`
+		    * Provide signature value as an argument to use for verification (must be hex ASCII encoded)
+        * Signature File: `-sigfile <filename>`
+			* Alternative to `Signature`
+        * MAC: `-mac <MACvalue>`
+		    * Provide MAC value as an argument to use for verification (must be hex ASCII encoded)
+        * MAC File: `-macfile <filename>`
+			* Alternative to `MAC`
+        * Key Size: `-keysize <sizeInBytes>`
+		    * Size of key used for key generation
+        * Create an Exportable Key: `-exportable`
+        * Create a Deletable Key: `-deletable`
+        * Key Manager/NAE Server IP Address: `-ip <ip>`
+		    * <ip> can be a colon separated list of IP addresses
+        * Key Manager/NAE Server Port: `-port <port>
+        * SSL Enabled: `-protocol ssl`
+		* SSL Disabled: `-protocol tcp`
+        * Tweak Algorithm: `-tweakalgo <TweakAlgo> `
+		    * To specify Tweak Algorithm name for **FPE** encryption
+        * Tweak Data: `-tweakdata <TweakData>`
+		    * To specify Tweak Data for **FPE** encryption
+        * AAD for AES-GCM: `-aad <aad>
+        * Auth Tag Length for AES-GCM: `-authtaglength <authtaglength>`
 
+## Samples for Format Preserving Encryption (FPE) [in FPE directory](FPE):
 
-**File:** *CryptoTool.java*
+1. Tokenization or Encrypt/Decrypt with FF1
 
-*`Usage: java CryptoTool OPERATION options`*
+    This sample shows how to *encrypt and decrypt* data using the **FF1** algorithm.
 
-This sample is used to perform various *crypto* and *key management* operations offered by **CADP JCE**.
- 
-Supported *Crypto* Operations:
+    * File: [*FF1EncryptionDecryptionSample.java*](FPE/FF1EncryptionDecryptionSample.java)
+    * Usage: 
+	```shell
+	java FF1EncryptionDecryptionSample <username> <password> <keyname> [<TweakAlgorithm>] [<TweakData>]
+	```
 
-	ENCRYPT, DECRYPT, MAC, MACV, SIGN, SIGNV
+    **Note:** Specify null for optional parameters if you want to *skip* them.
 
-Supported *Key Management* Operations:
+1. Tokenization or Encrypt/Decrypt with FPE
 
-	GENERATE, DELETE, EXPORT, IMPORT, LIST
+    This sample shows how to *encrypt and decrypt* data using **FPE**.
 
-Supported Options:
+    * File:* [*FPEEncryptionDecryptionSample.java*](FPE/FPEEncryptionDecryptionSample.java)
+    * Usage: 
+	```shell
+	java FPEEncryptionDecryptionSample <username> <password> <keyname> <iv> [<TweakAlgorithm>] [<TweakData>]
+	```
 
-**-auth** *username:passwd* username and password for authentication
-
-**-in** *filename* specify a file instead of stdin
-
-**-out** *filename* specify a file instead of stdout
-
-**-key** *keyname* specify a key name
-
-**-alg** *algoname* specify the name of the algorithm
-
-**-iv** *value*  provide initialization vector when required (must be hex ASCII encoded)
-
-**-sig** *value*  provide signature value as an argument to use for verification (must be hex ASCII encoded)
-
-**-sigfile** *filename*  alternative to **-sig**, provide signature value in a file
-
-**-mac** *value* provide mac value as an argument to use for verification (must be hex ASCII encoded)
-
-**-macfile** *filename*  alternative to **-mac**, provide mac value in a file
-
-**-keysize** *size*  size of key used for key generation
-
-**-exportable** create exportable key
-
-**-deletable** create deletable key
-
-**-ip** *ip* NAE server IP to use  (can be a colon separated list of IP addresses)
-
-**-port** *port* NAE server port to use
-
-**-protocol** *protocol* protocol to use (ssl or tcp)
-
-**-tweakalgo** *TweakAlgo* to specify Tweak Algorithm name for **FPE** encryption
-
-**-tweakdata** *TweakData* to specify Tweak Data for **FPE** encryption
-
-**-aad** *AAD* to specify AAD for *GCM* encryption
-
-**-authtaglength** *authtaglength* to specify authtaglength for **GCM** Encryption
-	 
-
-
-
-### Samples in FPE directory:
-
-**File:** *FF1EncryptionDecryptionSample.java*
-
-*`Usage: java FF1EncryptionDecryptionSample user password keyname [TweakAlgorithm] [TweakData]`*
-
-**Note:** Specify null for optional parameters if you want to *skip* them.
-
-This sample shows how to *encrypt and decrypt* data using the **FF1** algorithm.
-
-**File:** *FPEEncryptionDecryptionSample.java*
-
-*`Usage: java FPEEncryptionDecryptionSample user password keyname IV [TweakAlgorithm] [TweakData]`*
-
-**Note:** Specify null for optional parameters if you want to *skip* them.
-
-This sample shows how to *encrypt and decrypt* data using **FPE**.
+    **Note:** Specify null for optional parameters if you want to *skip* them.
 
 ## Prerequisites: 
 
-All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
+All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- **CADP JCE** installed and configured.
-- A ***javac*** compiler to compile the samples.
-- ***CADP JCE Jar*** files in the java classpath.
+- `CADP JCE` installed and configured.
+- A `javac` compiler in path to compile the sample. 
     
-
 ## More Information
 
-For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
-
+For more information on CADP JCE and samples, refer to the `CADP JCE User Guide`.
