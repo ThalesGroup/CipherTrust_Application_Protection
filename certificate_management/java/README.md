@@ -7,30 +7,30 @@
 Following *certificates* and *CA samples* are available in the **Certificate_Types** directory:
 
 1. cert.pkcs1
-1.  cert.pkcs8
-1.  cert.pkcs12
-1.  sample_ca.crt
+1. cert.pkcs8
+1. cert.pkcs12
+1. sample_ca.crt
 
 ## Samples
 
 1. Create a Certificate Signing Request (CSR) and Use it for Signing
 
-    This sample first creates a CSR request on the Key Manager with the existing key pair and then uses the CSR data from the Key Manager to get the CSR signed by the CA present on the Key Manager.
+This sample first creates a CSR request on the Key Manager with the existing key pair and then uses the CSR data from the Key Manager to get the CSR signed by the CA present on the Key Manager.
 
-    * File: 
+* File: 
 [*CertCreationAndSignSample.java*](CertCreationAndSignSample.java)
 
-    * Usage:
-    ```shell
-    java CertCreationAndSignSample username password keyname -cn cnName -country countryName -ca caName -expiry expiryTime
-    ```
+* Usage:
+```shell
+java CertCreationAndSignSample username password keyname -cn cnName -country countryName -ca caName -expiry expiryTime
+```
 
 1. How to Import/Export Certificates
 
-    This sample shows how to use different certificate operations:
+This sample shows how to use different certificate operations:
  
-    - *Import and export* certificate and its private key (if present)
-    - *Export* CA certificate and certificate chain.
+- *Import and export* certificate and its private key (if present)
+- *Export* CA certificate and certificate chain.
   
     **Note:** The imported certificates must have any of the following format:  `PKCS#1`, `PKCS#8`, or `PKCS#12`. 
     * File: [*CertSample.java*](CertSample.java)
@@ -52,7 +52,7 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
     * File: [CertSigningSample.java*](CertSigningSample.java*)
     * Usage:
     ```shell 
-    java CertSigningSample userName password -csr csrFilePath -ca caName -expiry expiryTime`*
+    java CertSigningSample <userName> <password> -csr <csrFilePath> -ca <caName> -expiry <expiryTime>
     ```
 
 
@@ -62,10 +62,10 @@ This sample generates a self-signed certificate with the specified properties su
 
 * File: [*SelfSignedCertificateUtility.java*](SelfSignedCertificateUtility.java)
 
-*`Usage: java SelfSignedCertificateUtility [-user KeyManagerUserName] [-password KeyManagerPassword] -key rsaOrECCKeyName -file details.properties [-certPass certPassword]`*
-
-This sample generates a self-signed certificate with the specified properties such as *KeyUsage*, *Validity*, and *Algorithm* etc. in the *details.properties* file.
-
+* Usage: 
+```shell
+java SelfSignedCertificateUtility [-user KeyManagerUserName] [-password KeyManagerPassword] -key rsaOrECCKeyName -file details.properties [-certPass certPassword]
+```
 
 ## Prerequisites: 
 
