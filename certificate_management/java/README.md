@@ -23,7 +23,7 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
     java CertCreationAndSignSample <username> <password> <keyname> -cn <cnName> -country <countryName> -ca <caName> -expiry <expiryTime>
     ```
 
-2. How to Import/Export Certificates
+1. How to Import/Export Certificates
 
     This sample shows how to use different certificate operations:
     - *Import and export* certificate and its private key (if present)
@@ -37,7 +37,7 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
     java CertSample <username> <password> <filename> <certName> <caName> <pkcs12Password> 
     ```
   
-    **Note:** <pkcs12Password> can be null if cert data is in PKCS#1 format
+    **Note:** `pkcs12Password` can be null if cert data is in PKCS#1 format
 
 1. Signing a CSR
 
@@ -49,7 +49,7 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
 
     After the details are provided, the Key Manager will sign the request and return the signed document.
 
-    * File: [CertSigningSample.java*](CertSigningSample.java*)
+    * File: [*CertSigningSample.java*](CertSigningSample.java)
     * Usage:
     ```shell 
     java CertSigningSample <userName> <password> -csr <csrFilePath> -ca <caName> -expiry <expiryTime>
@@ -58,18 +58,17 @@ Following *certificates* and *CA samples* are available in the **Certificate_Typ
 
 1. Create a Self-Signed Certificate
 
-This sample generates a self-signed certificate with the specified properties such as *KeyUsage*, *Validity*, and *Algorithm* etc. in the *details.properties* file.
+    This sample generates a self-signed certificate with the specified properties such as *KeyUsage*, *Validity*, and *Algorithm* etc. in the *details.properties* file.
 
-* File: [*SelfSignedCertificateUtility.java*](SelfSignedCertificateUtility.java)
-
-* Usage: 
-```shell
-java SelfSignedCertificateUtility [-user KeyManagerUserName] [-password KeyManagerPassword] -key rsaOrECCKeyName -file details.properties [-certPass certPassword]
-```
+    * File: [*SelfSignedCertificateUtility.java*](SelfSignedCertificateUtility.java)
+    * Usage: 
+    ```shell
+    java SelfSignedCertificateUtility [-user <username>] [-password <password>] -key <rsaOrECCKeyName> -file <details.properties> [-certPass <certPassword>]
+    ```
 
 ## Prerequisites: 
 
-All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
+All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
