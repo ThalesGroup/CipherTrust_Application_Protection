@@ -25,19 +25,20 @@ This sample first creates a CSR request on the Key Manager with the existing key
 java CertCreationAndSignSample <username> <password> <keyname> -cn <cnName> -country <countryName> -ca <caName> -expiry <expiryTime>
 ```
 
-1. How to Import/Export Certificates
+2. How to Import/Export Certificates
 
 This sample shows how to use different certificate operations:
- 
 - *Import and export* certificate and its private key (if present)
 - *Export* CA certificate and certificate chain.
   
-    **Note:** The imported certificates must have any of the following format:  `PKCS#1`, `PKCS#8`, or `PKCS#12`. 
-    * File: [*CertSample.java*](CertSample.java)
-    * Usage: 
-    ```shell
-    java CertSample user password fileName certName caName pkcs12Password (pkcs12Password can be null if cert data is in PKCS#1 format)`*
-    ```
+**Note:** The imported certificates must have any of the following format:  `PKCS#1`, `PKCS#8`, or `PKCS#12`. 
+
+* File: [*CertSample.java*](CertSample.java)
+* Usage: 
+```shell
+java CertSample <username> <password> <filename> <certName> <caName> <pkcs12Password> 
+```
+**Note:** <pkcs12Password> can be null if cert data is in PKCS#1 format
 
 1. Signing a CSR
 
