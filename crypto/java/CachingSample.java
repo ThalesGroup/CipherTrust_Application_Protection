@@ -26,6 +26,7 @@ import com.ingrian.security.nae.NAESessionInterface;
 
 /**
  * This sample shows how to encrypt and decrypt data using CADP JCE in local mode.
+ * Note: Persistent cache and symmetric cache should be enabled in the IngrainNAE.properties file.
  */
 
 public class CachingSample 

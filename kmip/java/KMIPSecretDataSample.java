@@ -53,12 +53,12 @@ public class KMIPSecretDataSample
        KMIPSession session  = KMIPSession.getSession(new NAEClientCertificate( args[0],  args[1].toCharArray()));
         try {
             // generate the secret data (the bytes of a public key)
-			// For IBM java ,use the IBMJCE provider instead of SUN/SunRsaSign.
+            // For IBM Java, change the provider from "SUN/SunRsaSign" to "IBMJCE"
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
             keyGen.initialize(1024, random);
-            KeyPair sunPair = keyGen.generateKeyPair();
-            PublicKey pub = sunPair.getPublic();
+            KeyPair keyPair = keyGen.generateKeyPair();
+            PublicKey pub = keyPair.getPublic();
 
             byte[] data = pub.getEncoded();
 

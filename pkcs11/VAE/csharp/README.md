@@ -1,7 +1,7 @@
 
 # PKCS11 Integrations/Sample Code
 
-## Overview:
+## Overview
 VPkcs11_Sample.exe or VPkcs11_Sample.dll is a command-line interface tool to understand the PKCS11 interface.
 
 ## Prerequisites: 
@@ -19,7 +19,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 
 ## Usage: 
 ### Run sample from executable(only on windows):
-`VPkcs11_Sample.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp keyname] [-o encryption mode] [-f input File]
+`VPkcs11_Sample.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n 0|1] [-m true|false])`
 
 #### Example
@@ -28,7 +28,7 @@ VPkcs11_Sample.exe -p pin1234# -k testkey1 -t 1
 
 
 ### Run sample from dotnet cli:
-`dotnet VPkcs11_Sample.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp keyname] [-o encryption mode] [-f input File]
+`dotnet VPkcs11_Sample.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n 0|1] [-m true|false])`
 
 #### Example

@@ -21,6 +21,7 @@ import com.ingrian.security.nae.NAESession;
  * This sample shows how to create AES and HmacSHA256 key by key derivation function (KDF) based on a hash-based message 
  * authentication code (HMAC) using a Master Key present on Key Manager. It illustrates that two keys created using HKDF 
  * have same key data using Encryption/Decryption and MAC/MACVerfiy operations. 
+ * Note: Master Key should be AES 256 bit key.
  * 
  */
 public class HKDFSecretKeySample {
@@ -31,7 +32,7 @@ public class HKDFSecretKeySample {
 			System.exit(-1);
 			/*
 			 * Usage description: 
-			 * masterKeyName: Master key to create the AES and Hmac keys.
+			 * masterKeyName: Master key to create the AES and Hmac keys. 
 			 * aesKeyName_1 and aesKeyName_2: AES key names to be created. These are used to determine that their key data is same 
 			 * using Encryption/Decryption operation.  
 			 * hmacKeyName_1 and hmacKeyName_2: Hmac key names to be created. These are used to determine that their key data is same

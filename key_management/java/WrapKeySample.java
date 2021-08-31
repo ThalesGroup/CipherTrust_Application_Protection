@@ -96,8 +96,8 @@ public class WrapKeySample {
 			PrivateKey prKey = privateKey.exportJCEKey();
 
 			// Initialize a Cipher based on the SunJCE provider.
+			// For IBM Java, change the provider from "SunJCE" to "IBMJCE"
 			// Note the use of PKCS1Padding.
-			// For IBM java ,use the IBMJCE provider instead of SunJCE.
 			Cipher cipher2 = Cipher.getInstance("RSA/ECB/PKCS1Padding",
 					"SunJCE");
 			cipher2.init(Cipher.UNWRAP_MODE, prKey);
