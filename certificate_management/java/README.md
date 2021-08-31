@@ -22,7 +22,7 @@ This sample first creates a CSR request on the Key Manager with the existing key
 
 * Usage:
 ```shell
-java CertCreationAndSignSample username password keyname -cn cnName -country countryName -ca caName -expiry expiryTime
+java CertCreationAndSignSample <username> <password> <keyname> -cn <cnName> -country <countryName> -ca <caName> -expiry <expiryTime>
 ```
 
 1. How to Import/Export Certificates
