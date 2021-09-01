@@ -6,7 +6,7 @@
 
 1. Key Operations on an ECC key
 
-This sample shows how to perform the following *key operations* using the **ECC** keys:
+    This sample shows how to perform the following *key operations* using the **ECC** keys:
 
     1. *Create* an ECC key pair with the group permissions. 
     1. *Export* public key data.
@@ -14,12 +14,12 @@ This sample shows how to perform the following *key operations* using the **ECC*
     1. *Delete* the key pair from Key Manager.
     1. *Import* the key pair back to Key Manager.
     1. *Export* private key data in **PEM-PKCS#8** and **PEM-SEC1** format.
-
-    * File: [*ECCKeySample.java*](ECCKeySample)
-    * Usage: 
-    ```shell
+    
+	* File: [*ECCKeySample.java*](ECCKeySample.java)
+	* Usage:
+	```shell
     java ECCKeySample <username> <password> <keyname> <groupName>
-    ```
+     ```
 
 1. Creating Derived Keys from Master Key
 
@@ -39,7 +39,7 @@ This sample shows how to perform the following *key operations* using the **ECC*
     1. *Create* a new version of key on Key Manager
     1. *Modify* version of key
 
-    **File:** *IngrianKeySample.java*
+    * File: [*IngrianKeySample.java*](IngrianKeySample.java)
     * Usage: 
     ```shell
     java IngrianKeySample <username> <password> <keyname> <groupName>
@@ -96,7 +96,7 @@ This sample shows how to perform the following *key operations* using the **ECC*
     java SecretKeySample <username> <password> <keyname> <groupname>
     ```
 
-1. Uploading a file to Amazon AWS S3
+1. Wrapping a key for exporting from Key Manager
 
     This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP JCE**.
 
