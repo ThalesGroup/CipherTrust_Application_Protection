@@ -24,7 +24,7 @@
 
     * File: [*AESGCMUpdateSample.java*](AESGCMUpdateSample.java)
     * Usage: 
-	````shell
+	```shell
 	java AESGCMUpdateSample <username> <password> <keyname> <authTagLength> <iv> <aad> <data>
 	```
 
@@ -54,7 +54,7 @@
 
     * File: [*CMSSignSample.java*](CMSSignSample.java)
     * Usage: 
-	``shell
+	```shell
 	java CMSSignSample <username> <password> <keyname> <caName>
 	```
 
@@ -75,7 +75,7 @@
 
     * File: [*ECCEncryptionSample.java*](ECCEncryptionSample.java)
     * Usage: 
-	``shell
+	```shell
 	java ECCEncryptionSample <username> <password> <keyname>
 	```
 
@@ -93,7 +93,7 @@
 
     This sample shows how to *encrypt/decrypt* a file using the **RSA** algorithm.
 
-    * File: [*FileEncryptionDecryptionSampleUsingRSAFileEncryptionDecryptionSampleUsingRSA.java)
+    * File: [*FileEncryptionDecryptionSampleUsingRSA.java*](FileEncryptionDecryptionSampleUsingRSA.java)
     * Usage: 
 	```shell
 	java FileEncryptionDecryptionSampleUsingRSA <username> <password> <asymKeyName> <fileToEncrypt> <encryptedFile> <decryptedFile>
@@ -175,7 +175,7 @@
 
     * File: [*RSAEncryptionSample.java*](RSAEncryptionSample.java)
     * Usage: 
-	````shell
+	```shell
 	java RSAEncryptionSample <username> <password> <keyname>
 	```
 
@@ -210,42 +210,42 @@
 	```
 
 	where `OPERATION` is one of the following supported operations:
-        * *Crypto*: `ENCRYPT`, `DECRYPT`, `MAC`, `MACV`, `SIGN`, `SIGNV`
-		* *Key Management*: `GENERATE`, `DELETE`, `EXPORT`, `IMPORT`, `LIST`
+	* *Crypto*: `ENCRYPT`, `DECRYPT`, `MAC`, `MACV`, `SIGN`, `SIGNV`
+    * *Key Management*: `GENERATE`, `DELETE`, `EXPORT`, `IMPORT`, `LIST`
 
     and `options` is one or many of the following:
-        * Authentication: `-auth <username:passwd>`
-        * Input File: `-in <filename>`
-		    * Default is standard input
-        * Input File: `-out <filename>`
-		    * Default is standard output
-        * Key: `-key <keyname>`
-        * Algorithm: `-alg <algoName>`
-        * Initialization Vector (IV): `-iv <value>`
-		    * Provide initialization vector when required (must be hex ASCII encoded)
-        * Signature: `-sig <value>`
-		    * Provide signature value as an argument to use for verification (must be hex ASCII encoded)
-        * Signature File: `-sigfile <filename>`
-			* Alternative to `Signature`
-        * MAC: `-mac <MACvalue>`
-		    * Provide MAC value as an argument to use for verification (must be hex ASCII encoded)
-        * MAC File: `-macfile <filename>`
-			* Alternative to `MAC`
-        * Key Size: `-keysize <sizeInBytes>`
-		    * Size of key used for key generation
-        * Create an Exportable Key: `-exportable`
-        * Create a Deletable Key: `-deletable`
-        * Key Manager/NAE Server IP Address: `-ip <ip>`
-		    * <ip> can be a colon separated list of IP addresses
-        * Key Manager/NAE Server Port: `-port <port>
-        * SSL Enabled: `-protocol ssl`
-		* SSL Disabled: `-protocol tcp`
-        * Tweak Algorithm: `-tweakalgo <TweakAlgo> `
-		    * To specify Tweak Algorithm name for **FPE** encryption
-        * Tweak Data: `-tweakdata <TweakData>`
-		    * To specify Tweak Data for **FPE** encryption
-        * AAD for AES-GCM: `-aad <aad>
-        * Auth Tag Length for AES-GCM: `-authtaglength <authtaglength>`
+	* Authentication: `-auth <username:passwd>`
+    * Input File: `-in <filename>`
+		* Default is standard input
+    * Output File: `-out <filename>`
+		* Default is standard output
+    * Key: `-key <keyname>`
+    * Algorithm: `-alg <algoName>`
+    * Initialization Vector (IV): `-iv <value>`
+		* Provide initialization vector when required (must be hex ASCII encoded)
+    * Signature: `-sig <value>`
+		* Provide signature value as an argument to use for verification (must be hex ASCII encoded)
+    * Signature File: `-sigfile <filename>`
+		* Alternative to `Signature`
+    * MAC: `-mac <MACvalue>`
+		* Provide MAC value as an argument to use for verification (must be hex ASCII encoded)
+    * MAC File: `-macfile <filename>`
+	    * Alternative to `MAC`
+    * Key Size: `-keysize <sizeInBytes>`
+		* Size of key used for key generation
+    * Create an Exportable Key: `-exportable`
+    * Create a Deletable Key: `-deletable`
+    * Key Manager/NAE Server IP Address: `-ip <ip>`
+		* <ip> can be a colon separated list of IP addresses
+    * Key Manager/NAE Server Port: `-port <port>`
+    * SSL Enabled: `-protocol ssl`
+    * SSL Disabled: `-protocol tcp`
+    * Tweak Algorithm: `-tweakalgo <TweakAlgo> `
+		* To specify Tweak Algorithm name for **FPE** encryption
+    * Tweak Data: `-tweakdata <TweakData>`
+		* To specify Tweak Data for **FPE** encryption
+    * AAD for AES-GCM: `-aad <aad>
+    * Auth Tag Length for AES-GCM: `-authtaglength <authtaglength>`
 
 ## Samples for Format Preserving Encryption (FPE) [in FPE directory](FPE):
 
