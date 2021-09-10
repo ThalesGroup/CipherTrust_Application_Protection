@@ -9,10 +9,10 @@ namespace Vormetric.Pkcs11Sample
         static void Usage()
         {
             Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i ] [-k|-kp keyname] [-o encryption mode] [-f input File] ");
-            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n 0|1] [-m true|false])");
+            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false])");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
-            Console.WriteLine("\t 1. Create key sample.                                     Parameters: -p pin -k keyname [-g gen_key_action] [-n 0|1]");
+            Console.WriteLine("\t 1. Create key sample.                                     Parameters: -p pin -k keyname [-g gen_key_action] [-n false|true]");
             Console.WriteLine("\t 2. Create key object sample. ");
             Console.WriteLine("\t 3. Find and delete the key sample. ");
             Console.WriteLine("\t 4. Encrypt and decrypt sample. ");
@@ -21,7 +21,7 @@ namespace Vormetric.Pkcs11Sample
             Console.WriteLine("\t 7. Find and export a key from DSM sample. ");
             Console.WriteLine("\t 8. Encrypt and decrypt a file sample. ");
             Console.WriteLine("\t 9. Encrypt and decrypt a file and log meta data sample. ");
-            Console.WriteLine("\t a. Test key attributes sample.                            Parameters: -p pin -k[p] keyname");
+            Console.WriteLine("\t a. Test key attributes sample.                            Parameters: -p pin -k keyname");
             Console.WriteLine("\t b. Compute message digest for the default test string. ");
             Console.WriteLine("\t c. Compute message digest for a given input file. ");
             Console.WriteLine("\t i. Unwrap and import a key into DSM sample. ");
@@ -48,8 +48,8 @@ namespace Vormetric.Pkcs11Sample
             Console.WriteLine("\t true  ... add metadata");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -n option:");
-            Console.WriteLine("\t 0 ... no-delete is not active, hence delete the key as usual");
-            Console.WriteLine("\t 1 ... no-delete enabled, thus deletion of the key is blocked.");
+            Console.WriteLine("\t false ... no-delete is not active, hence delete the key as usual");
+            Console.WriteLine("\t true ... no-delete enabled, thus deletion of the key is blocked.");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -H option:");
             Console.WriteLine("\t v1.5 ... use version 1.5 header");
@@ -58,8 +58,6 @@ namespace Vormetric.Pkcs11Sample
             Console.WriteLine("\t v2.7 ... use version 2.7 header");
             Console.WriteLine("");
             Console.WriteLine(" Note: Please make sure to install the Vormetric Key Agent,");
-            Console.WriteLine("\t or set the environment variable VPKCS11LIBPATH to the Vormetric PKCS11 library.");
-            Console.WriteLine("\t e.g. for 64 bit, VPKCS11LIBPATH=\"c:\\Program Files\\Vormetric\\DataSecurityExpert\\Agent\\pkcs11\bin\\vorpkcs11.dll\".");
             Console.WriteLine("Note: In case of success exit value is 0, otherwise -1");
             Environment.Exit(-1);
         }
