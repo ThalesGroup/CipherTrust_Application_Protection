@@ -20,7 +20,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 ## Usage: 
 ### Run sample from executable(only on windows):
 `VPkcs11_Sample.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n 0|1] [-m true|false])`
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
 VPkcs11_Sample.exe -p pin1234# -k testkey1 -t 1
@@ -29,7 +29,7 @@ VPkcs11_Sample.exe -p pin1234# -k testkey1 -t 1
 
 ### Run sample from dotnet cli:
 `dotnet VPkcs11_Sample.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n 0|1] [-m true|false])`
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
 dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
@@ -68,8 +68,8 @@ dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
      false ... don't add metadata
      true  ... add metadata
 ### Choices for the -n option:
-     0 ... no-delete is not active, hence delete the key as usual
-     1 ... no-delete enabled, thus deletion of the key is blocked.
+     false ... no-delete is not active, hence delete the key as usual
+     true ... no-delete enabled, thus deletion of the key is blocked.
 ### Choices for the -h option:
      v1.5 ... use version 1.5 header
      v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code
@@ -86,6 +86,9 @@ Two other source files, Settings.cs and Sample_Helpers.cs, contain global settin
 ### For Linux:
     /opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so
     
+User can modify the native PKCS11 library path according to their platform.
+
+## How to enable pkcs11 interop level log    
 Uncomment the following lines from Settings.cs to generate the PKCS11 interop level log
 ```
 SimplePkcs11InteropLoggerFactory simpleLoggerFactory = new SimplePkcs11InteropLoggerFactory();
@@ -93,3 +96,4 @@ simpleLoggerFactory.EnableFileOutput("log.txt");
 simpleLoggerFactory.MinLogLevel = Pkcs11InteropLogLevel.Error;
 Pkcs11InteropLoggerFactory.SetLoggerFactory(simpleLoggerFactory);
 ```
+ 
