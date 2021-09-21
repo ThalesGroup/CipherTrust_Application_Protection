@@ -7,11 +7,11 @@ VPkcs11_Sample.exe or VPkcs11_Sample.dll is a command-line interface tool to und
 ## Prerequisites: 
 In order to run VPkcs11_Sample :
 > - .NET Core 3.1 or higher must be installed.<br>
-> - CADP.NetCore NuGet package must be installed.
+> - CipherTrust.CADP.NETCore NuGet package must be installed.
 > - Vormetric Key Agent must be install and registered with a Data Security Manager (DSM).
 
 ## Note: 
-Vormetric Key Agent can be found in CADP .NetCore NuGet installed directory.
+Vormetric Key Agent can be found in CipherTrust.CADP.NETCore NuGet installed directory.
 
 ## Compilation:
 You can build the sample either from Visual Studio or dotnet cli through the command `dotnet build -c Release`
