@@ -6,11 +6,15 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,11 +29,14 @@ import javax.net.ssl.X509TrustManager;
 
 import com.jayway.jsonpath.JsonPath;
 
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionSpec;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 
 /* This example helper class simplifies the usage of REST calls to the Thales CipherTrust Manager by 
  * exposing a few API's that shield some of the complexities of the json formating.    
@@ -47,6 +54,8 @@ import okhttp3.Response;
 *     
  */
 public class CipherTrustManagerHelper {
+	String cmdebug = "0";
+
 	public String token = null;
 	public String key = null;
 	public String cmipaddress;
@@ -59,8 +68,9 @@ public class CipherTrustManagerHelper {
 	public static final String endbracket = "}";
 	public static final int digitblocklen = 56;
 	public static final int alphablocklen = 32;
-	public static final StringBuffer numberPattern = new StringBuffer("01234567890123456789012345678901024567896743678905435678");
-	public static final StringBuffer stringPattern =   new StringBuffer("asdfghjklzxcvbnmqwertyuioplkjhgf");
+	public static final StringBuffer numberPattern = new StringBuffer(
+			"01234567890123456789012345678901024567896743678905435678");
+	public static final StringBuffer stringPattern = new StringBuffer("asdfghjklzxcvbnmqwertyuioplkjhgf");
 	public static final StringBuffer combinedPattern = new StringBuffer("abcdefghijklmnopqrstuvwxyz012345");
 	public static final String quote = "\"";
 	public static final String comma = ",";
@@ -88,11 +98,50 @@ public class CipherTrustManagerHelper {
 	public static final MediaType JSONOCTET = MediaType.get("application/octet-stream");
 	public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	public static final MediaType JSONTXT = MediaType.get("text/plain");
-	
+
 	OkHttpClient client = getUnsafeOkHttpClient();
 
+	public CipherTrustManagerHelper() {
+		super();
+		Map<String, String> env = System.getenv();
+		// System.out.println("name of logger" + log.getName());
+		// log.debug("this is a test");
+		// log.info("this is a test");
+		for (String envName : env.keySet()) {
+			if (envName.equalsIgnoreCase("cmuserid")) {
+				username = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmuserid=" + username);
+			} else if (envName.equalsIgnoreCase("cmpassword")) {
+				password = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmpassword=" + password);
+			} else if (envName.equalsIgnoreCase("cmserver")) {
+				cmipaddress = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmserver=" + cmipaddress);
+			} else if (envName.equalsIgnoreCase("cmkey")) {
+				key = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmkey=" + key);
+			} else if (envName.equalsIgnoreCase("cmdataformat")) {
+				dataformat = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmdataformat=" + dataformat);
+			} else if (envName.equalsIgnoreCase("cmdebug")) {
+				cmdebug = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("cmdebug=" + cmdebug);
+			}
+			if (cmdebug.equalsIgnoreCase("1"))
+				System.out.format("%s=%s%n", envName, env.get(envName));
+		}
+
+
+	}
+
 	private String posttext(String url, String text) throws IOException {
-		RequestBody body = RequestBody.create(text,JSONTXT);
+		RequestBody body = RequestBody.create(text, JSONTXT);
 		Request request = new Request.Builder().url(url).post(body).addHeader("Authorization", "Bearer " + this.token)
 				.addHeader("Accept", "text/plain").addHeader("Content-Type", "text/plain").build();
 		try (Response response = client.newCall(request).execute()) {
@@ -101,7 +150,7 @@ public class CipherTrustManagerHelper {
 	}
 
 	private String poststream(String url, String json) throws IOException {
-		 RequestBody body = RequestBody.create(json, JSONOCTET);
+		RequestBody body = RequestBody.create(json, JSONOCTET);
 		Request request = new Request.Builder().url(url).post(body).addHeader("Authorization", "Bearer " + this.token)
 				.addHeader("Accept", "application/json").addHeader("Content-Type", "application/octet-stream").build();
 		try (Response response = client.newCall(request).execute()) {
@@ -110,30 +159,35 @@ public class CipherTrustManagerHelper {
 	}
 
 	private String getjson(String url) throws IOException {
-		Request request = new Request.Builder().url(url).method("GET", null).addHeader("Authorization", "Bearer " + this.token)
-				.addHeader("Accept", "application/json").addHeader("Content-Type", "application/json").build();
+		Request request = new Request.Builder().url(url).method("GET", null)
+				.addHeader("Authorization", "Bearer " + this.token).addHeader("Accept", "application/json")
+				.addHeader("Content-Type", "application/json").build();
 		try (Response response = client.newCall(request).execute()) {
 			return response.body().string();
 		}
 	}
 
 	private String postjson(String url, String json) throws IOException {
-	 RequestBody body = RequestBody.create(json, JSON);
+		RequestBody body = RequestBody.create(json, JSON);
 		Request request = new Request.Builder().url(url).post(body).addHeader("Authorization", "Bearer " + this.token)
 				.addHeader("Accept", "application/json").addHeader("Content-Type", "application/json").build();
 		try (Response response = client.newCall(request).execute()) {
 			return response.body().string();
 		}
 	}
-	
+
 	/**
-	* Returns an String that will be a JWT token to be used for REST calls based on the refresh token.
-	* <p>
-	* Note: This is using a Java KeyStore for authentication.
-	* @param  keystorepwd password to the java keystore
-	* @param  keystorelocation location of javakeystore that contains certificates
-	* @return string JWT token
-	*/
+	 * Returns an String that will be a JWT token to be used for REST calls
+	 * based on the refresh token.
+	 * <p>
+	 * Note: This is using a Java KeyStore for authentication.
+	 * 
+	 * @param keystorepwd
+	 *            password to the java keystore
+	 * @param keystorelocation
+	 *            location of javakeystore that contains certificates
+	 * @return string JWT token
+	 */
 
 	public String getTokenFromRefresh(String keystorepwd, String keystorelocation) throws IOException {
 
@@ -143,11 +197,12 @@ public class CipherTrustManagerHelper {
 		String grant_type = "refresh_token";
 		String refreshtokentag = "\"refresh_token\":";
 
-		String authcall = grant_typetag + quote + grant_type + quote + comma + refreshtokentag + quote + this.refreshtoken + quote + " }";
+		String authcall = grant_typetag + quote + grant_type + quote + comma + refreshtokentag + quote
+				+ this.refreshtoken + quote + " }";
 
-		RequestBody body = RequestBody.create(authcall,mediaType);
-		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens").method("POST", body)
-				.addHeader("Content-Type", "application/json").build();
+		RequestBody body = RequestBody.create(authcall, mediaType);
+		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens")
+				.method("POST", body).addHeader("Content-Type", "application/json").build();
 
 		Response response = client.newCall(request).execute();
 		String returnvalue = response.body().string();
@@ -157,13 +212,15 @@ public class CipherTrustManagerHelper {
 		return jwt;
 
 	}
-	
+
 	/**
-	* Returns an String that will be a JWT token to be used for REST calls based on the refresh token. 
-	* <p>
-	* Note: This is not using a Java KeyStore for authentication. 
-	* @return string JWT token
-	*/
+	 * Returns an String that will be a JWT token to be used for REST calls
+	 * based on the refresh token.
+	 * <p>
+	 * Note: This is not using a Java KeyStore for authentication.
+	 * 
+	 * @return string JWT token
+	 */
 
 	public String getTokenFromRefresh() throws IOException {
 
@@ -174,11 +231,12 @@ public class CipherTrustManagerHelper {
 		String grant_type = "refresh_token";
 		String refreshtokentag = "\"refresh_token\":";
 
-		String authcall = grant_typetag + quote + grant_type + quote + comma + refreshtokentag + quote + this.refreshtoken + quote + " }";
+		String authcall = grant_typetag + quote + grant_type + quote + comma + refreshtokentag + quote
+				+ this.refreshtoken + quote + " }";
 
-		RequestBody body = RequestBody.create(authcall,mediaType);
-		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens").method("POST", body)
-				.addHeader("Content-Type", "application/json").build();
+		RequestBody body = RequestBody.create(authcall, mediaType);
+		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens")
+				.method("POST", body).addHeader("Content-Type", "application/json").build();
 
 		Response response = client.newCall(request).execute();
 		String returnvalue = response.body().string();
@@ -188,14 +246,18 @@ public class CipherTrustManagerHelper {
 		return jwt;
 
 	}
+
 	/**
-	* Returns an String that will be a JWT token to be used for REST calls. 
-	* <p>
-	* Note: This is using a Java KeyStore for authentication.
-	* @param  keystorepwd password to the java keystore
-	* @param  keystorelocation location of javakeystore that contains certificates
-	* @return string JWT token
-	*/
+	 * Returns an String that will be a JWT token to be used for REST calls.
+	 * <p>
+	 * Note: This is using a Java KeyStore for authentication.
+	 * 
+	 * @param keystorepwd
+	 *            password to the java keystore
+	 * @param keystorelocation
+	 *            location of javakeystore that contains certificates
+	 * @return string JWT token
+	 */
 	public String getToken(String keystorepwd, String keystorelocation) throws IOException {
 
 		this.keystorepwd = keystorepwd;
@@ -208,12 +270,12 @@ public class CipherTrustManagerHelper {
 		String usernametag = "\"username\":";
 		String labels = "\"labels\": [\"myapp\",\"cli\"]}";
 
-		String authcall = grant_typetag + quote + grant_type + quote + comma + usernametag + quote + this.username + quote + comma + passwordtag
-				+ quote + this.password + quote + comma + labels;
+		String authcall = grant_typetag + quote + grant_type + quote + comma + usernametag + quote + this.username
+				+ quote + comma + passwordtag + quote + this.password + quote + comma + labels;
 
-		RequestBody body = RequestBody.create(authcall,mediaType);
-		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens").method("POST", body)
-				.addHeader("Content-Type", "application/json").build();
+		RequestBody body = RequestBody.create(authcall, mediaType);
+		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens")
+				.method("POST", body).addHeader("Content-Type", "application/json").build();
 
 		Response response = client.newCall(request).execute();
 		String returnvalue = response.body().string();
@@ -225,12 +287,14 @@ public class CipherTrustManagerHelper {
 		return jwt;
 
 	}
+
 	/**
-	* Returns an String that will be a JWT token to be used for REST calls. 
-	* <p>
-	* Note: This is not using a Java KeyStore for authentication. 
-	* @return string JWT token
-	*/
+	 * Returns an String that will be a JWT token to be used for REST calls.
+	 * <p>
+	 * Note: This is not using a Java KeyStore for authentication.
+	 * 
+	 * @return string JWT token
+	 */
 	public String getToken() throws IOException {
 
 		OkHttpClient client = getUnsafeOkHttpClient();
@@ -243,12 +307,13 @@ public class CipherTrustManagerHelper {
 		String usernametag = "\"username\":";
 		String labels = "\"labels\": [\"myapp\",\"cli\"]}";
 
-		String authcall = grant_typetag + quote + grant_type + quote + comma + usernametag + quote + this.username + quote + comma + passwordtag
-				+ quote + this.password + quote + comma + labels;
-
-		RequestBody body = RequestBody.create(authcall,mediaType);
-		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens").method("POST", body)
-				.addHeader("Content-Type", "application/json").build();
+		String authcall = grant_typetag + quote + grant_type + quote + comma + usernametag + quote + this.username
+				+ quote + comma + passwordtag + quote + this.password + quote + comma + labels;
+		//System.out.println("auth call " + authcall);
+		RequestBody body = RequestBody.create(authcall, mediaType);
+		
+		Request request = new Request.Builder().url("https://" + this.cmipaddress + "/api/v1/auth/tokens")
+				.method("POST", body).addHeader("Content-Type", "application/json").build();
 
 		Response response = client.newCall(request).execute();
 		String returnvalue = response.body().string();
@@ -282,7 +347,8 @@ public class CipherTrustManagerHelper {
 	private static OkHttpClient getOkHttpClient(String pwd, String keymgrhostname, String keystorelocation) {
 
 		try {
-			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			TrustManagerFactory trustManagerFactory = TrustManagerFactory
+					.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 
 			trustManagerFactory.init(readKeyStore(pwd, keystorelocation));
 
@@ -330,16 +396,44 @@ public class CipherTrustManagerHelper {
 		return null;
 	}
 
+	 public static OkHttpClient.Builder enableTls12OVersion(OkHttpClient okHttpClient) {
+		  OkHttpClient.Builder client = okHttpClient.newBuilder();
+		  try {
+		   SSLContext sc = SSLContext.getInstance("TLSv1.2");
+		   sc.init(null, null, null);
+		   //sslSocketFactory = sc.getSocketFactory();
+		   // client.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
+		   client.sslSocketFactory(sc.getSocketFactory());
+		   ConnectionSpec connectionSpec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+		     .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0).cipherSuites(
+	                    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	                    CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+	                    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+	                    CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA).build();
+		   List<ConnectionSpec> specs = new ArrayList<>();
+		   specs.add(connectionSpec);
+		   specs.add(ConnectionSpec.COMPATIBLE_TLS);
+		   specs.add(ConnectionSpec.CLEARTEXT);
+		   client.connectionSpecs(specs);
+		  } catch (Exception exc) {
+		   exc.printStackTrace();
+		  }
+		  return client;
+		 }
+
+
 	private static OkHttpClient getUnsafeOkHttpClient() {
 		try {
 			// Create a trust manager that does not validate certificate chains
 			final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
 				@Override
-				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+				public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {
 				}
 
 				@Override
-				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+				public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+						throws CertificateException {
 				}
 
 				@Override
@@ -349,15 +443,18 @@ public class CipherTrustManagerHelper {
 			} };
 
 			// Install the all-trusting trust manager
-			final SSLContext sslContext = SSLContext.getInstance("SSL");
+			final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+			//final SSLContext sslContext = SSLContext.getInstance("SSL");
 			sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 			// Create an ssl socket factory with our all-trusting manager
 			final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
+//https://stackoverflow.com/questions/49980508/okhttp-sslhandshakeexception-ssl-handshake-aborted-failure-in-ssl-library-a-pro
+//https://square.github.io/okhttp/https/		
 			OkHttpClient.Builder builder = new OkHttpClient.Builder();
+			
 			builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
 			builder.hostnameVerifier(new HostnameVerifier() {
-
+			
 				@Override
 				public boolean verify(String hostname, SSLSession session) {
 					return true;
@@ -371,34 +468,42 @@ public class CipherTrustManagerHelper {
 		}
 	}
 
-
-
 	/**
-	* Will loop thru n number of times to test basic functionality for the various methods implemented. 
-	* See parameters below and examples for more details.  
-	* <p>
-	* Examples:
-	* keyholder pwd MyAESEncryptionKey26 5 fpe 192.168.159.160 encrypt digit
-	* keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt alphabet
-	* keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt alphanumeric
-	* admin pwd! MyAESEncryptionKey26 10 fpe 192.168.159.160 encrypt digit
-	* admin pwd! hmacsha256-1 1 na 192.168.159.160 mac alphabet
-	* admin pwd! rsa-key5 1 na 192.168.159.160 sign alphabet
-	*
-	* @param  userid the userid must be granted access to the key in CM. 
-	* @param  password the password of the user.
-	* @param  key the key to be used. (Must be key name)
-	* @param  iterations number of iterations to run.  (Will use 25 bytes of random data)  
-	* @param  encmode fpe,rsa,gcm,na  
-	* @param  ciphertrustip ciphertrust manger ip address 
-	* @param  action encrypt/decrypt/mac/macv/sign/signv 
-	* @param  typeofdata digit/alphabet/alphanumeric 
-	*/
-	
+	 * Will loop thru n number of times to test basic functionality for the
+	 * various methods implemented. See parameters below and examples for more
+	 * details.
+	 * <p>
+	 * Examples: keyholder pwd MyAESEncryptionKey26 5 fpe 192.168.159.160
+	 * encrypt digit keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt
+	 * alphabet keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt
+	 * alphanumeric admin pwd! MyAESEncryptionKey26 10 fpe 192.168.159.160
+	 * encrypt digit admin pwd! hmacsha256-1 1 na 192.168.159.160 mac alphabet
+	 * admin pwd! rsa-key5 1 na 192.168.159.160 sign alphabet
+	 *
+	 * @param userid
+	 *            the userid must be granted access to the key in CM.
+	 * @param password
+	 *            the password of the user.
+	 * @param key
+	 *            the key to be used. (Must be key name)
+	 * @param iterations
+	 *            number of iterations to run. (Will use 25 bytes of random
+	 *            data)
+	 * @param encmode
+	 *            fpe,rsa,gcm,na
+	 * @param ciphertrustip
+	 *            ciphertrust manger ip address
+	 * @param action
+	 *            encrypt/decrypt/mac/macv/sign/signv
+	 * @param typeofdata
+	 *            digit/alphabet/alphanumeric
+	 */
+
 	public static void main(String[] args) throws Exception {
 
 		if (args.length != 8) {
-			System.err.println("Usage: java CipherTrustManagerHelper2  userid pwd keyname iterations mode ciphertrustip [encrypt/decrypt/mac/macv/sign/signv] [digit/alphabet/alphanumeric] ");
+			System.err.println(
+					"Usage: java CipherTrustManagerHelper2  userid pwd keyname iterations mode ciphertrustip [encrypt/decrypt/mac/macv/sign/signv] [digit/alphabet/alphanumeric] ");
 			System.exit(-1);
 		}
 
@@ -410,7 +515,7 @@ public class CipherTrustManagerHelper {
 		awsresrest.cmipaddress = args[5];
 		String action = args[6];
 		String typeofdata = args[7];
-		
+
 		if (typeofdata.equalsIgnoreCase("digit"))
 			awsresrest.dataformat = "digit";
 		else if (typeofdata.equalsIgnoreCase("alphabet"))
@@ -419,14 +524,16 @@ public class CipherTrustManagerHelper {
 			awsresrest.dataformat = "alphanumeric";
 		else
 			throw new RuntimeException("valid values for data type are: digit,alphabet,alphanumeric");
-		
-		//String tkn = awsresrest.getToken("Yoursupersecretpwd", "C:\\keystore\\cm_keystoreone");
+
+		// String tkn = awsresrest.getToken("Vormetric123!",
+		// "C:\\keystore\\cm_keystoreone");
 		String tkn = awsresrest.getToken();
 		Calendar calendar = Calendar.getInstance();
 
 		// Get start time (this needs to be a global variable).
 		Date startDate = calendar.getTime();
-		awsresrest.loop(args[4], numberofrecords, action);
+		System.out.println("key size is = " + awsresrest.getKeySize());
+		// awsresrest.loop(args[4], numberofrecords, action);
 
 		Calendar calendar2 = Calendar.getInstance();
 
@@ -436,29 +543,34 @@ public class CipherTrustManagerHelper {
 		System.out.println("Total time " + sumDate);
 	}
 
-
 	/**
-	* Returns an String that will either be a signed value or the string
-	* true or false.  
-	* <p>
-	* Examples:
-	* awsresrest.cmRESTSign( "SHA1", "na", "BGYUO07R7EBKYYMNGAIUAUPSJ","sign");
-	* awsresrest.cmRESTSign( "SHA1", "15e7eb8f1b0278583d71789a7aea05cbe1a041b2313f54c43f14a0c62b628175ece14bcfdecd47637049", "BGYUO07R7EBKYYMNGAIUAUPSJ","signv");
-	*
-	* @param  hashAlgo the hash algorithum to be used. (SHA1, SHA-256, SHA-512,etc)
-	* @param  signature the signature or na
-	* @param  data the data to be signed
-	* @param  action sign or signv.  
-	* @return either be a signed value or the string true or false
-	*/
-	
+	 * Returns an String that will either be a signed value or the string true
+	 * or false.
+	 * <p>
+	 * Examples: awsresrest.cmRESTSign( "SHA1", "na",
+	 * "BGYUO07R7EBKYYMNGAIUAUPSJ","sign"); awsresrest.cmRESTSign( "SHA1",
+	 * "15e7eb8f1b0278583d71789a7aea05cbe1a041b2313f54c43f14a0c62b628175ece14bcfdecd47637049",
+	 * "BGYUO07R7EBKYYMNGAIUAUPSJ","signv");
+	 *
+	 * @param hashAlgo
+	 *            the hash algorithum to be used. (SHA1, SHA-256, SHA-512,etc)
+	 * @param signature
+	 *            the signature or na
+	 * @param data
+	 *            the data to be signed
+	 * @param action
+	 *            sign or signv.
+	 * @return either be a signed value or the string true or false
+	 */
+
 	public String cmRESTSign(String hashAlgo, String signature, String data, String action) throws Exception {
 
 		String value = null;
 		int keysize = this.getKeySize() / 8;
 
 		if (hashAlgo.equalsIgnoreCase("none") && data.length() > (keysize - encoding_parameters_length)) {
-			throw new RuntimeException("When using none for hashAlgo data size must be smaller than (keysize - encoding parm length)");
+			throw new RuntimeException(
+					"When using none for hashAlgo data size must be smaller than (keysize - encoding parm length)");
 
 		}
 
@@ -469,18 +581,21 @@ public class CipherTrustManagerHelper {
 	}
 
 	/**
-	* Returns an String that will either be a hash a value or the string
-	* true or false.  
-	* <p>
-	* Examples:
-	* awsresrest.cmRESTMac( "na", "TIW58B91G25V3FN27491ACCTY","mac");
-	* awsresrest.cmRESTMac("7c8842d207c1d73d21ae47b82cc18e6b03c48ef9ff1c3d27c5ccf2aa3d79f21e", "TIW58B91G25V3FN27491ACCTY","macv");
-	*
-	* @param  hash the hash value must be either "na" or the actual hash value.
-	* @param  data the data to be hashed
-	* @param  action mac or macv.  
-	* @return either be a hash a value or the string true or false
-	*/
+	 * Returns an String that will either be a hash a value or the string true
+	 * or false.
+	 * <p>
+	 * Examples: awsresrest.cmRESTMac( "na", "TIW58B91G25V3FN27491ACCTY","mac");
+	 * awsresrest.cmRESTMac("7c8842d207c1d73d21ae47b82cc18e6b03c48ef9ff1c3d27c5ccf2aa3d79f21e",
+	 * "TIW58B91G25V3FN27491ACCTY","macv");
+	 *
+	 * @param hash
+	 *            the hash value must be either "na" or the actual hash value.
+	 * @param data
+	 *            the data to be hashed
+	 * @param action
+	 *            mac or macv.
+	 * @return either be a hash a value or the string true or false
+	 */
 
 	public String cmRESTMac(String hash, String data, String action) throws Exception {
 
@@ -493,24 +608,26 @@ public class CipherTrustManagerHelper {
 	}
 
 	/**
-	* Returns an String that will either be a be encrypted data or ciphertext.
-	* Notes: 
-    * 1.) when using rsa the key must be keyname of public key: example rsakey-pub 
-    * 2.) RSA Decrpyt will return values in base64 format. 
-    * 3.) When using gcm first part of encrypted data will include a tag and the tag value 
-	* <p>
-	* Examples:
-	* awsresrest.cmRESTProtect( "gcm", text, "decrypt");
-	* awsresrest.cmRESTProtect( "gcm", text, "encrypt");
-	* awsresrest.cmRESTProtect( "rsa", text, "encrypt");
-	* awsresrest.cmRESTProtect( "fpe", text, "encrypt");
-	*
-	* @param  encmode  the encryption mode to be used for encryption or decrypt.
-	* @param  data the data to be encrypted or the ciphertext in case of decrypt. 
-	* @param  action encrypt or decrypt.  
-	* @return either be encrypted data or ciphertext
-	*/
-	
+	 * Returns an String that will either be a be encrypted data or ciphertext.
+	 * Notes: 1.) when using rsa the key must be keyname of public key: example
+	 * rsakey-pub 2.) RSA Decrpyt will return values in base64 format. 3.) When
+	 * using gcm first part of encrypted data will include a tag and the tag
+	 * value
+	 * <p>
+	 * Examples: awsresrest.cmRESTProtect( "gcm", text, "decrypt");
+	 * awsresrest.cmRESTProtect( "gcm", text, "encrypt");
+	 * awsresrest.cmRESTProtect( "rsa", text, "encrypt");
+	 * awsresrest.cmRESTProtect( "fpe", text, "encrypt");
+	 *
+	 * @param encmode
+	 *            the encryption mode to be used for encryption or decrypt.
+	 * @param data
+	 *            the data to be encrypted or the ciphertext in case of decrypt.
+	 * @param action
+	 *            encrypt or decrypt.
+	 * @return either be encrypted data or ciphertext
+	 */
+
 	public String cmRESTProtect(String encmode, String data, String action) throws Exception {
 
 		String value = null;
@@ -533,11 +650,11 @@ public class CipherTrustManagerHelper {
 
 		for (int i = 1; i <= nbrofrecords; i++) {
 			if (this.dataformat.equalsIgnoreCase("digit"))
-			 sensitive = randomNumeric(25);
+				sensitive = randomNumeric(25);
 			else if (this.dataformat.equalsIgnoreCase("alphabet"))
-				 sensitive = randomAlpha(25);
+				sensitive = randomAlpha(25);
 			else
-				 sensitive = randomAlphaNumeric(25);			
+				sensitive = randomAlphaNumeric(25);
 			System.out.println("original value = " + sensitive);
 			if (action.equalsIgnoreCase("encrypt")) {
 
@@ -586,7 +703,8 @@ public class CipherTrustManagerHelper {
 			url = "https://" + this.cmipaddress + "/api/v1/crypto/sign?keyName=" + this.key + "&hashAlgo=" + hashAlgo;
 
 		} else if (action.equals("signv")) {
-			url = "https://" + this.cmipaddress + "/api/v1/crypto/signv?keyName=" + this.key + "&hashAlgo=" + hashAlgo + "&signature=" + signature;
+			url = "https://" + this.cmipaddress + "/api/v1/crypto/signv?keyName=" + this.key + "&hashAlgo=" + hashAlgo
+					+ "&signature=" + signature;
 
 		} else {
 			System.out.println("invalid action.... ");
@@ -623,16 +741,17 @@ public class CipherTrustManagerHelper {
 		if (action.equalsIgnoreCase("encrypt")) {
 			if (encmode.equals("fpe")) {
 				if (hint.equalsIgnoreCase("digit") && sensitive.length() > digitblocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + numberPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + numberPattern;
 				else if (hint.equalsIgnoreCase("alphabet") && sensitive.length() > alphablocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + stringPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + stringPattern;
 				else if (hint.equalsIgnoreCase("alphanumeric") && sensitive.length() > alphablocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + combinedPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + combinedPattern;
 				else
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/hide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint;
 			} else {
 				url = "https://" + this.cmipaddress + "/api/v1/crypto/encrypt";
 
@@ -640,16 +759,17 @@ public class CipherTrustManagerHelper {
 		} else if (action.equalsIgnoreCase("decrypt")) {
 			if (encmode.equals("fpe")) {
 				if (hint.equalsIgnoreCase("digit") && sensitive.length() > digitblocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + numberPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + numberPattern;
 				else if (hint.equalsIgnoreCase("alphabet") && sensitive.length() > alphablocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + stringPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + stringPattern;
 				else if (hint.equalsIgnoreCase("alphanumeric") && sensitive.length() > alphablocklen)
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint
-							+ "&iv=" + combinedPattern;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint + "&iv=" + combinedPattern;
 				else
-					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version=" + version + "&hint=" + hint;
+					url = "https://" + this.cmipaddress + "/api/v1/crypto/unhide2?keyName=" + this.key + "&version="
+							+ version + "&hint=" + hint;
 			} else {
 				url = "https://" + this.cmipaddress + "/api/v1/crypto/decrypt";
 
@@ -659,7 +779,7 @@ public class CipherTrustManagerHelper {
 			System.out.println("invalid mode action provided ");
 
 		}
-		//System.out.println("url is " + url);
+		// System.out.println("url is " + url);
 		return url;
 	}
 
@@ -667,8 +787,9 @@ public class CipherTrustManagerHelper {
 
 		String body = null;
 
-		body = ciphertexttag + quote + sensitive + quote + comma + tagtag + quote + enctag + quote + comma + modetag + quote + encmode + quote
-				+ comma + idtag + quote + this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag + quote + aad + quote + endbracket;
+		body = ciphertexttag + quote + sensitive + quote + comma + tagtag + quote + enctag + quote + comma + modetag
+				+ quote + encmode + quote + comma + idtag + quote + this.key + quote + comma + ivtag + quote + iv
+				+ quote + comma + aadtag + quote + aad + quote + endbracket;
 
 		return body;
 	}
@@ -682,13 +803,15 @@ public class CipherTrustManagerHelper {
 			} else if (encmode.equals("rsa")) {
 				byte[] dataBytes = sensitive.getBytes();
 				String plaintextbase64 = Base64.getEncoder().encodeToString(dataBytes);
-				body = plaintexttag + quote + plaintextbase64 + quote + comma + idtag + quote + this.key + quote + endbracket;
+				body = plaintexttag + quote + plaintextbase64 + quote + comma + idtag + quote + this.key + quote
+						+ endbracket;
 
 			} else {
 				byte[] dataBytes = sensitive.getBytes();
 				String plaintextbase64 = Base64.getEncoder().encodeToString(dataBytes);
-				body = plaintexttag + quote + plaintextbase64 + quote + comma + modetag + quote + encmode + quote + comma + idtag + quote
-						+ this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag + quote + aad + quote + endbracket;
+				body = plaintexttag + quote + plaintextbase64 + quote + comma + modetag + quote + encmode + quote
+						+ comma + idtag + quote + this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag
+						+ quote + aad + quote + endbracket;
 			}
 
 		} else {
@@ -700,15 +823,17 @@ public class CipherTrustManagerHelper {
 				 * plaintextbase64 =
 				 * Base64.getEncoder().encodeToString(dataBytes);
 				 */
-				//This example only works with passing in the public key name for RSA keys. 
+				// This example only works with passing in the public key name
+				// for RSA keys.
 				String keyprivate = this.key.substring(0, this.key.length() - 4);
-				body = ciphertexttag + quote + sensitive + quote + comma + idtag + quote + keyprivate + quote + comma + typetag + name + comma
-						+ padtag + rsapad + endbracket;
+				body = ciphertexttag + quote + sensitive + quote + comma + idtag + quote + keyprivate + quote + comma
+						+ typetag + name + comma + padtag + rsapad + endbracket;
 
 			} else {
 
-				body = ciphertexttag + quote + sensitive + quote + comma + modetag + quote + encmode + quote + comma + idtag + quote + this.key
-						+ quote + comma + ivtag + quote + iv + quote + comma + aadtag + quote + aad + quote + endbracket;
+				body = ciphertexttag + quote + sensitive + quote + comma + modetag + quote + encmode + quote + comma
+						+ idtag + quote + this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag + quote
+						+ aad + quote + endbracket;
 
 			}
 		}
@@ -716,7 +841,7 @@ public class CipherTrustManagerHelper {
 		return body;
 	}
 
-	private int getKeySize() throws IOException {
+	public int getKeySize() throws IOException {
 		String results = null;
 		int size = 0;
 		results = this.getjson(buildURL());
@@ -730,11 +855,15 @@ public class CipherTrustManagerHelper {
 
 				results = this.getjson(buildURL());
 			}
+			if (results.contains("Resource not found")) {
+				System.out.println("Key not found");
 
-			results = JsonPath.read(results.toString(), "$.size").toString();
-			Integer bigIntSize = new Integer(results);
-			size = bigIntSize.intValue();
-			//System.out.println("key size  = " + size);
+			} else {
+				results = JsonPath.read(results.toString(), "$.size").toString();
+				Integer bigIntSize = new Integer(results);
+				size = bigIntSize.intValue();
+			}
+			// System.out.println("key size = " + size);
 		} catch (Exception e) {
 
 			System.out.println(e.getMessage());
@@ -858,7 +987,8 @@ public class CipherTrustManagerHelper {
 				String parts[] = str.split(filetagsep);
 				enctag = parts[0].replace(":", "");
 				sensitive = parts[1];
-				results = this.postjson(buildURL(encmode, sensitive, action), this.getBody(encmode, sensitive, action, enctag));
+				results = this.postjson(buildURL(encmode, sensitive, action),
+						this.getBody(encmode, sensitive, action, enctag));
 			} else {
 				results = this.postjson(buildURL(encmode, sensitive, action), getBody(encmode, sensitive, action));
 			}
@@ -879,9 +1009,11 @@ public class CipherTrustManagerHelper {
 						enctag = parts[0];
 						sensitive = parts[1];
 
-						results = this.postjson(buildURL(encmode, sensitive, action), getBody(encmode, sensitive, action, enctag));
+						results = this.postjson(buildURL(encmode, sensitive, action),
+								getBody(encmode, sensitive, action, enctag));
 					} else {
-						results = this.postjson(buildURL(encmode, sensitive, action), getBody(encmode, sensitive, action));
+						results = this.postjson(buildURL(encmode, sensitive, action),
+								getBody(encmode, sensitive, action));
 					}
 				}
 			}
@@ -938,7 +1070,7 @@ public class CipherTrustManagerHelper {
 		else
 			results = this.postjson(buildURL(encmode, sensitive, action), getBody(encmode, sensitive, action));
 
-		System.out.println("value " + results);
+		//System.out.println("value " + results);
 		try {
 			if (results.contains("Token is expired")) {
 				System.out.println("get new token");
@@ -1000,8 +1132,8 @@ public class CipherTrustManagerHelper {
 	private static boolean isAlpha(String str) {
 
 		for (char c : str.toCharArray()) {
-			 if (!Character.isAlphabetic(c)) {
-			//if (!Character.isLetter(c)) {
+			if (!Character.isAlphabetic(c)) {
+				// if (!Character.isLetter(c)) {
 				return false;
 			}
 		}
