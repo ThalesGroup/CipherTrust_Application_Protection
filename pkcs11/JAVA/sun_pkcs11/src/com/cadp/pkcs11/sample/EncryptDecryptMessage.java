@@ -67,9 +67,9 @@ public class EncryptDecryptMessage {
         System.out.println("-d: Decrypted file path");
         System.out.println("-ls: Lifespan");
         System.out.println("-o: Operation {CTR | CBC_PAD (default) | CBC | FPE | FF1} "); 
-        System.out.println("utf-mode-name is one of ASCII, UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE");
-        System.out.println("genAction     is one of 0 (generate versioned key) or 3 (generate non-versioned key)");
-        System.out.println("headermode: v1.5, v1.5base64, v2.1, or v2.7");
+        System.out.println("-u: Utf-mode-name is one of ASCII, UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE");
+        System.out.println("-g: GenAction is one of 0 (generate versioned key) or 3 (generate non-versioned key)");
+        System.out.println("-h: v1.5, v1.5base64, v2.1, or v2.7");
         System.exit (1);
     }
     public static ByteOrder getSelByteOrder(String strMode) {

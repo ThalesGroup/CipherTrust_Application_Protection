@@ -44,8 +44,8 @@ public class FindExportKey {
     {
         System.out.println ("usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.FindExportKey -p pin [-k sourceKeyName] [-w wrappingKeyName] [-f keyFilename] [-m module]");
         System.out.println("-p: Username:Password of Keymanager");
-        System.out.println("-k: Keyname on Keymanager");
-        System.out.println("-w: Keyname on Keymanager");
+        System.out.println("-k: KeyName on Keymanager");
+        System.out.println("-w: Wrapping Keyname on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-f: KeyFilename type name i.e pem");
         exit (1);

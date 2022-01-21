@@ -52,12 +52,13 @@ public class DigestMessage {
 
     public static void usage() {
         System.out.println("usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.DigestMessage -p pin [-k keyName] [-f input-file]");
-	    System.out.println("[-o operation] HMAC-SHA256, HMAC-MD5, HMAC-SHA1, HMAC-SHA224, HMAC-SHA384, HMAC-SHA512, MD5, SHA1, SHA224, SHA512, SHA384 or SHA256 (default) [-m module] [-i message]");
+	    System.out.println("[-o operation] [-m module] [-i message]");
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-k: Keyname on Keymanager");
         System.out.println("-f: Input file path for plain text ");
         System.out.println("-i: Message in plainText");
+		System.out.println("-o: HMAC-SHA256, HMAC-MD5, HMAC-SHA1, HMAC-SHA224, HMAC-SHA384, HMAC-SHA512, MD5, SHA1, SHA224, SHA512, SHA384 or SHA256 (default)");
         System.exit(1);
     }
 

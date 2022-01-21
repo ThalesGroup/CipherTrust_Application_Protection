@@ -45,8 +45,8 @@ public class UnwrapImportKey {
         " [-u wrappingKeyName] [-f keyformat] [-m module] [-c public-key-name] [-v private-key-name] [-i keyfile]");
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-k: Keyname on Keymanager");
-        System.out.println("-u: Keyname on Keymanager");
-        System.out.println("-c: Keyname on Keymanager");
+        System.out.println("-u: Wrapping Keyname on Keymanager");
+        System.out.println("-c: Public keyname on Keymanager");
         System.out.println("-f: Format of key on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-i: Input filename");    

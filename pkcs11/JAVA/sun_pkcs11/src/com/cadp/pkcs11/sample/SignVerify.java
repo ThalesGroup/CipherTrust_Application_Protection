@@ -48,11 +48,11 @@ public class SignVerify {
 
     public static void usage() {
         System.out.println("usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.SignVerify -p pin [-k keyName] [-o operation] [-m module] [-i message]");
-		System.out.println("where 'operation' is HMAC-SHA256 (default), HMAC-SHA1, HMAC-SHA224, HMAC-SHA384, or HMAC-SHA512, or RSA");
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-k: Keyname on Keymanager");
         System.out.println("-i: Message in plainText");
         System.out.println("-m: Path of directory where dll is deployed/installed");
+		System.out.println("-o: HMAC-SHA256 (default), HMAC-SHA1, HMAC-SHA224, HMAC-SHA384, or HMAC-SHA512, or RSA");
         System.exit(1);
     }
 

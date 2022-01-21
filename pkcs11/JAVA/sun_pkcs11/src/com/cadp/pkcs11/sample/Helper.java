@@ -310,7 +310,7 @@ public class Helper {
               }
               else
               {
-                  System.out.println ("Library point to a file that does not exist: " + path);
+                  System.out.println ("PKCS11LIBPATH point to a file that does not exist: " + path);
                   System.exit(4);
               }
           }
