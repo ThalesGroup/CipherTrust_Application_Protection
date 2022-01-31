@@ -4,6 +4,8 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.cxf.jaxrs.client.WebClient;
@@ -14,6 +16,20 @@ import com.ingrian.ws.rest.response.EncryptResponse;
 /**
  * This sample shows how to encrypt a data using a restful web service. This
  * sample assumes that server is running on localhost port 8080
+ *  
+ * Note: To run Restful_EncryptSample, download and add the following jar files 
+ * along with protectappwsClientStub.jar and CADP JCE Jar files to the java classpath:
+ *
+ * a) cxf-rt-rs-client-3.4.3.jar
+ * b) cxf-core-3.4.3.jar
+ * c) cxf-rt-frontend-jaxrs-3.4.3.jar
+ * d) javax.ws.rs-api-2.1.1.jar
+ * e) cxf-rt-transports-http-3.4.3.jar
+ * f) stax2-api-4.2.1.jar
+ * g) woodstox-core-6.2.4.jar
+ * h) jettison-1.4.1.jar
+ * i) cxf-rt-rs-json-basic-3.4.3.jar
+ * j) cxf-rt-rs-extension-providers-3.4.3.jar
  */
 public class Restful_EncryptSample {
 	public static void main(String[] args) {
@@ -26,15 +42,15 @@ public class Restful_EncryptSample {
 		String password = args[1];
 		String keyName = args[2];
 		String plaintext = args[3];
-		String serverip = "127.0.0.1";
+		String serverip = "localhost";
 		String port = "8080";
-		String transfromation = null;
+		String transformation = null;
 		String keyIv = null;
 		if (args.length == 6) {
-			transfromation = args[4];
+			transformation = args[4];
 			keyIv = args[5];
 		} else if (args.length == 5) {
-			transfromation = args[4];
+			transformation = args[4];
 			System.out.println("Default key iv will be used for key");
 		} else {
 			System.out
@@ -47,6 +63,8 @@ public class Restful_EncryptSample {
 				+ "/protectappws/services/rest/encrypt";
 
 		WebClient client = WebClient.create(baseAddress);
+		client.accept(MediaType.APPLICATION_JSON);
+		client.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
 		/* Prepare a encrypt object to post to */
 		EncryptREST body = new EncryptREST();
@@ -54,8 +72,8 @@ public class Restful_EncryptSample {
 		body.setPassword(password);
 		body.setPlaintext(plaintext);
 		body.setUsername(username);
-		if (transfromation != null)
-			body.setTransformation(transfromation);
+		if (transformation != null)
+			body.setTransformation(transformation);
 		if (keyIv != null)
 			body.setKeyiv(keyIv);
 

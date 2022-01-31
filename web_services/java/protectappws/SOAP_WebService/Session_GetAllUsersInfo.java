@@ -29,7 +29,7 @@ public class Session_GetAllUsersInfo {
 		String password = args[1];
 		 
 		
-		String wsdl = "http://localhost:9090/protectappws/services/ProtectappwsImpl?wsdl";
+		String wsdl = "http://localhost:8080/protectappws/services/ProtectappwsImpl?wsdl";
 		URL wsdlURL = new URL(wsdl);
 		
 		/*1. Call the CXF client stub for remote method invocation*/
