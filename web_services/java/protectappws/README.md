@@ -72,6 +72,19 @@ To use these sample files, user must have
 - ***CADP JCE WebService*** (*protectappws.war*) installed and configured. We assume that server is running on localhost on port 8080.
 - A ***javac*** compiler to compile the samples.
 - ***protectappwsClientStub.jar*** and ***CADP JCE Jar*** files in the java classpath.
+
+ To run the ***Restful_EncryptSample.java*** sample, download and add the following jar files along with the above mentioned jars to the java classpath:
+
+  - `cxf-rt-rs-client-3.4.3.jar`
+  - `cxf-core-3.4.3.jar`
+  - `cxf-rt-frontend-jaxrs-3.4.3.jar`
+  - `javax.ws.rs-api-2.1.1.jar`
+  - `cxf-rt-transports-http-3.4.3.jar`
+  - `stax2-api-4.2.1.jar`
+  - `woodstox-core-6.2.4.jar`
+  - `jettison-1.4.1.jar`
+  - `cxf-rt-rs-json-basic-3.4.3.jar`
+  - `cxf-rt-rs-extension-providers-3.4.3.jar`
     
 
 ## More Information
