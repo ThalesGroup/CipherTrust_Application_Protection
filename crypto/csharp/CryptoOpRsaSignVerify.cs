@@ -23,7 +23,35 @@ class NaeCryptoOpSignVerify
         Console.Write("Enter username: ");
         string user = Console.ReadLine();
         Console.Write("Enter password: ");
-        string pass = Console.ReadLine();
+        string pass = string.Empty;
+        ConsoleKeyInfo consoleKeyInfo;
+
+        do
+        {
+            consoleKeyInfo = Console.ReadKey(true);
+
+            // Handle backspace and remove the key.
+            if (consoleKeyInfo.Key == ConsoleKey.Backspace)
+            {
+                Console.Write("\b \b");
+                pass = (pass.Length > 0) ? pass.Remove(pass.Length - 1, 1) : pass;
+            }
+            else
+            {
+                // Not adding the function keys, other keys having key char as '\0' in the password string.
+                if (consoleKeyInfo.KeyChar != '\0')
+                {
+                    pass += consoleKeyInfo.KeyChar;
+                    Console.Write("*");
+                }
+            }
+        }
+        // Stops Receving Keys Once Enter is Pressed
+        while (consoleKeyInfo.Key != ConsoleKey.Enter);
+
+        // cleaning up the newline character
+        pass = pass.Replace("\r", "");
+        Console.WriteLine();
 
         try
         {
