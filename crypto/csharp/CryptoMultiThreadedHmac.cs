@@ -108,6 +108,41 @@ class CryptoMultiThreadedHmac
 {
     static void Main(string[] args)
     {
+		NaeHmacKey key = null;
+        /*Read Username and password*/
+        Console.Write("Enter username: ");
+        string user = Console.ReadLine();
+        Console.Write("Enter password: ");
+        string pass = string.Empty;
+        ConsoleKeyInfo consoleKeyInfo;
+
+        do
+        {
+            consoleKeyInfo = Console.ReadKey(true);
+
+            // Handle backspace and remove the key.
+            if (consoleKeyInfo.Key == ConsoleKey.Backspace)
+            {
+                Console.Write("\b \b");
+                pass = (pass.Length > 0) ? pass.Remove(pass.Length - 1, 1) : pass;
+            }
+            else
+            {
+                // Not adding the function keys, other keys having key char as '\0' in the password string.
+                if (consoleKeyInfo.KeyChar != '\0')
+                {
+                    pass += consoleKeyInfo.KeyChar;
+                    Console.Write("*");
+                }
+            }
+        }
+        // Stops Receving Keys Once Enter is Pressed
+        while (consoleKeyInfo.Key != ConsoleKey.Enter);
+
+        // cleaning up the newline character
+        pass = pass.Replace("\r", "");
+        Console.WriteLine();
+
         /*Read the CADP.NETCore_Properties.xml from the nuget folder.
             In case, of multiple versions available it will take the latest one.
             Please update the code in case of below requirement:
@@ -119,14 +154,6 @@ class CryptoMultiThreadedHmac
         var cadpPackage = Path.Combine(path, ".nuget", "packages", "ciphertrust.cadp.netcore");
         var highestPackage = Directory.GetDirectories(cadpPackage).Select(x => Path.GetFileName(x)).OrderByDescending(e => new Version(e)).First();
         propertyFilePath = Path.Combine(cadpPackage, highestPackage, "content", "CADP.NETCore_Properties.xml");
-
-        NaeHmacKey key = null;
-        /*Read Username and password*/
-        Console.Write("Enter username: ");
-        string user = Console.ReadLine();
-        Console.Write("Enter password: ");
-        string pass = Console.ReadLine();
-
 
         /* Create a new NAE Session using the username and password */
         NaeSession session = new NaeSession(user, pass, propertyFilePath);
