@@ -66,7 +66,7 @@ namespace Vormetric.Pkcs11Sample
                     IObjectHandle srcKey = Helpers.FindKey(session, keyLabel, keyClass);
                     if (srcKey != null)
                     {
-                        Console.WriteLine("Found existing key on DSM! Please use new key name.");
+                        Console.WriteLine("Found existing key on key manager! Please use new key name.");
                         session.Logout();
                         return false;
                     }
@@ -124,7 +124,7 @@ namespace Vormetric.Pkcs11Sample
                             unwrappingKey = session.Factories.ObjectHandleFactory.Create();
                         IObjectHandle importKey = session.UnwrapKey(mechanism, unwrappingKey, wrappedKey, objectAttributes);
 
-                        Console.WriteLine("Successfully unwrapped and imported key into DSM!! Key handle: " + importKey.ObjectId);
+                        Console.WriteLine("Successfully unwrapped and imported key into key manager!! Key handle: " + importKey.ObjectId);
                     }
                     session.Logout();
                 }

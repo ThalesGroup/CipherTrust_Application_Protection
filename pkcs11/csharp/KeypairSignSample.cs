@@ -131,7 +131,7 @@ namespace Vormetric.Pkcs11Sample
                         if (nodelete == false)
                         {
                             session.DestroyObject(publicKeyHandle);
-                            Console.WriteLine("KeyPair "+ keyPairLabel + " has been deleted from DSM.");
+                            Console.WriteLine("KeyPair "+ keyPairLabel + " has been deleted from Key Manager.");
                         }                        
                         session.Logout();
                     }

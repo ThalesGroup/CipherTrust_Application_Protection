@@ -18,13 +18,13 @@ namespace Vormetric.Pkcs11Sample
             Console.WriteLine("\t 4. Encrypt and decrypt sample. ");
             Console.WriteLine("\t 5. Encrypt and decrypt with different mode (FPE) sample. ");
             Console.WriteLine("\t 6. Create a key pair and sign the message sample. ");
-            Console.WriteLine("\t 7. Find and export a key from DSM sample. ");
+            Console.WriteLine("\t 7. Find and export a key from key manager sample. ");
             Console.WriteLine("\t 8. Encrypt and decrypt a file sample. ");
             Console.WriteLine("\t 9. Encrypt and decrypt a file and log meta data sample. ");
             Console.WriteLine("\t a. Test key attributes sample.                            Parameters: -p pin -k keyname");
             Console.WriteLine("\t b. Compute message digest for the default test string. ");
             Console.WriteLine("\t c. Compute message digest for a given input file. ");
-            Console.WriteLine("\t i. Unwrap and import a key into DSM sample. ");
+            Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");

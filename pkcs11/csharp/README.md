@@ -40,7 +40,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
     4. Encrypt and decrypt sample.
     5. Encrypt and decrypt with different mode (FPE) sample.
     6. Create a key pair and sign the message sample.
-    7. Find and export a key from DSM sample.
+    7. Find and export a key from key manager sample.
     8. Encrypt and decrypt a file sample.
     9. Encrypt and decrypt a file and log meta data sample.
     a. Test key attributes sample.                            
