@@ -65,7 +65,7 @@ namespace Vormetric.Pkcs11Sample
 
                     if (String.IsNullOrEmpty(pathSource))
                     {
-                        pathSource = Settings.Pkcs11LibraryPath;
+                        pathSource = "FileInput.txt";
                     }
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
@@ -82,8 +82,6 @@ namespace Vormetric.Pkcs11Sample
             return true;
         }
 
-        public DigestMultiPartSample()
-        {
-        }
+       
     }
 }

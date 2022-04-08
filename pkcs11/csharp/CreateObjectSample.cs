@@ -50,6 +50,9 @@ namespace Vormetric.Pkcs11Sample
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
 
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+
                     // Generate symetric key
                     IObjectHandle createdKey = session.CreateObject(objectAttributes);
                     if (null != createdKey)

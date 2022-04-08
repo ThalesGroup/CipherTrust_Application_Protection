@@ -267,7 +267,7 @@ namespace Vormetric.Pkcs11Sample
                         sample = new FindDeleteKeySample();
                         sample.Run(new object[] { pin, keyLabel });
                         sample.Run(new object[] { pin, wrappingKeyLabel });
-                        sample.Run(new object[] { pin, newkeyLabel });
+                        sample.Run(new object[] { pin, newkeyLabel }); //Need to check if we can delete this line.
 
                         sample = new DigestSample();
                         sample.Run(new object[] { pin, "sha256" });

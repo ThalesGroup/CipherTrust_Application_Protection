@@ -116,6 +116,7 @@ namespace Vormetric.Pkcs11Sample
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
                     }
 
+                    //objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
                     mechanism = session.Factories.MechanismFactory.Create(mechType, iv);
 
                     if (wrappedKeyLen != 0) {

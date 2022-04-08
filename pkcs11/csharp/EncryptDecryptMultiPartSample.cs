@@ -28,8 +28,8 @@ namespace Vormetric.Pkcs11Sample
                     bool needMetaData = Convert.ToBoolean(inputParams[3]); // expects 'true' or 'false'
                     string headerMode = Convert.ToString(inputParams[4]);
 
-                    if(String.IsNullOrEmpty(pathSource))
-                        pathSource = Settings.Pkcs11LibraryPath;
+                    if (String.IsNullOrEmpty(pathSource))
+                        pathSource = "FileInput.txt";
 
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);

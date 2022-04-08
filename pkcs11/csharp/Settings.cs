@@ -142,7 +142,7 @@ namespace Vormetric.Pkcs11Sample
             /// </summary>
             if (Platform.IsWindows)
             {
-                Pkcs11LibraryPath = @"C:\Program Files\Vormetric\DataSecurityExpert\Agent\pkcs11\bin\vorpkcs11.dll";
+                Pkcs11LibraryPath = @"C:\Program Files\CipherTrust\CADP_for_C\libcadp_pkcs11.dll";
             }
             else if (Platform.IsLinux)
             {
