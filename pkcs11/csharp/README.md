@@ -2,17 +2,13 @@
 # PKCS11 Integrations/Sample Code
 
 ## Overview
-VPkcs11_Sample.exe or VPkcs11_Sample.dll is a command-line interface tool to understand the PKCS11 interface.
+CADP_PKCS11_Samples.exe or CADP_PKCS11_Samples.dll is a command-line interface tool to understand the PKCS11 interface.
 
 ## Prerequisites: 
-In order to run VPkcs11_Sample :
+In order to run CADP_PKCS11_Samples :
 > - .NET Core 3.1 or higher must be installed.<br>
-> - CipherTrust.CADP.NETCore NuGet package must be installed.
-> - Vormetric Key Agent must be install and registered with a Data Security Manager (DSM).
+> - CADP for C must be installed.
 
-## Note: 
-> - Vormetric Key Agent can be found in CipherTrust.CADP.NETCore NuGet installed directory.
-> - Refer "Vormetric Application Encryption Installation" chapter from "VDS_6.4.0_VAE_Install_API_Guide_v1.pdf" guide for installtion.
 
 ## Compilation:
 You can build the sample either from Visual Studio or dotnet cli through the command `dotnet build -c Release`
@@ -20,20 +16,20 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 
 ## Usage: 
 ### Run sample from executable(only on windows):
-`VPkcs11_Sample.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
+`CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-VPkcs11_Sample.exe -p pin1234# -k testkey1 -t 1
+CADP_PKCS11_Samples.exe -p pin1234# -k testkey1 -t 1
 
 
 
 ### Run sample from dotnet cli:
-`dotnet VPkcs11_Sample.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
+`dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c] [-k|-kp <keyname>] [-o encryption mode] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
+dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
 
 ## Option for various command
 ### Choices for the -t option:
@@ -44,7 +40,7 @@ dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
     4. Encrypt and decrypt sample.
     5. Encrypt and decrypt with different mode (FPE) sample.
     6. Create a key pair and sign the message sample.
-    7. Find and export a key from DSM sample.
+    7. Find and export a key from key manager sample.
     8. Encrypt and decrypt a file sample.
     9. Encrypt and decrypt a file and log meta data sample.
     a. Test key attributes sample.                            
@@ -78,16 +74,16 @@ dotnet VPkcs11_Sample.dll -p pin1234# -k testkey1 -t 1
      v2.7 ... use version 2.7 header
      
 
-The program VPkcs11_Sample consists of the main program whose source code can be found in Program.cs and ten other source code files.
+The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files.
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 
 Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings, Native PKCS11 library path and helper functions, respectively.
 ## Native PKCS11 library path(Default path)
 ### For windows:
-    C:\Program Files\Vormetric\DataSecurityExpert\Agent\pkcs11\bin\vorpkcs11.dll
+    C:\Program Files\CipherTrust\CADP_for_C\libcadp_pkcs11.dll
 ### For Linux:
-    /opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so
+    /opt/CipherTrust/CADP for C/libcadp_pkcs11.so
     
-User can modify the native PKCS11 library path according to their platform.
+User can modify the native PKCS11 library path according to their platform. 
 
 ## How to enable pkcs11 interop level log    
 Uncomment the following lines from Settings.cs to generate the PKCS11 interop level log
