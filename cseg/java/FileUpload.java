@@ -21,7 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 /**
  * This sample shows how to upload file to AWS(Amazon web server) S3 server
- * using Safenet cloud web services. In this sample we show how to use using
+ * using Thales cloud web services. In this sample we show how to use using
  * Http Client. User can use any other client it wants to.
  * 
  * User should take care of the parameter used in this sample. If any other

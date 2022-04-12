@@ -91,8 +91,8 @@
                        a binary distribution of Tomcat.  This will
                        be used by the "deploy" target.
 
-  ingrian.home         The directory in which you have saved IngrianNAE.jar,
-                       IngrianLog4j.jar, and IngrianNAE.properties files.
+  ingrian.home         The directory in which you have saved CADP_for_JAVA.jar,
+                       IngrianLog4j.jar, and CADP_for_JAVA.properties files.
 
   java.location        The directory in which you have installed java.
 
@@ -226,10 +226,10 @@
 			value="${ingrian.home}/guava-20.0.jar"/>
 	<property name="gson.jar"
 			value="${ingrian.home}/gson-2.1.jar"/>
-	<property name="IngrianNAE.jar"
-            value="${ingrian.home}/IngrianNAE-8.12.3.000.jar"/>
-	<property name="IngrianNAE.properties"
-            value="${ingrian.home}/IngrianNAE.properties"/>
+	<property name="CADP_for_JAVA.jar"
+            value="${ingrian.home}/CADP_for_JAVA-8.13.0.000.jar"/>
+	<property name="CADP_for_JAVA.properties"
+            value="${ingrian.home}/CADP_for_JAVA.properties"/>
 
  
 <!-- ==================== Compilation Classpath =========================== -->
@@ -251,7 +251,7 @@
     <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
 
     <fileset dir="${ingrian.home}" includes="${log4j.jar},${log4japi.jar},${commonscollections.jar},${commonslang.jar},\
-  	${guava.jar},${IngrianNAE.jar},${IngrianNAE.properties}"/>
+  	${guava.jar},${CADP_for_JAVA.jar},${CADP_for_JAVA.properties}"/>
        
     <fileset dir="${catalina.home}/lib">
       <include name="servlet-api.jar"/>
@@ -475,8 +475,8 @@
   	<copy todir="${build.home}/WEB-INF/lib" file="${commonslang.jar}"/>
   	<copy todir="${build.home}/WEB-INF/lib" file="${guava.jar}"/>
 	<copy todir="${build.home}/WEB-INF/lib" file="${gson.jar}"/>
-    <copy todir="${build.home}/WEB-INF/lib" file="${IngrianNAE.jar}"/>
-    <copy todir="${build.home}/WEB-INF/lib" file="${IngrianNAE.properties}"/>
+    <copy todir="${build.home}/WEB-INF/lib" file="${CADP_for_JAVA.jar}"/>
+    <copy todir="${build.home}/WEB-INF/lib" file="${CADP_for_JAVA.properties}"/>
 
     <!-- Copy static files from external dependencies as needed -->
     <!-- *** CUSTOMIZE HERE AS REQUIRED BY YOUR APPLICATION *** -->
