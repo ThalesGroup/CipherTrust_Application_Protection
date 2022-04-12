@@ -19,7 +19,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to create the message authentication code and
- * how to verify it using CADP JCE.
+ * how to verify it using CADP for JAVA.
  */
 
 public class HMACSample 

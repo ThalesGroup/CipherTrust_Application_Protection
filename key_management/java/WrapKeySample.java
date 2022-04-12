@@ -26,7 +26,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to wrap a key for export from the Key Manager
- * using the CADP JCE. An AES key is created on the Key Manager
+ * using the CADP for JAVA. An AES key is created on the Key Manager
  * which is to be wrapped, and a public and private key pair are
  * generated. The public key is used to wrap the AES key. The
  * private key is exported and the wrapped key is unwrapped (using

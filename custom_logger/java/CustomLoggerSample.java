@@ -20,7 +20,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to create the message authentication code and
- * how to verify it using CADP JCE using Custom Logger configuration
+ * how to verify it using CADP for JAVA using Custom Logger configuration
  */
 
 public class CustomLoggerSample 

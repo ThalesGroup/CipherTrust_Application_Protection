@@ -25,7 +25,7 @@ import com.ingrian.security.nae.NAESecretKey;
 
 /**
  * Sample KMIP program to to demonstrate the KMIP Session Batch feature
- * in the CADP JCE
+ * in the CADP for JAVA
  * This sample shows how to create, manipulate and delete keys using a KMIP 
  * Batch Session.
  * The keys will be a 256-bit AES Symmetric Key.
@@ -90,7 +90,7 @@ public class KMIPBatchSample
             System.out.println("Batching set to " + session.isBatching());
             // the KMIPsession is now not in batching mode. KMIP Operations will be sent
             // to the server when the line of code is executed. Operations are shown
-            // which add, modify, or delete attributes in one request, with the KMIP CADP JCE
+            // which add, modify, or delete attributes in one request, with the KMIP CADP for JAVA
             // session utilizing KMIP batching implicitly based on sets of UIDs
             
             KMIPAttributes queryAttributes = new KMIPAttributes();

@@ -9,7 +9,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.security.spec.PSSParameterSpec;
 
-// CADP JCE specific classes.
+// CADP for JAVA specific classes.
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEPrivateKey;
@@ -17,7 +17,7 @@ import com.ingrian.security.nae.NAEPublicKey;
 import com.ingrian.security.nae.NAESession;
 
 /**
- * This sample shows how to sign data and verify signature using CADP JCE.
+ * This sample shows how to sign data and verify signature using CADP for JAVA.
  */
 
 public class SignSample {    

@@ -31,7 +31,7 @@ import com.ingrian.security.nae.*;
  * you must first install the signing CA (sample_ca) to your Key Manager 
  * and then add that CA to Trusted CA List used by the Key Manager. 
  * The password for cert.pkcs12 is asdf1234. Further instructions 
- * can be found in the CADP JCE User Guide.
+ * can be found in the CADP for JAVA User Guide.
  * 
  * The sample certificates are included as a convenience. You can 
  * also use your own certificates. 

@@ -32,7 +32,7 @@ import com.ingrian.security.nae.RSAKeyPairGenerator;
  * 
  * The key created will be an RSA key pair with the
  * given name and length. The names need to be unique
- * for KMIP so the CADP JCE adds "Public" and "Private"
+ * for KMIP so the CADP for JAVA adds "Public" and "Private"
  * suffixes to make the key names unique.
  * 
  * The keys for this test case are then deleted.

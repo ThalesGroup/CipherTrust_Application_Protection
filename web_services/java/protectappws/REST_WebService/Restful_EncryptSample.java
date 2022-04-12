@@ -18,7 +18,7 @@ import com.ingrian.ws.rest.response.EncryptResponse;
  * sample assumes that server is running on localhost port 8080
  *  
  * Note: To run Restful_EncryptSample, download and add the following jar files 
- * along with protectappwsClientStub.jar and CADP JCE Jar files to the java classpath:
+ * along with protectappwsClientStub.jar and CADP for JAVA Jar files to the java classpath:
  *
  * a) cxf-rt-rs-client-3.4.3.jar
  * b) cxf-core-3.4.3.jar

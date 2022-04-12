@@ -26,7 +26,7 @@ import com.ingrian.security.nae.NAEPublicKey;
 import com.ingrian.security.nae.NAESecretKey;
 
 /**
- * This KMIP CADP JCE sample shows how to Locate keys matching a particular criteria 
+ * This KMIP CADP for JAVA sample shows how to Locate keys matching a particular criteria 
  * and access the values of all of the standard (non-custom) KMIP attributes.
  * 
  * Keys are found matching algorithm RSA and key length 2048. Then, for each key,
