@@ -15,7 +15,7 @@ import java.security.KeyPair;
 
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.NAEKey;
-//CADP JCE specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEParameterSpec;
 import com.ingrian.security.nae.NAEPermission;
 import com.ingrian.security.nae.IngrianProvider;

@@ -33,7 +33,7 @@
 
 1. Additional Key Features/Attributes
 
-    This sample shows how to use additional *key features* defined by **CADP JCE**:
+    This sample shows how to use additional *key features* defined by **CADP for JAVA**:
     1. *Create* an **AES** key with custom attributes 
     1. *Add* and *delete* key's custom attributes
     1. *Create* a new version of key on Key Manager
@@ -98,7 +98,7 @@
 
 1. Wrapping a key for exporting from Key Manager
 
-    This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP JCE**.
+    This sample shows how to *wrap* a key for exporting from the Key Manager using the **CADP for JAVA**.
 
     * File: [*WrapKeySample.java*](WrapKeySample.java)
     * Usage: 
@@ -112,9 +112,9 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- `CADP JCE` installed and configured.
+- `CADP for JAVA` installed and configured.
 - A `javac` compiler in path to compile the sample. 
     
 ## More Information
 
-For more information on CADP JCE and samples, refer to the `CADP JCE User Guide`.
+For more information on CADP for JAVA and samples, refer to the `CADP for JAVA User Guide`.

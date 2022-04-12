@@ -11,7 +11,7 @@ import java.security.PublicKey;
 import java.security.Security;
 
 import com.ingrian.internal.kmip.api.CryptographicUsageMask.UsageMask;
-// CADP JCE KMIP and NAE class imports
+// CADP for JAVA class imports
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.KMIPAttributeNames.KMIPAttribute;
 import com.ingrian.security.nae.KMIPAttributes;

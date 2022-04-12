@@ -6,7 +6,7 @@
 
 1. Batch Operations
 
-    This sample demonstrates the *KMIP Batch Session* feature of **CADP JCE** . This sample shows how to *create, manipulate and delete* keys using a KMIP Batch Session.
+    This sample demonstrates the *KMIP Batch Session* feature of **CADP for JAVA** . This sample shows how to *create, manipulate and delete* keys using a KMIP Batch Session.
 
     * File: [*KMIPBatchSample.java*](KMIPBatchSample.java)
     * Usage: 
@@ -42,7 +42,7 @@
 
 1. Create and use a Symmetric Key with KMIP
 
-    This sample shows how to create a *Symmetric key* using *KMIP* via **CADP JCE** and then use that new key to encrypt data.
+    This sample shows how to create a *Symmetric key* using *KMIP* via **CADP for JAVA** and then use that new key to encrypt data.
 
     * File: [*KMIPCreateAndEncryptSample.java*](KMIPCreateAndEncryptSample.java)
     * Usage: 
@@ -223,10 +223,10 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- `CADP JCE` installed and configured.
+- `CADP for JAVA` installed and configured.
 - A `javac` compiler in path to compile the sample. 
     
 ## More Information
 
-For more information on KMIP samples, refer to the `CADP JCE User Guide`.
+For more information on KMIP samples, refer to the `CADP for JAVA User Guide`.
 

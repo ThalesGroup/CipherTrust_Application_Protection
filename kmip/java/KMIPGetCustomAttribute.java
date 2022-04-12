@@ -23,7 +23,7 @@ import com.ingrian.security.nae.NAEPublicKey;
 import com.ingrian.security.nae.NAESecretKey;
 
 /**
- * This KMIP CADP JCE sample shows how to Locate keys matching a particular criteria 
+ * This KMIP CADP for JAVA sample shows how to Locate keys matching a particular criteria 
  * and access the values  of the supplied custom KMIP attributes.This sample will only work for RSA - 2048 keys * 
  * In this sample we are fetching only user's defined CustomAttribute of key using KMIP session.
  */

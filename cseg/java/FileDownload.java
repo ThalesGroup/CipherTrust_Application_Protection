@@ -30,7 +30,7 @@ import org.apache.http.util.EntityUtils;
  * User should take care of the parameter used in this sample. If any other
  * client is used then parameter name should be same.
  * 
- * Note: To run the samples, download and add the following jars as well as CADP JCE jars into the java classpath:
+ * Note: To run the samples, download and add the following jars as well as CADP for JAVA jars into the java classpath:
  *	     a) httpclient-4.5.1.jar
  *	     b) httpcore-4.4.4.jar
  *	     c) httpmime-4.5.1.jar

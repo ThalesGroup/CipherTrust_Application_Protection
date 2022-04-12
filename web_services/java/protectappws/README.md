@@ -69,9 +69,9 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
 To use these sample files, user must have
 
-- ***CADP JCE WebService*** (*protectappws.war*) installed and configured. We assume that server is running on localhost on port 8080.
+- ***CADP for JAVA WebService*** (*protectappws.war*) installed and configured. We assume that server is running on localhost on port 8080.
 - A ***javac*** compiler to compile the samples.
-- ***protectappwsClientStub.jar*** and ***CADP JCE Jar*** files in the java classpath.
+- ***protectappwsClientStub.jar*** and ***CADP for JAVA Jar*** files in the java classpath.
 
  To run the ***Restful_EncryptSample.java*** sample, download and add the following jar files along with the above mentioned jars to the java classpath:
 
@@ -89,5 +89,5 @@ To use these sample files, user must have
 
 ## More Information
 
-For more information on *WebService*, refer to the *CADP JCE WebService User Guide*.
+For more information on *WebService*, refer to the *CADP for JAVA WebService User Guide*.
 

@@ -40,7 +40,7 @@
 
 1. Encrypt/Decrypt with AES-GCM in Local mode
 
-    This sample shows how to *encrypt and decrypt* data using `CADP JCE` in the *local mode*.
+    This sample shows how to *encrypt and decrypt* data using `CADP for JAVA` in the *local mode*.
 
     * File: [*CachingSample.java*](CachingSample.java)
     * Usage: 
@@ -50,7 +50,7 @@
 
 1. CMS Sign Data and Verify
 
-    This sample shows how to perform *CMS sign data and verify signature* using `CADP JCE`.
+    This sample shows how to perform *CMS sign data and verify signature* using `CADP for JAVA`.
 
     * File: [*CMSSignSample.java*](CMSSignSample.java)
     * Usage: 
@@ -101,7 +101,7 @@
 
 1. Encrypt/Decrypt a File
 
-    This sample shows how to *encrypt and decrypt* a file using **CADP JCE**.
+    This sample shows how to *encrypt and decrypt* a file using **CADP for JAVA**.
 
     * File: [*FileEncryptionSample.java*](FileEncryptionSample.java)
     * Usage: 
@@ -141,7 +141,7 @@
 
 1. HMAC/Verify
 
-    This sample shows how to create a *Message Authentication Code (MAC)* and how to *verify* it using **CADP JCE**.
+    This sample shows how to create a *Message Authentication Code (MAC)* and how to *verify* it using **CADP for JAVA**.
 
     * File: [*HMACSample.java*](HMACSample.java)
     * Usage: 
@@ -161,7 +161,7 @@
 
 1. Multithreading
 
-    This sample shows how to use *multiple threads* that share the *same session* using **CADP JCE**.
+    This sample shows how to use *multiple threads* that share the *same session* using **CADP for JAVA**.
 
     * File: [*MultiThreadSample.java*](MultiThreadSample.java)
     * Usage: 
@@ -181,7 +181,7 @@
 
 1. Encrypt/Decrypt a Secret Key
 
-    This sample shows how to *encrypt and decrypt* data using **CADP JCE**.
+    This sample shows how to *encrypt and decrypt* data using **CADP for JAVA**.
 
     * File: [*SecretKeyEncryptionSample.java*](SecretKeyEncryptionSample.java)
     * Usage: 
@@ -191,7 +191,7 @@
 
 1. Sign/Verify
 
-    This sample shows how to perform the *sign data* and *verify signature* operation using **CADP JCE**.
+    This sample shows how to perform the *sign data* and *verify signature* operation using **CADP for JAVA**.
 
     * File: [*SignSample.java*](SignSample.java)
     * Usage: 
@@ -201,7 +201,7 @@
 
 1. Utility to do various Cryptographic and Key Operations
 
-    This sample is used to perform various *crypto* and *key management* operations offered by **CADP JCE**.
+    This sample is used to perform various *crypto* and *key management* operations offered by **CADP for JAVA**.
 
     * File: [*CryptoTool.java*](CryptoTool.java)
     * Usage: 
@@ -279,9 +279,9 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- `CADP JCE` installed and configured.
+- `CADP for JAVA` installed and configured.
 - A `javac` compiler in path to compile the sample. 
     
 ## More Information
 
-For more information on CADP JCE and samples, refer to the `CADP JCE User Guide`.
+For more information on CADP for JAVA and samples, refer to the `CADP for JAVA User Guide`.
