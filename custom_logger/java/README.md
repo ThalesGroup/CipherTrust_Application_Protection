@@ -14,7 +14,7 @@
 
 1. Using a Custom Logger
 
-    This sample shows how to create a *Message Authentication Code(MAC)* and how to *verify* it using the **CADP JCE Custom Logging** configurations.
+    This sample shows how to create a *Message Authentication Code(MAC)* and how to *verify* it using the **CADP for JAVA Custom Logging** configurations.
 
     **Note:** *JavaUtilLogger* class provides the custom logging configurations. The *CustomLoggerSample* class will use these custom configurations to log the messages in the log file or on the console.
 
@@ -30,10 +30,10 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have
 
-- `CADP JCE` installed and configured.
+- `CADP for JAVA` installed and configured.
 - A `javac` compiler in path to compile the sample. 
     
 ## More Information
 
-For more information on custom/external loggers, refer to the `CADP JCE User Guide`.
+For more information on custom/external loggers, refer to the `CADP for JAVA User Guide`.
 

@@ -20,14 +20,14 @@ It *encrypts* and *decrypts* the string, and then *displays* the registered JCE 
 
 - [Apache Ant](http://ant.apache.org)
 - [Apache Tomcat](http://tomcat.apache.org) 
-- CADP JCE
+- CADP for JAVA
 - JDK 1.8 or higher
 
 ## Prerequisites
 
 To use this sample, ensure that the following conditions are met:
 
-1. **CADP JCE** must be installed. You can use the *CryptoTool* utility to verify the installation.
+1. **CADP for JAVA** must be installed. You can use the *CryptoTool* utility to verify the installation.
    
 2. NAE User and Key must be created on Key Manager. 
 
@@ -39,7 +39,7 @@ To configure servlet:
 
  	**catalina.home** - specify the location of Apache Tomcat home directory.
 
-	**ingrian.home**-  specify the location of **CADP JCE** related jar files and IngrianNAE.properties file.
+	**ingrian.home**-  specify the location of **CADP for JAVA** related jar files and CADP_for_JAVA.properties file.
 
  	**java.location** - specify the location of the Java.
 
@@ -50,7 +50,7 @@ To configure servlet:
 	    <role rolename="manager-script"/>
     	<user <username>="tomcat" <password>="tomcat" roles="manager-script"/>
 	
-3. Run the "**ant dist**" command to build the war file. This creates a dist directory in parallel to the src directory and place the sample.war file in it. By default, **CADP JCE** related jar files and IngrianNAE.properties file are copied to the WEB-INF/lib folder. 
+3. Run the "**ant dist**" command to build the war file. This creates a dist directory in parallel to the src directory and place the sample.war file in it. By default, **CADP for JAVA** related jar files and CADP_for_JAVA.properties file are copied to the WEB-INF/lib folder. 
    
 **Note:** If you don’t want these jars to be included in the WEB-INF/lib folder of sample.war file, please do the following and run "**ant dist**" command again to build the war file:
 
@@ -62,8 +62,8 @@ To configure servlet:
   	     <copy todir="${build.home}/WEB-INF/lib" file="${commonslang.jar}"/>
   	     <copy todir="${build.home}/WEB-INF/lib" file="${guava.jar}"/>
 	     <copy todir="${build.home}/WEB-INF/lib" file="${gson.jar}"/>
-         <copy todir="${build.home}/WEB-INF/lib" file="${IngrianNAE.jar}"/>
-         <copy todir="${build.home}/WEB-INF/lib" file="${IngrianNAE.properties}"/>
+         <copy todir="${build.home}/WEB-INF/lib" file="${CADP_for_JAVA.jar}"/>
+         <copy todir="${build.home}/WEB-INF/lib" file="${CADP_for_JAVA.properties}"/>
 	
 	 b) Comment out the following listener from the web/WEB-INF/web.xml file.
 	 
@@ -158,6 +158,6 @@ To shut down Tomcat:
 
 ## More Information
 
-For more information on *CADP JCE* and *CryptoTool*, refer to the *CADP JCE User Guide*.
+For more information on *CADP for JAVA* and *CryptoTool*, refer to the *CADP for JAVA User Guide*.
 
 For more information on Security Manager, click on the link: [Security Manager](https://tomcat.apache.org/tomcat-7.0-doc/security-manager-howto.html)

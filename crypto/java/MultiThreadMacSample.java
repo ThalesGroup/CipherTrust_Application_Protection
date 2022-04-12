@@ -8,7 +8,7 @@ import java.security.Security;
 
 import java.security.SecureRandom;
 
-// CADP JCE specific classes.
+// CADP for JAVA specific classes.
 import com.ingrian.security.nae.MACValue;
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEMac;
@@ -16,7 +16,7 @@ import com.ingrian.security.nae.NAESession;
 import com.ingrian.security.nae.IngrianProvider;
 /**
  * This Mac sample shows how to use multiple threads that share
- * the same session using CADP JCE.
+ * the same session using CADP for JAVA.
  */
 
 public class MultiThreadMacSample extends Thread{ 

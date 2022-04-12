@@ -21,7 +21,7 @@ import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEParameterSpec;
 
 /*
- * Sample KMIP program to demonstrate CADP JCE support for 
+ * Sample KMIP program to demonstrate CADP for JAVA support for 
 
  * KMIP managed object lifecycle using the KMIP State
  * attribute and associated date attributes. 

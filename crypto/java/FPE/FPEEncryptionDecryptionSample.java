@@ -12,13 +12,13 @@ import javax.crypto.spec.IvParameterSpec;
 
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.NAEIvAndTweakDataParameter;
-//CADP JCE specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAESecureRandom;
 import com.ingrian.security.nae.NAESession;
 
 /**
- * This sample shows how to encrypt and decrypt data using CADP JCE.
+ * This sample shows how to encrypt and decrypt data using CADP for JAVA.
  *
  */
 public class FPEEncryptionDecryptionSample 

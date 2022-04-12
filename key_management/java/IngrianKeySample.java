@@ -20,14 +20,14 @@ import com.ingrian.security.nae.KeyExportData;
 import com.ingrian.security.nae.KeyInfoData;
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEParameterSpec;
-//CADP JCE specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEPermission;
 import com.ingrian.security.nae.NAESecretKey;
 import com.ingrian.security.nae.NAESecureRandom;
 import com.ingrian.security.nae.NAESession;
 
 /**
- * This sample shows how to use additional key features defined by CADP JCE:
+ * This sample shows how to use additional key features defined by CADP for JAVA:
  * create an AES key with custom attributes; add and delete this key's custom 
  * attributes; create new version of that key on NAE server; modify key version of that key.
  */

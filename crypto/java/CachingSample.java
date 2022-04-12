@@ -17,7 +17,7 @@ import com.ingrian.internal.cache.NAECachedKey;
 import com.ingrian.internal.cache.PersistentCache;
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.LocalKey;
-//CADP JCE specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEKeyCachePassphrase;
 import com.ingrian.security.nae.NAESession;
@@ -25,7 +25,7 @@ import com.ingrian.security.nae.NAESessionInterface;
 
 
 /**
- * This sample shows how to encrypt and decrypt data using CADP JCE in local mode.
+ * This sample shows how to encrypt and decrypt data using CADP for JAVA in local mode.
  * Note: Persistent cache and symmetric cache should be enabled in the IngrainNAE.properties file.
  */
 

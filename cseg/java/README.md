@@ -31,9 +31,9 @@
 All the Java samples are compiled and tested using ***JDK version 1.8.0_111***.
 
 To use these sample files, user must have:
-- User must have `CADP JCE CSEG WebService` (*safenetcloud.war*) installed and configured.
+- User must have `CADP for JAVA CSEG WebService` (*safenetcloud.war*) installed and configured.
 - A `javac` compiler to compile the samples.
-- *Download and add* the following jar files along with `CADP JCE Jar` files to the java classpath  :
+- *Download and add* the following jar files along with `CADP for JAVA Jar` files to the java classpath  :
 	- `httpclient-4.5.1.jar`
     - `httpcore-4.4.4.jar`
     - `httpmime-4.5.1.jar`
@@ -41,4 +41,4 @@ To use these sample files, user must have:
 
 ## More Information
 
-For more information on CSEG WebService and samples, refer to the `CADP JCE CSEG WebService User Guide`.
+For more information on CSEG WebService and samples, refer to the `CADP for JAVA CSEG WebService User Guide`.

@@ -27,12 +27,12 @@ All the Java samples are compiled and tested using ***JDK version 1.8.0_111*** .
 
 To use this sample file, user must have
 
-- **CADP JCE** installed and configured.
+- **CADP for JAVA** installed and configured.
 - A ***javac*** compiler to compile the sample.
-- ***CADP JCE Jar*** files in the java classpath.
+- ***CADP for JAVA Jar*** files in the java classpath.
     
 
 ## More Information
 
-For more information on CADP JCE and samples, refer to the *CADP JCE User Guide*.
+For more information on CADP for JAVA and samples, refer to the *CADP for JAVA User Guide*.
    

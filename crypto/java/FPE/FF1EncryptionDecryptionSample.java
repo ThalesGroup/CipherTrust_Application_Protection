@@ -10,7 +10,7 @@ import java.security.Security;
 
 import javax.crypto.Cipher;
 
-//CADP JCE specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.FPECharset;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
@@ -76,7 +76,7 @@ public class FF1EncryptionDecryptionSample
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 			
 			
-			// For legacy CADP JCE clients uncomment following.
+			// For legacy CADP for JAVA clients uncomment following.
 			//String algorithm = "FPE/FF1/CARD10";
 			// FF1 algorithm which supports both ACVP and NIST test vectors.
 			String algorithm = "FPE/FF1v2/CARD10";
@@ -102,7 +102,7 @@ public class FF1EncryptionDecryptionSample
 
 
 			//sample 2 custom character set
-			// For legacy CADP JCE clients uncomment following.
+			// For legacy CADP for JAVA clients uncomment following.
 			//String algorithm = "FPE/FF1/UNICODE";
 			// FF1 algorithm which supports both ACVP and NIST test vectors.
 			algorithm = "FPE/FF1v2/UNICODE";
