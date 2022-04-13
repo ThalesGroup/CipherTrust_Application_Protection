@@ -23,9 +23,12 @@ public class TokenServiceVaultlessSample {
 		/*
 		 * Create TokenSpec for the tokenization and detokenization. The same tokenSpec
 		 * should be used for tokenization and detokenization Prepare the tokenSpec :-
-		 * 1. Format 2. LuhnCheck : Note on setting this value either true or false,
-		 * input data must have luhndigit as last digit 3. GroupID 4. ClearTextSenitive
-		 * 5. NonIdempotent For definition and possible values.
+		 * 1. Format 
+		 * 2. LuhnCheck : Note on setting this value either true or false,
+		 * input data must have luhndigit as last digit 
+		 * 3. GroupID 
+		 * 4. ClearTextSenitive
+		 * 5. NonIdempotent.
 		 */
 		TokenSpec tokenSpec = new TokenSpec();
 

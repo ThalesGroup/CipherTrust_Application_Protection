@@ -2,7 +2,7 @@
  * Before Running this sample,
  * 
  * "UnicodeCodePointProperties" parameter in SafeNetVaultlessTokenization.properties file should be set to 
- * absolute Path of unicode.properties file.
+ * absolute path of unicode.properties file.
  * 
  * Scope and undefined Ranges specified in unicode.properties file have codepoint values for Armenian Unicode block.
  * 

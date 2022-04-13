@@ -2,10 +2,10 @@
  * Before Running this sample,
  * 
  * "UnicodeCodePointProperties" parameter in SafeNetVaultlessTokenization.properties file should be set to 
- * absolute Path of unicode.properties file.
+ * absolute path of unicode.properties file.
  * 
  * "Unicode.FromFile" parameter in unicode.properties file should be set to 
- * absolute Path of vietnamese.unicode file.
+ * absolute path of vietnamese.unicode file.
  * 
  * vietnamese.unicode file contains unicode codepoints for Vietnamese language.
  * 
