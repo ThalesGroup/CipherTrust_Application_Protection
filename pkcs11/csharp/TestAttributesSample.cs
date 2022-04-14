@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Collections.Generic;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class TestAttributesSample : ISample
-    {        
+    {
         public bool Run(object[] inputParams)
         {
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
@@ -39,14 +36,14 @@ namespace Vormetric.Pkcs11Sample
                     session.Login(CKU.CKU_USER, pin);
                     // Generate key pair
                     IObjectHandle keyHandle = null;
-                    IObjectHandle privateKeyHandle = null;                    
+                    IObjectHandle privateKeyHandle = null;
 
                     List<IObjectAttribute> getAttributes;
 
-                    List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();                    
+                    List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();
                     findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
-                    
-                    if(symmetric == false)
+
+                    if (symmetric == false)
                         findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
                     else
                         findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
@@ -76,13 +73,14 @@ namespace Vormetric.Pkcs11Sample
                         {
                             Console.WriteLine("Key: " + keyLabel + " Not generated! ");
                         }
-                    }                    
+                    }
 
                     if (symmetric == false)
                     {
                         if (keyHandle == null)
                             Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel);
-                        else {
+                        else
+                        {
 
                             findAttributes = new List<IObjectAttribute>();
                             findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PRIVATE_KEY));
@@ -113,7 +111,8 @@ namespace Vormetric.Pkcs11Sample
                         attrNames.Add(CKA.CKA_PRIVATE_EXPONENT);
                         attrNames.Add(CKA.CKA_PUBLIC_EXPONENT);
                     }
-                    else {
+                    else
+                    {
                         attrNames.Add(CKA.CKA_LABEL);
                         attrNames.Add(CKA.CKA_CLASS);
                         attrNames.Add(CKA.CKA_KEY_TYPE);
@@ -150,7 +149,7 @@ namespace Vormetric.Pkcs11Sample
                         Console.WriteLine("Attributes of private key:");
                         getAttributes = session.GetAttributeValue(privateKeyHandle, attrNames);
                         Helpers.PrintAttributes(getAttributes);
-                    }                    
+                    }
 
                     session.Logout();
                 }
@@ -158,6 +157,6 @@ namespace Vormetric.Pkcs11Sample
             return true;
         }
 
-        
+
     }
 }

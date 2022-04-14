@@ -20,7 +20,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-CADP_PKCS11_Samples.exe -p pin1234# -k testkey1 -t 1
+CADP_PKCS11_Samples.exe -p username:password -k testkey1 -t 1
 
 
 
@@ -29,7 +29,7 @@ CADP_PKCS11_Samples.exe -p pin1234# -k testkey1 -t 1
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
+dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
 
 ## Option for various command
 ### Choices for the -t option:
@@ -67,7 +67,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
 ### Choices for the -n option:
      false ... no-delete is not active, hence delete the key as usual
      true ... no-delete enabled, thus deletion of the key is blocked.
-### Choices for the -h option:
+### Choices for the -H option:
      v1.5 ... use version 1.5 header
      v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code
      v2.1 ... use version 2.1 header

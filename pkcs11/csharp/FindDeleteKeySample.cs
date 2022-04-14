@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Collections.Generic;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
-    class FindDeleteKeySample: ISample
+    class FindDeleteKeySample : ISample
     {
         const uint KeyStateDeactivated = 3;
 
@@ -23,12 +20,12 @@ namespace Vormetric.Pkcs11Sample
                 using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
-                    string keyLabel = Convert.ToString(inputParams[1]);                   
+                    string keyLabel = Convert.ToString(inputParams[1]);
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
                     IObjectHandle foundKey = Helpers.FindKey(session, keyLabel);
-                    
+
                     if (foundKey == null)
                         return false;
 
@@ -38,7 +35,7 @@ namespace Vormetric.Pkcs11Sample
 
                     session.DestroyObject(foundKey);
                     Console.WriteLine(keyLabel + " key deleted!");
-                    
+
                     session.Logout();
                 }
             }

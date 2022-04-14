@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class KeypairSignSample : ISample
     {
@@ -14,20 +12,20 @@ namespace Vormetric.Pkcs11Sample
 
         public bool Run(object[] inputParams)
         {
-            string pin          = Convert.ToString(inputParams[0]);
+            string pin = Convert.ToString(inputParams[0]);
             string keyPairLabel = Convert.ToString(inputParams[1]);
 
             string opName = "RSA";
             string headermode = null;
             bool nodelete = false;
             if (inputParams.Length >= 3)
-                opName       = Convert.ToString(inputParams[2]);
+                opName = Convert.ToString(inputParams[2]);
 
             if (inputParams.Length >= 4)
-                headermode   = Convert.ToString(inputParams[3]);
+                headermode = Convert.ToString(inputParams[3]);
 
             if (inputParams.Length >= 5)
-                nodelete     = Convert.ToBoolean(inputParams[4]);
+                nodelete = Convert.ToBoolean(inputParams[4]);
 
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
@@ -44,25 +42,26 @@ namespace Vormetric.Pkcs11Sample
                     Net.Pkcs11Interop.Common.CKM ulHeaderSgn = 0;
                     Net.Pkcs11Interop.Common.CKM ulHeaderVfy = 0;
 
-                    if      (headermode==null)             ulHeaderSgn = ulHeaderVfy = 0;
-                    else if (headermode.Equals("v2.1"))    {ulHeaderSgn = CKM.CKM_THALES_V21HDR|CKM.CKM_VENDOR_DEFINED; ulHeaderVfy = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED;}
-                    else if (headermode.Equals("v2.7"))    {ulHeaderSgn = CKM.CKM_THALES_V27HDR|CKM.CKM_VENDOR_DEFINED; ulHeaderVfy = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED;}
+                    if (headermode == null) ulHeaderSgn = ulHeaderVfy = 0;
+                    else if (headermode.Equals("v2.1")) { ulHeaderSgn = CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderVfy = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
+                    else if (headermode.Equals("v2.7")) { ulHeaderSgn = CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderVfy = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
 
                     if (string.IsNullOrEmpty(opName))
                         opName = "RSA";
 
-                    if      (opName.Equals("SHA512-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA512_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA512_HMAC);}
-                    else if (opName.Equals("SHA384-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA384_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA384_HMAC);}
-                    else if (opName.Equals("SHA256-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA256_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA256_HMAC);}
-                    else if (opName.Equals("SHA224-HMAC")) {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA224_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA224_HMAC);}
-                    else if (opName.Equals("SHA1-HMAC"))   {mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn|CKM.CKM_SHA_1_HMAC);  mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy|CKM.CKM_SHA_1_HMAC); }
-                    else if (opName.Equals("RSA"))         mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
-                    else {
-                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, and RSA are supported"); 
+                    if (opName.Equals("SHA512-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA512_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA512_HMAC); }
+                    else if (opName.Equals("SHA384-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA384_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA384_HMAC); }
+                    else if (opName.Equals("SHA256-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA256_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA256_HMAC); }
+                    else if (opName.Equals("SHA224-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA224_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA224_HMAC); }
+                    else if (opName.Equals("SHA1-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA_1_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA_1_HMAC); }
+                    else if (opName.Equals("RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
+                    else
+                    {
+                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, and RSA are supported");
                         return false;
                     }
 
-		            session.Login(CKU.CKU_USER, pin);
+                    session.Login(CKU.CKU_USER, pin);
 
                     try
                     {
@@ -75,7 +74,7 @@ namespace Vormetric.Pkcs11Sample
                             privateKeyHandle = Helpers.FindKey(session, keyPairLabel, (uint)CKO.CKO_PRIVATE_KEY);
                             if (publicKeyHandle != null)
                             {
-                                Console.WriteLine(keyPairLabel + " public key found! Key handle: "+ publicKeyHandle.ObjectId);
+                                Console.WriteLine(keyPairLabel + " public key found! Key handle: " + publicKeyHandle.ObjectId);
                                 Console.WriteLine(keyPairLabel + " private key found! Key handle: " + privateKeyHandle.ObjectId);
                             }
                             else
@@ -119,7 +118,7 @@ namespace Vormetric.Pkcs11Sample
                             else
                                 Console.WriteLine("Signature is NOT valid!");
                         }
-                        
+
                         if (publicKeyHandle == privateKeyHandle)
                         {
                             List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
@@ -131,11 +130,12 @@ namespace Vormetric.Pkcs11Sample
                         if (nodelete == false)
                         {
                             session.DestroyObject(publicKeyHandle);
-                            Console.WriteLine("KeyPair "+ keyPairLabel + " has been deleted from Key Manager.");
-                        }                        
+                            Console.WriteLine("KeyPair " + keyPairLabel + " has been deleted from Key Manager.");
+                        }
                         session.Logout();
                     }
-                    catch (Pkcs11Exception pke) {
+                    catch (Pkcs11Exception pke)
+                    {
                         Console.WriteLine(pke.Message);
                     }
                 }
