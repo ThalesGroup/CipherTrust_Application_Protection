@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
-    public class DigestSample: ISample
+    public class DigestSample : ISample
     {
         public bool Run(object[] inputParams)
         {
@@ -52,7 +48,9 @@ namespace Vormetric.Pkcs11Sample
                     {
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256);
                         opName = "sha256";
-                    } else {
+                    }
+                    else
+                    {
                         Console.WriteLine("Only sha1/224/256/384/512 and md5 allowed. This input is case sensitive. hmac not supported in C#.");
                         return false;
                     }

@@ -1,15 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.IO;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
-    public class DigestMultiPartSample: ISample
+    public class DigestMultiPartSample : ISample
     {
         public bool Run(object[] inputParams)
         {
@@ -76,12 +72,12 @@ namespace Vormetric.Pkcs11Sample
                         Console.WriteLine("Digest Text: " + ConvertUtils.BytesToHexString(digestBytes));
                     }
 
-                    session.Logout();                 
+                    session.Logout();
                 }
             }
             return true;
         }
 
-       
+
     }
 }
