@@ -128,7 +128,11 @@ namespace CADP.Pkcs11Sample
             List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, keyType));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
-            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
+			
+			//The RSA keys handle which is retrieved in first findkey (privatekeyhandle) is internally saved by pcks11 in map and 
+			//when again findkey (publickeyhandle) is applied on it these values get overrides.
+			//So commenting below code which was added a special case for one specific customer.
+            //objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
