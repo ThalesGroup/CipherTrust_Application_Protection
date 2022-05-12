@@ -59,7 +59,6 @@ dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
 ### Choices for the -g option:
      0 ... generate a versioned key
      1 ... rotate a versioned key
-     2 ... migrate a non-versioned key to a versioned key
      3 ... generate a non-versioned key
 ### Choices for the -m (metadata) option:
      false ... don't add metadata
@@ -74,14 +73,14 @@ dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
      v2.7 ... use version 2.7 header
      
 
-The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files.
+The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files, 
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 
 Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings, Native PKCS11 library path and helper functions, respectively.
 ## Native PKCS11 library path(Default path)
 ### For windows:
     C:\Program Files\CipherTrust\CADP_for_C\libcadp_pkcs11.dll
 ### For Linux:
-    /opt/CipherTrust/CADP for C/libcadp_pkcs11.so
+    /opt/CipherTrust/CADP_for_C/libcadp_pkcs11.so
     
 User can modify the native PKCS11 library path according to their platform. 
 
