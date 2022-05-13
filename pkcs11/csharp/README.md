@@ -59,6 +59,7 @@ dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
 ### Choices for the -g option:
      0 ... generate a versioned key
      1 ... rotate a versioned key
+     2 ... migrate a non-versioned key to a versioned key (Not Supported)
      3 ... generate a non-versioned key
 ### Choices for the -m (metadata) option:
      false ... don't add metadata
