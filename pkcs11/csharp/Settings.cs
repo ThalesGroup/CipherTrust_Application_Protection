@@ -23,18 +23,14 @@
  *  For more information, please contact JWC s.r.o. at info@pkcs11interop.net
  */
 
-using System;
-using System.IO;
-using System.Reflection;
 using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.Logging;
 using LLA40 = Net.Pkcs11Interop.LowLevelAPI40;
 using LLA41 = Net.Pkcs11Interop.LowLevelAPI41;
 using LLA80 = Net.Pkcs11Interop.LowLevelAPI80;
 using LLA81 = Net.Pkcs11Interop.LowLevelAPI81;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     /// <summary>
     /// Test settings.
@@ -48,7 +44,7 @@ namespace Vormetric.Pkcs11Sample
         public static Pkcs11InteropFactories Factories = new Pkcs11InteropFactories();
         public static string Pkcs11LibraryPath = string.Empty;
 
-         /// <summary>
+        /// <summary>
         /// Type of application that will be using PKCS#11 library.
         /// When set to AppType.MultiThreaded unmanaged PKCS#11 library performs locking to ensure thread safety.
         /// </summary>
@@ -146,7 +142,7 @@ namespace Vormetric.Pkcs11Sample
             }
             else if (Platform.IsLinux)
             {
-                Pkcs11LibraryPath = @"/opt/vormetric/DataSecurityExpert/agent/pkcs11/lib/libvorpkcs11.so";
+                Pkcs11LibraryPath = @"/opt/CipherTrust/CADP for C/libcadp_pkcs11.so";
             }
             // Convert strings to byte arrays
             SecurityOfficerPinArray = ConvertUtils.Utf8StringToBytes(SecurityOfficerPin);
@@ -163,9 +159,9 @@ namespace Vormetric.Pkcs11Sample
 
             PrivateKeyUri = pkcs11UriBuilder.ToString();
 
-            
+
         }
-        
+
 
     }
 }

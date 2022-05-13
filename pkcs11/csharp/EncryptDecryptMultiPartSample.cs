@@ -1,14 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.IO;
 
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class EncryptDecryptMultiPartSample : ISample
     {
@@ -24,7 +20,7 @@ namespace Vormetric.Pkcs11Sample
                 {
                     string pin = Convert.ToString(inputParams[0]);
                     string keyLabel = Convert.ToString(inputParams[1]);
-                    string pathSource = Convert.ToString(inputParams[2]);                    
+                    string pathSource = Convert.ToString(inputParams[2]);
                     bool needMetaData = Convert.ToBoolean(inputParams[3]); // expects 'true' or 'false'
                     string headerMode = Convert.ToString(inputParams[4]);
 
@@ -33,13 +29,14 @@ namespace Vormetric.Pkcs11Sample
 
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
-                      
+
                     IObjectHandle foundKey = Helpers.FindKey(session, keyLabel);
-                    if (foundKey == null) {
+                    if (foundKey == null)
+                    {
                         uint keySize = 32;
                         foundKey = Helpers.GenerateKey(session, keyLabel, keySize);
                     }
-                        
+
 
                     byte[] iv = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
@@ -49,63 +46,67 @@ namespace Vormetric.Pkcs11Sample
                     if (headerMode == null || headerMode.Length < 4) headerMode = "none";
                     switch (headerMode[3])
                     {
-                        case '5': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED, iv); 
-                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
-                                  break;
-                        case '1': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED, iv);
-                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
-                                  break;
-                        case '7': encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED, iv);
-                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv); 
-                                  break;
+                        case '5':
+                            encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            break;
+                        case '1':
+                            encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            break;
+                        case '7':
+                            encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED, iv);
+                            break;
                         case 'e': // last letter of 'none'
-                        default:  encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv); 
-                                  decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv); 
-                                  break;
+                        default:
+                            encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv);
+                            decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD, iv);
+                            break;
                     }
-                    
+
                     // Specify a file to read from and to create. 
                     string pathCipherSource = @".\TestEncryptedResult.dat";
                     string pathDeCipherSource = @".\TestDecryptedResult.dat";
-                    
+
                     // META data string must start with "META:"
                     byte[] metaData = ConvertUtils.Utf8StringToBytes("META: This is the meta data to put into the log");
-                    
+
                     using (FileStream sourceFileStream = new FileStream(pathSource, FileMode.Open, FileAccess.Read),
                     cipherSourceStream = new FileStream(pathCipherSource, FileMode.Create, FileAccess.Write))
                     {
                         // Encrypt data multi part
                         Console.WriteLine("Encrypted File: " + pathSource + " into " + pathCipherSource);
-                        if ( needMetaData)
+                        if (needMetaData)
                             session.Encrypt(encmechanism, foundKey, sourceFileStream, cipherSourceStream, metaData);
                         else
                             session.Encrypt(encmechanism, foundKey, sourceFileStream, cipherSourceStream);
                     }
-  
-                    
+
+
                     using (FileStream decipherSourceStream = new FileStream(pathDeCipherSource, FileMode.Create, FileAccess.Write),
                     cipherSourceFileStream = new FileStream(pathCipherSource, FileMode.Open, FileAccess.Read))
                     {
                         Console.WriteLine("Decrypted File: " + pathCipherSource + " into " + pathDeCipherSource);
-                        if ( needMetaData )
+                        if (needMetaData)
                             session.Decrypt(decmechanism, foundKey, cipherSourceFileStream, decipherSourceStream, metaData);
                         else
                             session.Decrypt(decmechanism, foundKey, cipherSourceFileStream, decipherSourceStream);
                     }
-                    
+
                     // now do file comparison 
-                    Console.WriteLine("Comparing source file and decrypted source file...: " );
+                    Console.WriteLine("Comparing source file and decrypted source file...: ");
 
                     // Do something interesting with decrypted data
                     if (FilesAreEqual(new FileInfo(pathSource), new FileInfo(pathDeCipherSource)))
                     {
                         Console.WriteLine("Source and Decrypted Data Matches!!!!!");
-                    }                   
+                    }
                     else
                     {
                         Console.WriteLine("Source and Decrypted Data not Matches!!!!!");
                     }
-                    session.Logout();                    
+                    session.Logout();
                 }
             }
             return true;
@@ -139,6 +140,6 @@ namespace Vormetric.Pkcs11Sample
             return true;
         }
 
-       
+
     }
 }

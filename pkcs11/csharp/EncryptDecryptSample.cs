@@ -2,21 +2,20 @@
 // EncryptDecryptSample.cs
 //
 
+using Net.Pkcs11Interop.Common;
+using Net.Pkcs11Interop.HighLevelAPI;
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
-using Net.Pkcs11Interop.HighLevelAPI;
-using System.IO;
 
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
-    public class EncryptDecryptSample: ISample
+    public class EncryptDecryptSample : ISample
     {
         const uint KeyStateDeactivated = 3;
 
@@ -63,27 +62,32 @@ namespace Vormetric.Pkcs11Sample
                     Net.Pkcs11Interop.Common.CKM ulHeaderDec = 0;
                     bool bAsymKey = false;
 
-                    if (inputParams.Length >= 2) {
+                    if (inputParams.Length >= 2)
+                    {
                         pin = Convert.ToString(inputParams[0]);
-                        keyLabel = Convert.ToString(inputParams[1]);                        
-                    } 
-                    else {
+                        keyLabel = Convert.ToString(inputParams[1]);
+                    }
+                    else
+                    {
                         Usage();
                         return false;
                     }
 
                     if (inputParams.Length >= 9) tweakStr = Convert.ToString(inputParams[8]);
 
-                    if (inputParams.Length >= 8) {
+                    if (inputParams.Length >= 8)
+                    {
                         utfmode = Convert.ToString(inputParams[7]);
                         encoding = getUTFEncoding(utfmode, out umode);
                     }
 
-                    if (inputParams.Length >= 7) {
-                            // how is the character set loaded? c...from the command line  r...from a file containing ranges  l...from a file containing the character set
-                        char cset = Convert.ToChar(inputParams[5]); 
+                    if (inputParams.Length >= 7)
+                    {
+                        // how is the character set loaded? c...from the command line  r...from a file containing ranges  l...from a file containing the character set
+                        char cset = Convert.ToChar(inputParams[5]);
 
-                        if (cset == 'c') {
+                        if (cset == 'c')
+                        {
                             charSet = Convert.ToString(inputParams[6]);
                             Console.WriteLine("character set specified on command line: '" + charSet + "'");
                         }
@@ -108,24 +112,24 @@ namespace Vormetric.Pkcs11Sample
                     if (inputParams.Length >= 5)
                     {
                         inputFileName = Convert.ToString(inputParams[4]);
-					}
+                    }
 
                     if (inputParams.Length >= 4)
                     {
                         headermode = Convert.ToString(inputParams[3]);
-                        if      (headermode.Equals("v1.5"))       {ulHeaderEnc = CKM.CKM_THALES_V15HDR|CKM.CKM_VENDOR_DEFINED;                       ulHeaderDec = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED;}
-                        else if (headermode.Equals("v1.5base64")) {ulHeaderEnc = CKM.CKM_THALES_V15HDR|CKM.CKM_VENDOR_DEFINED|CKM.CKM_THALES_BASE64; ulHeaderDec = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED|CKM.CKM_THALES_BASE64;}
-                        else if (headermode.Equals("v2.1"))       {ulHeaderEnc = CKM.CKM_THALES_V21HDR|CKM.CKM_VENDOR_DEFINED;                       ulHeaderDec = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED;}
-                        else if (headermode.Equals("v2.7"))       {ulHeaderEnc = CKM.CKM_THALES_V27HDR|CKM.CKM_VENDOR_DEFINED;                       ulHeaderDec = CKM.CKM_THALES_ALLHDR|CKM.CKM_VENDOR_DEFINED;}
-                        else                                      {ulHeaderEnc = ulHeaderDec = 0;}
-					}
+                        if (headermode.Equals("v1.5")) { ulHeaderEnc = CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderDec = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
+                        else if (headermode.Equals("v1.5base64")) { ulHeaderEnc = CKM.CKM_THALES_V15HDR | CKM.CKM_VENDOR_DEFINED | CKM.CKM_THALES_BASE64; ulHeaderDec = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED | CKM.CKM_THALES_BASE64; }
+                        else if (headermode.Equals("v2.1")) { ulHeaderEnc = CKM.CKM_THALES_V21HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderDec = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
+                        else if (headermode.Equals("v2.7")) { ulHeaderEnc = CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderDec = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
+                        else { ulHeaderEnc = ulHeaderDec = 0; }
+                    }
 
                     if (inputParams.Length >= 3)
                     {
                         opName = Convert.ToString(inputParams[2]);
                     }
 
-                    if(string.IsNullOrEmpty(opName))
+                    if (string.IsNullOrEmpty(opName))
                         opName = "CBC_PAD";
 
                     IObjectHandle foundSymmKey = null;
@@ -151,7 +155,8 @@ namespace Vormetric.Pkcs11Sample
                         publicKey = Helpers.FindKey(session, keyLabel, (uint)CKO.CKO_PUBLIC_KEY);
                         privateKey = Helpers.FindKey(session, keyLabel, (uint)CKO.CKO_PRIVATE_KEY);
 
-                        if(publicKey == null || privateKey == null) {
+                        if (publicKey == null || privateKey == null)
+                        {
                             // Generate key pair
                             Helpers.GenerateKeyPair(session, out publicKey, out privateKey, keyLabel); // password has been removed
                             Console.WriteLine("Asymmetric key " + keyLabel + " generated!");
@@ -177,8 +182,8 @@ namespace Vormetric.Pkcs11Sample
                                 return false;
                             }
                         }
-                    }                                      
-                    
+                    }
+
                     if (String.IsNullOrEmpty(inputFileName))
                     {
                         if (!opName.Equals("FPE") && !opName.Equals("FF1"))
@@ -192,7 +197,7 @@ namespace Vormetric.Pkcs11Sample
                             slot.CloseSession(session);
                             return false;
                         }
-                    }                    
+                    }
 
                     if (opName.Equals("FPE") || opName.Equals("FF1"))
                     {
@@ -201,8 +206,8 @@ namespace Vormetric.Pkcs11Sample
                             //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
                             encoding = getUTFEncoding(utfmode, out umode);
                             charSetArray = encoding.GetBytes(charSet);
-                            if (umode == 0) radix = (ushort) charSet.Length;
-                            else            Console.WriteLine("Please only specify an ASCII character set on the command line.");
+                            if (umode == 0) radix = (ushort)charSet.Length;
+                            else Console.WriteLine("Please only specify an ASCII character set on the command line.");
                         }
                         else if (charsetFileName == null)
                         {
@@ -336,7 +341,8 @@ namespace Vormetric.Pkcs11Sample
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FPE, niv);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FPE, niv);
                     }
-                    else if (opName.Equals("FF1")) {
+                    else if (opName.Equals("FF1"))
+                    {
                         byte[] tweak = encoding.GetBytes(tweakStr);
                         niv = new byte[tweak.Length + charSetArray.Length + 11];
 
@@ -369,28 +375,28 @@ namespace Vormetric.Pkcs11Sample
                     // Specify encryption mechanism with initialization vector as parameter
                     else if (opName.Equals("CBC_PAD"))
                     {
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD|ulHeaderEnc, iv);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC_PAD | ulHeaderDec, iv);
                     }
                     else if (opName.Equals("CBC"))
                     {
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC|ulHeaderEnc, iv);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC | ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CBC | ulHeaderDec, iv);
                     }
                     else if (opName.Equals("CTR"))
                     {
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR|ulHeaderEnc, iv);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR|ulHeaderDec, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR | ulHeaderEnc, iv);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_CTR | ulHeaderDec, iv);
                     }
                     else if (opName.Equals("ECB"))
                     {
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB|ulHeaderEnc);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB|ulHeaderDec);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB | ulHeaderEnc);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB | ulHeaderDec);
                     }
                     else if (opName.Equals("RSA"))
                     {
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS, iv);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS, iv);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
                     }
                     else
                     {
@@ -441,7 +447,7 @@ namespace Vormetric.Pkcs11Sample
                                 try
                                 {
                                     // Encrypt data 
-                                    if(bAsymKey == false)
+                                    if (bAsymKey == false)
                                         encryptedData = session.Encrypt(encmechanism, foundSymmKey, sourceData);
                                     else
                                         encryptedData = session.Encrypt(encmechanism, publicKey, sourceData);
@@ -450,7 +456,7 @@ namespace Vormetric.Pkcs11Sample
                                     // Do something interesting with encrypted data
 
                                     // Decrypt data
-                                    if(bAsymKey == false)
+                                    if (bAsymKey == false)
                                         decryptedData = session.Decrypt(decmechanism, foundSymmKey, encryptedData);
                                     else
                                         decryptedData = session.Decrypt(decmechanism, privateKey, encryptedData);
@@ -528,7 +534,7 @@ namespace Vormetric.Pkcs11Sample
 
                     session.Logout();
                 }
-                
+
             }
             return true;
         }

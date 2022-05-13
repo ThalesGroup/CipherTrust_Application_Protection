@@ -20,7 +20,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-CADP_PKCS11_Samples.exe -p pin1234# -k testkey1 -t 1
+CADP_PKCS11_Samples.exe -p username:password -k testkey1 -t 1
 
 
 
@@ -29,7 +29,7 @@ CADP_PKCS11_Samples.exe -p pin1234# -k testkey1 -t 1
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])`
 
 #### Example
-dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
+dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
 
 ## Option for various command
 ### Choices for the -t option:
@@ -59,7 +59,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
 ### Choices for the -g option:
      0 ... generate a versioned key
      1 ... rotate a versioned key
-     2 ... migrate a non-versioned key to a versioned key
+     2 ... migrate a non-versioned key to a versioned key (Not Supported)
      3 ... generate a non-versioned key
 ### Choices for the -m (metadata) option:
      false ... don't add metadata
@@ -67,21 +67,21 @@ dotnet CADP_PKCS11_Samples.dll -p pin1234# -k testkey1 -t 1
 ### Choices for the -n option:
      false ... no-delete is not active, hence delete the key as usual
      true ... no-delete enabled, thus deletion of the key is blocked.
-### Choices for the -h option:
+### Choices for the -H option:
      v1.5 ... use version 1.5 header
      v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code
      v2.1 ... use version 2.1 header
      v2.7 ... use version 2.7 header
      
 
-The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files.
+The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files, 
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 
 Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings, Native PKCS11 library path and helper functions, respectively.
 ## Native PKCS11 library path(Default path)
 ### For windows:
     C:\Program Files\CipherTrust\CADP_for_C\libcadp_pkcs11.dll
 ### For Linux:
-    /opt/CipherTrust/CADP for C/libcadp_pkcs11.so
+    /opt/CipherTrust/CADP_for_C/libcadp_pkcs11.so
     
 User can modify the native PKCS11 library path according to their platform. 
 

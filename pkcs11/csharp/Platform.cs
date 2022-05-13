@@ -2,7 +2,7 @@
 using System.IO;
 
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     /// <summary>
     /// Class for runtime platform detection
@@ -53,7 +53,7 @@ namespace Vormetric.Pkcs11Sample
         {
             // Supported platform has already been detected
             if (_isWindows || _isLinux)
-                return;          
+                return;
 
             string windir = Environment.GetEnvironmentVariable("windir");
             if (!string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir))
