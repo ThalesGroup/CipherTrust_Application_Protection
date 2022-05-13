@@ -1,8 +1,8 @@
-﻿using System;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
+using System;
 
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class Program
     {
@@ -56,8 +56,7 @@ namespace Vormetric.Pkcs11Sample
             Console.WriteLine("\t v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code");
             Console.WriteLine("\t v2.1 ... use version 2.1 header");
             Console.WriteLine("\t v2.7 ... use version 2.7 header");
-            Console.WriteLine("");
-            Console.WriteLine(" Note: Please make sure to install the Vormetric Key Agent,");
+            Console.WriteLine("");          
             Console.WriteLine("Note: In case of success exit value is 0, otherwise -1");
             Environment.Exit(-1);
         }

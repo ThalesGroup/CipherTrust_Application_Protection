@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading.Tasks;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class UnwrapImportKeySample : ISample
     {
@@ -17,9 +13,9 @@ namespace Vormetric.Pkcs11Sample
 
         char[] defKeyValue =  {
                  't','h','i','s',' ','i','s',' ',
-       	         'm','y',' ','s','a','m','p','l',
+                    'm','y',' ','s','a','m','p','l',
                  'e',' ','k','e','y',' ','d','a',
-       	         't','a',' ','5','4','3','2','1' };
+                    't','a',' ','5','4','3','2','1' };
         public bool Run(object[] inputParams)
         {
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
@@ -31,8 +27,8 @@ namespace Vormetric.Pkcs11Sample
                 using (ISession session = slot.OpenSession(SessionType.ReadWrite))
                 {
                     string pin = Convert.ToString(inputParams[0]);
-                    uint keySize = 32;                    
-                    
+                    uint keySize = 32;
+
                     string keyLabel = Convert.ToString(inputParams[1]);
                     uint keyClass = Convert.ToUInt32(inputParams[2]);
 
@@ -52,7 +48,7 @@ namespace Vormetric.Pkcs11Sample
 
                     byte[] wrappedKey = new byte[flength];
 
-                    while( (readCnt = fs.Read(wrappedKey, sumRead, flength-sumRead)) > 0)
+                    while ((readCnt = fs.Read(wrappedKey, sumRead, flength - sumRead)) > 0)
                     {
                         sumRead += readCnt;
                     }
@@ -72,18 +68,18 @@ namespace Vormetric.Pkcs11Sample
                     }
 
                     IObjectHandle unwrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyClass);
-                    
+
                     List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
 
                     if (wrappingKeyClass != (uint)CKO.CKO_SECRET_KEY && unwrappingKey != null)
                     {
-                        mechType = (uint)CKM.CKM_RSA_PKCS | (uint)CKA.CKA_THALES_DEFINED;        
+                        mechType = (uint)CKM.CKM_RSA_PKCS | (uint)CKA.CKA_THALES_DEFINED;
                     }
 
-                    if(keyClass == (uint)CKO.CKO_SECRET_KEY)
+                    if (keyClass == (uint)CKO.CKO_SECRET_KEY)
                     {
                         // Prepare attribute template that defines search criteria
-                        
+
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
@@ -97,9 +93,9 @@ namespace Vormetric.Pkcs11Sample
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
-                        
+
                     }
-                    else if(formatType != 0)
+                    else if (formatType != 0)
                     {
                         mechType |= (uint)formatType | (uint)CKA.CKA_THALES_DEFINED;
 
@@ -111,15 +107,17 @@ namespace Vormetric.Pkcs11Sample
 
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
-                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));                       
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
                     }
 
-                    //objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
+                    //Make the key deletable
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
                     mechanism = session.Factories.MechanismFactory.Create(mechType, iv);
 
-                    if (wrappedKeyLen != 0) {
+                    if (wrappedKeyLen != 0)
+                    {
 
                         if (null == unwrappingKey)
                             unwrappingKey = session.Factories.ObjectHandleFactory.Create();

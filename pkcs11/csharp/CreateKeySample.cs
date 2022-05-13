@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
-using Net.Pkcs11Interop.HighLevelAPI.Factories;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+using System;
 
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class CreateKeySample : ISample
     {
-        
+
         public bool Run(object[] inputParams)
         {
-            
+
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
                 // Find first slot with token present
@@ -44,18 +39,15 @@ namespace Vormetric.Pkcs11Sample
                     session.Login(CKU.CKU_USER, pin);
 
                     if (nodelete == false)
-                    {                       
+                    {
                         Helpers.CleanupKey(session, keyLabel);
                     }
                     if (genAction == 2)
                     {
-                        // migrate
-                        if (!Helpers.MigrateKey(session, keyLabel, genAction))
-                            throw new Exception(keyLabel + "was not found and no migration has been done");
-                        Console.WriteLine(keyLabel + " key migrated!");
+                        throw new Exception("Migration from non-versioned key to version key not supported");
                     }
                     else
-                    {  
+                    {
                         // Generate symetric key
                         IObjectHandle generatedKey = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr); // three of four genAction cases are handled in GenerateKey
                         if (null != generatedKey)
@@ -69,7 +61,7 @@ namespace Vormetric.Pkcs11Sample
                         }
                     }
                     session.Logout();
-                }              
+                }
                 return true;
             }
         }

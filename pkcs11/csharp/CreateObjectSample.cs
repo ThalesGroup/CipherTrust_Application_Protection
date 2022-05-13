@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
-using Net.Pkcs11Interop.Common;
+﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using System;
+using System.Collections.Generic;
 
-namespace Vormetric.Pkcs11Sample
+namespace CADP.Pkcs11Sample
 {
     class CreateObjectSample : ISample
     {
@@ -30,10 +27,10 @@ namespace Vormetric.Pkcs11Sample
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
-                    Helpers.CleanupKey( session, keyLabel );
+                    Helpers.CleanupKey(session, keyLabel);
 
                     // Prepare attribute template that defines search criteria
-                    List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();                    
+                    List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
@@ -74,7 +71,7 @@ namespace Vormetric.Pkcs11Sample
 
                     Helpers.PrintAttributes(getAttributes);
 
-                    session.Logout();           
+                    session.Logout();
                 }
             }
             return true;
