@@ -34,13 +34,13 @@ public class Session_EncryptSample {
 		String password = args[1];
 		String keyName = args[2];
 		String plaintext = args[3];
-		String transfromation = null;
+		String transformation = null;
 		String keyIv = null;
 		if (args.length == 6) {
-			transfromation = args[4];
+			transformation = args[4];
 			keyIv = args[5];
 		} else if (args.length == 5) {
-			transfromation = args[4];
+			transformation = args[4];
 			System.out.println("Default key iv will be used for key");
 		} else {
 			System.out
@@ -70,8 +70,8 @@ public class Session_EncryptSample {
 			encrypt.setKeyiv(keyIv);
 		encrypt.setKeyname(keyName);
 		encrypt.setPlaintext(plaintext);
-		if (transfromation != null)
-			encrypt.setTransformation(transfromation);
+		if (transformation != null)
+			encrypt.setTransformation(transformation);
 		String encrypted = port.sessionEncrypt(encrypt);
 		System.out.println("CipherText: " + encrypted);
 		
@@ -81,8 +81,8 @@ public class Session_EncryptSample {
 			decrypt.setKeyiv(keyIv);
 		decrypt.setKeyname(keyName);
 		decrypt.setCiphertext(encrypted);
-		if (transfromation != null)
-			decrypt.setTransformation(transfromation);
+		if (transformation != null)
+			decrypt.setTransformation(transformation);
 		String decrypted = port.sessionDecrypt(decrypt);
 		System.out.println("Decrypt the above cipher text: "+decrypted);
 	}
