@@ -30,6 +30,9 @@ import com.ingrian.ws.rest.response.EncryptResponse;
  * h) jettison-1.4.1.jar
  * i) cxf-rt-rs-json-basic-3.4.3.jar
  * j) cxf-rt-rs-extension-providers-3.4.3.jar
+ *  
+ * Note: Use the jar versions that are compatible with the cxf version in use. 
+ * For example, the above jars are compatible with cxf version 3.4.3.
  */
 public class Restful_EncryptSample {
 	public static void main(String[] args) {
@@ -88,7 +91,7 @@ public class Restful_EncryptSample {
 		if (r.getStatus() == 200) {
 
 			System.out
-					.println("Restful_EncryptSample output \nplain text : "
+					.println("Restful_EncryptSample output \nEncrypted text : "
 							+ res.getCipherText() + "  | HTTP status: "
 							+ r.getStatus());
 		} else {

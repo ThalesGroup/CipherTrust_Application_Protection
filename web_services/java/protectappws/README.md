@@ -85,7 +85,8 @@ To use these sample files, user must have
   - `jettison-1.4.1.jar`
   - `cxf-rt-rs-json-basic-3.4.3.jar`
   - `cxf-rt-rs-extension-providers-3.4.3.jar`
-    
+   
+ **Note:** Use the jar versions that are compatible with the cxf version in use. For example, the above jars are compatible with cxf version 3.4.3.
 
 ## More Information
 
