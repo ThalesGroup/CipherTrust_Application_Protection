@@ -247,9 +247,6 @@ namespace CADP.Pkcs11Sample
                         sample = new EncryptDecryptMultiPartSample();
                         sample.Run(new object[] { pin, keyLabel, fileName, needmetadata, headerMode });
 
-                        sample = new EncryptDecryptMultiPartSample();
-                        sample.Run(new object[] { pin, keyLabel, fileName, needmetadata, headerMode });
-
                         sample = new KeypairSignSample();
                         sample.Run(new object[] { pin, keyLabel, "RSA", "" });
                         sample.Run(new object[] { pin, keyLabel, "SHA512-HMAC", "" });
@@ -266,7 +263,6 @@ namespace CADP.Pkcs11Sample
                         sample = new FindDeleteKeySample();
                         sample.Run(new object[] { pin, keyLabel });
                         sample.Run(new object[] { pin, wrappingKeyLabel });
-                        sample.Run(new object[] { pin, newkeyLabel }); //Need to check if we can delete this line.
 
                         sample = new DigestSample();
                         sample.Run(new object[] { pin, "sha256" });
