@@ -119,7 +119,7 @@ int main(int argc, char **argv)
     I_O_Session sess = NULL; 
     char *path = NULL, *user = NULL, *pass = NULL , *keyname = NULL, *algo = NULL;
     I_T_BYTE *indata = NULL, *cryptoin1 = NULL, *cryptoin2 = NULL, *cryptoout1 = NULL, *cryptoout2 = NULL;
-    char *tweakdata = NULL,*tweakalgo = NULL,*inp_iv= NULL, *header_mode = NULL;;
+    char *tweakdata = NULL,*tweakalgo = NULL,*inp_iv= NULL, *header_mode = NULL;
     char*  iv = NULL;
     I_T_BYTE *passphrase = NULL;
     unsigned int argp = 0, ivlen = 0, indatalen = 0,tweakdata_len = 0,tweakalgo_len=0, header_mode_len = 0;

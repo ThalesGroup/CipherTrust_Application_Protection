@@ -117,128 +117,17 @@ CryptoDataUtilityLIBNAME = ../libCryptoDataUtility.so
 endif
 
 
-#all: kmip nae crypto CryptoDataUtility nae
 all: nae
 
-
-kmip: KMIPCreate KMIPRegisterSymmetricKey KMIPRegisterAsymmetricKey KMIPRegisterCertificate KMIPRegisterTemplate KMIPRegisterSecretData KMIPRegisterPrivateKey KMIPRegisterPublicKey KMIPRegisterCustomBigInt KMIPQuery KMIPLocate KMIPCrypto KMIPCrypto_RSA KMIPCrypto_AES_GCM KMIPGet KMIPGetAttributes KMIPDestroy KMIPModifyAttribute KMIPAddAttribute KMIPCryptoSinglePart KMIPGetAttributeList KMIPDeleteAttribute KMIPBatching KMIPGetCustomAttribute KMIPSetDate KMIPRevoke KMIPCreateKeyPair KMIPGetWrappedKey KMIPDiscoverVersion KMIPReKey KMIPReKeyPair
-
 nae: NAEVersionedKey NAEKeyManagement
-nae_cert: NAECertificateManagement 
-crypto: CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_FPE CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePartBulk_Enhanced CryptoSinglePart_FPE_CC_SSN CryptoSinglePart_multitenency CryptoSinglePart_CMS
-
-CryptoDataUtility: CryptoDataUtility.o $(CAPILIBNAME)  $(CryptoDataUtilityLIBNAME)
-	$(CC) -o CryptoDataUtility CryptoDataUtility.o  $(CAPILIBNAME) $(CryptoDataUtilityLIBNAME)  $(LIBS) -lpthread
-
-CryptoSinglePart: CryptoSinglePart.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart CryptoSinglePart.o $(CAPILIBNAME) $(LIBS)
-CryptoSinglePartBulk_Enhanced: CryptoSinglePartBulk_Enhanced.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePartBulk_Enhanced CryptoSinglePartBulk_Enhanced.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePartMultiThreadedCPP: CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o $(CAPILIBNAME)
-ifeq ($(OS_NAME),Darwin)
-	$(CPP) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) -L../lib -lcrypto -ldl
-else ifeq ($(OS_NAME),SunOS)
-	$(CPP) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) $(LIBS)
-else
-	$(CC) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) $(LIBS)
-endif
-
-CryptoSinglePartMultiThreadedC: CryptoSinglePartMultiThreadedC.o thread_c.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePartMultiThreadedC CryptoSinglePartMultiThreadedC.o thread_c.o  $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_Fast: CryptoSinglePart_Fast.o thread_c.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_Fast CryptoSinglePart_Fast.o thread_c.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_FPE: CryptoSinglePart_FPE.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_FPE CryptoSinglePart_FPE.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_FPE_CC_SSN: CryptoSinglePart_FPE_CC_SSN.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_FPE_CC_SSN CryptoSinglePart_FPE_CC_SSN.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_multitenency: CryptoSinglePart_multitenency.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_multitenency CryptoSinglePart_multitenency.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_AES_GCM: CryptoSinglePart_AES_GCM.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_AES_GCM CryptoSinglePart_AES_GCM.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_CMS: CryptoSinglePart_CMS.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_CMS CryptoSinglePart_CMS.o $(CAPILIBNAME) $(LIBS)
-
-CryptoSinglePart_EC: CryptoSinglePart_EC.o $(CAPILIBNAME)
-	$(CC) -o CryptoSinglePart_EC CryptoSinglePart_EC.o $(CAPILIBNAME) $(LIBS)
-
-NAECertificateManagement: NAECertificateManagement.o $(CAPILIBNAME)
-	$(CC) -o NAECertificateManagement NAECertificateManagement.o $(CAPILIBNAME) $(LIBS)
 
 NAEKeyManagement: NAEKeyManagement.o $(CAPILIBNAME)
 	$(CC) -o NAEKeyManagement NAEKeyManagement.o $(CAPILIBNAME) $(LIBS)
 
-KMIPCreate: KMIPCreate.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCreate KMIPCreate.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPModifyAttribute: KMIPModifyAttribute.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPModifyAttribute KMIPModifyAttribute.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPAddAttribute: KMIPAddAttribute.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPAddAttribute KMIPAddAttribute.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterSymmetricKey: KMIPRegisterSymmetricKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterSymmetricKey KMIPRegisterSymmetricKey.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterTemplate: KMIPRegisterTemplate.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterTemplate KMIPRegisterTemplate.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterSecretData: KMIPRegisterSecretData.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterSecretData KMIPRegisterSecretData.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPRegisterPrivateKey: KMIPRegisterPrivateKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterPrivateKey KMIPRegisterPrivateKey.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPRegisterPublicKey: KMIPRegisterPublicKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterPublicKey KMIPRegisterPublicKey.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPQuery: KMIPQuery.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPQuery KMIPQuery.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPLocate: KMIPLocate.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPLocate KMIPLocate.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPCrypto: KMIPCrypto.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCrypto KMIPCrypto.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPCrypto_RSA: KMIPCrypto_RSA.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCrypto_RSA KMIPCrypto_RSA.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPCrypto_AES_GCM: KMIPCrypto_AES_GCM.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCrypto_AES_GCM KMIPCrypto_AES_GCM.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPGet: KMIPGet.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPGet KMIPGet.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPGetAttributes: KMIPGetAttributes.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPGetAttributes KMIPGetAttributes.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPGetAttributeList: KMIPGetAttributeList.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPGetAttributeList KMIPGetAttributeList.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPDestroy: KMIPDestroy.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPDestroy KMIPDestroy.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPDeleteAttribute: KMIPDeleteAttribute.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPDeleteAttribute KMIPDeleteAttribute.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterCustomBigInt: KMIPRegisterCustomBigInt.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterCustomBigInt KMIPRegisterCustomBigInt.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPCryptoSinglePart: KMIPCryptoSinglePart.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCryptoSinglePart KMIPCryptoSinglePart.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPBatching: KMIPBatching.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPBatching KMIPBatching.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
 NAEVersionedKey: NAEVersionedKey.o $(CAPILIBNAME)
 	$(CC) -o NAEVersionedKey NAEVersionedKey.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterAsymmetricKey: KMIPRegisterAsymmetricKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterAsymmetricKey KMIPRegisterAsymmetricKey.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPRegisterCertificate: KMIPRegisterCertificate.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRegisterCertificate KMIPRegisterCertificate.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPGetCustomAttribute: KMIPGetCustomAttribute.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPGetCustomAttribute KMIPGetCustomAttribute.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPSetDate: KMIPSetDate.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPSetDate KMIPSetDate.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPRevoke: KMIPRevoke.o  KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPRevoke KMIPRevoke.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPCreateKeyPair: KMIPCreateKeyPair.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPCreateKeyPair KMIPCreateKeyPair.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPGetWrappedKey: KMIPGetWrappedKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPGetWrappedKey KMIPGetWrappedKey.o KMIPMisc.o  $(CAPILIBNAME) $(LIBS)
-KMIPDiscoverVersion: KMIPDiscoverVersion.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPDiscoverVersion KMIPDiscoverVersion.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPReKey: KMIPReKey.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPReKey KMIPReKey.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-KMIPReKeyPair: KMIPReKeyPair.o KMIPMisc.o $(CAPILIBNAME)
-	$(CC) -o KMIPReKeyPair KMIPReKeyPair.o KMIPMisc.o $(CAPILIBNAME) $(LIBS)
-binaries = CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_FPE CryptoSinglePart_FPE_CC_SSN CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePart_CMS CryptoSinglePartBulk_Enhanced NAEKeyManagement NAECertificateManagement KMIPCreate KMIPRegisterSymmetricKey KMIPRegisterAsymmetricKey KMIPRegisterCertificate KMIPRegisterTemplate KMIPRegisterSecretData KMIPRegisterPrivateKey KMIPRegisterPublicKey KMIPQuery KMIPLocate KMIPCrypto KMIPCrypto_RSA KMIPCrypto_AES_GCM KMIPGet KMIPGetAttributes KMIPDestroy KMIPRegisterCustomBigInt NAEVersionedKey KMIPModifyAttribute KMIPAddAttribute KMIPCryptoSinglePart KMIPGetAttributeList KMIPDeleteAttribute KMIPBatching KMIPGetCustomAttribute KMIPSetDate KMIPRevoke KMIPCreateKeyPair KMIPGetWrappedKey CryptoSinglePart_multitenency KMIPDiscoverVersion KMIPReKey KMIPReKeyPair CryptoDataUtility
+
+binaries = NAEKeyManagement NAEVersionedKey 
 
 clean:
 	rm -f $(binaries) *.o
