@@ -11,6 +11,11 @@ In order to run CADP_PKCS11_Samples :
 
 
 ## Compilation:
+Refer Pkcs11Interop.dll in your application present at below path (default location), after installing CADP for C.
+#### For Windows: 
+     C:\Program Files\CipherTrust\CADP_for_C\wrapper\.NET Core
+#### For Linux : 
+     /opt/CipherTrust/CADP_for_C/wrapper/dotNET Core
 You can build the sample either from Visual Studio or dotnet cli through the command `dotnet build -c Release`
  
 
@@ -78,7 +83,7 @@ The program CADP_PKCS11_Samples consists of the main program whose source code c
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 
 Two other source files, Settings.cs and Sample_Helpers.cs, contain global settings, Native PKCS11 library path and helper functions, respectively.
 ## Native PKCS11 library path(Default path)
-### For windows:
+### For Windows:
     C:\Program Files\CipherTrust\CADP_for_C\libcadp_pkcs11.dll
 ### For Linux:
     /opt/CipherTrust/CADP_for_C/libcadp_pkcs11.so
