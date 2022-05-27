@@ -142,7 +142,7 @@ namespace CADP.Pkcs11Sample
             }
             else if (Platform.IsLinux)
             {
-                Pkcs11LibraryPath = @"/opt/CipherTrust/CADP for C/libcadp_pkcs11.so";
+                Pkcs11LibraryPath = @"/opt/CipherTrust/CADP_for_C/libcadp_pkcs11.so";
             }
             // Convert strings to byte arrays
             SecurityOfficerPinArray = ConvertUtils.Utf8StringToBytes(SecurityOfficerPin);
