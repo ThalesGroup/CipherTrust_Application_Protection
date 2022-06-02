@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <None Include="..\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\CryptoSinglePart.c" />
