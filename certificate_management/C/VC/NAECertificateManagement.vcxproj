@@ -22,9 +22,9 @@
     <ClCompile Include="..\NAECertificateManagement.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{06BB5073-D2A8-4239-A198-DB11D289477B}</ProjectGuid>
+    <ProjectGuid>{C764250F-A209-4C83-A791-48D5680B0C72}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>NAEKeyManagement</RootNamespace>
+    <RootNamespace>NAECertificateManagement</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
