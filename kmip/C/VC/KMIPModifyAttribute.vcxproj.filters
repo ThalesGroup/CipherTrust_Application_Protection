@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <None Include="..\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\KMIPMisc.h">
