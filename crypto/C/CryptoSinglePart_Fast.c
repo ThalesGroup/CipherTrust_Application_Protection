@@ -56,7 +56,7 @@ void *deleteEVP(void * state)
     if (threadExit == 1)
         break;
     #ifdef WIN32
-        Sleep(3500000); //3500 seconds
+        Sleep(3500);
     #else
         sleep(3500);
     #endif
