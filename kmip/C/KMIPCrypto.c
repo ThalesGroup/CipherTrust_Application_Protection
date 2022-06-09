@@ -32,7 +32,7 @@ void usage(void)
     exit(1);
 }
 
-I_KS_Result Crypto(I_O_Session *handle_p, I_T_CHAR *name, I_T_BYTE *indata, I_T_BYTE *iv, unsigned int iv_len)
+I_KS_Result Crypto(I_O_Session *handle_p, I_T_CHAR *name, I_T_BYTE *indata, I_T_BYTE *iv, unsigned int iv_len, int *keyFlag)
 {
     I_KS_Result result;
     unsigned int i = 0;
@@ -75,6 +75,7 @@ I_KS_Result Crypto(I_O_Session *handle_p, I_T_CHAR *name, I_T_BYTE *indata, I_T_
             if (uids_p->count == 0)
             {
                 printf("No object exist for specified name.\n");
+                *keyFlag = 1;
                 break;
             }
             else
@@ -186,7 +187,7 @@ int main(int argc, char **argv)
 
     I_O_Session sess;
     char *path;
-    int argp;
+    int argp, keyFlag = 0;
     unsigned int ivlen =0;
     I_T_RETURN rc;
     I_KS_Result result;
@@ -234,11 +235,15 @@ int main(int argc, char **argv)
         I_C_Fini();
         return rc;
     }
-    result = Crypto(&sess,keyname,indata,iv,ivlen);
+    result = Crypto(&sess,keyname,indata,iv,ivlen,&keyFlag);
     if (result.status != I_KT_ResultStatus_Success)
     {
         printf("KMIPCrypto failed Status:%s Reason:%s\n",
                 I_KC_GetResultStatusString(result), I_KC_GetResultReasonString(result));
+    }
+    else if(keyFlag == 1)
+    {
+        printf("Object not found\n");
     }
     else
         printf("KMIPCrypto Successful\n");
