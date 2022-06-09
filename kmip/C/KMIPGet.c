@@ -21,7 +21,7 @@ void usage(void)
     exit(1);
 }
 
-I_KS_Result Get(I_O_Session *handle_p, I_T_CHAR *uniqueID_p, I_T_CHAR *name)
+I_KS_Result Get(I_O_Session *handle_p, I_T_CHAR *uniqueID_p, I_T_CHAR *name, int *keyFlag)
 {
     I_KS_Result result;
     I_KO_AttributeList attrList = NULL;
@@ -58,6 +58,7 @@ I_KS_Result Get(I_O_Session *handle_p, I_T_CHAR *uniqueID_p, I_T_CHAR *name)
             if (uids_p->count == 0)
             {
                 printf("No object exist for specified name.\n");
+                *keyFlag = 1;
                 break;
             }
             else
@@ -185,7 +186,7 @@ int main(int argc, char **argv)
 
     I_O_Session sess;
     char *path;
-    int argp;
+    int argp, keyFlag = 0;
     char *uniqueID_p = NULL, *name = NULL;
     I_T_RETURN rc;
     I_KS_Result result;
@@ -222,11 +223,15 @@ int main(int argc, char **argv)
         return rc;
     }
 
-    result = Get(&sess, uniqueID_p, name);
+    result = Get(&sess, uniqueID_p, name, &keyFlag);
     if (result.status != I_KT_ResultStatus_Success)
     {
         printf("Get failed Status:%s Reason:%s\n",
                 I_KC_GetResultStatusString(result), I_KC_GetResultReasonString(result));
+    }
+    else if(keyFlag == 1)
+    {
+        printf("Object not found\n");
     }
     else
         printf("Get Operations Successful\n");
