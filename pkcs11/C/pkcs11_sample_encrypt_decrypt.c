@@ -397,7 +397,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
     CK_BYTE	      *pBuf = NULL;
     char            *pCharset = NULL;
     char            *token = NULL;
-    CK_BYTE         *pDecryptBuf, *pPlainBuf;
+    CK_BYTE         *pDecryptBuf = NULL, *pPlainBuf = NULL;
     FILE            *fp_read = NULL;
     FILE            *fp_write = NULL;
     FILE            *fp_charset = NULL;
