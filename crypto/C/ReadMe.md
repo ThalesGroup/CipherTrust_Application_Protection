@@ -39,6 +39,10 @@ To compile the sample application on Windows:
 
 To compile the sample application on Linux:
 
+You can compile this with a C++ or C compiler such as gcc (3.2.x or greater).
+If you have an older gcc or another C compiler, you may need to obtain 
+libstdc++.so.5 and possibly libgcc_s.so
+
 1. Navigate to <installation_Directory>. For example, 
    consider that <installation_Directory> is /opt/CipherTrust/CADP_for_C/
 

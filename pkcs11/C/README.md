@@ -57,6 +57,7 @@ Prior to compiling the CADP for C PKCS11 source code, download the C directory f
 
 This section provides instructions on how to compile the source code for CADP for C PKCS11 in Windows and in Linux.
 
+
 ### Windows
 
 After compiling the source code for CADP for C PKCS11 in Windows, the following new directories will be created within the VC directory: 
@@ -72,6 +73,9 @@ To compile the source code in Windows, do the following:
 3. Within the Solution Explorer of Visual Studio, right click on Solution 'PKCS11' and then select Build Solution.  
 
 ### Linux
+
+If you have an older gcc or another C compiler, you may need to obtain 
+libstdc++.so and possibly libgcc_s.so.
 
 After successfully compiling the source code for CADP for C PKCS11 in Linux, the executables files will be added to the C directory.
 
