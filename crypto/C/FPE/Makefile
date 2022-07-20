@@ -27,23 +27,22 @@ endif
 # you can compile this with a C++ or C compiler such as gcc 
 # (3.2.x or greater).
 # if you have an older gcc or another C compiler, you may need to obtain 
-# libstdc++.so.5 and possibly libgcc_s.so.1 from a newer gcc/g++ or 
-# the ../samplelibs directory, and use the variable below point to them.
+# libstdc++.so.5 and possibly libgcc_s.so.1 from a newer gcc/g++.
 # For Bluecat, the path to the location of the library and the 
 # 
 # LIBS = -L/usr/share/bluecat/cdt/lib -lstdc++
 
 # on NCR MP-RAS
-# LIBS = -L../samplelibs -lstdc++ -lpthread -ldl
+# LIBS = -lstdc++ -lpthread -ldl
 
 # For 64-bit builds (Ex: HPUX 11.11) use the 64-bit gcc and the path to the
 # 64-bit libgcc.
 LIBSTDC++ = -lstdc++
 LIBGCC = -lgcc_s
-LIBS += -lpthread -L../../samplelibs $(LIBSTDC++)
+LIBS += -lpthread $(LIBSTDC++)
 
 # HPUX1123-32 requires this LIBS line
-# LIBS = -L../samplelibs -lstdc++
+# LIBS = -lstdc++
 
 
 
