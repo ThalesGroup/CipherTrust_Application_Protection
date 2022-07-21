@@ -375,6 +375,9 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
             return CKR_GENERAL_ERROR;
         }
     }
+	if (decryptedText) {
+		free(decryptedText);
+	}
     else return CKR_OK;
 }
 
