@@ -653,7 +653,16 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
                 ff1paramsutf.radix = (unsigned short) myhtons(strlen(charset));
                 ff1paramsutf.tweaklen = myhtonl(0);
                 ff1paramsutf.utfmode  = 0; /* ASCII */
-                ff1paramsutf.tweaklen = myhtonl(0);
+                /* Adding this if user needs to hit tweakdata scenario */
+                if (tweakfilename)
+                {
+                    FILE *pf=fopen(tweakfilename, "r");
+                    if (pf && fread(ff1paramsutf.charset+myhtonl(ff1paramsutf.charsetlen), 1, 8, pf)==8) ;
+                    if (pf) fclose(pf);
+                    ff1paramsutf.tweaklen = myhtonl(8);
+                }
+                else
+                    ff1paramsutf.tweaklen = myhtonl(0);
             }
             else if(cset_choc == 'l')
             {
