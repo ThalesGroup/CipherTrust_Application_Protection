@@ -31,7 +31,7 @@ namespace CADP.Pkcs11Sample
                     {
                         pathSource = Convert.ToString(inputParams[2]);
                     }
-
+                    
                     if (opName.Equals("sha512"))
                     {
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA512);
@@ -44,19 +44,19 @@ namespace CADP.Pkcs11Sample
                     {
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA224);
                     }
-                    else if (opName.Equals("sha1"))
-                    {
-                        mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA_1);
-                    }
-                    else if (opName.Equals("md5"))
-                    {
-                        mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_MD5);
-                    }
                     else
                     {
+                        if(opName.Equals("sha1") || opName.Equals("md5"))
+                        {
+                            Console.WriteLine("Only sha224/256/384/512 allowed. This input is case sensitive. hmac not supported in C#.");
+                            Console.WriteLine("Setting the default algorithm : SHA256");
+                        }
+
+                        //if no opname provided. setting the default SHA256.
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256);
                         opName = "sha256";
                     }
+                    
                     Console.WriteLine("Mechanism is " + opName);
 
                     if (String.IsNullOrEmpty(pathSource))
