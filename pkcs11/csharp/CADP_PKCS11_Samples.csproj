@@ -12,6 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Pkcs11Interop">
+      <HintPath>..\..\..\..\..\Program Files\CipherTrust\CADP_for_C\wrapper\.NET Core\Pkcs11Interop.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="FileInput.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
