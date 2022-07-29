@@ -36,14 +36,7 @@ namespace CADP.Pkcs11Sample
                     {
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA224);
                     }
-                    else if (opName.Equals("sha1"))
-                    {
-                        mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA_1);
-                    }
-                    else if (opName.Equals("md5"))
-                    {
-                        mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_MD5);
-                    }
+                    
                     else if (opName.Equals("sha256"))
                     {
                         mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256);
@@ -51,7 +44,7 @@ namespace CADP.Pkcs11Sample
                     }
                     else
                     {
-                        Console.WriteLine("Only sha1/224/256/384/512 and md5 allowed. This input is case sensitive. hmac not supported in C#.");
+                        Console.WriteLine("Only sha224/256/384/512 allowed. This input is case sensitive. hmac not supported in C#.");
                         return false;
                     }
 
