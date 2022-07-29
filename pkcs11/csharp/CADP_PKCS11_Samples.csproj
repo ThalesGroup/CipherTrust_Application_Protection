@@ -11,11 +11,7 @@
     <PackageTags>CipherTrust Data Security Platform, CipherTrust Application Data Protection, Hashing, Encryption, Key Management, Data Security, DevOps, DevSecOps, PKCS#11, KMIP, JCE, CSP, CNG</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="Pkcs11Interop">
-      <HintPath>..\..\..\..\..\Program Files\CipherTrust\CADP_for_C\wrapper\.NET Core\Pkcs11Interop.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  
 
   <ItemGroup>
     <None Update="FileInput.txt">
