@@ -33,4 +33,4 @@ In order to run C# samples,
     * [Windows Only] `SampleApp.exe` to run the code at a terminal prompt. Example: `SampleApp.exe`  
 
 ## More Information
-For more information on CADP for .NET Core, refer to the CADP for .NET Core user guide.
+For more information on CADP for .NET Core, refer to the [CADP for .NET Core user guide](https://thalesdocs.com/ctp/con/cadp/cadp-netcore/latest/index.html).
