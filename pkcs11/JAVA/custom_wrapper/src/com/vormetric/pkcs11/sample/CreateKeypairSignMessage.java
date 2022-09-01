@@ -109,6 +109,7 @@ public class CreateKeypairSignMessage {
 			CK_ATTRIBUTE[] privateKeyAttr = new CK_ATTRIBUTE[]
 			{
 					new CK_ATTRIBUTE (CKA_CLASS, CKO_PRIVATE_KEY),
+					new CK_ATTRIBUTE (CKA_LABEL, privateKeyname),
 					new CK_ATTRIBUTE (CKA_TOKEN, true),
 					new CK_ATTRIBUTE (CKA_PRIVATE, true),
 					new CK_ATTRIBUTE (CKA_SENSITIVE, true),
