@@ -1,7 +1,5 @@
 package com.vormetric.pkcs11.sample;
 
-import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_MD5;
-import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_MD5_HMAC;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA224;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA224_HMAC;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA256;
@@ -10,8 +8,7 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA384;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA384_HMAC;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA512;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA512_HMAC;
-import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA_1;
-import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_SHA_1_HMAC;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,16 +40,13 @@ import com.vormetric.pkcs11.wrapper.CK_MECHANISM;
 public class DigestMessage {
     public static final CK_MECHANISM sha256Mech      = new CK_MECHANISM (CKM_SHA256);
     public static final CK_MECHANISM sha384Mech      = new CK_MECHANISM (CKM_SHA384);
-    public static final CK_MECHANISM sha1Mech        = new CK_MECHANISM (CKM_SHA_1);
     public static final CK_MECHANISM sha224Mech      = new CK_MECHANISM (CKM_SHA224);
-    public static final CK_MECHANISM md5Mech         = new CK_MECHANISM (CKM_MD5);
     public static final CK_MECHANISM sha512Mech      = new CK_MECHANISM (CKM_SHA512);
     public static final CK_MECHANISM hmacSha256Mech  = new CK_MECHANISM (CKM_SHA256_HMAC);
-    public static final CK_MECHANISM hmacSha1Mech  = new CK_MECHANISM (CKM_SHA_1_HMAC);
     public static final CK_MECHANISM hmacSha224Mech  = new CK_MECHANISM (CKM_SHA224_HMAC);
     public static final CK_MECHANISM hmacSha384Mech  = new CK_MECHANISM (CKM_SHA384_HMAC);
     public static final CK_MECHANISM hmacSha512Mech  = new CK_MECHANISM (CKM_SHA512_HMAC);
-    public static final CK_MECHANISM hmacMD5Mech  = new CK_MECHANISM (CKM_MD5_HMAC);
+
 
     public static String plainTextInp = "Plain text message to be hashed.";
 
@@ -64,7 +58,7 @@ public class DigestMessage {
         System.out.println("-k: Keyname on Keymanager");
         System.out.println("-f: Input file path for plainText ");  
         System.out.println("-i: Message in plainText");
-		System.out.println("-o: HMAC-SHA256, HMAC-MD5, HMAC-SHA1, HMAC-SHA224, HMAC-SHA384, HMAC-SHA512, MD5, SHA1, SHA224, SHA512, SHA384 or SHA256 (default)");
+		System.out.println("-o: HMAC-SHA256, HMAC-SHA224, HMAC-SHA384, HMAC-SHA512, SHA224, SHA512, SHA384 or SHA256 (default)");
 		System.out.println("-g: 0 for versionCreate, 1 for versionRotate, 2 for versionMigrate, 3 for nonVersionCreate");
 	    System.exit(1);
     }
@@ -128,25 +122,13 @@ public class DigestMessage {
                 System.out.println("SHA384 mode selected");
                 hashMech = sha384Mech;
                 digestSize = 48;
-            } else if (operation.equals("SHA1")) {
-                System.out.println("SHA1 mode selected");
-                hashMech = sha1Mech;
-                digestSize = 20;
             } else if (operation.equals("SHA224")) {
                 System.out.println("SHA224 mode selected");
                 hashMech = sha224Mech;
                 digestSize = 28;
-            } else if (operation.equals("MD5")) {
-                System.out.println("MD5 mode selected");
-                hashMech = md5Mech;
-                digestSize = 16;
             } else if (operation.equals("HMAC-SHA256")) {
                 System.out.println("HMAC-SHA256 mode selected");
                 hashMech = hmacSha256Mech;
-                key = keyID;
-            } else if (operation.equals("HMAC-SHA1")) {
-                System.out.println("HMAC-SHA1 mode selected");
-                hashMech = hmacSha1Mech;
                 key = keyID;
             } else if (operation.equals("HMAC-SHA224")) {
                 System.out.println("HMAC-SHA224 mode selected");
@@ -162,10 +144,6 @@ public class DigestMessage {
                 hashMech = hmacSha512Mech;
 		        key = keyID;
                 digestSize = 64;
-            } else if (operation.equals("HMAC-MD5")) {
-                System.out.println("HMAC-MD5 mode selected");
-                hashMech = hmacMD5Mech;
-		        key = keyID;
             } else if (operation.equals("") || operation.equals("SHA256")) {
                 System.out.println("SHA256 mode selected");
                 hashMech = sha256Mech;
