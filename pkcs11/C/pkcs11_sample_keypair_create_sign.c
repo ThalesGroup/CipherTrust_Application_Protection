@@ -205,6 +205,7 @@ void keypairSignUsage()
     printf ("Usage: pkcs11_keypair_create_sign -p pin -s slotID -kp keyName [-b modulus_bit_size] [-m module]\n");
     printf ("\n -kp to be created keypair name");
     printf ("\n -b modulus bits size in bits");
+    printf ("\n -n no deleion of key");
     exit (2);
 }
 
