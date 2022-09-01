@@ -468,7 +468,7 @@ static CK_RV signVerifyFile(char *operation, char *filename, char *signature_fil
 void SignVerifyUsage()
 {
     printf("Usage: pkcs11_sample_sign_verify -p pin [-s slotID] [-g gen_key_action] [-K] [-k keyName] [-op opaqueobjectname] [-q opaquefilename] [-a alias] [-m module_path] [-o operation] [-f input_file_name] [-d signature_file_name] [-h header_version]\n");
-    printf("       operation     ...SHA256 (default) or SHA384 or SHA384-HMAC or SHA512 or SHA512-HMAC or SHA1 or SHA1-HMAC or SHA224 or SHA224-HMAC or SHA256-HMAC\n");
+    printf("       operation     ...SHA256 (default) or SHA384 or SHA384-HMAC or SHA512 or SHA512-HMAC or SHA224 or SHA224-HMAC or SHA256-HMAC\n");
     printf("       -K            ...create a key with well-known key bytes on the Key Manager (only available for SHA256-HMAC)\n");
     printf("       header_version...v2.1 or v2.7\n");
     exit(2);
