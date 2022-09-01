@@ -232,7 +232,7 @@ void usage()
     printf ("Usage: pkcs11_sample_key_states -p pin -s slotID -k[p] keyName [-i {k|m|u}:identifier] [-ks key_state] [-m module]\n");
 
     printf ("identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
-    printf ("key_state: PREACTIVATED...0, ACTIVATED...1, SUSPENDED...2, DEACTIVATED...3, COMPROMISED...4, DESTROYED...5\n");
+    printf ("key_state: ACTIVATED...1, SUSPENDED...2, DEACTIVATED...3, COMPROMISED...4, DESTROYED...5\n");
     /*printf ("key_transition-date: dc: creation_date; dt: destroy_date; da: activation_date; ds: suspend_date; dd: deactivation_date; dp: compromise_date; dr: compromise_occurrence_date; ps: process_start_date; pt: protect_stop_date .\n");
     printf ("key_transition_date: can be in long format or date format, e.g., 1545134551 or 2017/10/30.\n");*/
     exit (2);
