@@ -75,9 +75,9 @@ class Vpkcs11Session {
 }
 
 public class Helper {
-    public static final String UnixInstallPath = "/opt/CipherTrust/CAP/PKCS11/lib/cipherTrustPKCS11.so";
-    public static final String WinX86InstallPath = "C:\\Program Files\\CipherTrust\\CAP\\PKCS11\\cipherTrustPKCS11.dll";
-    public static final String WinX64InstallPath = "C:\\Program Files\\CipherTrust\\CAP\\PKCS11\\cipherTrustPKCS11.dll";
+    public static final String UnixInstallPath = "/opt/CipherTrust/CADP_for_C/libcadp_pkcs11.so";
+    public static final String WinX86InstallPath = "C:\\Program Files\\CipherTrust\\CADP_for_C\\libcadp_pkcs11.dll";
+    public static final String WinX64InstallPath = "C:\\Program Files\\CipherTrust\\CADP_for_C\\libcadp_pkcs11.dll";
 
     private static Map<Long, String> PKCS11ConstantNames;
 
