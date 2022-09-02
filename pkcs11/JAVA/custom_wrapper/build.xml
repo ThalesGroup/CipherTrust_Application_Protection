@@ -1,0 +1,190 @@
+<project name="custom_wrapper" basedir="." default="main">
+
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+
+    <property name="src_util.dir" value="util/src"/>
+    <property name="util_classes.dir" value="util/${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+	<property name="wrapper.jar" value="cadp-pkcs11-wrapper-1.0.jar"/>
+	<property name="jaxb.jar" value="jaxb-api-2.3.0-b170201.1204.jar"/>
+
+    <property name="PIN" value="admin:KeySecure_1"/>
+    <property name="IMPKEYNAME" value="pkcs11_java_test_key_"/>
+	<property name="WRAPKEYNAME" value="pkcs11_java_test_key_wrap"/>
+    <property name="SourceFile" value="build.xml"/>
+    <property name="CreateKey" value="com.vormetric.pkcs11.sample.CreateKey"/>
+    <property name="CreateObject" value="com.vormetric.pkcs11.sample.CreateObject"/>
+    <property name="CreateKeypairSignMessage"
+              value="com.vormetric.pkcs11.sample.CreateKeypairSignMessage"/>
+    <property name="EncryptDecryptFile" value="com.vormetric.pkcs11.sample.EncryptDecryptFile"/>
+    <property name="EncryptDecryptMessage"
+              value="com.vormetric.pkcs11.sample.EncryptDecryptMessage"/>
+    <property name="KeyStateTransition"
+              value="com.vormetric.pkcs11.sample.KeyStateTransition"/>
+    
+    <property name="FindDeleteKey" value="com.vormetric.pkcs11.sample.FindDeleteKey"/>
+    <property name="FindExportKey" value="com.vormetric.pkcs11.sample.FindExportKey"/>
+    <property name="UnwrapImportKey" value="com.vormetric.pkcs11.sample.UnwrapImportKey"/>
+    <property name="EncryptDecryptMetaData"
+              value="com.vormetric.pkcs11.sample.EncryptDecryptMetaData"/>
+    <property name="EncryptDecryptAsymmetricKey"
+              value="com.vormetric.pkcs11.sample.EncryptDecryptAsymmetricKey"/>
+    <property name="TestKeyAttributes"
+              value="com.vormetric.pkcs11.sample.TestKeyAttributes"/>
+    <property name="GenerateRandom"
+              value="com.vormetric.pkcs11.sample.GenerateRandom"/>
+    <property name="DigestMessage"
+              value="com.vormetric.pkcs11.sample.DigestMessage"/>
+    <property name="SignVerify"
+              value="com.vormetric.pkcs11.sample.SignVerify"/>
+    <property name="SEED" value="12345" />
+    <property name="OUTPUT_SIZE" value="7" />
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete file="build.xml.dec"/>
+        <delete file="build.xml.enc"/>
+        <delete>
+            <fileset dir="${basedir}" includes="*.dat"/>
+        </delete>
+    </target>
+
+   
+    <target name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpath="${wrapper.jar}:${jaxb.jar}" includeantruntime="false">            
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>        
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+        </jar>
+    </target>
+
+    <target name="run" depends="jar">
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${FindDeleteKey}" fork="true">
+            <arg value="-p"/>
+	    <arg value="${PIN}"/>  
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${CreateKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>  
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${FindDeleteKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>     
+
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${CreateObject}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>     
+
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${FindExportKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+			<arg value="-w"/>
+			<arg value="${WRAPKEYNAME}"/>
+	    
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${FindDeleteKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>     
+            <arg value="-k"/>
+	    <arg value="${IMPKEYNAME}"/>
+	    
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${UnwrapImportKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${CreateKeypairSignMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${EncryptDecryptMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>          
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${EncryptDecryptMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-o"/>
+            <arg value="CBC"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${EncryptDecryptFile}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-f"/>
+            <arg value="${SourceFile}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${EncryptDecryptMetaData}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${EncryptDecryptAsymmetricKey}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${KeyStateTransition}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${TestKeyAttributes}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${GenerateRandom}" fork="true">
+           <arg value="-p"/>
+           <arg value="${PIN}"/>
+           <arg value="-d"/>
+           <arg value="${SEED}"/>
+           <arg value="-z"/>
+           <arg value="${OUTPUT_SIZE}"/>
+        </java>
+	<java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${DigestMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+
+        </java>
+	<java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${DigestMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-o"/>
+            <arg value="SHA384"/>
+            <arg value="-f"/>
+            <arg value="${SourceFile}"/>
+        </java>
+        <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${DigestMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-o"/>
+            <arg value="SHA512"/>
+        </java>
+         <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${DigestMessage}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-i"/>
+            <arg value="this is a test"/>
+            <arg value="-o"/>
+            <arg value="HMAC-SHA256"/>
+        </java>
+         <java classpath="${jar.dir}/${ant.project.name}.jar:${wrapper.jar}:${jaxb.jar}" classname="${SignVerify}" fork="true">
+            <arg value="-p"/>
+            <arg value="${PIN}"/>
+            <arg value="-i"/>
+            <arg value="Hello World"/>
+            <arg value="-o"/>
+            <arg value="HMAC-SHA256"/>
+        </java>
+
+    </target>
+
+    <target name="clean-build" depends="clean,jar"/>
+
+    <target name="main" depends="clean,run"/>
+
+</project>
