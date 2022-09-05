@@ -273,6 +273,8 @@ int main(int argc, char* argv[])
                 }
                 else if(genAction == versionMigrate)
                 {
+                    fprintf(stdout, "Migration of key is not supported\n");
+                    break;
                     printf("Migrating non-versioned key to versioned key \n");
                     rc = migrateNonVersionedKey(hKey, genAction);
                     if(rc == CKR_OK)
