@@ -114,6 +114,7 @@ where:
 - -z : key size for symmetric key in bytes.
 - -i : identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.
 >> Note : The typical use case for the '-i' option is in conjunction with the '-g 1' or '-g 2' options (rotate key or migrate key, respectively).
+>> Note: Version migrate key i.e '-g 2' option is not supported.
 
 #### Running Code Samples
 
@@ -162,6 +163,7 @@ where:
 - -z : key size for symmetric key in bytes.
 - -i :  identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.
 >> Note: The typical use case for the '-i' option is in conjunction with the '-g 1' or '-g 2' options (rotate key or migrate key, respectively).
+>> Note: Version migrate key i.e '-g 2' option is not supported.
 
 #### Running Code Samples
 
