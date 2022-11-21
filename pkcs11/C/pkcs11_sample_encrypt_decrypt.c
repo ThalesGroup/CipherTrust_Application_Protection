@@ -173,7 +173,8 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
     CK_ULONG		decryptedTextLen = 0;
     int             status;
     int is_gcm = pMechEnc->mechanism == CKM_AES_GCM;
-    int taglen = (tag_bits & 0x7) == 0 ? tag_bits >> 3 : (tag_bits >> 3) + 1;
+    // int taglen = (tag_bits & 0x7) == 0 ? tag_bits >> 3 : (tag_bits >> 3) + 1;
+    int taglen = tag_bits >> 3;
 
     (void) taglen;
 
@@ -1310,10 +1311,10 @@ FREE_RESOURCES:
 
 void usageEncryptDecrypt()
 {
-    printf ("Usage: pkcs11_sample_encrypt_decrypt -p pin [-s slotID] -k keyName [-i {k|m|u}:identifier] [-m module_path] [-o operation] [-f input_file_name] [-iv iv_in_hex] [-a AAD_length] [-t tag_bits] ([-c charset_for_fpe_mode]|[-l literal_charset_filename_for_fpe_mode]|[-r ranged_charset_filename_for_fpe_mode]) [-d decrypted_file_name] [-e encrypted_file_name] [-u charsettype] [-h header_version] [-n] [-T tweakfile]\n");
+    printf ("Usage: pkcs11_sample_encrypt_decrypt -p pin [-s slotID] -k keyName [-i {k|m|u}:identifier] [-m module_path] [-o operation] [-f input_file_name] [-iv iv_in_hex] [-a AAD_in_hex] [-t tag_bits] ([-c charset_for_fpe_mode]|[-l literal_charset_filename_for_fpe_mode]|[-r ranged_charset_filename_for_fpe_mode]) [-d decrypted_file_name] [-e encrypted_file_name] [-u charsettype] [-h header_version] [-n] [-T tweakfile]\n");
     printf ("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     printf ("-z key_size key size for symmetric key in bytes.\n");
-    printf ("-o operation...CBC_PAD (default) or CTR or ECB or FPE or FF1\n");
+    printf ("-o operation...CBC_PAD (default) or CTR or ECB or GCM or FPE or FF1\n");
     printf ("-c charset character set commandline typed input\n");
     printf ("-d optionally included decrypted file name.\n");
     printf ("-e optionally included encrypted file name.\n");
@@ -1469,7 +1470,7 @@ int main(int argc, char *argv[])
             sscanf(x, "%X", &u);
             def_aad[k] = (CK_BYTE) u;
         }
-        gcmParams.pAAD = (CK_BYTE_PTR) pAad;
+        // gcmParams.pAAD = (CK_BYTE_PTR) pAad;
     }
 
     do

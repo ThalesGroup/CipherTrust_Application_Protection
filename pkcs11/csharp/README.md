@@ -13,9 +13,9 @@ In order to run CADP_PKCS11_Samples :
 ## Compilation:
 Refer Pkcs11Interop.dll in your application present at below path (default location), after installing CADP for C.
 #### For Windows: 
-     C:\Program Files\CipherTrust\CADP_for_C\wrapper\.NET Core
+     C:\Program Files\CipherTrust\CADP_for_C\wrapper\.NETCore
 #### For Linux : 
-     /opt/CipherTrust/CADP_for_C/wrapper/dotNET Core
+     /opt/CipherTrust/CADP_for_C/wrapper/dotNETCore
 You can build the sample either from Visual Studio or dotnet cli through the command `dotnet build -c Release`
  
 

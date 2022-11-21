@@ -217,7 +217,7 @@ static CK_RV verifyBlock(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMech,
  * This function takes a given message and computes the correponding signature,
  * using a key
  ************************************************************************
- * Parameters: operation ... HMAC-SHA256, HMAC-SHA224, HMAC-SHA1, HMAC-SHA384, HMAC-SHA512
+ * Parameters: operation ... SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, SHA384-HMAC, SHA512-HMAC, SHA1-RSA, SHA256-RSA, SHA384-RSA, SHA512-RSA
  * Returns: CK_RV
  ************************************************************************
  */
@@ -272,7 +272,10 @@ static CK_RV signVerifyFile(char *operation, char *filename, char *signature_fil
     CK_MECHANISM	vfymechSHA224hmac  = { headervfy |CKM_SHA224_HMAC, NULL, 0};
     CK_MECHANISM	vfymechSHA1hmac    = { headervfy |CKM_SHA_1_HMAC,  NULL, 0};
 
-    CK_MECHANISM	signvfymechRSAPkcs   = { CKM_RSA_PKCS,  NULL, 0};
+    CK_MECHANISM	signvfymechSHA1RSAPkcs     = { CKM_SHA1_RSA_PKCS,  NULL, 0};
+    CK_MECHANISM	signvfymechSHA256RSAPkcs   = { CKM_SHA256_RSA_PKCS,  NULL, 0};
+    CK_MECHANISM	signvfymechSHA384RSAPkcs   = { CKM_SHA384_RSA_PKCS,  NULL, 0};
+    CK_MECHANISM	signvfymechSHA512RSAPkcs   = { CKM_SHA512_RSA_PKCS,  NULL, 0};
 
     CK_MECHANISM   *pmechsign = NULL;
     CK_MECHANISM   *pmechvfy  = NULL;
@@ -304,10 +307,25 @@ static CK_RV signVerifyFile(char *operation, char *filename, char *signature_fil
         pmechsign = &signmechSHA256hmac;
         pmechvfy  = &vfymechSHA256hmac;
     }
-    else if (strcmp(operation, "RSA") == 0)
+    else if (strcmp(operation, "SHA1-RSA") == 0)
     {
-        pmechsign = &signvfymechRSAPkcs;
-        pmechvfy  = &signvfymechRSAPkcs;
+        pmechsign = &signvfymechSHA1RSAPkcs;
+        pmechvfy  = &signvfymechSHA1RSAPkcs;
+    }
+    else if (strcmp(operation, "SHA256-RSA") == 0)
+    {
+        pmechsign = &signvfymechSHA256RSAPkcs;
+        pmechvfy  = &signvfymechSHA256RSAPkcs;
+    }
+    else if (strcmp(operation, "SHA384-RSA") == 0)
+    {
+        pmechsign = &signvfymechSHA384RSAPkcs;
+        pmechvfy  = &signvfymechSHA384RSAPkcs;
+    }
+    else if (strcmp(operation, "SHA512-RSA") == 0)
+    {
+        pmechsign = &signvfymechSHA512RSAPkcs;
+        pmechvfy  = &signvfymechSHA512RSAPkcs;
     }
     else
     {
@@ -464,11 +482,11 @@ static CK_RV signVerifyFile(char *operation, char *filename, char *signature_fil
     return rc;
 }
 
-
 void SignVerifyUsage()
 {
     printf("Usage: pkcs11_sample_sign_verify -p pin [-s slotID] [-g gen_key_action] [-K] [-k keyName] [-op opaqueobjectname] [-q opaquefilename] [-a alias] [-m module_path] [-o operation] [-f input_file_name] [-d signature_file_name] [-h header_version]\n");
-    printf("       operation     ...SHA256 (default) or SHA384 or SHA384-HMAC or SHA512 or SHA512-HMAC or SHA224 or SHA224-HMAC or SHA256-HMAC\n");
+    printf("       operation     ...SHA256-HMAC (default) or SHA384-HMAC or SHA512-HMAC or SHA224-HMAC or\n");
+    printf("                        SHA1-RSA or SHA256-RSA or SHA384-RSA or SHA512-RSA\n");
     printf("       -K            ...create a key with well-known key bytes on the Key Manager (only available for SHA256-HMAC)\n");
     printf("       header_version...v2.1 or v2.7\n");
     exit(2);
@@ -510,7 +528,7 @@ int main(int argc, char* argv[])
     char *libPath = NULL;
     char *foundPath = NULL;
     int slotId = 0;
-    char *operation = "SHA256";
+    char *operation = "SHA256-HMAC";
     char *filename = NULL;
     char *signature_file = "signature.out";
     char *keyAlias = NULL;
@@ -553,7 +571,7 @@ int main(int argc, char* argv[])
             break;
         case 'o':
             operation = optarg;
-            if(!strcmp(operation, "RSA"))
+            if(strstr(operation, "RSA"))
             {
                 bAsymKey = CK_TRUE;
             }
@@ -595,6 +613,14 @@ int main(int argc, char* argv[])
     if ( (NULL == pin) || (NULL == objLabel) || (createkey&&strcmp(operation, "SHA256-HMAC")) )
     {
         /* -K option works only with SHA256-HMAC */
+        SignVerifyUsage();
+    }
+
+    if ( (strcmp(operation, "SHA512-HMAC")) && (strcmp(operation, "SHA384-HMAC")) && (strcmp(operation, "SHA224-HMAC")) &&
+         (strcmp(operation, "SHA256-HMAC")) && (strcmp(operation, "SHA1-RSA")) && (strcmp(operation, "SHA256-RSA")) && (strcmp(operation, "SHA384-RSA")) &&
+         (strcmp(operation, "SHA512-RSA")) )
+    {
+        printf("Error: Invalid operation provided.\n");
         SignVerifyUsage();
     }
 
