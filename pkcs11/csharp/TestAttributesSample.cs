@@ -116,12 +116,6 @@ namespace CADP.Pkcs11Sample
                         attrNames.Add(CKA.CKA_LABEL);
                         attrNames.Add(CKA.CKA_CLASS);
                         attrNames.Add(CKA.CKA_KEY_TYPE);
-                        attrNames.Add(CKA.CKA_END_DATE);
-                        attrNames.Add(CKA.CKA_ALWAYS_SENSITIVE);
-                        attrNames.Add(CKA.CKA_NEVER_EXTRACTABLE);
-
-                        attrNames.Add(CKA.CKA_THALES_OBJECT_CREATE_DATE_EL);
-                        attrNames.Add(CKA.CKA_THALES_KEY_DEACTIVATION_DATE_EL);
                     }
 
                     if (keyHandle != null)
@@ -132,11 +126,12 @@ namespace CADP.Pkcs11Sample
 
                         if (symmetric == true)
                         {
-                            Console.WriteLine("\n\nAbout to set the end time to a new value...");
-                            DateTime endTime = DateTime.UtcNow.AddDays(30);
+                            Console.WriteLine("\n\nAbout to add ApplcationName attribute with value as {0}...", Settings.ApplicationName);
+                            attrNames.Add(CKA.CKA_APPLICATION);
                             List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
-                            objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_DEACTIVATION_DATE, endTime));
+                            objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
                             session.SetAttributeValue(keyHandle, objAttributes);
+
 
                             Console.WriteLine(symmetric ? "\n\nAttributes of symmetric key (again):" : "\n\nAttributes of public key (again):");
                             getAttributes = session.GetAttributeValue(keyHandle, attrNames);
