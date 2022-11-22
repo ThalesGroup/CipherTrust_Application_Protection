@@ -326,6 +326,10 @@ namespace CADP.Pkcs11Sample
 
                     switch (attr.Type)
                     {
+
+                        case (uint)CKA.CKA_APPLICATION:
+                            Console.WriteLine(name + " : " + attr.GetValueAsString());
+                            break;
                         case (uint)CKA.CKA_CLASS: // converting its value to an uint fails for inexplicable reasons
                             break;
                         case (uint)CKA.CKA_KEY_TYPE:

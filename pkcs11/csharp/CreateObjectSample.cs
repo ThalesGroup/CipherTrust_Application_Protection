@@ -65,7 +65,6 @@ namespace CADP.Pkcs11Sample
                     attrNames.Add(CKA.CKA_LABEL);
                     attrNames.Add(CKA.CKA_CLASS);
                     attrNames.Add(CKA.CKA_KEY_TYPE);
-                    attrNames.Add(CKA.CKA_END_DATE);
 
                     getAttributes = session.GetAttributeValue(createdKey, attrNames);
 
