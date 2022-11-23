@@ -109,7 +109,6 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
  ************************************************************************
  * Function: signData
  * Signs a piece of data with the RSA private key.
- * modulusBits is the key strength. In this case 2048 bits.
  * The caller is responsible for allocating a buffer of sufficient size
  * to hold the signed data.
  ************************************************************************
@@ -118,15 +117,13 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
  ************************************************************************
  */
 
-static CK_RV signAndVerifyData (unsigned mod_bits)
+static CK_RV signAndVerifyData ()
 {
     CK_RV rc = CKR_OK;
 
-    CK_MECHANISM		signMech = { CKM_RSA_PKCS, NULL_PTR, 0 };
+    CK_MECHANISM		signMech = { CKM_SHA1_RSA_PKCS, NULL_PTR, 0 };
     CK_ULONG			dataLen = (CK_ULONG)strlen((const char *)data);
     CK_BYTE*			pSig = NULL_PTR;
-//	CK_ULONG			modulusBits = mod_bits;
-//	CK_ULONG			sigLen = modulusBits/8;
     CK_ULONG			sigLen = 0;
 
     do
@@ -334,7 +331,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        rc = signAndVerifyData(modBits);
+        rc = signAndVerifyData();
         if (rc != CKR_OK)
         {
             rc = deleteKey(hPublicKey ? hPublicKey : hKeyRSAPublic, CK_TRUE);
