@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 		{
 		     fprintf(stderr, "I_C_CreateCertificateRequest error: %s\n",
 		               I_C_GetErrorString(rc));
-                     break;
+                     goto cleanup;
 	        }
                 else
                 {
@@ -265,13 +265,13 @@ int main(int argc, char **argv)
 		{
 		     fprintf(stderr, "I_C_CreateCertificateSignRequest error: %s\n",
 					I_C_GetErrorString(rc));
-                     break;
+                     goto cleanup;
 		}
 		else
                 {
                      fprintf(stdout,"CSR Sign request successfuly executed on Key Manager \n");
                 }
-		
+		cleanup:
 		if(cert){
 		    //printf("\n Going to delete Certificate Creation output buffer \n");
 		     I_C_Free(cert);
