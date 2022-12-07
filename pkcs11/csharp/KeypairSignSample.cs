@@ -15,7 +15,7 @@ namespace CADP.Pkcs11Sample
             string pin = Convert.ToString(inputParams[0]);
             string keyPairLabel = Convert.ToString(inputParams[1]);
 
-            string opName = "RSA";
+            string opName = "SHA1-RSA";
             string headermode = null;
             bool nodelete = false;
             if (inputParams.Length >= 3)
@@ -47,17 +47,20 @@ namespace CADP.Pkcs11Sample
                     else if (headermode.Equals("v2.7")) { ulHeaderSgn = CKM.CKM_THALES_V27HDR | CKM.CKM_VENDOR_DEFINED; ulHeaderVfy = CKM.CKM_THALES_ALLHDR | CKM.CKM_VENDOR_DEFINED; }
 
                     if (string.IsNullOrEmpty(opName))
-                        opName = "RSA";
+                        opName = "SHA1-RSA";
 
                     if (opName.Equals("SHA512-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA512_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA512_HMAC); }
                     else if (opName.Equals("SHA384-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA384_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA384_HMAC); }
                     else if (opName.Equals("SHA256-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA256_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA256_HMAC); }
                     else if (opName.Equals("SHA224-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA224_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA224_HMAC); }
                     else if (opName.Equals("SHA1-HMAC")) { mechanismSgn = session.Factories.MechanismFactory.Create(ulHeaderSgn | CKM.CKM_SHA_1_HMAC); mechanismVfy = session.Factories.MechanismFactory.Create(ulHeaderVfy | CKM.CKM_SHA_1_HMAC); }
-                    else if (opName.Equals("RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
+                    else if (opName.Equals("SHA1-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA1_RSA_PKCS);
+                    else if (opName.Equals("SHA256-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256_RSA_PKCS);
+                    else if (opName.Equals("SHA384-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA384_RSA_PKCS);
+                    else if (opName.Equals("SHA512-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA512_RSA_PKCS);
                     else
                     {
-                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, and RSA are supported");
+                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, SHA1-RSA, SHA256-RSA, SHA384-RSA and SHA512-RSA are supported");
                         return false;
                     }
 
@@ -65,7 +68,7 @@ namespace CADP.Pkcs11Sample
 
                     try
                     {
-                        if (opName.Equals("RSA"))
+                        if (opName.Equals("SHA1-RSA") || opName.Equals("SHA256-RSA") || opName.Equals("SHA384-RSA") || opName.Equals("SHA512-RSA"))
                         {
                             if (!string.IsNullOrEmpty(headermode))
                                 return false;
