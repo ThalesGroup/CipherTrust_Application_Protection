@@ -126,7 +126,7 @@ namespace CADP.Pkcs11Sample
 
                         if (symmetric == true)
                         {
-                            Console.WriteLine("\n\nAbout to add ApplcationName attribute with value as {0}...", Settings.ApplicationName);
+                            Console.WriteLine("\n\nAbout to add ApplicationName attribute with value as {0}...", Settings.ApplicationName);
                             attrNames.Add(CKA.CKA_APPLICATION);
                             List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
                             objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
