@@ -71,6 +71,8 @@ public class AESGCMUpdateSample {
 			System.out.println("data: " + new String(decryptedText));
 		} catch (Exception e) {
 			e.printStackTrace();
+                       System.out.println("The Cause is " + e.getMessage() + ".");
+	               throw e;
 		} finally {
 			// releasing session
 			if (session != null) {

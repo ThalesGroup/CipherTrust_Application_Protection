@@ -72,6 +72,7 @@ public class GenerateRandom {
         }
         catch(PKCS11Exception pe){
             System.out.println(pe.getMessage());
+            throw e;
         }
         catch (Exception e)
         {

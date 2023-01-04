@@ -131,6 +131,7 @@ public class KMIPModifySample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
+            throw e;
         }
         finally {
         	if(session!=null)

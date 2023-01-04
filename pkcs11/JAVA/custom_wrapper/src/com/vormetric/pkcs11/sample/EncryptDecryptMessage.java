@@ -743,6 +743,7 @@ public class EncryptDecryptMessage {
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
+                        throw ex;
                     } finally {
                     	try {
                         	if(br!=null) br.close();
