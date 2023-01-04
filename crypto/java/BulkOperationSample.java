@@ -93,7 +93,9 @@ public class BulkOperationSample {
 			// displaying the decrypted data
 			displayData(decryptedData, "Decrypted Data ");
 		} catch (Exception e) {
-			e.printStackTrace();
+		       e.printStackTrace();
+                       System.out.println("The Cause is " + e.getMessage() + ".");
+	               throw e;
 		} finally{
 			// releasing session
 			if(session!=null) {

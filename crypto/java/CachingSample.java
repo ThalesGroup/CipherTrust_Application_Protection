@@ -134,7 +134,8 @@ public class CachingSample
            }
        } catch (Exception e) {
            e.printStackTrace();
-           System.out.println("Exception = " + e);
+            System.out.println("The Cause is " + e.getMessage() + ".");
+	    throw e;
        }
 
     }
