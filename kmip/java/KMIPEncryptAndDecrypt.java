@@ -86,6 +86,8 @@ public class KMIPEncryptAndDecrypt {
 			System.out.println(new String(decResult.getData()));
 		} catch (Exception e) {
 			e.printStackTrace();
+                         System.out.println("The Cause is " + e.getMessage() + ".");
+	                 throw e;
 		} finally {
 			session.closeSession();
 		}

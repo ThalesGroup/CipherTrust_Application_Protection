@@ -169,10 +169,14 @@ public class EncryptDecryptAsymmetricKey {
         catch (PKCS11Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+	    throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+	    throw e;
         }
         finally {
             Helper.closeDown(session);
