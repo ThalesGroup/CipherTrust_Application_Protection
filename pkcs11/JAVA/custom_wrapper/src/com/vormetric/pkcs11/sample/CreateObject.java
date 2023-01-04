@@ -83,6 +83,7 @@ public class CreateObject{
         catch (Exception e)
         {
             e.printStackTrace();
+            throw e;
         }
         finally {
             Helper.closeDown(session);

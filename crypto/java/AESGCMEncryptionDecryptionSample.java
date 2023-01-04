@@ -66,6 +66,8 @@ public class AESGCMEncryptionDecryptionSample {
 	 		System.out.println("data: " + new String(decrypt));	 		
 		} catch (Exception e) {
 			e.printStackTrace();
+                       System.out.println("The Cause is " + e.getMessage() + ".");
+	               throw e;
 		} finally{
 			// releasing session
 			if(session!=null) {

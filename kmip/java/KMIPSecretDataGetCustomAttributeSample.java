@@ -50,6 +50,8 @@ public class KMIPSecretDataGetCustomAttributeSample {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+                       System.out.println("The Cause is " + e.getMessage() + ".");
+	               throw e;
 		}
 		finally{
         	if(session!=null)
