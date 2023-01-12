@@ -70,6 +70,7 @@ CryptoSinglePart_multitenency.c| Uses session level properties file via I_C_Open
 CryptoSinglePart_CMS.c | Performs sign verify operations using I_C_Crypt_Enhanced() in CMS format.
 CryptoDataUtility.c | This utility allows the user to decrypt a  string without specifying the keyName. To  accomplish this, the cipher text, at the time of encryption, is bundled with the same meta data, of the key, which was used for encryption.
 CryptoSinglePart_EC.c | Performs cryptographic operations using I_C_Crypt_Enhanced() for Algo EC.
+CryptoSinglePart_ExtHdrAll.c | Performs cryptographic operations using I_C_Crypt_Enhanced() with external and internal header support for Algorithms - AES, AES/GCM, SEED DESede and ARIA.
 
 ## Limitations
 
