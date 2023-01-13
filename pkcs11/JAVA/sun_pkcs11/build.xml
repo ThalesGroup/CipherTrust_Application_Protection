@@ -8,7 +8,7 @@
     <property name="util_classes.dir" value="util/${build.dir}/classes"/>
     <property name="jar.dir" value="${build.dir}/jar"/>
 
-    <property name="PIN" value="admin:KeySecure_1"/>
+    <property name="PIN" value="ausername:password"/>
     <property name="IMPKEYNAME" value="pkcs11_java_test_key_"/>
 	<property name="WRAPKEYNAME" value="pkcs11_java_test_key_wrap"/>
     <property name="SourceFile" value="build.xml"/>
