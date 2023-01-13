@@ -94,7 +94,7 @@ public class CipherTrustManagerHelper {
 	public static final String modetag = "\"mode\":";
 	public static final String filetagname = "etag:";
 	public static final String filetagsep = "!";
-	private static final String[] VALID_HOSTS = { "192.168.159.160", "192.168.1.25", "mwarner-win10" };
+	private static final String[] VALID_HOSTS = { "ipaddress1", "ipaddress2", "fqdn1" };
 	public static final MediaType JSONOCTET = MediaType.get("application/octet-stream");
 	public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 	public static final MediaType JSONTXT = MediaType.get("text/plain");
@@ -473,12 +473,12 @@ public class CipherTrustManagerHelper {
 	 * various methods implemented. See parameters below and examples for more
 	 * details.
 	 * <p>
-	 * Examples: keyholder pwd MyAESEncryptionKey26 5 fpe 192.168.159.160
-	 * encrypt digit keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt
-	 * alphabet keyholder pwd myrsa-pub 5 rsa 192.168.159.160 encrypt
-	 * alphanumeric admin pwd! MyAESEncryptionKey26 10 fpe 192.168.159.160
-	 * encrypt digit admin pwd! hmacsha256-1 1 na 192.168.159.160 mac alphabet
-	 * admin pwd! rsa-key5 1 na 192.168.159.160 sign alphabet
+	 * Examples: keyholder pwd MyAESEncryptionKey26 5 fpe 192.168.1.xxx
+	 * encrypt digit keyholder pwd myrsa-pub 5 rsa 192.168.1.xxx encrypt
+	 * alphabet keyholder pwd myrsa-pub 5 rsa 192.168.1.xxx encrypt
+	 * alphanumeric admin pwd! MyAESEncryptionKey26 10 fpe 192.168.1.xxx
+	 * encrypt digit admin pwd! hmacsha256-1 1 na 192.168.1.xxx mac alphabet
+	 * admin pwd! rsa-key5 1 na 192.168.1.xxx sign alphabet
 	 *
 	 * @param userid
 	 *            the userid must be granted access to the key in CM.
@@ -674,10 +674,10 @@ public class CipherTrustManagerHelper {
 			} else if (action.equalsIgnoreCase("mac")) {
 				// admin Vormetric123! hmacsha256-1 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
-				// 192.168.159.160 mac
+				// 192.168.1.xxx mac
 				// admin Vormetric123! rsa-key5 1
 				// 2c6e43fbf1bcf89ed75ee69280e5f53e78ffe8fb5591d1660d081a8613cf1f10
-				// 192.168.159.160 sign
+				// 192.168.1.xxx sign
 				value = this.cmRESTMac("na", sensitive, action);
 				System.out.println("mac " + value);
 				value = this.cmRESTMac(value, sensitive, "macv");
