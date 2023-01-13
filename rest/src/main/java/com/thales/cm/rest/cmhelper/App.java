@@ -18,7 +18,7 @@ public class App
 		
 		awsresrest.username = "admin";
 		awsresrest.password = "yourpwd";
-		awsresrest.cmipaddress = "192.168.159.160";
+		awsresrest.cmipaddress = "ipaddress";
 		
 		try {
 			String tkn = awsresrest.getToken();

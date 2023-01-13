@@ -50,9 +50,9 @@ echo "Setting DSM inbound rules"
 aws ec2 authorize-security-group-ingress --group-id $dsmvtsSG --protocol tcp --port 0-65535 --source-group $dsmvtsSG 
 #aws ec2 authorize-security-group-ingress --group-id $dsmvtsSG --protocol icmp --port 0-65535 --source-group $dsmvtsSG --cidr $cidr
 
-awsSubnet1=$(aws ec2 create-subnet --vpc-id $vpcID --availability-zone $awsAZ1 --cidr-block 172.31.96.0/20  | grep SubnetId | awk '{print $2}' | tr -d '"' | tr -d ',')
+awsSubnet1=$(aws ec2 create-subnet --vpc-id $vpcID --availability-zone $awsAZ1 --cidr-block ___insert_ip_address_range1___/20  | grep SubnetId | awk '{print $2}' | tr -d '"' | tr -d ',')
 echo "awsSubnet1=$awsSubnet1"
-awsSubnet2=$(aws ec2 create-subnet --vpc-id $vpcID --availability-zone $awsAZ2 --cidr-block 172.31.112.0/20  | grep SubnetId | awk '{print $2}' | tr -d '"' | tr -d ',')
+awsSubnet2=$(aws ec2 create-subnet --vpc-id $vpcID --availability-zone $awsAZ2 --cidr-block ___insert_ip_address_range2___/20  | grep SubnetId | awk '{print $2}' | tr -d '"' | tr -d ',')
 echo "awsSubnet2=$awsSubnet2"
 
 echo "Creating DSM Instance "
