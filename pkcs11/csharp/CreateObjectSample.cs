@@ -20,7 +20,8 @@ namespace CADP.Pkcs11Sample
                     string pin = Convert.ToString(inputParams[0]);
                     string keyValue = new string((char[])inputParams[1]);
                     string keyLabel = Convert.ToString(inputParams[2]);
-
+                    bool isOpaqueObj = inputParams.Length > 2 ? Convert.ToBoolean(inputParams[3]) : false;
+                    int version = inputParams.Length > 3 ? Convert.ToInt32(inputParams[4]) : 0;
                     uint keySize = (uint)keyValue.Length;
                     DateTime endTime = DateTime.UtcNow.AddDays(31);
 
@@ -33,9 +34,18 @@ namespace CADP.Pkcs11Sample
                     List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
-                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+                    if(isOpaqueObj)
+                    {
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_THALES_OPAQUE_OBJECT));
+                    }
+                    else
+                    {
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+                    }
+                    if(!isOpaqueObj && version<3)
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_VERSIONED_KEY, true));
 
+                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, keyValue));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
@@ -64,7 +74,7 @@ namespace CADP.Pkcs11Sample
 
                     attrNames.Add(CKA.CKA_LABEL);
                     attrNames.Add(CKA.CKA_CLASS);
-                    attrNames.Add(CKA.CKA_KEY_TYPE);
+                    attrNames.Add(CKA.CKA_KEY_TYPE);                  
 
                     getAttributes = session.GetAttributeValue(createdKey, attrNames);
 
