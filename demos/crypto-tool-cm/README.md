@@ -21,9 +21,12 @@ cd demos/cm-crypto-tool
 npm install
 npm run dev
 ```
+
+<mark>With NodeJS, NPM and Git installed, above steps should work fine on any other host</mark>
+
 ### Open the web interface on your favorite browser (tested on Chrome only)
 ```
-http://server:3000/
+http://localhost:3000/
 ```
 
 ## Using the tool
