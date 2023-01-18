@@ -1,4 +1,4 @@
-# Crypto tool for CipherTrust Vault
+# Crypto tool for CipherTrust Manager
 
 ![image](https://user-images.githubusercontent.com/111074839/207679307-1f62783f-9ef8-4e58-ba8e-9e168e78371f.png)
 
@@ -13,11 +13,11 @@ sudo apt install npm
 ### Deploy this software
 Clone this repo
 ```
-git clone https://github.com/anugram/cm-crypto-tool.git
+git clone https://github.com/thalescpl-io/CipherTrust_Application_Protection.git
 ```
 Install and run the application
 ```
-cd cm-crypto-tool
+cd demos/cm-crypto-tool
 npm install
 npm run dev
 ```
