@@ -365,6 +365,13 @@ namespace CADP.Pkcs11Sample
                             Console.WriteLine(name + " : " + date.ToString());
                             break;
 
+                        case (uint)CKA.CKA_KEY_CACHE_ON_HOST:
+                            if (attr.GetValueAsByteArray().Length == 0)
+                                Console.WriteLine(name + " : No");
+                            else
+                                Console.WriteLine(name + " : " + attr.GetValueAsBool().ToString());
+                            break;
+
                         default:
                             valArray = attr.GetValueAsByteArray();
                             str = BitConverter.ToString(valArray);
