@@ -354,8 +354,15 @@ namespace CADP.Pkcs11Sample
 
                         case (uint)CKA.CKA_ALWAYS_SENSITIVE:
                         case (uint)CKA.CKA_NEVER_EXTRACTABLE:
-                            bval = attr.GetValueAsBool();
-                            Console.WriteLine(name + " : " + bval.ToString());
+                            if (attr.GetValueAsByteArray().Length == 0)
+                            {
+                                Console.WriteLine(name + " : No");
+                            }
+                            else
+                            {
+                                bval = attr.GetValueAsBool();
+                                Console.WriteLine(name + " : " + bval.ToString());
+                            }
                             break;
 
                         case (uint)CKA.CKA_THALES_OBJECT_CREATE_DATE_EL:
@@ -373,13 +380,20 @@ namespace CADP.Pkcs11Sample
                             break;
 
                         default:
-                            valArray = attr.GetValueAsByteArray();
-                            str = BitConverter.ToString(valArray);
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var c in str)
-                                if (c != '-') sb.Append(c);
+			    if (attr.GetValueAsByteArray().Length == 0)
+                            {
+                                Console.WriteLine(name + " : ");
+                            }
+                            else
+                            {
+                                valArray = attr.GetValueAsByteArray();
+                                str = BitConverter.ToString(valArray);
+                                StringBuilder sb = new StringBuilder();
+                                foreach (var c in str)
+                                    if (c != '-') sb.Append(c);
 
-                            Console.WriteLine(name + " : " + sb.ToString().ToLower());
+                                Console.WriteLine(name + " : " + sb.ToString().ToLower());
+                            }
 
                             break;
                     }
