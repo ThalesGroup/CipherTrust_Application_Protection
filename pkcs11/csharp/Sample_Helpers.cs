@@ -388,13 +388,13 @@ namespace CADP.Pkcs11Sample
                             break;
 
                         default:
-			    if (attr.GetValueAsByteArray().Length == 0)
+                            valArray = attr.GetValueAsByteArray();
+			    if (valArray.Length == 0)
                             {
                                 Console.WriteLine(name + " : ");
                             }
                             else
                             {
-                                valArray = attr.GetValueAsByteArray();
                                 str = BitConverter.ToString(valArray);
                                 StringBuilder sb = new StringBuilder();
                                 foreach (var c in str)
