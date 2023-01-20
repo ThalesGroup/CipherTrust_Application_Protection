@@ -379,6 +379,14 @@ namespace CADP.Pkcs11Sample
                                 Console.WriteLine(name + " : " + attr.GetValueAsBool().ToString());
                             break;
 
+                        case (uint)CKA.CKA_THALES_CUSTOM_1:
+                        case (uint)CKA.CKA_THALES_CUSTOM_2:
+                        case (uint)CKA.CKA_THALES_CUSTOM_3:
+                        case (uint)CKA.CKA_THALES_CUSTOM_4:
+                        case (uint)CKA.CKA_THALES_CUSTOM_5:
+                            Console.WriteLine(name + " : " + attr.GetValueAsString());
+                            break;
+
                         default:
 			    if (attr.GetValueAsByteArray().Length == 0)
                             {
