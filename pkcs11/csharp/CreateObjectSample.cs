@@ -41,11 +41,12 @@ namespace CADP.Pkcs11Sample
                     else
                     {
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
+
                     }
-                    if(!isOpaqueObj && version<3)
+                    if (!isOpaqueObj && version<3)
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_VERSIONED_KEY, true));
 
-                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, keyValue));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));
 
