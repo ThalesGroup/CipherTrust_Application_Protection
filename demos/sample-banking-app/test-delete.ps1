@@ -6,10 +6,11 @@ using module CipherTrustManager
 $DebugPreference = 'SilentlyContinue'
 #$DebugPreference = 'Continue'
 
-$username = "admin"
-$password = "P4ssw0rd!"
-$kms = "192.168.136.131"
-$counter = "demo1"
+$username = "<admin_username>"
+$password = "<password>"
+$kms = "<ipaddress_or_fqdn>"
+#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$counter = "<prefix>"
 $keyname = "dpgKey-$counter"
 
 ###Start with docker down etc

@@ -1,7 +1,10 @@
-$username = "admin"
-$password = "ChangeIt!"
-$kms = "1.1.1.1"
-$counter = "demo"
+$username = "<admin_username>"
+$password = "<password>"
+$kms = "<ipaddress_or_fqdn>"
+#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$counter = "<prefix>"
+#sampleUserPassword is the password that will be applied to sample users created by this script
+$sampleUserPassword = "<userPassword>"
 
 #Some house keeping stuff
 add-type @"
@@ -203,7 +206,7 @@ catch {
 $ccPolicyId = $response.id
 
 Write-Output "Creating sample users..."
-#ccaccountowner, cccustomersupport, everyoneelse --- password is same for all...P4ssw0rd!
+#ccaccountowner, cccustomersupport, everyoneelse --- password is same for all...$sampleUserPassword
 $users = "cccustomersupport"
 foreach ($user in $users)
 {
@@ -212,7 +215,7 @@ foreach ($user in $users)
         'email' = "$user@local"
         'name' = $user
         'username' = $user
-        'password' = 'P4ssw0rd!'
+        'password' = $sampleUserPassword
         'app_metadata' = @{}
         'user_metadata' = @{}
     }

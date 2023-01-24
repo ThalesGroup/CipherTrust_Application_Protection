@@ -9,12 +9,14 @@ Import-Module -Name powershell-yaml -Force
 $DebugPreference = 'SilentlyContinue'
 #$DebugPreference = 'Continue'
 
-
-$username = "admin"
-$password = "P4ssw0rd!"
-$kms = "192.168.136.131"
+$username = "<admin_username>"
+$password = "<password>"
+$kms = "<ipaddress_or_fqdn>"
+#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$counter = "<prefix>"
+#sampleUserPassword is the password that will be applied to sample users created by this script
+$sampleUserPassword = "<userPassword>"
 $nae_port = 9005
-$counter = "demo1"
 $keyname = "dpgKey-$counter"
 #$usageMask = 3145740
 $usageMask = ([CipherTrustManager.UsageMaskTable]::Encrypt + [CipherTrustManager.UsageMaskTable]::Decrypt + [CipherTrustManager.UsageMaskTable]::FPEEncrypt + [CipherTrustManager.UsageMaskTable]::FPEDecrypt) #More HUMAN READABLE ;)
@@ -122,12 +124,12 @@ Write-Output "...Done"
 
 ###Creating Users
 Write-Output "Creating sample users..."
-#ccaccountowner, cccustomersupport, everyoneelse, user1, user2, user3 --- password is same for all...$password
-$pssword = ConvertTo-SecureString $password -AsPlainText
-$users = @("ccaccountowner", "cccustomersupport", "everyoneelse", "user1", "user2", "user3")
+#ccaccountowner, cccustomersupport, everyoneelse, user1, user2, user3 --- password is same for all...$sampleUserPassword
+$passwd = ConvertTo-SecureString $sampleUserPassword -AsPlainText
+$users = @("cccustomersupport")
 foreach ($user in $users) {
     Write-Output "---Creating account for $user..."
-    $Cred = New-Object System.Management.Automation.PSCredential ($user, $pssword)
+    $Cred = New-Object System.Management.Automation.PSCredential ($user, $passwd)
     New-CMUser `
         -email "$($user)@local" `
         -name $user `
@@ -142,7 +144,7 @@ Write-Output "Creating PlainText User Set..."
 $plainTextUserSetId = New-CMUserSet `
     -name "plainttextuserset-$counter" `
     -description "plain text user set for card account owner" `
-    -users @('ccaccountowner', 'user1', 'user2', 'user3')
+    -users @()
 #if already exists... go get the id
 if (-NOT $plainTextUserSetId) {
     $userList = Find-CMUserSets  `
