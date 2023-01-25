@@ -25,6 +25,12 @@ import com.fakebank.dpg.model.CustomerAccountMongoDocumentBean;
 import com.fakebank.dpg.model.CustomerAccountPersonal;
 import com.fakebank.dpg.repository.CustomerAccountMongoRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 
 /**
  * @author CipherTrust.io
@@ -37,11 +43,18 @@ public class CCAccountController {
 	private CustomerAccountMongoRepository mongoCustomerAccountRepo;
 	//private AccountRepository accountRepository;
 	
+	@Operation(summary = "Add new card to existing user account")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Card Added Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = NewCreditCardBean.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@PostMapping("/api/fakebank/account/card")
+	@PostMapping("/api/account/card/save")
 	public ApiResponseBean saveCreditAccount(@RequestBody NewCreditCardBean bean) {
-		//MongoDb: Add the customer details to the DB
 		ApiResponseBean response = new ApiResponseBean();
+		
+		// Check if the user already exists in the database
+		// If yes add new card entry, else fail with no user existing
 		Optional<CustomerAccountMongoDocumentBean> existingUser = mongoCustomerAccountRepo.findById(bean.getUserName());
 		if(existingUser.isPresent()) {
 			CustomerAccountMongoDocumentBean user = existingUser.get();
@@ -52,7 +65,6 @@ public class CCAccountController {
 			newCardDetails.setExpDate(bean.getExpDate());
 			newCardDetails.setBalance("0");
 			List<CustomerAccountCard> cards = new ArrayList<CustomerAccountCard>();
-			System.out.println(user.toString());
 			if(user.getCards() != null) {
 				cards = user.getCards();
 			}			
@@ -66,16 +78,22 @@ public class CCAccountController {
 			return response;
 		}
 		response.setStatus("Success");
-		response.setMessage("new credit account added succesfully");
+		response.setMessage("New card added succesfully");
 		return response;
 	}
 	
+	@Operation(summary = "Create or update user account")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Details Updated Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = CustomerPersonalDetails.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@PostMapping("/api/fakebank/account/personal")
+	@PostMapping("/api/account/details/save")
 	public ApiResponseBean saveAccountDetails(@RequestBody CustomerPersonalDetails bean) {
-		//MongoDb: Add the customer details to the DB
 		ApiResponseBean response = new ApiResponseBean();
 		Optional<CustomerAccountMongoDocumentBean> existingUser = mongoCustomerAccountRepo.findById(bean.getUserName());
+		// Find if the user already exists, if yes update details
+		// If not add one
 		if(existingUser.isPresent()) {
 			CustomerAccountMongoDocumentBean user = existingUser.get();
 			CustomerAccountPersonal userPersonalDetails = bean.getDetails();
@@ -96,8 +114,13 @@ public class CCAccountController {
 		return response;
 	}
 	
+	@Operation(summary = "Fetch account details for userId")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Account Details Retrieved Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = CustomerPersonalDetails.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@GetMapping("/api/fakebank/account/personal/{id}")
+	@GetMapping("/api/account/details/{id}")
 	public CustomerPersonalDetails getAccountDetails(@PathVariable("id") String id) {
 		Optional<CustomerAccountMongoDocumentBean> acc = mongoCustomerAccountRepo.findById(id);
 		CustomerPersonalDetails customer = new CustomerPersonalDetails();
@@ -113,8 +136,13 @@ public class CCAccountController {
 		return customer;
 	}
 	
+	@Operation(summary = "Fetch all cards for userId")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Account Cards Retrieved Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = CustomerCreditAccounts.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@GetMapping("/api/fakebank/accounts/{id}")
+	@GetMapping("/api/account/cards/{id}")
 	public CustomerCreditAccounts getAccountsById(@PathVariable("id") String id) {
 		Optional<CustomerAccountMongoDocumentBean> acc = mongoCustomerAccountRepo.findById(id);
 		CustomerCreditAccounts res = new CustomerCreditAccounts();
@@ -129,9 +157,15 @@ public class CCAccountController {
 		return res;
 	}
 	
+	@Operation(summary = "Fetch all account holders")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Accounts Retrieved Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = CustomerPersonalDetails.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@GetMapping("/api/fakebank/account/holders")
+	@GetMapping("/api/account/all")
 	public CustomerPersonalAccounts getAccountHolders() {
+		// Fetch all accounts for the administrator view
 		List<CustomerAccountMongoDocumentBean> accounts = mongoCustomerAccountRepo.findAll();
 		ArrayList<CustomerPersonalDetails> list = new ArrayList<CustomerPersonalDetails>();
 		CustomerPersonalAccounts res = new CustomerPersonalAccounts();
@@ -145,6 +179,8 @@ public class CCAccountController {
 		return res;
 	}
 	
+	// Most likely not needed
+	/*
 	@CrossOrigin(origins = "*")
 	@GetMapping("/api/fakebank/details/{id}")
 	public CustomerPersonalDetails getAccountDetailsById(@PathVariable("id") String id) {
@@ -153,6 +189,6 @@ public class CCAccountController {
 		res.setUserName(acc.get().getUserName());
 		res.setDetails(acc.get().getDetails());
 		return res;
-	}
+	}*/
 	
 }

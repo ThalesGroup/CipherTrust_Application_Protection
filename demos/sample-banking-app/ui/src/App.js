@@ -27,9 +27,7 @@ function App() {
           <Route path="/auth/user" element={<UserLayout />}>
             <Route exact path="home" element={<UserDashboard />} />
             <Route path="myAccount" element={<My />} />
-            <Route path="accounts" element={<Account />} />
             <Route path="createAccount" element={<CreateAccount />} />
-            <Route path="createFirst" element={<CreateFirst />} />
           </Route>
           <Route path="/auth/admin" element={<AdminLayout />}>
             <Route exact path="home" element={<List />} />

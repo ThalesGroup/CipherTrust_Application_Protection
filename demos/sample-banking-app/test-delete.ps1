@@ -6,15 +6,18 @@ using module CipherTrustManager
 $DebugPreference = 'SilentlyContinue'
 #$DebugPreference = 'Continue'
 
+#########################
+## Change Variables below
+#########################
 $username = "<admin_username>"
 $password = "<password>"
 $kms = "<ipaddress_or_fqdn>"
 #counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
 $counter = "<prefix>"
 $keyname = "dpgKey-$counter"
-
-###Start with docker down etc
-####
+###########################################################################
+## Do not change anything below unless you know what you are doing
+###########################################################################
 
 Write-Output "-----------------------------------------------------------------"
 Write-Output "Next few steps will Deleting boilerplate config on your CM instance"

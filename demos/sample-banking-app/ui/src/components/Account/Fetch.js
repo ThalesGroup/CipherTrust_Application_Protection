@@ -19,7 +19,7 @@ export default function Fetch() {
   useEffect(() => {
     const headers = { Authorization: `Basic ${sessionStorage.getItem('basic')}` };
     axios
-      .get('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/details/'+userQuery,
+      .get('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/details/' + userQuery,
       {
         headers: headers
       })
@@ -33,12 +33,10 @@ export default function Fetch() {
       .catch((err) => console.log(err));
 
     axios
-      .get('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/accounts/'+
-        decodedToken.preferred_username+
-        '/'+ 
-        userQuery, {
-            headers: headers
-        })
+      .get('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/cards/' + userQuery, 
+      {
+        headers: headers
+      })
       .then((res) => {
         setAccounts(res.data.accounts);
       })

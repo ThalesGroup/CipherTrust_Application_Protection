@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import jwt_decode from "jwt-decode";
 
 async function loginUser(credentials) {
- console.log(credentials);
- return fetch('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8080/api/fakebank/signin/', {
+ return fetch('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8080/api/user/signin', 
+ {
    method: 'POST',
    headers: {
      'Content-Type': 'application/json'

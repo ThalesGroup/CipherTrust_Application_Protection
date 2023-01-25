@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 async function createAccount(AccDetails) {
     console.log(JSON.stringify(AccDetails))
-    return fetch('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/details', {
+    return fetch('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/details', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -30,12 +30,11 @@ export default function My() {
         const headers = { Authorization: `Basic ${sessionStorage.getItem('basic')}` };
         axios
           .get(
-            'http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/details/'+decodedToken.preferred_username,
+            'http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/details/' + decodedToken.preferred_username,
             {
                 headers: headers
             })
           .then((res) => {
-            console.log(res.data.details);
             setFullName(res.data.details.name);
             setMobileNumber(res.data.details.mobile);
             setDob(res.data.details.dob);

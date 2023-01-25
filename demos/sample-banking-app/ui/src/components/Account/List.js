@@ -12,11 +12,11 @@ export default function Fetch() {
     useEffect(() => {
       const headers = { Authorization: `Basic ${sessionStorage.getItem('basic')}` };
       axios
-        .get('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/accounts/all/'+decodedToken.preferred_username, {
+        .get('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/accounts/all', {
           headers: headers
         })
         .then((res) => {
-          console.log(res.data.accounts);
+          //console.log(res.data.accounts);
           setAccounts(res.data.accounts);
         })
         .catch((err) => console.log(err));

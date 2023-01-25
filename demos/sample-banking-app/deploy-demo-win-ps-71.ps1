@@ -1,3 +1,6 @@
+Install-Module -Name powershell-yaml -RequiredVersion 0.4.2
+Import-Module powershell-yaml
+
 $username = "<admin_username>"
 $password = "<password>"
 $kms = "<ipaddress_or_fqdn>"
@@ -5,9 +8,6 @@ $kms = "<ipaddress_or_fqdn>"
 $counter = "<prefix>"
 #sampleUserPassword is the password that will be applied to sample users created by this script
 $sampleUserPassword = "<userPassword>"
-
-Install-Module -Name powershell-yaml -RequiredVersion 0.4.2
-Import-Module powershell-yaml
 
 Write-Output "-----------------------------------------------------------------"
 Write-Output "Next few steps will create boilerplate config on your CM instance"

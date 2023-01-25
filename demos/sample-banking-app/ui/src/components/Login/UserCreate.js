@@ -4,8 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import { useNavigate } from 'react-router-dom';
 
 async function createAccount(acc) {
-    console.log(acc);
-    return fetch('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/create', {
+    return fetch('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

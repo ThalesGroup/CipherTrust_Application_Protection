@@ -19,12 +19,11 @@ export default function UserDashboard() {
         const headers = { Authorization: `Basic ${sessionStorage.getItem('basic')}` };
         axios
           .get(
-            'http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/details/'+decodedToken.preferred_username,
+            'http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/details/' + decodedToken.preferred_username,
             {
                 headers: headers
             })
           .then((res) => {
-            console.log(res.data.details);
             if(res.data.details.ssn === null) {
                 navigate('/auth/user/createFirst');
             } else {
@@ -41,7 +40,7 @@ export default function UserDashboard() {
 
         axios
           .get(
-            'http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/accounts/'+decodedToken.preferred_username+'/'+ decodedToken.preferred_username,
+            'http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/cards/' + decodedToken.preferred_username,
             {
                 headers: headers
             })

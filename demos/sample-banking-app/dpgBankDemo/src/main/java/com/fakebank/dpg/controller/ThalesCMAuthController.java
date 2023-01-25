@@ -16,10 +16,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,9 +34,16 @@ import com.fakebank.dpg.model.CustomerAccountPersonal;
 import com.fakebank.dpg.repository.CustomerAccountMongoRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 /**
  * @author CipherTrust.io
- *
+ * This is the main controller file for user creation and login API calls
+ * CM = CipherTrust Manager
  */
 @RestController
 public class ThalesCMAuthController {
@@ -49,25 +54,33 @@ public class ThalesCMAuthController {
 	@Autowired
 	private CustomerAccountMongoRepository mongoCustomerAccountRepo;
 	
+	@Operation(summary = "Create a new credit card account")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Account Created Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = NewAccountBean.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@PostMapping("/api/user-mgmt/user/create")
+	@PostMapping("/api/user/create")
 	public ApiResponseBean saveOrUpdateUser(@RequestBody NewAccountBean bean) {
+		// This API controller is invoked by the sign up page on the Banking Application front end
+		
 		ApiResponseBean response = new ApiResponseBean();
 		
-		//Add User to CM
-		//Get CM IP and credentials from system environment - passed via docker invocation
-		String cmUrl = System.getenv("CMIP");
+		// First step is to add User to CM - we need JWT for any further DPG policies to apply
+		// Get CM IP and credentials from system environment - passed via docker invocation
+		String cmUrl = System.getenv("CM_URL");
 		String cmUser = System.getenv("CM_USERNAME");
 		String cmUserPwd = System.getenv("CM_PASSWORD");
 		String cmUserSetId = System.getenv("CM_USER_SET_ID");
 		
-		//Acquire JWT from CM
+		// Acquire JWT from CM for the newly created user
 		CMCreateTokenBean tokenRequest = new CMCreateTokenBean("password", cmUser, cmUserPwd);
 		HttpHeaders tokenRequestHeaders = new HttpHeaders();
 		tokenRequestHeaders.setContentType(MediaType.APPLICATION_JSON);
 	    HttpEntity<CMCreateTokenBean> tokenRequestEntity = new HttpEntity<CMCreateTokenBean>(tokenRequest,tokenRequestHeaders);
 	    ResponseEntity<JsonNode> tokenResponse;
 	    try {
+	    	// API call to CM for acquiring JWT
 	    	tokenResponse = 
 	    			restTemplate.exchange(cmUrl + "/api/v1/auth/tokens", HttpMethod.POST, tokenRequestEntity, JsonNode.class);
 		} catch (Exception ex) {
@@ -174,10 +187,15 @@ public class ThalesCMAuthController {
 	}
 	
 	
+	@Operation(summary = "Login user")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Account Authenticated Succesfully", content = {
+			@Content(mediaType = "application/json", schema = @Schema(implementation = AuthSignInBean.class)) }),
+		@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content) })
 	@CrossOrigin(origins = "*")
-	@PostMapping("/api/fakebank/signin")
+	@PostMapping("/api/user/signin")
 	public TokenResponseBean login(@RequestBody AuthSignInBean credentials) {
-		String BaseUrl = System.getenv("CMIP");
+		String BaseUrl = System.getenv("CM_URL");
 		System.out.println(BaseUrl);
 		String URI_USERS = BaseUrl + "/api/v1/auth/tokens/";
 		TokenResponseBean token = restTemplate.postForObject(URI_USERS, credentials, TokenResponseBean.class);
@@ -185,6 +203,8 @@ public class ThalesCMAuthController {
 		return token;
 	}
 	
+	// This might be useless...we will see
+	/*
 	@CrossOrigin(origins = "*")
 	@GetMapping("/api/fakebank/getUserDetails")
 	public void getUserDetails(@RequestParam(name = "t") String token) {
@@ -203,5 +223,5 @@ public class ThalesCMAuthController {
 		JsonNode map = response.getBody();
 	    String someValue = map.get("name").asText();
 	    System.out.println(someValue);
-	}
+	}*/
 }

@@ -3,7 +3,7 @@ import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 async function createAccount(AccDetails) {
-    return fetch('http://'+process.env.REACT_APP_BACKEND_IP_ADDRESS+':8081/api/proxy/account/card', {
+    return fetch('http://' + process.env.REACT_APP_BACKEND_IP_ADDRESS + ':8081/api/proxy/account/card', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
