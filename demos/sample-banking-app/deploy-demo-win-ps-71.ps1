@@ -1,13 +1,18 @@
 Install-Module -Name powershell-yaml -RequiredVersion 0.4.2
 Import-Module powershell-yaml
 
-$username = "<admin_username>"
-$password = "<password>"
-$kms = "<ipaddress_or_fqdn>"
-#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
-$counter = "<prefix>"
-#sampleUserPassword is the password that will be applied to sample users created by this script
-$sampleUserPassword = "<userPassword>"
+#########################
+## Change Variables below
+#########################
+$username = "<admin_username>" # Username for CipherTrust Manager (CM) that has access to create resources
+$password = "<password>" # Password of the user above
+$kms = "<ipaddress_or_fqdn>" # IP Address or FQDN of the CipherTrust Manager
+$protocol = "https" # Can be http or https
+$counter = "<prefix>" # counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$sampleUserPassword = "<userPassword>" # sampleUserPassword is the password that will be applied to sample users created by this script
+###########################################################################
+## Do not change anything below unless you know what you are doing
+###########################################################################
 
 Write-Output "-----------------------------------------------------------------"
 Write-Output "Next few steps will create boilerplate config on your CM instance"
@@ -417,7 +422,7 @@ $body = @{
     'description' = 'DPG policy for credit card attributes'
     'proxy_config' = @(
         @{
-            'api_url' = '/api/fakebank/account/personal'
+            'api_url' = '/api/account/details/save'
             'json_request_post_tokens' = @(
                 @{
                     'name' = 'details.ssn'
@@ -431,7 +436,7 @@ $body = @{
             )
         },
         @{
-            'api_url' = '/api/fakebank/account/card'
+            'api_url' = '/api/account/card/save'
             'json_request_post_tokens' = @(
                 @{
                     'name' = 'ccNumber'
@@ -446,7 +451,7 @@ $body = @{
             )
         },
         @{
-            'api_url' = '/api/fakebank/accounts/{id}'
+            'api_url' = '/api/account/cards/{id}'
             'json_response_get_tokens' = @(
                 @{
                     'name' = 'accounts.[*].cvv'
@@ -462,7 +467,7 @@ $body = @{
             )
         },
         @{
-            'api_url' = '/api/fakebank/account/personal/{id}'
+            'api_url' = '/api/account/details/{id}'
             'json_response_get_tokens' = @(
                 @{
                     'name' = 'details.ssn'
@@ -478,7 +483,7 @@ $body = @{
             )
         },
         @{
-            'api_url' = '/api/user-mgmt/user/create'
+            'api_url' = '/api/user/create'
             'json_request_post_tokens' = @(
                 @{
                     'name' = 'personal.ssn'
@@ -583,10 +588,14 @@ $yamlObj.services.ciphertrust.environment = @(
     "DPG_PORT=9005"
 )
 $yamlObj.services.api.environment = @(
-    "CMIP=https://$kms",
+    "CM_URL=${protocol}://$kms",
     "CM_USERNAME=$username",
     "CM_PASSWORD=$password",
     "CM_USER_SET_ID=$plainTextUserSetId"
+)
+
+$yamlObj.services.frontend.environment = @(
+    "CM_URL=$kms"
 )
 
 $yaml = ConvertTo-YAML $yamlObj | yq

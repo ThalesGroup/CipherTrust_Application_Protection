@@ -13,14 +13,14 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       
   frontend:
     stdin_open: true
+    image: ciphertrust/learn:banking-demo-ui
     container_name: frontend
-    build:
-      dockerfile: Dockerfile
-      context: ./ui
+    environment:
+      - CM_URL: GENERATED_BY_POWERSHELL
     volumes:
       - /app/node_modules
       - ./ui:/app
@@ -28,23 +28,19 @@ services:
       - 3000:3000
       
   api:
+    image: ciphertrust/learn:banking-demo-backend-api
+    container_name: api
     environment:
-      - CMIP: GENERATED_BY_POWERSHELL
+      - CM_URL: GENERATED_BY_POWERSHELL
       - CM_USERNAME: GENERATED_BY_POWERSHELL
       - CM_PASSWORD: GENERATED_BY_POWERSHELL
       - CM_USER_SET_ID: GENERATED_BY_POWERSHELL
-    container_name: api
-    build:
-      dockerfile: Dockerfile
-      context: ./dpgBankDemo
     ports:
       - 8080:8080
       
   proxy:
+    image: ciphertrust/learn:banking-demo-backend-proxy
     container_name: proxy
-    build:
-      dockerfile: Dockerfile
-      context: ./apiProxy
     ports:
       - 8081:8081
 
