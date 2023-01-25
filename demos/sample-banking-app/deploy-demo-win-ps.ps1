@@ -18,14 +18,16 @@ Import-Module powershell-yaml
 ## Change Variables below
 #########################
 $username = "<admin_username>" # Username for CipherTrust Manager (CM) that has access to create resources
-$password = "<password>" # Password of the user above
-$kms = "<ipaddress_or_fqdn>" # IP Address or FQDN of the CipherTrust Manager
+$password = "<admin_password>" # Password of the user above
+$kms = "<IP_or_FQDN>" # IP Address or FQDN of the CipherTrust Manager
 $protocol = "https" # Can be http or https
-$counter = "<prefix>" # counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
-$sampleUserPassword = "<userPassword>" # sampleUserPassword is the password that will be applied to sample users created by this script
-###########################################################################
-## Do not change anything below unless you know what you are doing
-###########################################################################
+$counter = "demo" # counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$sampleUserPassword = "<strong_password>" # sampleUserPassword is the password that will be applied to sample users created by this script
+$host_machine = "localhost" # IP Address or FQDN where you want to deploy this demo application
+################################################################
+## End
+## Changing anything below this point may have undesired effects
+################################################################
 
 Write-Output "-----------------------------------------------------------------"
 Write-Output "Next few steps will create boilerplate config on your CM instance"
@@ -601,14 +603,14 @@ $yamlObj.services.ciphertrust.environment = @(
     "DPG_PORT=9005"
 )
 $yamlObj.services.api.environment = @(
-    "CM_URL=https://$kms",
+    "CM_URL=${protocol}://$kms",
     "CM_USERNAME=$username",
     "CM_PASSWORD=$password",
     "CM_USER_SET_ID=$plainTextUserSetId"
 )
 
 $yamlObj.services.frontend.environment = @(
-    "CM_URL=$kms"
+    "CM_URL=$host_machine"
 )
 
 $yaml = ConvertTo-YAML $yamlObj | yq

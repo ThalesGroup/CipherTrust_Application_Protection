@@ -180,7 +180,7 @@ public class CCAccountController {
 	@CrossOrigin(origins = "*")
 	@GetMapping("/api/proxy/accounts/all")
 	public CustomerPersonalAccounts getAllAccountHolders(@RequestHeader(HttpHeaders.AUTHORIZATION) String header) {
-		String dockerUri = "http://ciphertrust:9005/api/fakebank/account/holders";
+		String dockerUri = "http://ciphertrust:9005/api/account/all";
 		HttpHeaders headers = new HttpHeaders();
 
 		headers.add("Authorization", header);

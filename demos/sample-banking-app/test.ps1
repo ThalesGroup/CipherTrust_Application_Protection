@@ -9,19 +9,25 @@ Import-Module -Name powershell-yaml -Force
 $DebugPreference = 'SilentlyContinue'
 #$DebugPreference = 'Continue'
 
-$username = "<admin_username>"
-$password = "<password>"
-$kms = "<ipaddress_or_fqdn>"
-#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
-$counter = "<prefix>"
-#sampleUserPassword is the password that will be applied to sample users created by this script
-$sampleUserPassword = "<userPassword>"
-$nae_port = 9005
+#########################
+## Change Variables below
+#########################
+$username = "<admin_username>" # Username for CipherTrust Manager (CM) that has access to create resources
+$password = "<admin_password>" # Password of the user above
+$kms = "<IP_or_FQDN>" # IP Address or FQDN of the CipherTrust Manager
+$protocol = "https" # Can be http or https
+$counter = "demo" # counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
+$sampleUserPassword = "<strong_password>" # sampleUserPassword is the password that will be applied to sample users created by this script
+$host_machine = "localhost" # IP Address or FQDN where you want to deploy this demo application
+$nae_port = 9005 # The NAE-XML server
 $keyname = "dpgKey-$counter"
-#$usageMask = 3145740
 $usageMask = ([CipherTrustManager.UsageMaskTable]::Encrypt + [CipherTrustManager.UsageMaskTable]::Decrypt + [CipherTrustManager.UsageMaskTable]::FPEEncrypt + [CipherTrustManager.UsageMaskTable]::FPEDecrypt) #More HUMAN READABLE ;)
-$algorithm = 'aes'
-$size = 256
+$algorithm = 'aes' # Advanced Encryption Standard (AES)
+$size = 256 # key length of the AES key we want to generate
+################################################################
+## End
+## Changing anything below this point may have undesired effects
+################################################################
 
 Write-Output "-----------------------------------------------------------------"
 Write-Output "Next few steps will create boilerplate config on your CM instance"
@@ -379,15 +385,23 @@ Write-Output "Creating Docker Setup from Template..."
 $content = ''
 foreach ($line in $fileContent) { $content = $content + "`n" + $line }
 $yamlObj = ConvertFrom-YAML $content
+
 $yamlObj.services.ciphertrust.environment = @(
     "REG_TOKEN=$regToken",
     "DESTINATION_URL=http://api:8080",
     "TLS_ENABLED=false",
     "KMS=$kms",
-    "DPG_PORT=$nae_port"
+    "DPG_PORT=9005"
 )
 $yamlObj.services.api.environment = @(
-    "CMIP=https://$kms"
+    "CM_URL=${protocol}://$kms",
+    "CM_USERNAME=$username",
+    "CM_PASSWORD=$password",
+    "CM_USER_SET_ID=$plainTextUserSetId"
+)
+
+$yamlObj.services.frontend.environment = @(
+    "CM_URL=$host_machine"
 )
 
 $yaml = ConvertTo-YAML $yamlObj | .\yq.exe

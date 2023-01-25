@@ -9,11 +9,10 @@ $DebugPreference = 'SilentlyContinue'
 #########################
 ## Change Variables below
 #########################
-$username = "<admin_username>"
-$password = "<password>"
-$kms = "<ipaddress_or_fqdn>"
-#counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
-$counter = "<prefix>"
+$username = "<admin_username>" # Username for CipherTrust Manager (CM) that has access to create resources
+$password = "<admin_password>" # Password of the user above
+$kms = "<IP_or_FQDN>" # IP Address or FQDN of the CipherTrust Manager
+$counter = "demo" # counter is a unique prefix that you can add the all the assets created by this script to ensure uniqueness of your resources
 $keyname = "dpgKey-$counter"
 ###########################################################################
 ## Do not change anything below unless you know what you are doing
