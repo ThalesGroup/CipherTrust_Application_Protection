@@ -7,3 +7,5 @@
 This repository will hold code samples and/or integrations that you can use in your environment
 
 [Crypto Tool](crypto-tool-cm): Next JS based application that interacts with CipherTrust Manager APIs to perform various crypto operations like data encryption, decryption, signing and verification, random number generation, and hashing. Can be used as is with any existing CipherTrust manager instance.
+
+[Banking Demo Application](sample-banking-app): Multi tier application, that leverages stack like ReactJs, SpringBoot, and MongoDB, to demonstrate how you can protect your data, that is consumed by Rest APIs, via Ciphertrust Data Protection stack, specifically Data Protection Gateway (DPG), seemlessly.
