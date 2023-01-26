@@ -67,6 +67,20 @@ Below is some explanation for the same
 | api | SpringBoot application that acts as the backend API layer that also talks to CM and MongoDb | <ul><li>Port Listening at: 8000</li><li>image: this is either docker hub based or can be built from source</li><li>environment: environment vars including CM URL, credentials and a CM user set ID auto populated by PowerShell script</li></ul> |
 | ciphertrust | DPG container | <ul><li>Port Listening at: 9005 (NAE port)</li><li>image: thalesciphertrust/ciphertrust-data-protection-gateway:latest (from Docker Hub)</li><li>environment: environment vars for DPG containers</li></ul> |
 
+#### 5) Understanding mongo-init.js file
+mongo-init.js file is embedded within the MongoDb container while we create the container.
+The purpose of this file is to define the username and password that the backend API SpringBoot application (dpgBankDemo) uses to authenticate and perform CRUD operations on the embedded MongoDb.
+
+The file contains some default values which, if changed, need to be replicated in the file dpgBankDemo/src/main/resources/applicatio.properties.
+
+| mongo-init.js parameter | Usage | application.properties counterpart |
+| --- | --- | --- |
+| user | username used by java app to talk to MongoDb running in container | spring.data.mongodb.username |
+| pwd | password used by java app to talk to MongoDb running in container | spring.data.mongodb.password |
+| roles.db | actual database where all the collections are to be created and data stored and retrieved | spring.data.mongodb.database |
+
+If you change any of these properties, change should be in both the places.
+
 ### Running demo from pre-built images
 #### 1) List of images
 | Service | Image |
@@ -103,8 +117,8 @@ services:
     restart: always
     command: --quiet
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ChangeIt!
+      MONGO_INITDB_ROOT_USERNAME: <admin_username>
+      MONGO_INITDB_ROOT_PASSWORD: <admin_password>
       MONGO_INITDB_DATABASE: dpg
     ports:
       - 27017:27017
