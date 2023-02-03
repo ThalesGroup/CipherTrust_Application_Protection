@@ -186,7 +186,7 @@ public class EncryptDecryptMessage {
         return bta;
     }
 
-    public static void main ( String[] args) {
+    public static void main ( String[] args) throws Exception {
         String pin = null;
         String libPath = null;
         String operation = "CBC_PAD";

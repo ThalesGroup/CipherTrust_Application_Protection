@@ -21,7 +21,7 @@ import com.ingrian.security.nae.NAESession;
  */
 
 public class FileEncryptionSampleUsingARIA {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
 		if (args.length != 8) {
 			System.err

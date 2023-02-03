@@ -35,7 +35,7 @@ public class KMIPKeyPairSample
     static int length = 2048;
     static KeyFormatType keyFormat = KeyFormatType.PKCS1;
     
-    public static void main( String[] args )
+    public static void main( String[] args ) throws Exception
     {
 	    if (args.length != 4)
         {
