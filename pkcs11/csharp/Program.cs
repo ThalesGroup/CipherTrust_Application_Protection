@@ -247,9 +247,11 @@ namespace CADP.Pkcs11Sample
                         sample = new EncryptDecryptMultiPartSample();
                         sample.Run(new object[] { pin, keyLabel, fileName, needmetadata, headerMode });
 
-                        sample = new KeypairSignSample();
-                        sample.Run(new object[] { pin, keyLabel, "SHA1-RSA", "" });
-                        
+                        sample = new KeypairSignSample();                       
+                        sample.Run(new object[] { pin, keyLabel, "SHA512-HMAC", "" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA384-HMAC", "" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA256-HMAC", "" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA224-HMAC", "" });
 
                         sample = new FindExportKeySample();
                         sample.Run(new object[] { pin, keyLabel, keyType, wrappingKeyLabel, wrappingKeyType, formatType, keyFilename, genWrappingKey });
