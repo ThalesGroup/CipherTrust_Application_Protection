@@ -31,14 +31,14 @@ $ python tokenizeSample.py -d -u <username>:<password> -l <vts URL> -p <data or 
 **Example** :
 
 ```
-$ python tokenizeSample.py -d -u <username>:<password> -l 192.0.2.0 -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python tokenizeSample.py -d -u <username>:<password> -l <ip_address> -p DataToTokenizeDetokenize -O token -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
 
 ```
 Header: {'User-Agent': 'python-requests/2.23.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '_/_', 'Connection': 'keep-alive', 'Content-Type': 'application/json', 'Content-Length': '104', 'Authorization': 'Basic cm9vdDpjYSRoY293'}
-URL: https://192.0.2.0/vts/rest/v2.0/tokenize
+URL: https://<ipaddress>/vts/rest/v2.0/tokenize
 Data: {"tokengroup": "FF1_Tok_Group", "tokentemplate": "FF1_Tok_Template", "data": "DataToTokenizeDetokenize"}
 
 EzchFFKH33EGhopWc|Bb|TV(
@@ -69,14 +69,14 @@ $ python detokenizeSample.py -d -u <username>:<password> -l <vts URL> -I <inputF
 **Example** :
 
 ```
-$ python detokenizeSample.py -d -u <username>:<password> -l 192.0.2.0 -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
+$ python detokenizeSample.py -d -u <username>:<password> -l <ipaddress> -I token -O raw -tg FF1_Tok_Group -tt FF1_Tok_Template
 ```
 
 ## Output
 
 ```
 Header: {'User-Agent': 'python-requests/2.23.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '_/_', 'Connection': 'keep-alive', 'Content-Type': 'application/json', 'Content-Length': '105', 'Authorization': 'Basic cm9vdDpjYSRoY293'}
-URL: https://192.0.2.0/vts/rest/v2.0/detokenize
+URL: https://<ipaddress>/vts/rest/v2.0/detokenize
 Data: {"tokengroup": "FF1_Tok_Group", "tokentemplate": "FF1_Tok_Template", "token": "EzchFFKH33EGhopWc|Bb|TV("}
 
 DataToTokenizeDetokenize

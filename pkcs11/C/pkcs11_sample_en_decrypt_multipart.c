@@ -95,7 +95,8 @@ static CK_RV encryptAndDecryptFile(char *operation, char *infilename, char *head
     CK_ULONG  encheader=0; /* no header */
     CK_ULONG  decheader=0; /* no header */
     int is_gcm = 0;
-    int tag_len = ((tag_bits & 0x00000007) != 0) ? (tag_bits >> 3) + 1 : (tag_bits >> 3);
+    // int tag_len = ((tag_bits & 0x00000007) != 0) ? (tag_bits >> 3) + 1 : (tag_bits >> 3);
+    int tag_len = tag_bits >> 3;
     size_t n = 0;
 
     if (!operation)                     pmechEncryption = &mechEncryptionPad;
@@ -560,7 +561,7 @@ static CK_RV encryptAndDecryptFile(char *operation, char *infilename, char *head
 void enDecryptMultipartUsage()
 {
     printf("Usage: pkcs11_sample_en_decrypt_multipart -p pin -s slotID -k keyName [-i {k|m|u}:identifier] -f filename [-m module] [-o operation] [-h header_version]\n");
-    printf("-o  operation...CBC_PAD (default) or CTR or ECB or CBC\n");
+    printf("-o  operation...CBC_PAD (default) or CTR or ECB or CBC or GCM\n");
     printf("-h  header_version...v1.5 or v2.1 or v.2.7\n");
     printf("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     exit (2);
