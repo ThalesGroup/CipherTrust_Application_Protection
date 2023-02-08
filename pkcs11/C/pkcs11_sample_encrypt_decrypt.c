@@ -1069,8 +1069,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
             }
             if (tag_bits > 0)
             {
-                printf("tag bits = %d (%d bytes)\n", (int) tag_bits,
-                       (int) (tag_bits & 0x7) == 0 ? (int) tag_bits >> 3 : (int) (tag_bits >> 3) + 1);
+                printf("tag bits = %d (%d bytes)\n", (int) tag_bits, (int) tag_bits >> 3 );
             }
         }
         else if (!strcmp(operation, "ECB"))
