@@ -127,7 +127,7 @@ public class KeyStateTransition {
     }
 
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;

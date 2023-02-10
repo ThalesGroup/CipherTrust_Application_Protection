@@ -18,7 +18,7 @@ import com.ingrian.security.nae.NAESession;
  */
 public class AESGCMUpdateSample {
 
-	public static void main(String[] args) {
+	public static void main(String[] args)  throws Exception{
 		if (args.length != 7) {
 			System.err
 					.println("Usage: java AESGCMUpdateSample user password keyname "

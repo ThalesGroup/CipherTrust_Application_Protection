@@ -20,7 +20,7 @@ import com.ingrian.security.nae.NAESession;
  */
 
 public class FileEncryptionSampleUsingSEED {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		if (args.length != 8) {
 			System.err
 					.println("Usage: java FileEncryptionSampleUsingSEED user password keyname fileToEncrypt "
@@ -62,7 +62,7 @@ public class FileEncryptionSampleUsingSEED {
 			seed.update(dstName, decrName, blockSize, cipher);
 
 		} catch (Exception e) {
-			e.printStackTrace
+			e.printStackTrace();
                        System.out.println("The Cause is " + e.getMessage() + ".");
 	               throw e;
 		} finally {

@@ -27,7 +27,7 @@ import com.ingrian.security.nae.NAEClientCertificate;
  */
 public class KMIPEncryptAndDecrypt {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 
 		if (args.length < 6) {
 			checkUsage();
