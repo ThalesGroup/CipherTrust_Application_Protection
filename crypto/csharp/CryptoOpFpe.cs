@@ -79,7 +79,7 @@ namespace CADP.NetCoreNaeSamples
                 if (!GetOrGenerateKey(session, keyName))
                     return;
 				
-				nkm = new NaeKeyManagement(session);
+	        nkm = new NaeKeyManagement(session);
 
                 try
                 {
@@ -88,6 +88,14 @@ namespace CADP.NetCoreNaeSamples
                     userSpec.TweakData = "SampleTweakData";
 
                     key = new NaeFpe(session, keyName, NaeFpe.Cardinality.CARD10, userSpec);
+			
+		    /* Below constructor and parameters will be used for FPE algorithms with NaeFpe.AlgorithmName having options as 
+                     * FPE_AES_CARD10, FPE_AES_CARD26, FPE_AES_CARD62, FPE_AES_UNICODE.
+                     * FPE_FF1v2_CARD10, FPE_FF1v2_CARD26, FPE_FF1v2_CARD62, FPE_FF1v2_UNICODE.
+                     * FPE_FF3_CARD10, FPE_FF3_CARD26, FPE_FF3_CARD62, FPE_FF3_UNICODE.
+                     * Charset is mandatory for Unicode, it is comma separated and can have ranegs (separated with '-') and single values. Refer below example.*/
+                    //var charset = "0100-017F,F900-FA2D,A490-A4A1,A4A4-A4B3,A4B5-A4C0,A4C2-A4C4, A4C6";
+                    //key = new NaeFpe(session, keyName, NaeFpe.AlgorithmName.FPE_AES_UNICODE, userSpec, charset);
                 }
                 catch (Exception e)
                 {
@@ -105,8 +113,13 @@ namespace CADP.NetCoreNaeSamples
                 }
 
                 inputBytes = Encoding.ASCII.GetBytes(input);
-
-
+		
+		/* For FPE algorithm, the input bytes should be encoded using UT8 and not ASCII. */
+                // inputBytes = Encoding.UTF8.GetBytes(input);
+		
+		/* For FPE set IV only when data size is greater than its block size eg CARD10: 56, CARD26: 40, CARD62:32.
+                 * UNICODE, the block size is calculated based on Cardinality. */
+		    
                 /*Set IV only when data size is more than 56 Bytes */
                 if (inputBytes.Length > 56)
                 {
