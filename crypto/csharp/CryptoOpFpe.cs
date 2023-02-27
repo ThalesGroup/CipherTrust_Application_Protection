@@ -86,7 +86,9 @@ namespace CADP.NetCoreNaeSamples
                     UserSpec userSpec = new UserSpec();
                     userSpec.TweakAlgo = "SHA1";
                     userSpec.TweakData = "SampleTweakData";
-
+		    
+		    // Below constructor will be deprecated in future.
+                    // This constructor will be used for FPE/AES/CARD10, FPE/AES/CARD26, FPE/AES/CARD62 only, for any other FPE Algo refer below section.
                     key = new NaeFpe(session, keyName, NaeFpe.Cardinality.CARD10, userSpec);
 			
 		    /* Below constructor and parameters will be used for FPE algorithms with NaeFpe.AlgorithmName having options as 
@@ -114,7 +116,7 @@ namespace CADP.NetCoreNaeSamples
 
                 inputBytes = Encoding.ASCII.GetBytes(input);
 		
-		/* For FPE algorithm, the input bytes should be encoded using UT8 and not ASCII. */
+		/* For FPE UNICODE algorithm, the input bytes should be encoded using UT8 and not ASCII. */
                 // inputBytes = Encoding.UTF8.GetBytes(input);
 		
 		/* For FPE set IV only when data size is greater than its block size eg CARD10: 56, CARD26: 40, CARD62:32.
