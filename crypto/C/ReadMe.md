@@ -7,7 +7,7 @@ This readme file contains the following information:
 
 ## Overview
 
-CADP for C v8.13.0.000 supports Cryptographic Operations through Cryptographic API using NAE protocol for communication with the Key Manager server.
+CADP for C supports Cryptographic Operations through Cryptographic API using NAE protocol for communication with the Key Manager server.
 
 Cryptographic API can be used to perform local cryptographic operations after fetching keys from Key Manager server.
 
@@ -15,7 +15,7 @@ For API details, refer to the Cryptographic API section in the CADP for C API Gu
 
 ## How to Compile Sample Applications
 
-Included with the CADP for C v8.13.0.000 software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
+Included with the CADP for C software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
 
 >*To compile the sample application on **Windows**:*
 
