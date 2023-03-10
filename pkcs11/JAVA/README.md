@@ -7,41 +7,161 @@ This readme file contains the following information:
 - CADP for C PKCS11 Library Path (Default Path)
 - How to Run the Code Samples
 - Viewing Sample Usage Information
+- Ant build
 
 
 ## Overview
 
-It is a JAR file that provides PKCS11 JAVA wrapper APIs. Underknith it call CADP for C PKCS11 C APIs.
+The following samples below provide PKCS#11 Java code to demonstrate the following:
 
-Note: For details about the CADP for C PKCS11 APIs, refer to the CipherTrust Application Data Protection PKCS11 API Reference Guide. For information about how to install, configure, and upgrade CADP for C, refer to the online CADP for C user documentation at https://thalesdocs.com.
+- CreateKey.java 
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a key on the Data Security Manager.
+    4. Clean up.
 
-The following samples provide CADP for C PKCS11 code to illustrate the following functionality:
+- CreateObject.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a key object by providing template including key value onto the Data Security Manager.
+    4. Clean up.
 
-- CreateKey.java : Creates an AES key.
-- CreateObject.java : Creates a random or opaque key object.
-- DigestMessage.java : Computes a digest or HMAC with a given key.
-- EncryptDecryptAsymmetricKey.java : Encrypts and decrypts the content with the asymmetric key. 
-- EncryptDecryptFile.java : Encrypts and decrypts the file content.
-- EncryptDecryptMessage.java : Encrypts and decrypts the input data from the file with extra options like charset, reserve leftmost character, etc.
-- EncryptDecryptMetadata.java : Encrypts and decrypts the content.
-- FindDeleteKey.java: Finds and deletes an AES key.
-- CreateKeypairSignMessage: Creates a key pair and signs using an RSA key pair.
-- FindExportKey: Exports a key from a Key Manager wrapped by a wrapping key.
-- SignVerify: Signs and verifies a given message based on a generated symmetric key
-- KeyStateTransition.java : Creates a key with given key state transition dates or sets key states or key state transition dates for a given key.
-- GenerateRandom.java : Generates a random sequence of bytes.
-- UnwrapImportKey.java : Reads the wrapped bytes from a file provided by the user, and then imports the key with unwrapped bytes. 
-- TestKeyAttributes.java : Create an asymmetric key pair. Sign a piece of message, Verify the message was signed with the created private key, and delete the key pair.
-- Helper.java: Contains global settings, pkcs11 library path, and helper functions shared by other .c files.
+- CreateKeypairSignMessage.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a key pair on the Data Security Manager.
+    4. Signing a piece of data with the created key pair.
+    5. Delete the key pair.
+    6. Clean up.
+
+- DigestMessage.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a secure hash for a given hash mechanism, or
+    4. Creating a secure hash for a given file input stream
+    5. Clean up.
+
+- EncryptDecryptAsymmetricKey.java
+    This file demonstrates the following
+    1. Initialization
+    2. Create a connection and logging in.
+    3. Create an asymmetric key pair on the Data Security Manager
+    4. Encrypt and descrypt a message
+    5. Clean up.
+ 
+- EncryptDecryptFile.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a symmetric key on the Data Security Manager.
+    4. Using the symmetric key to encrypt the input file name and write the encrypted output into "filename.enc".
+    5. Using the symmetric key to decrypt the "filename.enc" and write the decrypted output into "filename.dec".
+    6. Compare the original input file name with "filename.dec", should be the same.
+    7. Clean up.
+
+- EncryptDecryptMessage.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Creating a symmetric key on the Data Security Manager.
+    4. Using the symmetric key to encrypt plain text.
+    5. Using the symmetric key to decrypt cipher text.
+    6. Delete key.
+    7. Clean up.
+
+- EncryptDecryptMetadata.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Finding an existing symmetric key on the Data Security Manager.
+    4. Creating a symmetric key on the Data Security Manager.
+    5. Passing user defined metadata while using the symmetric key to encrypt plain text;
+    metadata will be logged and uploaded depending on logging level.
+    6. Passing in user defined metadata while using the symmetric key to decrypt cipher text;
+    metadata will be logged and uploaded depending on logging level.
+    7. Search and Delete key.
+    8. Clean up.
+
+- FindDeleteKey.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Querying for a key using the keyname.
+    4. Deleting the key that was found.
+    5. Clean up.
+
+- FindExportKey
+    This file demonstrates the following:
+    1. Initialization.
+    2. Creating a connection and logging in.
+    3. Find a source key on the Data Security Manager.
+    3. Find a wrapping key on the Data Security Manager.
+    4. Wrap the source key with the wrapping key.
+    7. Save the wrapped key value to a binary file.
+    8. Clean up.
+
+- SignVerify
+    This file demonstrates the following:
+    1. Initialization
+    2. Creating a connection and logging in.
+    3. Create or find an existing symmetric key, used for HMAC mechanism
+    4. Using the symmetric key to sign plaintext using the mechanism to generate the hash
+    5. Using the symmetric key to verify ciphertext against the existing hash bytes.
+    6. Delete key.
+    7. Clean up.
+
+- KeyStateTransition.java
+    This file demonstrates the following:
+    1. Initialization
+    2. Creating a connection and logging in.
+    3. Creating a symmetric key with key transition dates specified, or
+    4. Setting the key transition dates of an existing symmetric key, or
+    5. Setting the key state of an existing symmetric key, and
+    6. Getting the key attributes of the created or existing key
+    7. Clean up.
+
+- GenerateRandom.java
+    This file demonstrates the following:
+    1. Initialization.
+    2. Create a connection and log in.
+    3. Seed the Random Generator and generate the random bytes.
+    4. Clean up.
+
+- UnwrapImportKey.java
+    This file demostrates the following
+    1. Initialization
+    2. Create a connection and loggin in.
+    3. Using the eventually specified wrappingkey import asymmetric public or private key or import symmetric key read from keyfile.
+    4. Clean up.
+
+- TestKeyAttributes.java
+    This file demonstrates the following
+    1. Initialization
+    2. Create a connection and logging in.
+    3. Create an asymmetric key pair on the Data Security Manager
+    4. Getting and printing both public and private key's attributes from custom template
+    5. Creating a symmetric key on the Data Security Manager
+    6. Setting and Getting symmetric key's attributes based on custom template, also readonly attributes
+    7. Clean up.
+
+- Helper.java: This file has helper functions shared by other java files.
 
 
 ## Prerequisites
 
+- All the Java samples are compiled and tested using JDK version 1.8.0_111 on Linux and Windows.
+
 To run PKCS11 Java Samples :
+
 - The minimum Java version must be 8 (minimum 1.8.0_111).
 - CADP for C library must be installed.
-- CADP-pkcs11-wrapper-1.0 Jar must be in the classpath.
-- Add CADP for C PKCS11 Library Path inside Helper.Java sample.
+- cadp-pkcs11-wrapper-1.0 Jar must be in the classpath.
+- Add CADP for C PKCS11 Library Path inside Helper.Java sample. If Library path is not updated in Helper.java it can be provided as an input for the samples using [-m module] attribute or it will use the default library path.
+- Property file should be placed parallel to the library file. If property file is placed at a custom location then you are required to set the path of this file through the environment variable (NAE_Properties_Conf_Filename).
 
 ## CADP for C PKCS11 Library Path (Default Path)
 
@@ -65,16 +185,16 @@ Go to the src directory placed inside custom_wrapper or sun_pkcs11 according to 
 
 Run the following command to run the CreateKey.java sample from custom_wrapper:
 
-### To Compile – 
+#### To Compile – 
 java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper.java  com.vormetric.pkcs11.sample.CreateKey.java
 
-### To Run - 
+#### To Run - 
 java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper com.vormetric.pkcs11.sample.CreateKey
 
 Note: In a similar fashion, you can run other java samples.
 
 
-#### Viewing Sample Usage Information
+## Viewing Sample Usage Information
 
 Before running the code samples in Windows, learn how to run a sample by viewing its usage information (if you do not already know how to do so). To view usage information about a given sample, enter the name of the executable sample file from the directory in which the executable files are located. For example:
 
@@ -88,3 +208,25 @@ usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.CreateKey -p pin [-k keyName]
 -k: Keyname on Keymanager
 -m: Path of directory where library (Dll) is deployed/installed
 -g: ...0 for versionCreate, 1 for versionRotate, 2 for versionMigrate, 3 for nonVersionCreate
+
+## Ant Build
+
+### Build:
+You need ant to build the samples.
+
+Update Library path in Helper.java placed inside custom_wrapper/src/com/vormetric/pkcs11/sample/Helper.java
+
+Move to the directory where build.xml resides. i.e Inside customer_wrapper or sun_pkcs11.
+
+To run all the sample programs altogether, please first modify the following line in build.xml, property name="wrapper.jar" value="cadp-pkcs11-wrapper-1.0.jar", replace cadp-pkcs11-wrapper-1.0.jar with the complete path of cadp-pkcs11-wrapper-1.0.jar or place the jar in current directory.
+
+If you are using Java 11 or newer then modify the following line in build.xml, property name="jaxb.jar" value="jaxb-api-2.3.1.jar", replace jaxb-api-2.3.1.jar with the complete path of jaxb-api-2.3.1.jar or place the jar in current directory.
+
+To compile the sample files, simply type 'ant compile' in the terminal or cmd of directory.
+
+### Execution 
+
+To run all the sample programs altogether, please first modify the following line in build.xml,
+property name="PIN" value="username:password"/
+replace "username:password" with the credentials you used to register with the KeyManager, then simply
+type 'ant' in the terminal or cmd of directory.
