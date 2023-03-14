@@ -18,21 +18,21 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Creating a key on the Data Security Manager.
+    3. Creating a key on the CipherTrust Manager.
     4. Clean up.
 
 - CreateObject.java
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Creating a key object by providing template including key value onto the Data Security Manager.
+    3. Creating a key object by providing template including key value onto the CipherTrust Manager.
     4. Clean up.
 
 - CreateKeypairSignMessage.java
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Creating a key pair on the Data Security Manager.
+    3. Creating a key pair on the CipherTrust Manager.
     4. Signing a piece of data with the created key pair.
     5. Delete the key pair.
     6. Clean up.
@@ -49,7 +49,7 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following
     1. Initialization
     2. Create a connection and logging in.
-    3. Create an asymmetric key pair on the Data Security Manager
+    3. Create an asymmetric key pair on the CipherTrust Manager
     4. Encrypt and descrypt a message
     5. Clean up.
  
@@ -57,7 +57,7 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Creating a symmetric key on the Data Security Manager.
+    3. Creating a symmetric key on the CipherTrust Manager.
     4. Using the symmetric key to encrypt the input file name and write the encrypted output into "filename.enc".
     5. Using the symmetric key to decrypt the "filename.enc" and write the decrypted output into "filename.dec".
     6. Compare the original input file name with "filename.dec", should be the same.
@@ -67,7 +67,7 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Creating a symmetric key on the Data Security Manager.
+    3. Creating a symmetric key on the CipherTrust Manager.
     4. Using the symmetric key to encrypt plain text.
     5. Using the symmetric key to decrypt cipher text.
     6. Delete key.
@@ -77,8 +77,8 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Finding an existing symmetric key on the Data Security Manager.
-    4. Creating a symmetric key on the Data Security Manager.
+    3. Finding an existing symmetric key on the CipherTrust Manager.
+    4. Creating a symmetric key on the CipherTrust Manager.
     5. Passing user defined metadata while using the symmetric key to encrypt plain text;
     metadata will be logged and uploaded depending on logging level.
     6. Passing in user defined metadata while using the symmetric key to decrypt cipher text;
@@ -98,8 +98,8 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following:
     1. Initialization.
     2. Creating a connection and logging in.
-    3. Find a source key on the Data Security Manager.
-    3. Find a wrapping key on the Data Security Manager.
+    3. Find a source key on the CipherTrust Manager.
+    3. Find a wrapping key on the CipherTrust Manager.
     4. Wrap the source key with the wrapping key.
     7. Save the wrapped key value to a binary file.
     8. Clean up.
@@ -142,9 +142,9 @@ The following samples below provide PKCS#11 Java code to demonstrate the followi
     This file demonstrates the following
     1. Initialization
     2. Create a connection and logging in.
-    3. Create an asymmetric key pair on the Data Security Manager
+    3. Create an asymmetric key pair on the CipherTrust Manager
     4. Getting and printing both public and private key's attributes from custom template
-    5. Creating a symmetric key on the Data Security Manager
+    5. Creating a symmetric key on the CipherTrust Manager
     6. Setting and Getting symmetric key's attributes based on custom template, also readonly attributes
     7. Clean up.
 
@@ -161,7 +161,7 @@ To run PKCS11 Java Samples :
 - CADP for C library must be installed.
 - cadp-pkcs11-wrapper-1.0 Jar must be in the classpath.
 - Add CADP for C PKCS11 Library Path inside Helper.Java sample. If Library path is not updated in Helper.java it can be provided as an input for the samples using [-m module] attribute or it will use the default library path.
-- Property file should be placed parallel to the library file. If property file is placed at a custom location then you are required to set the path of this file through the environment variable (NAE_Properties_Conf_Filename).
+- Property file should be placed parallel to the library file.
 
 ## CADP for C PKCS11 Library Path (Default Path)
 
@@ -191,7 +191,10 @@ java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper.java  
 #### To Run - 
 java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper com.vormetric.pkcs11.sample.CreateKey
 
-Note: In a similar fashion, you can run other java samples.
+    Note: On Linux replace ';' with ':' in -cp attribute.
+
+
+In a similar fashion, you can run other java samples.
 
 
 ## Viewing Sample Usage Information
@@ -204,8 +207,8 @@ The following displays:
 
 usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.CreateKey -p pin [-k keyName] [-m module] [-g gen_key_action]
 
--p: Username: Password of Keymanager
--k: Keyname on Keymanager
+-p: Username: Password of CipherTrust Manager
+-k: Keyname on CipherTrust Manager
 -m: Path of directory where library (Dll) is deployed/installed
 -g: ...0 for versionCreate, 1 for versionRotate, 2 for versionMigrate, 3 for nonVersionCreate
 
@@ -228,5 +231,4 @@ To compile the sample files, simply type 'ant compile' in the terminal or cmd of
 
 To run all the sample programs altogether, please first modify the following line in build.xml,
 property name="PIN" value="username:password"/
-replace "username:password" with the credentials you used to register with the KeyManager, then simply
-type 'ant' in the terminal or cmd of directory.
+replace "username:password" with the credentials you used to register with the CipherTrust Manager, then simply type 'ant' in the terminal or cmd of directory.
