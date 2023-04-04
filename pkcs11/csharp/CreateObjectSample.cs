@@ -33,6 +33,7 @@ namespace CADP.Pkcs11Sample
                     List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+                    // For creating Opaque object change (uint)CKO.CKO_SECRET_KEY to (uint)CKO.CKO_THALES_OPAQUE_OBJECT in below line
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, (uint)CKK.CKK_AES));
 
