@@ -119,7 +119,7 @@ endif
 all: crypto CryptoDataUtility
 
 
-crypto: CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoSinglePart_CMS
+crypto: CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoSinglePart_CMS CryptoSinglePart_ExtHdrAll
 
 CryptoDataUtility: CryptoDataUtility.o $(CAPILIBNAME)  $(CryptoDataUtilityLIBNAME)
 	$(CC) -o CryptoDataUtility CryptoDataUtility.o  $(CAPILIBNAME) $(CryptoDataUtilityLIBNAME)  $(LIBS) -lpthread
@@ -156,7 +156,10 @@ CryptoSinglePart_CMS: CryptoSinglePart_CMS.o $(CAPILIBNAME)
 CryptoSinglePart_EC: CryptoSinglePart_EC.o $(CAPILIBNAME)
 	$(CC) -o CryptoSinglePart_EC CryptoSinglePart_EC.o $(CAPILIBNAME) $(LIBS)
 
-binaries = CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePart_CMS CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoDataUtility
+CryptoSinglePart_ExtHdrAll: CryptoSinglePart_ExtHdrAll.o $(CAPILIBNAME)
+	$(CC) -o CryptoSinglePart_ExtHdrAll CryptoSinglePart_ExtHdrAll.o $(CAPILIBNAME) $(LIBS)
+
+binaries = CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePart_CMS CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoDataUtility CryptoSinglePart_ExtHdrAll
 
 clean:
 	rm -f $(binaries) *.o
