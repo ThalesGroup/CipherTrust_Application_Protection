@@ -35,19 +35,23 @@ Included with the CADP for C software are sample C/C++ files, the source code fo
 
 You can compile this with a C++ or C compiler such as gcc (3.2.x or greater). If you have an older gcc or another C compiler, you may need to obtain libstdc++.so.5 and possibly libgcc_s.so.
 
-1. Navigate to `<installation_Directory>`. For example, consider that `<installation_Directory>` is /opt/CipherTrust/CADP_for_C/.
+1. Navigate to the Sample Directory. For example, `<CipherTrust_Application_Protection/key_management/C>`.
 
-2. Copy "C" directory of sample applications (CipherTrust_Application_Protection/key_management/C) to the `<installation_Directory>`.
+2. Open Makefile.
 
-3. Navigate to `<installation_Directory>/C/`.
+3. Update the path of the variable `CAPILIBPATH`, if required. The default path is the default installation directory.
+```
+   CAPILIBPATH := /opt/CipherTrust/CADP_for_C/
+```
+4. Save and close the Makefile.
 
-4. Run make command.
+5. Run make command.
 ```
    [root@machine C]# make
 ```
-5. Run a sample with valid arguments.
+6. Run a sample with valid arguments.
 ```
-   [root@machine C]# ./NAEKeyManagement -h
+   [root@machine C]# ./NAECertificateManagement -h
 ```
 
 ## Sample Applications
