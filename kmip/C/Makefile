@@ -9,14 +9,17 @@
 #
 ######################################################################
 
-CAPILDIR := ..
+# Set CAPILIBPATH to the path of the directory that contains libcadp_capi library.
+CAPILIBPATH := /opt/CipherTrust/CADP_for_C/
+
+CAPILDIR := $(CAPILIBPATH)
 CAPIINDIR := $(subst /lib,/include,$(CAPILDIR))
 
 ## libname might be different for different OS
 ## enter the path of openssl library libcrypto.a in CAPILIBNAME
 LIBS += -L$(CAPILDIR)
 LIBS += -lcrypto
-CAPIINCLUDEDIR=../include
+CAPIINCLUDEDIR=$(CAPILIBPATH)/include
 # set CC to point to your C compiler.
 ifeq ($(OS_NAME),OS400)
 CC=icc
@@ -107,17 +110,22 @@ LIBS += -ldl
 # LIBS +=  -m64
 
 ifeq ($(OS_NAME),Darwin)
-CAPILIBNAME = ../libcadp_capi.dylib
-CryptoDataUtilityLIBNAME = ../libCryptoDataUtility.dylib
+CAPILIBNAME = $(CAPILIBPATH)/libcadp_capi.dylib
+CryptoDataUtilityLIBNAME = $(CAPILIBPATH)/libCryptoDataUtility.dylib
 CPP=g++
 else
-CAPILIBNAME = ../libcadp_capi.so
-CryptoDataUtilityLIBNAME = ../libCryptoDataUtility.so
+CAPILIBNAME = $(CAPILIBPATH)/libcadp_capi.so
+CryptoDataUtilityLIBNAME = $(CAPILIBPATH)/libCryptoDataUtility.so
 endif
 
 
-all: kmip
+all: init kmip
 
+init:
+ifeq (,$(wildcard $(CAPILIBNAME)))
+	$(info $(CAPILIBNAME) library not found on the provided path. Please provide the correct path.)
+	@exit 101
+endif
 
 kmip: KMIPCreate KMIPRegisterSymmetricKey KMIPRegisterAsymmetricKey KMIPRegisterCertificate KMIPRegisterTemplate KMIPRegisterSecretData KMIPRegisterPrivateKey KMIPRegisterPublicKey KMIPRegisterCustomBigInt KMIPQuery KMIPLocate KMIPCrypto KMIPCrypto_RSA KMIPCrypto_AES_GCM KMIPGet KMIPGetAttributes KMIPDestroy KMIPModifyAttribute KMIPAddAttribute KMIPCryptoSinglePart KMIPGetAttributeList KMIPDeleteAttribute KMIPBatching KMIPGetCustomAttribute KMIPSetDate KMIPRevoke KMIPCreateKeyPair KMIPGetWrappedKey KMIPDiscoverVersion KMIPReKey KMIPReKeyPair
 
