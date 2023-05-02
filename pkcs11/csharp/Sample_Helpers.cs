@@ -249,6 +249,8 @@ namespace CADP.Pkcs11Sample
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
 
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyLabel));
+
 
             if (preActive == true)
                 objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_ACTIVATION_DATE, activateTime));
@@ -289,7 +291,7 @@ namespace CADP.Pkcs11Sample
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
-
+            
             // Prepare attribute template of new private key
             List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
@@ -302,6 +304,8 @@ namespace CADP.Pkcs11Sample
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
             //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN_RECOVER, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
+            //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyPairLabel));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
 
             // Specify key generation mechanism
             IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
@@ -337,6 +341,7 @@ namespace CADP.Pkcs11Sample
                             {
                                 case 0: Console.WriteLine(name + " : RSA"); break;
                                 case 31: Console.WriteLine(name + " : AES"); break;
+                                case 19: Console.WriteLine(name + " : Opaque"); break;
                                 default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
                             }
                             break;

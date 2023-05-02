@@ -4,6 +4,9 @@
 
 using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+using Net.Pkcs11Interop.HighLevelAPI40.MechanismParams;
+using Net.Pkcs11Interop.LowLevelAPI40.MechanismParams;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +26,7 @@ namespace CADP.Pkcs11Sample
         {
             Console.WriteLine("Usage: pin keyname [encryption_mode] [header_mode] [inputFile] ([c char_set] ");
             Console.WriteLine("|[r range_charset_file]|[l literal_charset_file]) [utf_mode] [tweak]");
-            Console.WriteLine("encryption_mode: ECB, CTR, CBC, CBC_PAD, FPE/FF1, RSA");
+            Console.WriteLine("encryption_mode: ECB, CTR, CBC, CBC_PAD, FPE/FF1, RSA, GCM");
             Console.WriteLine("header_mode: none, v1.5, v1.5base64, v2.1, v2.7");
             Console.WriteLine("utf_mode: UTF-8 UTF-16LE/BE UTF-32LE/BE");
         }
@@ -58,9 +61,16 @@ namespace CADP.Pkcs11Sample
                     ushort radix = 0;
                     Encoding csFileEncoding = null;
                     bool csRangeInput = false;
-                    Net.Pkcs11Interop.Common.CKM ulHeaderEnc = 0;
-                    Net.Pkcs11Interop.Common.CKM ulHeaderDec = 0;
+                    CKM ulHeaderEnc = 0;
+                    CKM ulHeaderDec = 0;
                     bool bAsymKey = false;
+                    string aad = string.Empty;
+                    uint tagBits = 12;
+
+                    CkGcmParams mechanismParams = null;
+                    byte[] gcm_iv = { 0xae, 0xc6, 0x12, 0xbe, 0x7c, 0x1d, 0xdb, 0x65, 0x9a, 0x4b, 0x31, 0x5c };
+                    byte[] def_aad = { 0x38, 0x59, 0xb3, 0xc9, 0xd0, 0xb4, 0x2d, 0x45, 0xc4, 0x3e, 0x8e, 0xbd, 0x4c, 0x8c, 0xbd, 0xe1 };// 0xb6, 0xeb, 0x21, 0x06 };
+
 
                     if (inputParams.Length >= 2)
                     {
@@ -128,6 +138,12 @@ namespace CADP.Pkcs11Sample
                     {
                         opName = Convert.ToString(inputParams[2]);
                     }
+                    if(opName == "GCM")
+                    {
+                        tagBits = Convert.ToUInt32(inputParams[3]);
+                        //calculate tag bits.
+                        tagBits *= 8;
+                    }
 
                     if (string.IsNullOrEmpty(opName))
                         opName = "CBC_PAD";
@@ -142,7 +158,6 @@ namespace CADP.Pkcs11Sample
                     byte[] iv = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
                     string sourceText = "This is Unencrypted Source Text.";
                     byte[] sourceData = ConvertUtils.Utf8StringToBytes(sourceText);
-
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
@@ -393,6 +408,12 @@ namespace CADP.Pkcs11Sample
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB | ulHeaderEnc);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_ECB | ulHeaderDec);
                     }
+                    else if(opName.Equals("GCM"))
+                    {
+                        mechanismParams = new CkGcmParams(gcm_iv, (uint)gcm_iv.Length*8,def_aad, tagBits);
+                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_GCM, mechanismParams);
+                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_GCM, mechanismParams);
+                    }
                     else if (opName.Equals("RSA"))
                     {
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
@@ -503,6 +524,18 @@ namespace CADP.Pkcs11Sample
                             encryptedData = session.Encrypt(encmechanism, publicKey, sourceData);
 
                         // Do something interesting with encrypted data
+                        if(opName.Equals("GCM"))
+                        {
+                            CK_GCM_PARAMS gcmparam = (CK_GCM_PARAMS)(mechanismParams.ToMarshalableStructure());
+                            int taglen = (int)gcmparam.TagBits / 8;
+                            byte[] tagData = encryptedData.Skip(encryptedData.Length - taglen).Take(taglen).ToArray();
+                            byte[] encData = encryptedData.Take(encryptedData.Length - taglen).ToArray();
+                            encryptedData = new byte[tagData.Length + encData.Length];
+                            Buffer.BlockCopy(tagData, 0, encryptedData, 0, taglen);
+                            Buffer.BlockCopy(encData, 0, encryptedData, taglen, encData.Length);
+                            Console.WriteLine($"Tag Data: {ConvertUtils.BytesToHexString(tagData)}");
+                            
+                        }
 
                         // Decrypt data
                         if (bAsymKey == false)
