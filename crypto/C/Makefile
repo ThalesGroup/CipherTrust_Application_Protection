@@ -9,14 +9,18 @@
 #
 ######################################################################
 
-CAPILDIR := ..
+# Set CAPILIBPATH to the path of the directory that contains libcadp_capi library.
+CAPILIBPATH := /opt/CipherTrust/CADP_for_C/
+
+CAPILDIR := $(CAPILIBPATH)
+	
 CAPIINDIR := $(subst /lib,/include,$(CAPILDIR))
 
 ## libname might be different for different OS
 ## enter the path of openssl library libcrypto.a in CAPILIBNAME
 LIBS += -L$(CAPILDIR)
 LIBS += -lcrypto
-CAPIINCLUDEDIR=../include
+CAPIINCLUDEDIR=$(CAPILIBPATH)/include
 # set CC to point to your C compiler.
 ifeq ($(OS_NAME),OS400)
 CC=icc
@@ -107,19 +111,25 @@ LIBS += -ldl
 # LIBS +=  -m64
 
 ifeq ($(OS_NAME),Darwin)
-CAPILIBNAME = ../libcadp_capi.dylib
-CryptoDataUtilityLIBNAME = ../libCryptoDataUtility.dylib
+CAPILIBNAME = $(CAPILIBPATH)/libcadp_capi.dylib
+CryptoDataUtilityLIBNAME = $(CAPILIBPATH)/libCryptoDataUtility.dylib
 CPP=g++
 else
-CAPILIBNAME = ../libcadp_capi.so
-CryptoDataUtilityLIBNAME = ../libCryptoDataUtility.so
+CAPILIBNAME = $(CAPILIBPATH)/libcadp_capi.so
+CryptoDataUtilityLIBNAME = $(CAPILIBPATH)/libCryptoDataUtility.so
 endif
 
 
-all: crypto CryptoDataUtility
+all: init crypto CryptoDataUtility
 
 
-crypto: CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoSinglePart_CMS
+init:
+ifeq (,$(wildcard $(CAPILIBNAME)))
+	$(info $(CAPILIBNAME) library not found on the provided path. Please provide the correct path.)
+	@exit 101
+endif
+
+crypto: CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoSinglePart_CMS CryptoSinglePart_ExtHdrAll
 
 CryptoDataUtility: CryptoDataUtility.o $(CAPILIBNAME)  $(CryptoDataUtilityLIBNAME)
 	$(CC) -o CryptoDataUtility CryptoDataUtility.o  $(CAPILIBNAME) $(CryptoDataUtilityLIBNAME)  $(LIBS) -lpthread
@@ -131,7 +141,7 @@ CryptoSinglePartBulk_Enhanced: CryptoSinglePartBulk_Enhanced.o $(CAPILIBNAME)
 
 CryptoSinglePartMultiThreadedCPP: CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o $(CAPILIBNAME)
 ifeq ($(OS_NAME),Darwin)
-	$(CPP) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) -L../lib -lcrypto -ldl
+	$(CPP) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) -L$(CAPILIBPATH)/lib -lcrypto -ldl
 else ifeq ($(OS_NAME),SunOS)
 	$(CPP) -o CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedCPP.o criticalMutex.o thread.o  $(CAPILIBNAME) $(LIBS)
 else
@@ -156,7 +166,10 @@ CryptoSinglePart_CMS: CryptoSinglePart_CMS.o $(CAPILIBNAME)
 CryptoSinglePart_EC: CryptoSinglePart_EC.o $(CAPILIBNAME)
 	$(CC) -o CryptoSinglePart_EC CryptoSinglePart_EC.o $(CAPILIBNAME) $(LIBS)
 
-binaries = CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePart_CMS CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoDataUtility
+CryptoSinglePart_ExtHdrAll: CryptoSinglePart_ExtHdrAll.o $(CAPILIBNAME)
+	$(CC) -o CryptoSinglePart_ExtHdrAll CryptoSinglePart_ExtHdrAll.o $(CAPILIBNAME) $(LIBS)
+
+binaries = CryptoSinglePart CryptoSinglePartMultiThreadedCPP CryptoSinglePartMultiThreadedC CryptoSinglePart_Fast CryptoSinglePart_AES_GCM CryptoSinglePart_EC CryptoSinglePart_CMS CryptoSinglePartBulk_Enhanced CryptoSinglePart_multitenency CryptoDataUtility CryptoSinglePart_ExtHdrAll
 
 clean:
 	rm -f $(binaries) *.o

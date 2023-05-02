@@ -7,7 +7,7 @@ This readme file contains the following information:
 
 ## Overview
 
-CADP for C v8.13.0.000 supports Key Management using KMIP protocol for communication with the KMIP server. Currently, only the following managed objects are supported: Symmetric Key, Template, and Secret Data.
+CADP for C supports Key Management using KMIP protocol for communication with the KMIP server. Currently, only the following managed objects are supported: Symmetric Key, Template, and Secret Data.
 
 For API details, refer to the KMIP Key Management API section in the CADP for C API Guide. To use KMIP with CADP CAPI, you must set the KMIP_Spec_File, KMIP_IP, KMIP_Port, Protocol, and CA_File parameters in the  properties file.
 
@@ -17,7 +17,7 @@ For details on KMIP, visit: http://www.oasis-open.org/standards#kmip.
 
 ## How to Compile Sample Applications
 
-Included with the CADP for C v8.13.0.000 software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
+Included with the CADP for C software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
 
 >*To compile the sample application on **Windows**:*
 
@@ -35,19 +35,23 @@ Included with the CADP for C v8.13.0.000 software are sample C/C++ files, the so
 
 You can compile this with a C++ or C compiler such as gcc (3.2.x or greater). If you have an older gcc or another C compiler, you may need to obtain libstdc++.so.5 and possibly libgcc_s.so.
 
-1. Navigate to `<installation_Directory>`. For example, consider that `<installation_Directory>` is /opt/CipherTrust/CADP_for_C/.
+1. Navigate to the Sample Directory. For example, `<CipherTrust_Application_Protection/key_management/C>`.
 
-2. Copy "C" directory of sample applications (CipherTrust_Application_Protection/kmip/C) to the `<installation_Directory>`.
+2. Open Makefile.
 
-3. Navigate to `<installation_Directory>/C/`.
+3. Update the path of the variable `CAPILIBPATH`, if required. The default path is the default installation directory.
+```
+   CAPILIBPATH := /opt/CipherTrust/CADP_for_C/
+```
+4. Save and close the Makefile.
 
-4. Run make command.
+5. Run make command.
 ```
    [root@machine C]# make
 ```
-5. Run a sample with valid arguments.
+6. Run a sample with valid arguments.
 ```
-   [root@machine C]# ./KMIPCreate -h
+   [root@machine C]# ./NAECertificateManagement -h
 ```
 
 ## Sample Applications

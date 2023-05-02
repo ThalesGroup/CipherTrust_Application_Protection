@@ -7,7 +7,7 @@ This readme file contains the following information:
 
 ## Overview
 
-CADP for C v8.13.0.000 supports Cryptographic Operations through Cryptographic API using NAE protocol for communication with the Key Manager server.
+CADP for C supports Cryptographic Operations through Cryptographic API using NAE protocol for communication with the Key Manager server.
 
 Cryptographic API can be used to perform local cryptographic operations after fetching keys from Key Manager server.
 
@@ -15,7 +15,7 @@ For API details, refer to the Cryptographic API section in the CADP for C API Gu
 
 ## How to Compile Sample Applications
 
-Included with the CADP for C v8.13.0.000 software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
+Included with the CADP for C software are sample C/C++ files, the source code for sample applications that you can use to test your installation.
 
 >*To compile the sample application on **Windows**:*
 
@@ -33,19 +33,23 @@ Included with the CADP for C v8.13.0.000 software are sample C/C++ files, the so
 
 You can compile this with a C++ or C compiler such as gcc (3.2.x or greater). If you have an older gcc or another C compiler, you may need to obtain libstdc++.so.5 and possibly libgcc_s.so.
 
-1. Navigate to `<installation_Directory>`. For example, consider that `<installation_Directory>` is /opt/CipherTrust/CADP_for_C/.
+1. Navigate to the Sample Directory. For example, `<CipherTrust_Application_Protection/key_management/C>`.
 
-2. Copy "C" directory of sample applications (CipherTrust_Application_Protection/crypto/C) to the `<installation_Directory>`.
+2. Open Makefile.
 
-3. Navigate to `<installation_Directory>/C/`.
+3. Update the path of the variable `CAPILIBPATH`, if required. The default path is the default installation directory.
+```
+   CAPILIBPATH := /opt/CipherTrust/CADP_for_C/
+```
+4. Save and close the Makefile.
 
-4. Run make command.
+5. Run make command.
 ```
    [root@machine C]# make
 ```
-5. Run a sample with valid arguments.
+6. Run a sample with valid arguments.
 ```
-   [root@machine C]# ./CryptoSinglePart ../CADP_CAPI.properties aes_key_256 AES abcdef null null username password@1234
+   [root@machine C]# ./NAECertificateManagement -h
 ```
 
 ## Sample Applications
@@ -70,6 +74,7 @@ CryptoSinglePart_multitenency.c| Uses session level properties file via I_C_Open
 CryptoSinglePart_CMS.c | Performs sign verify operations using I_C_Crypt_Enhanced() in CMS format.
 CryptoDataUtility.c | This utility allows the user to decrypt a  string without specifying the keyName. To  accomplish this, the cipher text, at the time of encryption, is bundled with the same meta data, of the key, which was used for encryption.
 CryptoSinglePart_EC.c | Performs cryptographic operations using I_C_Crypt_Enhanced() for Algo EC.
+CryptoSinglePart_ExtHdrAll.c | Performs cryptographic operations using I_C_Crypt_Enhanced() with external and internal header support for Algorithms - AES, AES/GCM, SEED DESede and ARIA.
 
 ## Limitations
 

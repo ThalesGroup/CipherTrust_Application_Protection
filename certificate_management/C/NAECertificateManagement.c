@@ -239,12 +239,12 @@ int main(int argc, char **argv)
 		certInfo->ipList = (char **)calloc(3,sizeof(char *));
 		for(i=0;i<3;i++)
 		{
-		    certInfo->ipList[i]=strdup("10.164.73.200");
+		    certInfo->ipList[i]=strdup("__insert_ip_address_here___");
 		}
 		certInfo->dnsList = (char **)calloc(3,sizeof(char *));
 		for(i=0;i<3;i++)
 		{
-		    certInfo->dnsList[i] = strdup("www.thales.com");
+		    certInfo->dnsList[i] = strdup("__insert_fqdn_here___");
 		}
 	      	certInfo->ipLen = 3;
 	     	certInfo->dnsLen = 3;

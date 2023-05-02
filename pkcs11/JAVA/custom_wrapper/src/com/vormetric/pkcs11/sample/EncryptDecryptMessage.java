@@ -55,7 +55,7 @@ import com.vormetric.pkcs11.wrapper.params.CK_GCM_PARAMS;
 
 
 public class EncryptDecryptMessage {
-
+    public static int tagSize = 96;
     public static final byte[] iv = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
     public static final byte[] gcm_iv = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};    public static final byte[] UTF8_BOM = { (byte)0xef, (byte)0xbb, (byte)0xbf };
 
@@ -223,7 +223,6 @@ public class EncryptDecryptMessage {
         Vpkcs11Session session = null;
         boolean bAsymKey = false;
         String aad = "";
-        int tagSize = 96;
         int lifespan = 0;
         
         if (args.length == 0) {
@@ -242,7 +241,9 @@ public class EncryptDecryptMessage {
                 charSetStr = args[i + 1];
                 charSetChoc = 'c';
             }
-            else if (args[i].equals("-t")) tweakStr = args[i + 1];
+            else if (args[i].equals("-t") && !operation.equals("GCM")) {
+                tweakStr = args[i + 1];
+            }
             else if (args[i].equals("-r")) {
                 charSetInputFile = args[i + 1];
                 charSetChoc = 'r';
@@ -456,7 +457,7 @@ public class EncryptDecryptMessage {
                         {
                             iue.printStackTrace();
                         }
-                        catch(java.io.IOException ioe)
+                        catch(IOException ioe)
                         {}
                     }
                 }
@@ -743,7 +744,6 @@ public class EncryptDecryptMessage {
 
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                        throw ex;
                     } finally {
                     	try {
                         	if(br!=null) br.close();
@@ -843,7 +843,7 @@ public class EncryptDecryptMessage {
                 long publickeyID = 0;
                 long privatekeyID = 0;
                 boolean bAsymKey = false;
-                int tagLen = 12;
+                int tagLen = tagSize/8;
                 
                 long keyID = 0;
                 if(keyIDArr.length == 1) {
@@ -900,7 +900,7 @@ public class EncryptDecryptMessage {
                 	byte[] temp = new byte[(int)encryptedDataLen];
                 	System.arraycopy(encryptedText, (int)encryptedDataLen-tagLen , temp, 0, tagLen);
                 	System.arraycopy(encryptedText, 0, temp, tagLen, (int)encryptedDataLen-tagLen);
-                	encryptedText =temp;
+                	encryptedBytes=temp;
                 	
                 }
                 

@@ -1,0 +1,61 @@
+version: '3.7'
+
+services:      
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    command: --quiet
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ChangeIt!
+      MONGO_INITDB_DATABASE: dpg
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      
+  frontend:
+    stdin_open: true
+    image: ciphertrust/learn:banking-demo-ui
+    container_name: frontend
+    environment:
+      - CM_URL: GENERATED_BY_POWERSHELL
+    volumes:
+      - /app/node_modules
+      - ./ui:/app
+    ports:
+      - 3000:3000
+      
+  api:
+    image: ciphertrust/learn:banking-demo-backend-api
+    container_name: api
+    environment:
+      - CM_URL: GENERATED_BY_POWERSHELL
+      - CM_USERNAME: GENERATED_BY_POWERSHELL
+      - CM_PASSWORD: GENERATED_BY_POWERSHELL
+      - CM_USER_SET_ID: GENERATED_BY_POWERSHELL
+    ports:
+      - 8080:8080
+      
+  proxy:
+    image: ciphertrust/learn:banking-demo-backend-proxy
+    container_name: proxy
+    ports:
+      - 8081:8081
+
+  ciphertrust:
+    image: thalesciphertrust/ciphertrust-data-protection-gateway:latest
+    container_name: ciphertrust
+    environment:
+      - REG_TOKEN=GENERATED_BY_POWERSHELL
+      - DESTINATION_URL=http://api:8080
+      - DPG_PORT=9005
+      - TLS_ENABLED=false
+      - KMS=GENERATED_BY_POWERSHELL
+    ports:
+      - 9005:9005
+      
+networks:
+  db_net:
+    driver: bridge

@@ -37,7 +37,8 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_OBJECT_HANDLE hGenKey
     CK_BYTE         *decryptedText = NULL_PTR;
     CK_ULONG		decryptedTextLen = 0;
     int             status;
-    int taglen = (tag_bits & 0x7) == 0 ? tag_bits >> 3 : (tag_bits >> 3) + 1;
+    // int taglen = (tag_bits & 0x7) == 0 ? tag_bits >> 3 : (tag_bits >> 3) + 1;
+    int taglen = tag_bits >> 3;
     CK_BYTE pBuf[32] =
     {
         't', 'h', 'i', 's', ' ', 'i', 's', ' ',

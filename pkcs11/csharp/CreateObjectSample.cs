@@ -34,6 +34,7 @@ namespace CADP.Pkcs11Sample
                     List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+
                     if(isOpaqueObj)
                     {
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_THALES_OPAQUE_OBJECT));
@@ -46,6 +47,7 @@ namespace CADP.Pkcs11Sample
                     }
                     if (!isOpaqueObj && version<3)
                         objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_VERSIONED_KEY, true));
+
 
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE, keyValue));
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VALUE_LEN, keySize));

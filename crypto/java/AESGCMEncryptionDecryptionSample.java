@@ -19,7 +19,7 @@ import com.ingrian.security.nae.NAESession;
  */
 public class AESGCMEncryptionDecryptionSample {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 
 		if (args.length != 7)
 	    {

@@ -260,11 +260,7 @@ namespace CADP.Pkcs11Sample
                         sample = new EncryptDecryptMultiPartSample();
                         sample.Run(new object[] { pin, keyLabel, fileName, needmetadata, headerMode });
 
-                        sample = new KeypairSignSample();
-                        sample.Run(new object[] { pin, keyLabel, "SHA1-RSA", "" });
-                        sample.Run(new object[] { pin, keyLabel, "SHA256-RSA", "" });
-                        sample.Run(new object[] { pin, keyLabel, "SHA384-RSA", "" });
-                        sample.Run(new object[] { pin, keyLabel, "SHA512-RSA", "" });
+                        sample = new KeypairSignSample();                       
                         sample.Run(new object[] { pin, keyLabel, "SHA512-HMAC", "" });
                         sample.Run(new object[] { pin, keyLabel, "SHA384-HMAC", "" });
                         sample.Run(new object[] { pin, keyLabel, "SHA256-HMAC", "" });

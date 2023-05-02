@@ -332,7 +332,7 @@ namespace CADP.Pkcs11Sample
                     {
 
                         case (uint)CKA.CKA_APPLICATION:
-                            Console.WriteLine(name + " : " + attr.GetValueAsString());
+                            Console.WriteLine("CKA_APPLICATION" + " : " + attr.GetValueAsString());
                             break;
                         case (uint)CKA.CKA_CLASS: // converting its value to an uint fails for inexplicable reasons
                             break;
@@ -359,8 +359,15 @@ namespace CADP.Pkcs11Sample
 
                         case (uint)CKA.CKA_ALWAYS_SENSITIVE:
                         case (uint)CKA.CKA_NEVER_EXTRACTABLE:
-                            bval = attr.GetValueAsBool();
-                            Console.WriteLine(name + " : " + bval.ToString());
+                            if (attr.GetValueAsByteArray().Length == 0)
+                            {
+                                Console.WriteLine(name + " : No");
+                            }
+                            else
+                            {
+                                bval = attr.GetValueAsBool();
+                                Console.WriteLine(name + " : " + bval.ToString());
+                            }
                             break;
 
                         case (uint)CKA.CKA_THALES_OBJECT_CREATE_DATE_EL:
@@ -370,14 +377,36 @@ namespace CADP.Pkcs11Sample
                             Console.WriteLine(name + " : " + date.ToString());
                             break;
 
+                        case (uint)CKA.CKA_KEY_CACHE_ON_HOST:
+                            if (attr.GetValueAsByteArray().Length == 0)
+                                Console.WriteLine(name + " : No");
+                            else
+                                Console.WriteLine(name + " : " + attr.GetValueAsBool().ToString());
+                            break;
+
+                        case (uint)CKA.CKA_THALES_CUSTOM_1:
+                        case (uint)CKA.CKA_THALES_CUSTOM_2:
+                        case (uint)CKA.CKA_THALES_CUSTOM_3:
+                        case (uint)CKA.CKA_THALES_CUSTOM_4:
+                        case (uint)CKA.CKA_THALES_CUSTOM_5:
+                            Console.WriteLine(name + " : " + attr.GetValueAsString());
+                            break;
+
                         default:
                             valArray = attr.GetValueAsByteArray();
-                            str = BitConverter.ToString(valArray);
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var c in str)
-                                if (c != '-') sb.Append(c);
+			    if (valArray.Length == 0)
+                            {
+                                Console.WriteLine(name + " : ");
+                            }
+                            else
+                            {
+                                str = BitConverter.ToString(valArray);
+                                StringBuilder sb = new StringBuilder();
+                                foreach (var c in str)
+                                    if (c != '-') sb.Append(c);
 
-                            Console.WriteLine(name + " : " + sb.ToString().ToLower());
+                                Console.WriteLine(name + " : " + sb.ToString().ToLower());
+                            }
 
                             break;
                     }
