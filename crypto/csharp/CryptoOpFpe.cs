@@ -98,7 +98,15 @@ namespace CADP.NetCoreNaeSamples
                      * Charset is mandatory for Unicode, it is comma separated and can have ranegs (separated with '-') and single values. Refer below example.*/
                     //var charset = "0100-017F,F900-FA2D,A490-A4A1,A4A4-A4B3,A4B5-A4C0,A4C2-A4C4, A4C6";
                     //key = new NaeFpe(session, keyName, NaeFpe.AlgorithmName.FPE_AES_UNICODE, userSpec, charset);
-                }
+			
+		    /* For versioned keys, below are the two header modes supported
+		     * 1. Internal header mode : version key header adjusted in cipher data. No explicit handling needed for it to work.
+		     * 2. External header mode : version key header needs explicit handling.
+						 Set the optional versionKeyHeaderSupported paramater as VersionKeyHeaderSupported.External_Header_Supported in NaeFpe Constructor.Refer below example- 
+			                         //key = new NaeFpe(session, keyName, NaeFpe.AlgorithmName.FPE_AES_UNICODE, userSpec, charset,null, VersionKeyHeaderSupported.External_Header_Supported);
+						 Get version key header after encryption using GetExternalHeader() API and then set it at the time of decryption using SetExternalHeader(header) API. */  
+                    
+		}
                 catch (Exception e)
                 {
                    Console.WriteLine($"Error occurred: {e.Message}");
@@ -146,6 +154,9 @@ namespace CADP.NetCoreNaeSamples
                         }
                     }
                     
+		    /* for external header mode, uncomment the below lines */
+		    // byte[] header = ((NaeFpe)key).GetExternalHeader();
+		    // ((NaeFpe)key).SetExternalHeader(header);
 
                     /*Create decryptor to Decyrpt the encrypted bytes.*/
                     using (var decryptor = key.CreateDecryptor())
