@@ -8,7 +8,7 @@ namespace CADP.Pkcs11Sample
     {
         static void Usage()
         {
-            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d ] [-k|-kp keyname] [-o encryption mode] [-f input File] ");
+            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d ] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] ");
             Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false])");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
@@ -39,8 +39,17 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t sha384-HMAC  ... SHA384-HMAC mode");
             Console.WriteLine("\t sha512-HMAC  ... SHA512-HMAC mode");
             Console.WriteLine("");
+            Console.WriteLine("\t Choices for the -O option: ");
+            Console.WriteLine("\t true    ... Opaque object");
+            Console.WriteLine("\t false   ... non Opaque object");
+            Console.WriteLine("");
             Console.WriteLine("\t Choices for the -TagLen option: ");
-
+            Console.WriteLine("12   ... 12 Bytes taglength for GCM");
+            Console.WriteLine("13   ... 13 Bytes taglength for GCM");
+            Console.WriteLine("14   ... 14 Bytes taglength for GCM");
+            Console.WriteLine("15   ... 15 Bytes taglength for GCM");
+            Console.WriteLine("16   ... 16 Bytes taglength for GCM");
+            Console.WriteLine("");
             Console.WriteLine("\tChoices for the -g option:");
             Console.WriteLine("\t 0 ... generate a versioned key");
             Console.WriteLine("\t 1 ... rotate a versioned key");

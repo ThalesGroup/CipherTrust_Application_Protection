@@ -28,7 +28,7 @@ namespace CADP.Pkcs11Sample
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
-                    Helpers.CleanupKey(session, keyLabel);
+                    Helpers.CleanupKey(session, keyLabel, isOpaqueObj);
 
                     // Prepare attribute template that defines search criteria
                     List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
