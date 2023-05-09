@@ -210,12 +210,8 @@ namespace CADP.Pkcs11Sample
 
             foreach (IObjectHandle handle in foundObjects)
             {
-                if (isOpaqueObj)
+                if (!isOpaqueObj)
                 {
-                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_THALES_OPAQUE_OBJECT));
-                }
-                else
-                { 
                 const uint KeyStateDeactivated = 3;
                 List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
                 objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
