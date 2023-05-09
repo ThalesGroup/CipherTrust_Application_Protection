@@ -183,11 +183,20 @@ namespace CADP.Pkcs11Sample
             return key;
         }
 
-        public static void CleanupKey(ISession session, string keyLabel)
+        public static void CleanupKey(ISession session, string keyLabel, bool isOpaqueObj =false)
         {
 
             List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
-            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+
+            if (isOpaqueObj)
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_THALES_OPAQUE_OBJECT));
+            }
+            else
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+               
+            }
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
             // Initialize searching
@@ -201,11 +210,13 @@ namespace CADP.Pkcs11Sample
 
             foreach (IObjectHandle handle in foundObjects)
             {
+                if (!isOpaqueObj)
+                {
                 const uint KeyStateDeactivated = 3;
                 List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
                 objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
                 session.SetAttributeValue(handle, objAttributes);
-
+                }
                 session.DestroyObject(handle);
                 Console.WriteLine("Existing " + keyLabel + " key deleted!");
             }
