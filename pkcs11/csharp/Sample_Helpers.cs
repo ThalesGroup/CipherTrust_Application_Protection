@@ -328,7 +328,7 @@ namespace CADP.Pkcs11Sample
                     {
 
                         case (uint)CKA.CKA_APPLICATION:
-                            Console.WriteLine(name + " : " + attr.GetValueAsString());
+                            Console.WriteLine("CKA_APPLICATION" + " : " + attr.GetValueAsString());
                             break;
                         case (uint)CKA.CKA_CLASS: // converting its value to an uint fails for inexplicable reasons
                             break;
