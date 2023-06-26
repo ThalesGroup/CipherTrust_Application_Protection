@@ -192,7 +192,7 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
         {
             rc = FunctionListFuncPtr->C_EncryptInit(hSess,
                                                     pMechEnc,
-                                                    hPrivKey
+                                                    hPubKey
                                                    );
         }
 
@@ -298,7 +298,7 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
         rc = FunctionListFuncPtr->C_DecryptInit(
                  hSess,
                  pMechDec,
-                 hPubKey
+                 hPrivKey
              );
     }
 
