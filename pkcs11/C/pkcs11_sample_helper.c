@@ -1028,8 +1028,7 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     }
 
     printf("Key Handle: %08x,\n", (unsigned int)hKey);
-    memset(keyLabel, 0, sizeof keyLabel);
-    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[2].ulValueLen, keyLabel);
+    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[1].ulValueLen, keyLabel);
     printf("CKA_CLASS: %08x.\n", (unsigned int)objClass);
 
     printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)getAttrsTemplate[3].ulValueLen, keyUuid);
@@ -1098,11 +1097,11 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
         printf("CKA_MODULUS_BITS: %u.\n", (unsigned int)modulusBits);
     }
 
-    printf("CKA_THALES_CUSTOM_1: %.*s\n", (int)getAttrsTemplate[4].ulValueLen, custom1);
-    printf("CKA_THALES_CUSTOM_2: %.*s\n", (int)getAttrsTemplate[5].ulValueLen, custom2);
-    printf("CKA_THALES_CUSTOM_3: %.*s\n", (int)getAttrsTemplate[6].ulValueLen, custom3);
-    printf("CKA_THALES_CUSTOM_4: %.*s\n", (int)getAttrsTemplate[7].ulValueLen, custom4);
-    printf("CKA_THALES_CUSTOM_5: %.*s\n", (int)getAttrsTemplate[8].ulValueLen, custom5);
+    printf("CKA_THALES_CUSTOM_1: %.*s\n", (int)getAttrsTemplate[7].ulValueLen, custom1);
+    printf("CKA_THALES_CUSTOM_2: %.*s\n", (int)getAttrsTemplate[8].ulValueLen, custom2);
+    printf("CKA_THALES_CUSTOM_3: %.*s\n", (int)getAttrsTemplate[9].ulValueLen, custom3);
+    printf("CKA_THALES_CUSTOM_4: %.*s\n", (int)getAttrsTemplate[10].ulValueLen, custom4);
+    printf("CKA_THALES_CUSTOM_5: %.*s\n", (int)getAttrsTemplate[11].ulValueLen, custom5);
 
     printf("CKA_ENCRYPT: %s\n", bEncrypt ? "true" : "false");
     printf("CKA_UNWRAP:  %s\n", bUnwrap  ? "true" : "false");
