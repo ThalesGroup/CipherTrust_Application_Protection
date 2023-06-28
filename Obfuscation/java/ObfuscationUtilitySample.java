@@ -12,23 +12,25 @@ import com.ingrian.security.nae.IngrianProvider;
 public class ObfuscationUtilitySample {
 
 	public static void main(String []dataToEncrypt) {
-	
-		Scanner sc =new Scanner(System.in);
-		System.out.println("Enter text to be encrypted");
-        String str = sc.next();      
+		String encryptData=null;
 		
-		if ("".equalsIgnoreCase(str) || str == null) {
-			System.exit(-1);
+        if (dataToEncrypt.length==0) {
+                 Scanner sc =new Scanner(System.in);
+			System.out.println("Please Enter Text to be Encrypted:");
+			encryptData = sc.next();      
 		}
+		else{
+         encryptData=dataToEncrypt[0];	
+		}		 
+		
 		String encrptedData = null;
 		try {
-			encrptedData = IngrianProvider.obfuscate(str.getBytes()
+			encrptedData = IngrianProvider.obfuscate(encryptData.getBytes()
 					);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Obfuscate data=" + encrptedData);
+		System.out.println("Encrypted Text: " + encrptedData);
 
 	}
 	}
-
