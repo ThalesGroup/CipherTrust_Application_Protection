@@ -191,8 +191,6 @@ static CK_RV signVerifyBuf(CK_SESSION_HANDLE hSess, CK_OBJECT_HANDLE hGenKey, CK
     CK_BYTE		    *msgDigest = NULL_PTR;
     CK_ULONG		msgDigestLen = 0;
     int             status;
-    // int taglen = (tag_bits & 0x7) == 0 ? tag_bits >> 3 : (tag_bits >> 3) + 1;
-    int taglen = tag_bits >> 3;
     CK_BYTE pBuf[32] =
     {
         't', 'h', 'i', 's', ' ', 'i', 's', ' ',
@@ -201,8 +199,6 @@ static CK_RV signVerifyBuf(CK_SESSION_HANDLE hSess, CK_OBJECT_HANDLE hGenKey, CK
         't', 'a', ' ', '5', '4', '3', '2', '1'
     };
     int len = sizeof(pBuf);
-
-    (void) taglen;
 
     /* C_SignInit */
     rc = FunctionListFuncPtr->C_SignInit(hSess, pMech, hGenKey);
