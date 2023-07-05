@@ -300,6 +300,8 @@ public class KeyStateTransition {
             {
                 System.out.println ("the key not found, creating it..." );
                 keyID = createKeywDates(session, keyName, dateList, genAction);
+				if (!dateList.isEmpty())
+                    Helper.setKeyTransitionDates(session, keyID, dateList);
             }
             else
             {
@@ -333,7 +335,7 @@ public class KeyStateTransition {
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         finally {
             Helper.closeDown(session);

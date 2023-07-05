@@ -7,6 +7,7 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_ENCRYPT;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_KEY_TYPE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_LABEL;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_NEVER_EXTRACTABLE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_SENSITIVE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_SIGN;
@@ -28,25 +29,25 @@ import com.vormetric.pkcs11.wrapper.PKCS11Constants;
 import com.vormetric.pkcs11.wrapper.PKCS11Exception;
 
 /**
-* Sample code is provided for educational purposes.
-* No warranty of any kind, either expressed or implied by fact or law.
-* Use of this item is not restricted by copyright or license terms.
-*/
+ * Sample code is provided for educational purposes.
+ * No warranty of any kind, either expressed or implied by fact or law.
+ * Use of this item is not restricted by copyright or license terms.
+ */
 
 
 /*
-***************************************************************************
-* File: UnwrapImportKey.java
-***************************************************************************
-***************************************************************************
-* This file demonstrates the following:
-* 1. Initialization.
-* 2. Create a connection and log in.
-* 3. Read the wrapped key from the file.
-* 4. Unwrap it using wrapping key.
-* 5. Clean up.
-***************************************************************************
-*/
+ ***************************************************************************
+ * File: UnwrapImportKey.java
+ ***************************************************************************
+ ***************************************************************************
+ * This file demonstrates the following:
+ * 1. Initialization.
+ * 2. Create a connection and log in.
+ * 3. Read the wrapped key from the file.
+ * 4. Unwrap it using wrapping key.
+ * 5. Clean up.
+ ***************************************************************************
+ */
 
 public class UnwrapImportKey {
 
@@ -63,14 +64,14 @@ public class UnwrapImportKey {
     public static void usage()
     {
         System.out.println ("usage: java [-cp CLASSPATH] com.vormetric.pkcs11.sample.UnwrapImportKey -p pin [-k sourceKeyName]" +
-        " [-u wrappingKeyName] [-f keyformat] [-m module] [-c public-key-name] [-v private-key-name] [-i keyfile]");
+                " [-u wrappingKeyName] [-f keyformat] [-m module] [-c public-key-name] [-v private-key-name] [-i keyfile]");
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-k: Source keyname on Keymanager");
         System.out.println("-u: Wrapping Keyname on Keymanager");
         System.out.println("-c: Public keyname on Keymanager");
         System.out.println("-f: Format of key on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
-        System.out.println("-i: Input filename");    
+        System.out.println("-i: Input filename");
         System.out.println("-v: Private keyname");
         System.exit (1);
     }
@@ -141,9 +142,9 @@ public class UnwrapImportKey {
                 }
             }
 
-    	    CK_MECHANISM mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
+            CK_MECHANISM mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
 
-	        if (unwrappingKey == 0)
+            if (unwrappingKey == 0)
             {
                 System.out.println ("Unwrapping key not used..." );
             }
@@ -163,40 +164,42 @@ public class UnwrapImportKey {
                 wrappedKey = Helper.readKey(inputFileName);
 
                 CK_ATTRIBUTE[] symAttrs = new CK_ATTRIBUTE[]
-                {
-                        new CK_ATTRIBUTE (CKA_LABEL, keyName),
-                        new CK_ATTRIBUTE (CKA_CLASS, CKO_SECRET_KEY),
-                        new CK_ATTRIBUTE (CKA_KEY_TYPE, CKK_AES),
-                        new CK_ATTRIBUTE (CKA_VALUE_LEN, 32),
-                        new CK_ATTRIBUTE (CKA_TOKEN, true),
-                        new CK_ATTRIBUTE (CKA_ENCRYPT, true),
-                        new CK_ATTRIBUTE (CKA_DECRYPT, true),
-                        new CK_ATTRIBUTE (CKA_SIGN, false),
-                        new CK_ATTRIBUTE (CKA_VERIFY, false),
-                        new CK_ATTRIBUTE (CKA_WRAP, true),
-                        new CK_ATTRIBUTE (CKA_UNWRAP, true),
-                        new CK_ATTRIBUTE (CKA_EXTRACTABLE, false),
-                        new CK_ATTRIBUTE (CKA_ALWAYS_SENSITIVE, false),
-                        new CK_ATTRIBUTE (CKA_NEVER_EXTRACTABLE, true),
-                        new CK_ATTRIBUTE (CKA_SENSITIVE, true),
-                        new CK_ATTRIBUTE (Helper.CKA_KEY_CACHE_ON_HOST, true),
-                        new CK_ATTRIBUTE (Helper.CKA_KEY_CACHED_TIME, 44640)
-                };
+                        {
+                                new CK_ATTRIBUTE (CKA_LABEL, keyName),
+                                new CK_ATTRIBUTE (CKA_CLASS, CKO_SECRET_KEY),
+                                new CK_ATTRIBUTE (CKA_KEY_TYPE, CKK_AES),
+                                new CK_ATTRIBUTE (CKA_VALUE_LEN, 32L),
+                                new CK_ATTRIBUTE (CKA_TOKEN, true),
+                                new CK_ATTRIBUTE (CKA_ENCRYPT, true),
+                                new CK_ATTRIBUTE (CKA_DECRYPT, true),
+                                new CK_ATTRIBUTE (CKA_SIGN, false),
+                                new CK_ATTRIBUTE (CKA_VERIFY, false),
+                                new CK_ATTRIBUTE (CKA_WRAP, true),
+                                new CK_ATTRIBUTE (CKA_UNWRAP, true),
+                                new CK_ATTRIBUTE (CKA_EXTRACTABLE, false),
+                                new CK_ATTRIBUTE (CKA_ALWAYS_SENSITIVE, false),
+                                new CK_ATTRIBUTE (CKA_NEVER_EXTRACTABLE, true),
+                                new CK_ATTRIBUTE (CKA_SENSITIVE, true),
+                                new CK_ATTRIBUTE (Helper.CKA_KEY_CACHE_ON_HOST, true),
+                                new CK_ATTRIBUTE (Helper.CKA_KEY_CACHED_TIME, 44640),
+                                new CK_ATTRIBUTE (CKA_MODIFIABLE, true)
+                        };
 
                 CK_ATTRIBUTE[] asymAttrs = new CK_ATTRIBUTE[]
-                {
-                        new CK_ATTRIBUTE (CKA_LABEL, keyName),
-                        new CK_ATTRIBUTE (CKA_CLASS, objClass),
-                        new CK_ATTRIBUTE (CKA_KEY_TYPE, CKK_RSA),
-                        new CK_ATTRIBUTE (CKA_ENCRYPT, true),
-                        new CK_ATTRIBUTE (CKA_DECRYPT, true),
-                        new CK_ATTRIBUTE (CKA_SIGN, true),
-                        new CK_ATTRIBUTE (CKA_VERIFY, true),
-                        new CK_ATTRIBUTE (CKA_WRAP, true),
-                        new CK_ATTRIBUTE (CKA_TOKEN, true)
-                };
+                        {
+                                new CK_ATTRIBUTE (CKA_LABEL, keyName),
+                                new CK_ATTRIBUTE (CKA_CLASS, objClass),
+                                new CK_ATTRIBUTE (CKA_KEY_TYPE, CKK_RSA),
+                                new CK_ATTRIBUTE (CKA_ENCRYPT, true),
+                                new CK_ATTRIBUTE (CKA_DECRYPT, true),
+                                new CK_ATTRIBUTE (CKA_SIGN, true),
+                                new CK_ATTRIBUTE (CKA_VERIFY, true),
+                                new CK_ATTRIBUTE (CKA_WRAP, true),
+                                new CK_ATTRIBUTE (CKA_TOKEN, true)
+                        };
 
-		if( unwrappingKey != 0 && !Helper.isKeySymmetric(unwrappingKey) ) {
+
+                if( unwrappingKey != 0 && Helper.isKeySymmetric(unwrappingKey) ) {
                     mechanism.mechanism = Helper.CKA_THALES_DEFINED | PKCS11Constants.CKM_RSA_PKCS;
                 }
 
@@ -213,7 +216,7 @@ public class UnwrapImportKey {
                     /* importing symmetric key */
                     attrs = symAttrs;
                 }
-                /* If the key is found, delete the key */
+
                 long importedKey = session.p11.C_UnwrapKey(session.sessionHandle, mechanism, unwrappingKey, wrappedKey, attrs);
                 System.out.println ("Successfully unwrapped key. Imported key "+keyName+"; handle: "  + importedKey);
             }
@@ -223,13 +226,13 @@ public class UnwrapImportKey {
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         finally {
             Helper.closeDown(session);

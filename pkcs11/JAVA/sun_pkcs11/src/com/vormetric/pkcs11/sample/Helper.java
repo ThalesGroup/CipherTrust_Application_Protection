@@ -28,6 +28,8 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_SECRET_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKU_USER;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
+
 
 /**
 * Sample code is provided for educational purposes.
@@ -446,7 +448,7 @@ public class Helper {
         return match;
     }
 
-    public static long[] createKeyPair(Vpkcs11Session session, String keyName, CK_MECHANISM mechanism, int modulusBits)
+    public static long[] createKeyPair(Vpkcs11Session session, String keyName, CK_MECHANISM mechanism, long modulusBits)
     {
         long[] keyIDArr = null;
         byte[] publicExponent = { 0x01, 0x00, 0x01, 0x00 };
@@ -478,12 +480,15 @@ public class Helper {
 
         CK_ATTRIBUTE[] privateKeyAttr = new CK_ATTRIBUTE[]
                 {
+                        new CK_ATTRIBUTE (CKA_LABEL, keyName),
                         new CK_ATTRIBUTE (CKA_CLASS, CKO_PRIVATE_KEY),
                         new CK_ATTRIBUTE (CKA_TOKEN, true),
                         new CK_ATTRIBUTE (CKA_PRIVATE, true),
                         new CK_ATTRIBUTE (CKA_SENSITIVE, true),
                         new CK_ATTRIBUTE (CKA_DECRYPT, true),
                         new CK_ATTRIBUTE (CKA_SIGN, true),
+                        new CK_ATTRIBUTE (CKA_EXTRACTABLE, true),
+                        new CK_ATTRIBUTE (CKA_MODIFIABLE, true),
                         new CK_ATTRIBUTE (CKA_UNWRAP, true)
                 };
         try {
@@ -569,7 +574,7 @@ public class Helper {
                             new CK_ATTRIBUTE (CKA_LABEL, keyName),
                             new CK_ATTRIBUTE (CKA_CLASS, CKO_SECRET_KEY),
                             new CK_ATTRIBUTE (CKA_KEY_TYPE, CKK_AES),
-                            new CK_ATTRIBUTE (CKA_VALUE_LEN, 32),
+                            new CK_ATTRIBUTE (CKA_VALUE_LEN, 32L),
                             new CK_ATTRIBUTE (CKA_TOKEN, true),
                             new CK_ATTRIBUTE (CKA_ENCRYPT, true),
                             new CK_ATTRIBUTE (CKA_DECRYPT, true),

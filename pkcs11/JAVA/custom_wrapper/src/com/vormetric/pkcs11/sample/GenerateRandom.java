@@ -71,12 +71,15 @@ public class GenerateRandom {
 
         }
         catch(PKCS11Exception pe){
-            System.out.println(pe.getMessage());
-            throw e;
+            pe.printStackTrace();
+            System.out.println("The Cause is " + pe.getMessage() + ".");
+            throw pe;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);

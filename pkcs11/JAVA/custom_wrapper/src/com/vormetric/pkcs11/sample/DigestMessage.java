@@ -71,7 +71,7 @@ public class DigestMessage {
 	return result;
     }
 
-    public static void main ( String[] args) throws Exception{
+    public static void main ( String[] args) throws Exception {
         String pin = null;
         String libPath = null;
         String operation = "SHA256";
@@ -167,8 +167,8 @@ public class DigestMessage {
 
         } catch (Exception e) {
 	        e.printStackTrace();
-                System.out.println("The Cause is " + e.getMessage() + ".");
-	        throw e;
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);

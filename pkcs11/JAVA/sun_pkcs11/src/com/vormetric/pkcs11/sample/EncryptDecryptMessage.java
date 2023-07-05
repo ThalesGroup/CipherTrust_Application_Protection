@@ -185,7 +185,7 @@ public class EncryptDecryptMessage {
         return bta;
     }
 
-    public static void main ( String[] args) {
+    public static void main ( String[] args) throws Exception {
         String pin = null;
         String libPath = null;
         String operation = "CBC_PAD";
@@ -797,6 +797,8 @@ public class EncryptDecryptMessage {
 
         } catch (Exception e) {
                 e.printStackTrace();
+                System.out.println("The Cause is " + e.getMessage() + ".");
+                throw e;
         }
         finally {
             Helper.closeDown(session);
@@ -908,8 +910,12 @@ public class EncryptDecryptMessage {
 
             } catch (PKCS11Exception e) {
                 e.printStackTrace();
+                System.out.println("The Cause is " + e.getMessage() + ".");
+                throw e;
             } catch (Exception ex) {
                 ex.printStackTrace();
+                System.out.println("The Cause is " + ex.getMessage() + ".");
+                throw ex;
             }
             return null;
         }

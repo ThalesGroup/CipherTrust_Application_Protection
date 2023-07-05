@@ -44,17 +44,18 @@ public class FindExportKey {
     {
         System.out.println ("usage: java [-cp CLASSPATH] com.vormetric.pkcs11.sample.FindExportKey -p pin [-k sourceKeyName] [-w wrappingKeyName] [-f keyFile format] [-m module] [-c public keyName] [-v private keyName] [-o outputFileName]");
         System.out.println("-p: Username:Password of Keymanager");
-        System.out.println("-k: Source KeyName on Keymanager");
-        System.out.println("-w: Wrapping Keyname on Keymanager");
+        System.out.println("-k: Source keyname on Keymanager");
+        System.out.println("-w: Wrapping keyname on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-f: KeyFile format i.e pem");
         System.out.println("-o: Output filename");
         System.out.println("-c: Public keyName");
         System.out.println("-v: Private keyName");
+        
         exit (1);
     }
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -131,13 +132,13 @@ public class FindExportKey {
             if (sourceKey != 0)
             {
                 System.out.println ("Exporting key ... ");
-               
+
                 if( formatName != null && formatName.equals("pem") )
                     mechanism.mechanism |= Helper.CKA_THALES_DEFINED | Helper.CKM_THALES_PEM_FORMAT;
-                else if( wrappingKey != 0 && !Helper.isKeySymmetric(wrappingKey) ) {
+                else if( wrappingKey != 0 && Helper.isKeySymmetric(wrappingKey) ) {
                     mechanism.mechanism = Helper.CKA_THALES_DEFINED | PKCS11Constants.CKM_RSA_PKCS;
                 }
-
+               
                 /* If the key is found, delete the key */
                 byte[] wrappedKey = session.p11.C_WrapKey(session.sessionHandle, mechanism, wrappingKey, sourceKey );
                 Helper.saveKey(wrappedKey, outputFileName);
@@ -153,10 +154,14 @@ public class FindExportKey {
         catch (PKCS11Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);

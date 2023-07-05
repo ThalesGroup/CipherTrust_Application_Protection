@@ -19,6 +19,8 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS_KEY_PAIR
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
+
 
 import com.vormetric.pkcs11.wrapper.CK_ATTRIBUTE;
 import com.vormetric.pkcs11.wrapper.CK_MECHANISM;
@@ -90,7 +92,7 @@ public class CreateKeypairSignMessage {
 			/* Create the keypair */
 			CK_MECHANISM mechanism = new CK_MECHANISM (CKM_RSA_PKCS_KEY_PAIR_GEN);
 			byte[] publicExponent = { 0x01, 0x00, 0x01, 0x00 };
-			int modulusBits = 2048;
+			long modulusBits = 2048;
 
 			CK_ATTRIBUTE[] publicKeyAttr = new CK_ATTRIBUTE[]
 			{
@@ -116,7 +118,9 @@ public class CreateKeypairSignMessage {
 					new CK_ATTRIBUTE (CKA_DECRYPT, true),
 					new CK_ATTRIBUTE (CKA_SIGN, true),
 					new CK_ATTRIBUTE (CKA_UNWRAP, true),
-					new CK_ATTRIBUTE (CKA_MODIFIABLE, true)
+					new CK_ATTRIBUTE (CKA_MODIFIABLE, true),
+					new CK_ATTRIBUTE (CKA_EXTRACTABLE, true)
+
 			};
 
             publickeyID = Helper.findKey(session, publicKeyname, CKO_PUBLIC_KEY);
@@ -162,14 +166,15 @@ public class CreateKeypairSignMessage {
 		catch (PKCS11Exception e)
 	    {
 			e.printStackTrace();
-                       System.out.println("The Cause is " + e.getMessage() + ".");
-	               throw e;
+			System.out.println("The Cause is " + e.getMessage() + ".");
+			throw e;
+			
 	    }
 		catch (Exception e)
 	    {
             e.printStackTrace();
-            System.out.println("The Cause is " + e.getMessage() + ".");
-            throw e;
+			System.out.println("The Cause is " + e.getMessage() + ".");
+			throw e;
 	    }
 	    finally {
 			Helper.closeDown(session);

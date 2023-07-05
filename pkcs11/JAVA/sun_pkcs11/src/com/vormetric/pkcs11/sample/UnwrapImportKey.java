@@ -1,5 +1,6 @@
 package com.vormetric.pkcs11.sample;
 
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_ALWAYS_SENSITIVE;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_CLASS;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_DECRYPT;
@@ -63,7 +64,7 @@ public class UnwrapImportKey {
         " [-u wrappingKeyName] [-f keyformat] [-m module] [-c public-key-name] [-v private-key-name] [-i keyfile]");
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-k: Source keyname on Keymanager");
-        System.out.println("-u: Wrapping keyname on Keymanager");
+        System.out.println("-u: Wrapping Keyname on Keymanager");
         System.out.println("-c: Public keyname on Keymanager");
         System.out.println("-f: Format of key on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
@@ -71,7 +72,7 @@ public class UnwrapImportKey {
         System.out.println("-v: Private keyname");
         System.exit (1);
     }
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -177,7 +178,8 @@ public class UnwrapImportKey {
                         new CK_ATTRIBUTE (CKA_NEVER_EXTRACTABLE, true),
                         new CK_ATTRIBUTE (CKA_SENSITIVE, true),
                         new CK_ATTRIBUTE (Helper.CKA_KEY_CACHE_ON_HOST, true),
-                        new CK_ATTRIBUTE (Helper.CKA_KEY_CACHED_TIME, 44640)
+                        new CK_ATTRIBUTE (Helper.CKA_KEY_CACHED_TIME, 44640),
+                        new CK_ATTRIBUTE (CKA_MODIFIABLE, true)
                 };
 
                 CK_ATTRIBUTE[] asymAttrs = new CK_ATTRIBUTE[]
@@ -193,7 +195,7 @@ public class UnwrapImportKey {
                         new CK_ATTRIBUTE (CKA_TOKEN, true)
                 };
 
-		if( unwrappingKey != 0 && !Helper.isKeySymmetric(unwrappingKey) ) {
+                if( unwrappingKey != 0 && Helper.isKeySymmetric(unwrappingKey) ) {
                     mechanism.mechanism = Helper.CKA_THALES_DEFINED | PKCS11Constants.CKM_RSA_PKCS;
                 }
 
@@ -210,7 +212,7 @@ public class UnwrapImportKey {
                     /* importing symmetric key */
                     attrs = symAttrs;
                 }
-                /* If the key is found, delete the key */
+                
                 long importedKey = session.p11.C_UnwrapKey(session.sessionHandle, mechanism, unwrappingKey, wrappedKey, attrs);
                 System.out.println ("Successfully unwrapped key. Imported key "+keyName+"; handle: "  + importedKey);
             }
@@ -219,10 +221,14 @@ public class UnwrapImportKey {
         catch (PKCS11Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);
