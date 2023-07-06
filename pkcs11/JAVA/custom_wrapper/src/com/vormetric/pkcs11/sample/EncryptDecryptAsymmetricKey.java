@@ -34,6 +34,9 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS_KEY_PAIR_GEN;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
+
 
 import com.vormetric.pkcs11.wrapper.CK_ATTRIBUTE;
 import com.vormetric.pkcs11.wrapper.CK_MECHANISM;
@@ -60,7 +63,7 @@ public class EncryptDecryptAsymmetricKey {
         Vpkcs11Session session = null;
         String keyName = null;
         long publicKeyID, privateKeyID;
-        int modulusBits = 2048;
+        long modulusBits = 2048;
 
         for (int i=0; i<args.length; i+=2)
         {
@@ -110,13 +113,16 @@ public class EncryptDecryptAsymmetricKey {
 
                 CK_ATTRIBUTE[] privateKeyAttr = new CK_ATTRIBUTE[]
                         {
+                                new CK_ATTRIBUTE(CKA_LABEL, keyName),
                                 new CK_ATTRIBUTE(CKA_CLASS, CKO_PRIVATE_KEY),
                                 new CK_ATTRIBUTE(CKA_TOKEN, true),
                                 new CK_ATTRIBUTE(CKA_PRIVATE, true),
                                 new CK_ATTRIBUTE(CKA_SENSITIVE, true),
                                 new CK_ATTRIBUTE(CKA_DECRYPT, true),
                                 new CK_ATTRIBUTE(CKA_SIGN, true),
-                                new CK_ATTRIBUTE(CKA_UNWRAP, true)
+                                new CK_ATTRIBUTE(CKA_UNWRAP, true),
+                                new CK_ATTRIBUTE (CKA_MODIFIABLE, true),
+                                new CK_ATTRIBUTE (CKA_EXTRACTABLE, true)
                         };
 
                 keyIDArr = session.p11.C_GenerateKeyPair(session.sessionHandle, mechanism, publicKeyAttr, privateKeyAttr);
@@ -170,13 +176,13 @@ public class EncryptDecryptAsymmetricKey {
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         finally {
             Helper.closeDown(session);
