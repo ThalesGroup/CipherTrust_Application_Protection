@@ -83,7 +83,9 @@ static CK_RV unwrapKey (char * keyLabel, CK_OBJECT_HANDLE_PTR phKey, CK_OBJECT_H
 
     CK_ULONG symKeyTemplateSize = sizeof(symKeyTemplate)/sizeof(CK_ATTRIBUTE)-3;
 
-    CK_ATTRIBUTE	asymmKeyTemplate[10] =
+
+    // In CipherTrust mode, EXTRACTABLE and MODIFIABLE are not set to True by default
+    CK_ATTRIBUTE	asymmKeyTemplate[12] =
     {
 
         {CKA_LABEL, label, len }, /* Keyname */
@@ -92,6 +94,8 @@ static CK_RV unwrapKey (char * keyLabel, CK_OBJECT_HANDLE_PTR phKey, CK_OBJECT_H
         {CKA_ENCRYPT, &bTrue, sizeof(bTrue)},
         {CKA_VERIFY, &bTrue, sizeof(bTrue)},
         {CKA_WRAP, &bTrue, sizeof(bTrue)},
+        {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
+        {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
         {CKA_TOKEN, &bTrue, sizeof(bTrue)}
     };
     CK_ULONG asymmKeyTemplateSize = sizeof(asymmKeyTemplate)/sizeof(CK_ATTRIBUTE)-3;
@@ -102,6 +106,8 @@ static CK_RV unwrapKey (char * keyLabel, CK_OBJECT_HANDLE_PTR phKey, CK_OBJECT_H
     if(unwrappingObjClass != CKO_SECRET_KEY && hUnwrappingKey != CK_INVALID_HANDLE)
     {
         mechImportKey.mechanism = CKA_THALES_DEFINED | CKM_RSA_PKCS;
+        mechImportKey.pParameter = NULL;
+        mechImportKey.ulParameterLen = 0;
     }
 
     if(objClass != CKO_SECRET_KEY && format_type != 0)
@@ -223,7 +229,7 @@ static CK_RV findnImportKey (char* keyLabel, char* wrappingKeySearchId, char* ke
     }
 
     /* read wrapped key bytes from input file */
-    fp = fopen(key_filename, "r+");
+    fp = fopen(key_filename, "r+b");
 
     if (!fp)
     {
@@ -296,9 +302,9 @@ static CK_RV findnImportKey (char* keyLabel, char* wrappingKeySearchId, char* ke
 
 void importKeyUsage()
 {
-    printf ("Usage: pkcs11_sample_import_key -p pin -s slotID -{k|c|v} key_name|asymm_key_name -i key_filename [-u unwrappingKeyName] [-f format] [-m module] [-K imported keyid] [-M imported MUID] [-U imported UUID]\n");
+    printf ("Usage: pkcs11_sample_import_key -p pin -s slotID -{k|c|v} key_name|asymm_key_name -i key_filename [-u {s|v}:unwrappingKeyName] [-f format] [-m module] [-K imported keyid] [-M imported MUID] [-U imported UUID]\n");
     printf ("-k to be unwrapped/imported key name onto the Key Manager; take the form of {s|c|v}:key_name. \n");
-    printf ("-u unwrapping key label in the Key Manager.\n");
+    printf ("-u unwrapping key label in the Key Manager. Ex - for symmetric key provide -u s:sym_key and for asymmetric private key provide -u v:private_key\n");
     printf ("-i key filename that contains the wrapped key bytes.\n");
     printf ("-f format type: one of 'pem' or 'der' for asymmetric key output type, omit for symmetric keys.\n");
     exit (1);
