@@ -1028,7 +1028,8 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     }
 
     printf("Key Handle: %08x,\n", (unsigned int)hKey);
-    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[1].ulValueLen, keyLabel);
+    memset(keyLabel, 0, sizeof keyLabel);
+    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[2].ulValueLen, keyLabel);
     printf("CKA_CLASS: %08x.\n", (unsigned int)objClass);
 
     printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)getAttrsTemplate[3].ulValueLen, keyUuid);

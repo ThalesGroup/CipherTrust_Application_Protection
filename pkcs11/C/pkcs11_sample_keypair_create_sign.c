@@ -73,7 +73,6 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
         {CKA_NEVER_EXTRACTABLE,	&bNeverExtractable,	sizeof(CK_BBOOL)	},
     };
 
-    // In CipherTrust mode, EXTRACTABLE and MODIFIABLE are not set to True by default
     CK_ATTRIBUTE	privateKeyTemplate[] =
     {
         {CKA_LABEL, keyLabel, keyLabel_len }, /* Keyname*/
@@ -82,10 +81,7 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
         {CKA_SENSITIVE, &bTrue, sizeof(bTrue)},
         {CKA_DECRYPT, &bTrue, sizeof(bTrue)},
         {CKA_SIGN, &bTrue, sizeof(bTrue)},
-        {CKA_UNWRAP, &bTrue, sizeof(bTrue)},
-        {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
-        {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
-        {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)}
+        {CKA_UNWRAP, &bTrue, sizeof(bTrue)}
     };
 
     CK_RV		rc = CKR_OK;
@@ -206,7 +202,7 @@ void keypairSignUsage()
     printf ("Usage: pkcs11_keypair_create_sign -p pin -s slotID -kp keyName [-b modulus_bit_size] [-m module]\n");
     printf ("\n -kp to be created keypair name");
     printf ("\n -b modulus bits size in bits");
-    printf ("\n -n no deleion of key\n");
+    printf ("\n -n no deleion of key");
     exit (2);
 }
 

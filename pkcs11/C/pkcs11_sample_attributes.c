@@ -94,7 +94,7 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
         {CKA_THALES_CUSTOM_2, ca2, caLen2 },
         {CKA_THALES_CUSTOM_3, ca3, caLen3 }
     };
-    // In CipherTrust mode, By default EXTRACTABLE and MODIFIABLE are not set to True
+
     CK_ATTRIBUTE privateKeyTemplate[] =
     {
         {CKA_LABEL, keyLabel, keyLabel_len }, /* Keyname*/
@@ -107,10 +107,7 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
         {CKA_UNWRAP, &bTrue, sizeof(bTrue)},
         {CKA_THALES_CUSTOM_1, ca1, caLen1 },
         {CKA_THALES_CUSTOM_2, ca2, caLen2 },
-        {CKA_THALES_CUSTOM_3, ca3, caLen3 },
-        {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
-        {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
-        {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)}
+        {CKA_THALES_CUSTOM_3, ca3, caLen3 }
     };
 
     CK_RV    rc = CKR_OK;
