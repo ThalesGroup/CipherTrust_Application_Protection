@@ -52,7 +52,7 @@ public class EncryptDecryptFile {
         System.exit (1);
     }
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -212,10 +212,14 @@ public class EncryptDecryptFile {
 		catch (PKCS11Exception e)
 	    {
 			e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
 	    }
 		catch (Exception e)
 	    {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
 	    }
 	    finally {
             Helper.closeDown(session);

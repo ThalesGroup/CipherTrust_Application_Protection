@@ -5,27 +5,31 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_AES_CBC_PAD;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_SECRET_KEY;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_LABEL;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_CLASS;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_DATA;
 
 /**
-* Sample code is provided for educational purposes.
-* No warranty of any kind, either expressed or implied by fact or law.
-* Use of this item is not restricted by copyright or license terms.
-*/
+ * Sample code is provided for educational purposes.
+ * No warranty of any kind, either expressed or implied by fact or law.
+ * Use of this item is not restricted by copyright or license terms.
+ */
 
 /*
-***************************************************************************
-* File: FindExportKey.java
-***************************************************************************
-***************************************************************************
-* This file is designed to be run after CreateKey and
-* demonstrates the following:
-* 1. Initialization
-* 2. Creating a connection and logging in.
-* 3. Querying for a key using the keyname.
-* 4. Export the key that was found.
-* 4. Clean up.
-*/
+ ***************************************************************************
+ * File: FindExportKey.java
+ ***************************************************************************
+ ***************************************************************************
+ * This file is designed to be run after CreateKey and
+ * demonstrates the following:
+ * 1. Initialization
+ * 2. Creating a connection and logging in.
+ * 3. Querying for a key using the keyname.
+ * 4. Export the key that was found.
+ * 4. Clean up.
+ */
 
+import sun.security.pkcs11.wrapper.CK_ATTRIBUTE;
 import sun.security.pkcs11.wrapper.CK_MECHANISM;
 import sun.security.pkcs11.wrapper.PKCS11Constants;
 import sun.security.pkcs11.wrapper.PKCS11Exception;
@@ -44,17 +48,18 @@ public class FindExportKey {
     {
         System.out.println ("usage: java [-cp CLASSPATH] com.vormetric.pkcs11.sample.FindExportKey -p pin [-k sourceKeyName] [-w wrappingKeyName] [-f keyFile format] [-m module] [-c public keyName] [-v private keyName] [-o outputFileName]");
         System.out.println("-p: Username:Password of Keymanager");
-        System.out.println("-k: Source KeyName on Keymanager");
-        System.out.println("-w: Wrapping Keyname on Keymanager");
+        System.out.println("-k: Source keyname on Keymanager");
+        System.out.println("-w: Wrapping keyname on Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-f: KeyFile format i.e pem");
         System.out.println("-o: Output filename");
         System.out.println("-c: Public keyName");
         System.out.println("-v: Private keyName");
+
         exit (1);
     }
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -116,7 +121,7 @@ public class FindExportKey {
                 }
             }
 
-	        mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
+            mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
 
             if (wrappingKey == 0)
             {
@@ -131,13 +136,20 @@ public class FindExportKey {
             if (sourceKey != 0)
             {
                 System.out.println ("Exporting key ... ");
-               
+
+                CK_ATTRIBUTE[] wrappingKeyAttr = new CK_ATTRIBUTE[]{
+                        new CK_ATTRIBUTE(CKA_LABEL, "")
+                        , new CK_ATTRIBUTE(CKA_CLASS, CKO_DATA)};
+
+                session.p11.C_GetAttributeValue(session.sessionHandle, wrappingKey, wrappingKeyAttr);
+
                 if( formatName != null && formatName.equals("pem") )
                     mechanism.mechanism |= Helper.CKA_THALES_DEFINED | Helper.CKM_THALES_PEM_FORMAT;
-                else if( wrappingKey != 0 && !Helper.isKeySymmetric(wrappingKey) ) {
+                else if( wrappingKey != 0 && wrappingKeyAttr[1].pValue.equals(CKO_PUBLIC_KEY) ) {
                     mechanism.mechanism = Helper.CKA_THALES_DEFINED | PKCS11Constants.CKM_RSA_PKCS;
+                    mechanism.pParameter = null;
                 }
-
+        
                 /* If the key is found, delete the key */
                 byte[] wrappedKey = session.p11.C_WrapKey(session.sessionHandle, mechanism, wrappingKey, sourceKey );
                 Helper.saveKey(wrappedKey, outputFileName);
@@ -153,10 +165,14 @@ public class FindExportKey {
         catch (PKCS11Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);
