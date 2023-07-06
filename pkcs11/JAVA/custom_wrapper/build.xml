@@ -10,7 +10,7 @@
 	<property name="wrapper.jar" value="cadp-pkcs11-wrapper-1.0.jar"/>
 	<property name="jaxb.jar" value="jaxb-api-2.3.0-b170201.1204.jar"/>
 
-    <property name="PIN" value="username:password"/>
+    <property name="PIN" value="admin:KeySecure_1"/>
     <property name="IMPKEYNAME" value="pkcs11_java_test_key_"/>
 	<property name="WRAPKEYNAME" value="pkcs11_java_test_key_wrap"/>
     <property name="SourceFile" value="build.xml"/>
