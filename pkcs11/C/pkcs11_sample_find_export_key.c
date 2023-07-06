@@ -133,8 +133,6 @@ static CK_RV wrapAndExportKey (CK_OBJECT_HANDLE hKey, CK_OBJECT_HANDLE hWrapping
         if(wrappingObjClass != CKO_SECRET_KEY && hWrappingKey != CK_INVALID_HANDLE)
         {
             mechExportKey.mechanism = (CK_MECHANISM_TYPE)(CKA_THALES_DEFINED | CKM_RSA_PKCS);
- 	    mechExportKey.pParameter = NULL;
-            mechExportKey.ulParameterLen = 0;
         }
         else if(format_type != 0)
         {
@@ -178,7 +176,7 @@ static CK_RV wrapAndExportKey (CK_OBJECT_HANDLE hKey, CK_OBJECT_HANDLE hWrapping
         }
 
         /* export wrapped key by saving it to a file */
-        fp = fopen(outfilename, "a+b");
+        fp = fopen(outfilename, "a+");
 
         if (fp)
         {
@@ -212,13 +210,13 @@ static CK_RV wrapAndExportKey (CK_OBJECT_HANDLE hKey, CK_OBJECT_HANDLE hWrapping
 
 void exportKeyUsage()
 {
-    printf ("Usage: pkcs11_sample_find_export_key -p pin -s slotID -[k|v|c|o] keyName/opaqueObjectName [-i {k|m|u}:identifier] -w {s|c}:wrappingKeyName [-f format] [-e] [-m module]\n");
+    printf ("Usage: pkcs11_sample_find_export_key -p pin -s slotID -[k|v|c|o] keyName/opaqueObjectName [-i {k|m|u}:identifier] -w wrappingKeyName [-f format] [-e] [-m module]\n");
     printf ("\n -i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.");
     printf ("\n -k|v|c keyname to be wrapped/exported from the Key Manager; 'k': symmetric key name, 'v': private key, 'c': public key.");
     printf ("\n -o opaque object name to be wrapped/exported from the Key Manager");
-    printf ("\n -w wrapping key label to be searched on the Key Manager. For ex - for symmetric key provide -w s:sym_key and for asymmetric key provide -w c:public_key");
+    printf ("\n -w wrapping key label to be searched on the Key Manager.");
     printf ("\n -f format type: one of 'pem' or 'der' for asymmetric key output type, omit for symmetric keys.");
-    printf ("\n -e invalidate cache and use Key Manager for every export request\n");
+    printf ("\n -e invalidate cache and use Key Manager for every export request");
     exit (2);
 }
 
