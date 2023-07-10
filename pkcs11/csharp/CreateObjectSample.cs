@@ -61,14 +61,19 @@ namespace CADP.Pkcs11Sample
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
 
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
-                    objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+
 
                     // Generate symetric key
                     IObjectHandle createdKey = session.CreateObject(objectAttributes);
+
                     if (null != createdKey)
                     {
                         Console.WriteLine(keyLabel + " key created!");
                     }
+                    List<IObjectAttribute> objAttributes_exp = new List<IObjectAttribute>();
+                    objAttributes_exp.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+                    session.SetAttributeValue(createdKey, objAttributes_exp);
+
 
                     List<IObjectAttribute> getAttributes;
                     List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
@@ -82,6 +87,7 @@ namespace CADP.Pkcs11Sample
                     getAttributes = session.GetAttributeValue(createdKey, attrNames);
 
                     Helpers.PrintAttributes(getAttributes);
+
 
                     session.Logout();
                 }
