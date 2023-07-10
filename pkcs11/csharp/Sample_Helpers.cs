@@ -254,7 +254,6 @@ namespace CADP.Pkcs11Sample
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, bAlwSen));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
 
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
@@ -292,7 +291,7 @@ namespace CADP.Pkcs11Sample
             List<IObjectAttribute> publicKeyAttributes = new List<IObjectAttribute>();
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, true));
+            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyPairLabel));
             //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
@@ -317,6 +316,7 @@ namespace CADP.Pkcs11Sample
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
             //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyPairLabel));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
 
             // Specify key generation mechanism
             IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
@@ -366,19 +366,6 @@ namespace CADP.Pkcs11Sample
                         case (uint)CKA.CKA_END_DATE:
                             date = attr.GetValueAsDateTime();
                             Console.WriteLine(name + " : " + date.ToString());
-                            break;
-
-                        case (uint)CKA.CKA_ALWAYS_SENSITIVE:
-                        case (uint)CKA.CKA_NEVER_EXTRACTABLE:
-                            if (attr.GetValueAsByteArray().Length == 0)
-                            {
-                                Console.WriteLine(name + " : No");
-                            }
-                            else
-                            {
-                                bval = attr.GetValueAsBool();
-                                Console.WriteLine(name + " : " + bval.ToString());
-                            }
                             break;
 
                         case (uint)CKA.CKA_THALES_OBJECT_CREATE_DATE_EL:

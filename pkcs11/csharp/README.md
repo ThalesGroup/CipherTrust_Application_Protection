@@ -6,7 +6,7 @@ CADP_PKCS11_Samples.exe or CADP_PKCS11_Samples.dll is a command-line interface t
 
 ## Prerequisites: 
 In order to run CADP_PKCS11_Samples :
-> - .NET Core 3.1 or higher must be installed.<br>
+> - .NET 6.0 or higher must be installed.<br>
 > - CADP for C must be installed.
 
 
