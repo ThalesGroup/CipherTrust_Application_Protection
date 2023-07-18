@@ -19,7 +19,7 @@ In order to run C# samples,
 1. Add the CipherTrust.CADP.NETCore NuGet package to the project and build using command `dotnet build -c Release`. To know more about NuGet package and how to add it, refer to [CipherTrust.CADP.NETCore](https://www.nuget.org/packages/CipherTrust.CADP.NETCore/).
 1. Use either of the following commands to execute the project.
     * `dotnet run` command to run the project at a terminal prompt.
-    * `dotnet` command to run `SampleApp.dll` at location `\bin\Release\netcoreapp3.1` using terminal. Example: `dotnet SampleApp.dll`
+    * `dotnet` command to run `SampleApp.dll` at location `\bin\release\net6.0` using terminal. Example: `dotnet SampleApp.dll`
     * [Windows Only] `SampleApp.exe` at location `\bin\release\net6.0` using terminal. Example: `SampleApp.exe`
 
 ## More Information
