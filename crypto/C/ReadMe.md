@@ -25,13 +25,13 @@ Included with the CADP for C software are sample C/C++ files, the source code fo
 
 3. Navigate to `<installation_Directory>\C\VC`
 
-4. Open the `sample.sln` file in Visual Studio 2010.
+4. Open the `sample.sln` file in Visual Studio 2022.
 
 5. Select a sample project and build it.
 
 >*To compile the sample application on **Linux**:*
 
-You can compile this with a C++ or C compiler such as gcc (3.2.x or greater). If you have an older gcc or another C compiler, you may need to obtain libstdc++.so.5 and possibly libgcc_s.so.
+You can compile this with a C++ or C compiler such as gcc (4.8.x or higher). If you have an older gcc or another C compiler, you may need to obtain libstdc++.so.6 and possibly libgcc_s.so.
 
 1. Navigate to the Sample Directory. For example, `<CipherTrust_Application_Protection/key_management/C>`.
 
