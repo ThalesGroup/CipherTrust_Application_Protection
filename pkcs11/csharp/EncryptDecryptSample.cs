@@ -1,4 +1,4 @@
-﻿//
+//
 // EncryptDecryptSample.cs
 //
 
@@ -6,7 +6,7 @@ using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
 using Net.Pkcs11Interop.HighLevelAPI40.MechanismParams;
-using Net.Pkcs11Interop.LowLevelAPI40.MechanismParams;
+using Net.Pkcs11Interop.LowLevelAPI41.MechanismParams;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -67,7 +67,7 @@ namespace CADP.Pkcs11Sample
                     string aad = string.Empty;
                     uint tagBits = 12;
 
-                    CkGcmParams mechanismParams = null;
+                    ICkGcmParams mechanismParams = null;
                     byte[] gcm_iv = { 0xae, 0xc6, 0x12, 0xbe, 0x7c, 0x1d, 0xdb, 0x65, 0x9a, 0x4b, 0x31, 0x5c };
                     byte[] def_aad = { 0x38, 0x59, 0xb3, 0xc9, 0xd0, 0xb4, 0x2d, 0x45, 0xc4, 0x3e, 0x8e, 0xbd, 0x4c, 0x8c, 0xbd, 0xe1 };// 0xb6, 0xeb, 0x21, 0x06 };
 
@@ -410,7 +410,8 @@ namespace CADP.Pkcs11Sample
                     }
                     else if(opName.Equals("GCM"))
                     {
-                        mechanismParams = new CkGcmParams(gcm_iv, (uint)gcm_iv.Length*8,def_aad, tagBits);
+                        //mechanismParams = new CkGcmParams(gcm_iv, (uint)gcm_iv.Length*8,def_aad, tagBits);
+                        mechanismParams = session.Factories.MechanismParamsFactory.CreateCkGcmParams(gcm_iv, (uint)gcm_iv.Length * 8, def_aad, tagBits);
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_GCM, mechanismParams);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_AES_GCM, mechanismParams);
                     }
@@ -526,15 +527,24 @@ namespace CADP.Pkcs11Sample
                         // Do something interesting with encrypted data
                         if(opName.Equals("GCM"))
                         {
-                            CK_GCM_PARAMS gcmparam = (CK_GCM_PARAMS)(mechanismParams.ToMarshalableStructure());
-                            int taglen = (int)gcmparam.TagBits / 8;
-                            byte[] tagData = encryptedData.Skip(encryptedData.Length - taglen).Take(taglen).ToArray();
-                            byte[] encData = encryptedData.Take(encryptedData.Length - taglen).ToArray();
-                            encryptedData = new byte[tagData.Length + encData.Length];
-                            Buffer.BlockCopy(tagData, 0, encryptedData, 0, taglen);
-                            Buffer.BlockCopy(encData, 0, encryptedData, taglen, encData.Length);
-                            Console.WriteLine($"Tag Data: {ConvertUtils.BytesToHexString(tagData)}");
-                            
+
+                            // using original:
+                            int taglen1 = (int)tagBits / 8;
+                            byte[] tagData1 = encryptedData.Skip(encryptedData.Length - taglen1).Take(taglen1).ToArray();
+                            byte[] encData1 = encryptedData.Take(encryptedData.Length - taglen1).ToArray();
+                            encryptedData = new byte[tagData1.Length + encData1.Length];
+                            Buffer.BlockCopy(tagData1, 0, encryptedData, 0, taglen1);
+                            Buffer.BlockCopy(encData1, 0, encryptedData, taglen1, encData1.Length);
+                            Console.WriteLine($"Tag Data: {ConvertUtils.BytesToHexString(tagData1)}");
+
+                            //CK_GCM_PARAMS gcmparam = (CK_GCM_PARAMS)(mechanismParams.ToMarshalableStructure());
+                            //int taglen = (int)gcmparam.TagBits / 8;
+                            //byte[] tagData = encryptedData.Skip(encryptedData.Length - taglen).Take(taglen).ToArray();
+                            //byte[] encData = encryptedData.Take(encryptedData.Length - taglen).ToArray();
+                            //encryptedData = new byte[tagData.Length + encData.Length];
+                            //Buffer.BlockCopy(tagData, 0, encryptedData, 0, taglen);
+                            //Buffer.BlockCopy(encData, 0, encryptedData, taglen, encData.Length);
+                            //Console.WriteLine($"Tag Data: {ConvertUtils.BytesToHexString(tagData)}");
                         }
 
                         // Decrypt data
