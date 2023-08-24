@@ -665,7 +665,7 @@ void cleanup ()
     }
     if (FunctionListFuncPtr)
         FunctionListFuncPtr->C_Finalize(NULL);
-#ifdef __WINDOWS__
+#ifdef _WIN32
     if (dllHandle)
         FreeLibrary (dllHandle);
 #else
