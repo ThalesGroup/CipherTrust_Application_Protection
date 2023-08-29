@@ -44,11 +44,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t false   ... non Opaque object");
             Console.WriteLine("");
             Console.WriteLine("\t Choices for the -TagLen option: ");
-            Console.WriteLine("12   ... 12 Bytes taglength for GCM");
-            Console.WriteLine("13   ... 13 Bytes taglength for GCM");
-            Console.WriteLine("14   ... 14 Bytes taglength for GCM");
-            Console.WriteLine("15   ... 15 Bytes taglength for GCM");
-            Console.WriteLine("16   ... 16 Bytes taglength for GCM");
+            Console.WriteLine("\t 4 - 12   ... Bytes taglength for GCM");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -g option:");
             Console.WriteLine("\t 0 ... generate a versioned key");
