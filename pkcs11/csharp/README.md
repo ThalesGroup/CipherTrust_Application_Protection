@@ -67,7 +67,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
     true    ... Opaque object
     false   ... Non Opaque object
 ### Choices for the -TagLen option:
-     4 - 12 ... bytes taglength for GCM
+     4 - 16 ... bytes taglength for GCM
 ### Choices for the -g option:
      0 ... generate a versioned key
      1 ... rotate a versioned key
