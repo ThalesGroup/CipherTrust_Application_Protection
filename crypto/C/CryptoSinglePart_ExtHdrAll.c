@@ -42,7 +42,7 @@ void usage(void)
         "  user - (optional NAE user) user can be in a root domain or in a specific domain. For domain user, specify domain||username\n"
         "  passwd - optional (mandatory if user is specified) NAE user's password\n"
         "  headerMode - Version Header Mode (for versionkey mode value should be always 1 or 2)\n"
-        "               headerMode = 0 (Default - INTERNAL_HEADER) \n"
+        "               headerMode = 0 (NONE)\n"
         "               headerMode = 1 (EXTERNAL_HEADER : version key header stored in userSpec.)\n"
         "               headerMode = 2 (INTERNAL_HEADER : version key header adjust in cipher data.)\n"
         "  tagLen – Length of authentication tag, should be between 4 - 16 bytes ... in case of GCM\n"  
