@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace CADP.NetCoreNaeSamples
 {
-    class SampleApp
+    class TestCryptoDataUtility
     {
         static void Main(string[] args)
         {
