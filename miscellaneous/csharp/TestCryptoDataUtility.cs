@@ -10,9 +10,9 @@ namespace CADP.NetCoreNaeSamples
     {
         static void Main(string[] args)
         {
-            var errorMessage = @"Please provide command line arguments to use the sample!
+            var errorMessage = @" Please provide command line arguments to use the sample!
  Usage
- Parameter 1 : Key name to be used for crypto operation
+ Parameter 1 : Key name to be used for crypto operation (already generated)
  Parameter 2 : Text to encrypt.";
 
             if(args == null || args.Length != 2)
