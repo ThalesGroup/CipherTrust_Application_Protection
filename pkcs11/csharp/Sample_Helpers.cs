@@ -330,7 +330,6 @@ namespace CADP.Pkcs11Sample
             byte[] valArray;
             string str, name;
             long epoch_time;
-            bool bval;
             DateTime? date;
 
             foreach (IObjectAttribute attr in objectAttributes)
