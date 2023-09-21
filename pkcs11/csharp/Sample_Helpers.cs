@@ -393,7 +393,7 @@ namespace CADP.Pkcs11Sample
                             valArray = attr.GetValueAsByteArray();
 			    if (valArray.Length == 0)
                             {
-                                Console.WriteLine(name + " : ");
+                                Console.WriteLine(name + " : " + valArray.Length);
                             }
                             else
                             {
