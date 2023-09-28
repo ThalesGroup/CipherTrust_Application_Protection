@@ -850,7 +850,8 @@ int main(int argc, char *argv[])
             if (rc == CKR_OK && hObject != CK_INVALID_HANDLE)
             {
                 fprintf(stderr, "Found: %s with same name already exist. \n", bOpaque ? "Opaque Object" : "Key" );
-				return; //If object already exists then return from it.
+                if(bOpaque == CK_TRUE)
+                   goto END; //If object already exists do nothing.
             }
 
             rc = createObjectBVersion(objLabel, bVersionedKey, key_version, pBaseKsid, bk_sid_type, bCreationDate, bOpaque, opaqueSize, pf, KEYID, UUID, MUID, ALIAS);
@@ -895,6 +896,7 @@ int main(int argc, char *argv[])
     }
     while (0);
 
+END:
     if (loggedIn)
     {
         if (logout() == CKR_OK)
