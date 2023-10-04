@@ -1136,7 +1136,7 @@ CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATT
     CK_BBOOL    bCacheOnHost, bVersioned, blaSensitive, blnExtractable;
     int         custom1Index = 17;
 
-    CK_ULONG    ulCreationTime, ulDeactivateTime;
+    CK_ULONG    ulCreationTime, ulDeactivateTime = 0;
     CK_ATTRIBUTE_PTR pKeyTemplate = NULL;
     CK_DATE     keyTransDates[KEY_TRANS_DATES_MAX];
     char        *pKeyDateDesc = NULL;
