@@ -12,12 +12,14 @@ The following samples show how to perform crypto operations with various ciphers
 * CryptoOpRSAEncDec.cs
   * This sample shows how to perform *crypto operations* (Encrypt and Decrypt) using a **RSA** key.
 * CryptoOpRsaSignVerify.cs
-  * This sample shows how to CMS *sign data and verify signed data* using **RSA** key.
+  * This sample shows how to *sign data and verify signed data* using **RSA** key.
 * CryptoMultiThreadedHmac.cs
   * This sample shows how to use multiple threads that share the same session and perform mac operations.*
 * CryptoOpFpe.cs
   * This sample shows how to perform *crypto operations* (Encrypt and Decrypt) using **FPE**.
-
+* CryptoOpECSignVerify.cs
+  * This sample shows how to perform *sign data and verify signed data* using **EC** key.
+  
 ## Prerequisites: 
 In order to run C# samples, 
 1. .NET 6.0 or higher must be installed.
