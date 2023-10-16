@@ -19,6 +19,8 @@ The following samples show how to perform crypto operations with various ciphers
   * This sample shows how to perform *crypto operations* (Encrypt and Decrypt) using **FPE**.
 * CryptoOpECSignVerify.cs
   * This sample shows how to perform *sign data and verify signed data* using **EC** key.
+* CryptoOpFpeWithEncoding.cs
+  * This sample shows how to encrypt and decrypt data using FPE Unicode with different Encodings
   
 ## Prerequisites: 
 In order to run C# samples, 
@@ -35,4 +37,4 @@ In order to run C# samples,
     * [Windows Only] `SampleApp.exe` at location `\bin\release\net6.0` using terminal. Example: `SampleApp.exe`  
 
 ## More Information
-For more information on CADP for .NET Core, refer to the [CADP for .NET Core user guide](https://thalesdocs.com/ctp/con/cadp/cadp-netcore/latest/index.html).
+For more information on CADP for .NET Core, refer to the [CADP for .NET Core user guide](https://thalesdocs.com/ctp/con/cadp/cadp-netcore/alpha-8.14.0/index.html).
