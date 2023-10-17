@@ -1,6 +1,7 @@
 ﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CADP.Pkcs11Sample
@@ -63,6 +64,9 @@ namespace CADP.Pkcs11Sample
                     if (srcKey == null && keyType == (uint)CKO.CKO_SECRET_KEY)
                     {
                         srcKey = Helpers.CreateKeyObject(session, keyLabel, new string(keyValue), keySize);
+                        List<IObjectAttribute> objAttributes_exp = new List<IObjectAttribute>();
+                        objAttributes_exp.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+                        session.SetAttributeValue(srcKey, objAttributes_exp);
                     }
 
                     IObjectHandle wrappingKey = Helpers.FindKey(session, wrappingKeyLabel, wrappingKeyType);

@@ -116,7 +116,10 @@ namespace CADP.Pkcs11Sample
                         attrNames.Add(CKA.CKA_LABEL);
                         attrNames.Add(CKA.CKA_CLASS);
                         attrNames.Add(CKA.CKA_KEY_TYPE);
+                        attrNames.Add(CKA.CKA_END_DATE);
+                        attrNames.Add(CKA.CKA_THALES_OBJECT_CREATE_DATE_EL);
                     }
+
 
                     if (keyHandle != null)
                     {
