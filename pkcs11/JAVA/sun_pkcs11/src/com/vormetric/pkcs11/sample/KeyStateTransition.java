@@ -127,7 +127,7 @@ public class KeyStateTransition {
     }
 
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -300,6 +300,8 @@ public class KeyStateTransition {
             {
                 System.out.println ("the key not found, creating it..." );
                 keyID = createKeywDates(session, keyName, dateList, genAction);
+				if (!dateList.isEmpty())
+                    Helper.setKeyTransitionDates(session, keyID, dateList);
             }
             else
             {
@@ -332,6 +334,8 @@ public class KeyStateTransition {
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);
