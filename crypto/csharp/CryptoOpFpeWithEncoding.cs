@@ -115,10 +115,8 @@ namespace CryptoOpFpeWithEncoding
                    return;
                }
 
-               /*Read the input data form console*/
-                    Console.WriteLine("Please enter the input text");
-                string input = string.Empty;
-                input = Console.ReadLine();
+               /*Setting the input based on charset provided in the sampe application.*/                
+                string input = "ĀĀāāĂĂăă";
                 if (string.IsNullOrEmpty(input))
                 {
                     Console.WriteLine("Please enter a valid input");
@@ -144,6 +142,9 @@ namespace CryptoOpFpeWithEncoding
                     inputBytes = Encoding.UTF32.GetBytes(input);
                 }
 
+                Console.WriteLine($"Encoding used: {encoding.EncodingName}");
+                Console.WriteLine($"Input Bytes: {BitConverter.ToString(inputBytes).Replace('-', ' ')}");
+
                 /* For FPE UNICODE IV block size is calculated based on Cardinality. 
                  * The value of each hex encoded byte in the IV value will be in the range 00 to (cardinality-1). 
                  * For example, when Charset is 26 , the maximum value will be 0x19 (hex encode of 26-1=25).
@@ -164,8 +165,7 @@ namespace CryptoOpFpeWithEncoding
                                 encrstr.Write(inputBytes, 0, inputBytes.Length);
                             }
                             encrBytes = memstr.ToArray();
-                            string strEncryptedData = ByteToString(encoding, encrBytes);
-                            Console.WriteLine($"Encrypted {Convert.ToString(encrBytes.Length)} bytes: {strEncryptedData}");
+                            Console.WriteLine($"Encrypted Bytes: {BitConverter.ToString(encrBytes).Replace('-', ' ')}");
                         }
                     }
 
@@ -180,8 +180,7 @@ namespace CryptoOpFpeWithEncoding
                             }
                             byte[] decrBytes = memstr2.ToArray();
                             string Decrypted_decrBytes_len = Convert.ToString(decrBytes.Length);
-                            string strDecryptedData = ByteToString(encoding, decrBytes);
-                            Console.WriteLine($"Decrypted {Convert.ToString(decrBytes.Length)} bytes: {strDecryptedData}");
+                            Console.WriteLine($"Decrypted Bytes: {BitConverter.ToString(decrBytes).Replace('-', ' ')}");
                         }
                     }
                 }
