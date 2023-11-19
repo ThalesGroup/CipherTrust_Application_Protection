@@ -182,6 +182,108 @@ END:
 
     return rc;
 }
+
+static CK_RV signVerifyBuf(CK_SESSION_HANDLE hSess, CK_OBJECT_HANDLE hGenKey, CK_MECHANISM *pMech)
+{
+    /* General */
+	/* For C_Sign */
+    CK_RV rc        = CKR_OK;
+    CK_BYTE		    *msgDigest = NULL_PTR;
+    CK_ULONG		msgDigestLen = 0;
+    int             status;
+    CK_BYTE pBuf[32] =
+    {
+        't', 'h', 'i', 's', ' ', 'i', 's', ' ',
+        'm', 'y', ' ', 's', 'a', 'm', 'p', 'l',
+        'e', ' ', 'p', 'l', 'n', ' ', 'd', 'a',
+        't', 'a', ' ', '5', '4', '3', '2', '1'
+    };
+    int len = sizeof(pBuf);
+
+    /* C_SignInit */
+    rc = FunctionListFuncPtr->C_SignInit(hSess, pMech, hGenKey);
+
+    if (rc != CKR_OK)
+    {
+        fprintf(stderr, "FAIL: call to C_SignInit() failed. rv=0x%x\n", (unsigned int)rc);
+        goto END;
+    }
+
+    /* first call C_Sign by pass in NULL to get msgDigest buffer size */
+    rc = FunctionListFuncPtr->C_Sign(
+             hSess,
+             pBuf, len,
+             NULL, &msgDigestLen
+         );
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: 1st call to C_Sign() failed. rv=0x%x\n", (unsigned int)rc);
+        goto END;
+    }
+    else
+    {
+        printf ("1st call to C_Sign() succeeded: size = %u.\n", (unsigned int)msgDigestLen);
+        msgDigest = (CK_BYTE *)calloc( 1, sizeof(CK_BYTE) * msgDigestLen );
+        if (!msgDigest)
+        {
+            rc =  CKR_HOST_MEMORY;
+            goto END;
+        }
+    }
+
+    /* then call C_Sign to get actual msgDigest */
+    rc = FunctionListFuncPtr->C_Sign(
+             hSess,
+             pBuf, len,
+             msgDigest, &msgDigestLen
+         );
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: 2nd call to C_Sign() failed. rv=0x%x\n", (unsigned int)rc);
+        goto END;
+    }
+
+    /* C_VerifyInit */
+    printf("About to call C_VerifyInit()\n");
+
+    rc = FunctionListFuncPtr->C_VerifyInit(hSess, pMech, hGenKey);
+
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: Call to C_VerifyInit() failed. rv=0x%x\n", (unsigned int)rc);
+        goto END;
+    }
+
+
+    printf("About to call C_Verify(), output length set to %lu\n", msgDigestLen);
+    rc = FunctionListFuncPtr->C_Verify(
+             hSess,
+             pBuf, len,
+             msgDigest, msgDigestLen
+         );
+	switch (rc) {
+
+	case CKR_SIGNATURE_INVALID:
+        printf ("C_Verify() failed.\n");
+		break;
+
+	case CKR_OK:
+        printf ("C_Verify() succeeded.\n");
+		break;
+    
+	default:
+        fprintf (stderr, "FAIL : call to C_Verify() failed. rv=0x%x\n", (unsigned int)rc);
+    }
+
+END:
+    /* cleanup and free memory */
+	if (msgDigest) {
+		free (msgDigest);
+		msgDigest = NULL;
+	}
+    return rc;
+}
+ 
 /*
  ************************************************************************
  * Function: createObject
@@ -225,6 +327,7 @@ static CK_RV createObjectBVersion(char *keyLabel, CK_BBOOL bVersionedKey, int ve
 
     CK_BYTE_PTR         keyValue =  bOpaque ? malloc( opaqueSize ) : pf ? malloc(SYMKEY_BUF_LEN) :  &defKeyValue;
     CK_MECHANISM mech = { CKM_AES_CBC_PAD,   def_iv, 16 };
+    CK_MECHANISM mechsv = { CKM_SHA256_HMAC, NULL, 0 };
     if(!keyValue)
         return CKR_HOST_MEMORY;
 
@@ -406,12 +509,21 @@ static CK_RV createObjectBVersion(char *keyLabel, CK_BBOOL bVersionedKey, int ve
         fprintf (stderr, "Error in C_CreateObject(), return value: %d\n", (int)rc);
     }
 
-    /* encrypt/decrypt using the freshly minted key */
-    rc = encryptDecryptBuf(hSession, hObject, &mech, &mech);
-    if (rc != CKR_OK)
-    {
-        fprintf (stderr, "Error in Encrypt/Decrypt: return value: %d\n", (int)rc);
-    }
+	if (!bOpaque) {
+		/* encrypt/decrypt using the freshly minted key */
+		rc = encryptDecryptBuf(hSession, hObject, &mech, &mech);
+		if (rc != CKR_OK)
+		{
+			fprintf (stderr, "Error in Encrypt/Decrypt: return value: %d\n", (int)rc);
+		}
+	} else {
+		/* sign/verify using the freshly minted key */
+		rc = signVerifyBuf(hSession, hObject, &mechsv);
+		if (rc != CKR_OK)
+		{
+			fprintf (stderr, "Error in Sign/Verify: return value: %d\n", (int)rc);
+		}
+	}
 
 FREE_RESOURCES:
     if((bOpaque || pf) && keyValue)
@@ -738,6 +850,8 @@ int main(int argc, char *argv[])
             if (rc == CKR_OK && hObject != CK_INVALID_HANDLE)
             {
                 fprintf(stderr, "Found: %s with same name already exist. \n", bOpaque ? "Opaque Object" : "Key" );
+                if(bOpaque == CK_TRUE)
+                   goto END; //If object already exists do nothing.
             }
 
             rc = createObjectBVersion(objLabel, bVersionedKey, key_version, pBaseKsid, bk_sid_type, bCreationDate, bOpaque, opaqueSize, pf, KEYID, UUID, MUID, ALIAS);
@@ -782,6 +896,7 @@ int main(int argc, char *argv[])
     }
     while (0);
 
+END:
     if (loggedIn)
     {
         if (logout() == CKR_OK)

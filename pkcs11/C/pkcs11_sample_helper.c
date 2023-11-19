@@ -1028,8 +1028,7 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     }
 
     printf("Key Handle: %08x,\n", (unsigned int)hKey);
-    memset(keyLabel, 0, sizeof keyLabel);
-    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[2].ulValueLen, keyLabel);
+    printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[1].ulValueLen, keyLabel);
     printf("CKA_CLASS: %08x.\n", (unsigned int)objClass);
 
     printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)getAttrsTemplate[3].ulValueLen, keyUuid);
@@ -1137,7 +1136,7 @@ CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATT
     CK_BBOOL    bCacheOnHost, bVersioned, blaSensitive, blnExtractable;
     int         custom1Index = 17;
 
-    CK_ULONG    ulCreationTime, ulDeactivateTime;
+    CK_ULONG    ulCreationTime, ulDeactivateTime = 0;
     CK_ATTRIBUTE_PTR pKeyTemplate = NULL;
     CK_DATE     keyTransDates[KEY_TRANS_DATES_MAX];
     char        *pKeyDateDesc = NULL;

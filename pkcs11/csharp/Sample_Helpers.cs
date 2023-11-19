@@ -183,11 +183,20 @@ namespace CADP.Pkcs11Sample
             return key;
         }
 
-        public static void CleanupKey(ISession session, string keyLabel)
+        public static void CleanupKey(ISession session, string keyLabel, bool isOpaqueObj =false)
         {
 
             List<IObjectAttribute> objectAttributes = new List<IObjectAttribute>();
-            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+
+            if (isOpaqueObj)
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_THALES_OPAQUE_OBJECT));
+            }
+            else
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
+               
+            }
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
             // Initialize searching
@@ -201,11 +210,13 @@ namespace CADP.Pkcs11Sample
 
             foreach (IObjectHandle handle in foundObjects)
             {
+                if (!isOpaqueObj)
+                {
                 const uint KeyStateDeactivated = 3;
                 List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
                 objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_STATE, KeyStateDeactivated));
                 session.SetAttributeValue(handle, objAttributes);
-
+                }
                 session.DestroyObject(handle);
                 Console.WriteLine("Existing " + keyLabel + " key deleted!");
             }
@@ -243,11 +254,12 @@ namespace CADP.Pkcs11Sample
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ENCRYPT, true));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DECRYPT, true));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_DERIVE, true));
-            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, bAlwSen));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
 
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
+
+            objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyLabel));
 
 
             if (preActive == true)
@@ -279,7 +291,7 @@ namespace CADP.Pkcs11Sample
             List<IObjectAttribute> publicKeyAttributes = new List<IObjectAttribute>();
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, true));
+            //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ALWAYS_SENSITIVE, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PRIVATE, false));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyPairLabel));
             //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId));
@@ -289,7 +301,7 @@ namespace CADP.Pkcs11Sample
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
-
+            
             // Prepare attribute template of new private key
             List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
@@ -302,6 +314,9 @@ namespace CADP.Pkcs11Sample
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN, true));
             //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_SIGN_RECOVER, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_UNWRAP, true));
+            //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyPairLabel));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
+            privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
 
             // Specify key generation mechanism
             IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
@@ -315,7 +330,6 @@ namespace CADP.Pkcs11Sample
             byte[] valArray;
             string str, name;
             long epoch_time;
-            bool bval;
             DateTime? date;
 
             foreach (IObjectAttribute attr in objectAttributes)
@@ -337,6 +351,7 @@ namespace CADP.Pkcs11Sample
                             {
                                 case 0: Console.WriteLine(name + " : RSA"); break;
                                 case 31: Console.WriteLine(name + " : AES"); break;
+                                case 19: Console.WriteLine(name + " : Opaque"); break;
                                 default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
                             }
                             break;
@@ -350,19 +365,6 @@ namespace CADP.Pkcs11Sample
                         case (uint)CKA.CKA_END_DATE:
                             date = attr.GetValueAsDateTime();
                             Console.WriteLine(name + " : " + date.ToString());
-                            break;
-
-                        case (uint)CKA.CKA_ALWAYS_SENSITIVE:
-                        case (uint)CKA.CKA_NEVER_EXTRACTABLE:
-                            if (attr.GetValueAsByteArray().Length == 0)
-                            {
-                                Console.WriteLine(name + " : No");
-                            }
-                            else
-                            {
-                                bval = attr.GetValueAsBool();
-                                Console.WriteLine(name + " : " + bval.ToString());
-                            }
                             break;
 
                         case (uint)CKA.CKA_THALES_OBJECT_CREATE_DATE_EL:
@@ -391,7 +393,7 @@ namespace CADP.Pkcs11Sample
                             valArray = attr.GetValueAsByteArray();
 			    if (valArray.Length == 0)
                             {
-                                Console.WriteLine(name + " : ");
+                                Console.WriteLine(name + " : " + valArray.Length);
                             }
                             else
                             {
