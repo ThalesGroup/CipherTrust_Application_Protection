@@ -70,7 +70,7 @@ public class GenerateRandom {
         }
         catch(PKCS11Exception pe){
             pe.printStackTrace(pe.getMessage());
-            System.out.println("The Cause is " + e.getMessage() + ".");
+            System.out.println("The Cause is " + pe.getMessage() + ".");
             throw pe;
         }
         catch (Exception e)
