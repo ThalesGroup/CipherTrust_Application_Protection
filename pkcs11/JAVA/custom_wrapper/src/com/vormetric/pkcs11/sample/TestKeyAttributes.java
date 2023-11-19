@@ -26,6 +26,7 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS_KEY_PAIR
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_SECRET_KEY;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -104,7 +105,7 @@ public class TestKeyAttributes {
         String pin = null;
         String libPath = null;
         String keyName = null;
-        int modulusBits = 2048;
+        long modulusBits = 2048;
         int days = 90;
         boolean symmetric = true;
 
@@ -171,6 +172,8 @@ public class TestKeyAttributes {
                         , new CK_ATTRIBUTE(CKA_DECRYPT, true)
                         , new CK_ATTRIBUTE(CKA_SIGN, true)
                         , new CK_ATTRIBUTE(CKA_UNWRAP, true)
+                        , new CK_ATTRIBUTE(CKA_MODIFIABLE, true)
+                        , new CK_ATTRIBUTE(CKA_EXTRACTABLE, true)
                         , new CK_ATTRIBUTE(CKA_THALES_CUSTOM_1, DEFAULT_CUSTOM_VALUE)
                         , new CK_ATTRIBUTE(CKA_THALES_CUSTOM_2, DEFAULT_CUSTOM_VALUE)
                         , new CK_ATTRIBUTE(CKA_THALES_CUSTOM_3, DEFAULT_CUSTOM_VALUE)
@@ -288,11 +291,11 @@ public class TestKeyAttributes {
         } catch (PKCS11Exception e) {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         } finally {
             Helper.closeDown(session);
             System.out.println ("End TestKeyAttributes." );

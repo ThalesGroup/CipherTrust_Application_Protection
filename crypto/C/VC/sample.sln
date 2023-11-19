@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CryptoDataUtility", "Crypto
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CryptoSinglePart_EC", "CryptoSinglePart_EC.vcxproj", "{341DE5D0-223C-44B4-AC35-23BF4DA5CAEB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CryptoSinglePart_ExtHdrAll", "CryptoSinglePart_ExtHdrAll.vcxproj", "{341DE5D0-223C-44B4-AC35-23BF4DA5CA00}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -109,6 +111,10 @@ Global
 		{341DE5D0-223C-44B4-AC35-23BF4DA5CAEB}.Release|Win32.Build.0 = Release|Win32
 		{341DE5D0-223C-44B4-AC35-23BF4DA5CAEB}.Release|x64.ActiveCfg = Release|x64
 		{341DE5D0-223C-44B4-AC35-23BF4DA5CAEB}.Release|x64.Build.0 = Release|x64
+		{341DE5D0-223C-44B4-AC35-23BF4DA5CA00}.Debug|Win32.ActiveCfg = Debug|Win32
+		{341DE5D0-223C-44B4-AC35-23BF4DA5CA00}.Debug|x64.ActiveCfg = Debug|x64
+		{341DE5D0-223C-44B4-AC35-23BF4DA5CA00}.Release|Win32.ActiveCfg = Release|Win32
+		{341DE5D0-223C-44B4-AC35-23BF4DA5CA00}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

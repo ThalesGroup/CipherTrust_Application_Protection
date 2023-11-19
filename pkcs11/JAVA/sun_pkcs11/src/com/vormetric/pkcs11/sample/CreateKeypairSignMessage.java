@@ -18,6 +18,7 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS_KEY_PAIR_GEN;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
 /**
 * Sample code is provided for educational purposes.
 * No warranty of any kind, either expressed or implied by fact or law.
@@ -57,7 +58,7 @@ public class CreateKeypairSignMessage {
         System.exit (1);
     }
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
@@ -87,7 +88,7 @@ public class CreateKeypairSignMessage {
 			/* Create the keypair */
 			CK_MECHANISM mechanism = new CK_MECHANISM (CKM_RSA_PKCS_KEY_PAIR_GEN);
 			byte[] publicExponent = { 0x01, 0x00, 0x01, 0x00 };
-			int modulusBits = 2048;
+			long modulusBits = 2048;
 
 			CK_ATTRIBUTE[] publicKeyAttr = new CK_ATTRIBUTE[]
 			{
@@ -113,6 +114,7 @@ public class CreateKeypairSignMessage {
 					new CK_ATTRIBUTE (CKA_DECRYPT, true),
 					new CK_ATTRIBUTE (CKA_SIGN, true),
 					new CK_ATTRIBUTE (CKA_UNWRAP, true),
+					new CK_ATTRIBUTE (CKA_EXTRACTABLE, true),
 					new CK_ATTRIBUTE (CKA_MODIFIABLE, true)
 			};
 
@@ -159,10 +161,14 @@ public class CreateKeypairSignMessage {
 		catch (PKCS11Exception e)
 	    {
 			e.printStackTrace();
+			System.out.println("The Cause is " + e.getMessage() + ".");
+			throw e;
 	    }
 		catch (Exception e)
 	    {
             e.printStackTrace();
+			System.out.println("The Cause is " + e.getMessage() + ".");
+			throw e;
 	    }
 	    finally {
 			Helper.closeDown(session);

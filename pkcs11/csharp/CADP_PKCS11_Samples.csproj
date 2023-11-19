@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Copyright>Copyright © 2022 Thales Group. All rights reserved.</Copyright>
     <Authors>Thales</Authors>
     <Company>Thales Group.</Company>
