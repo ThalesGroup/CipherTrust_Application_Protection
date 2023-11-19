@@ -17,6 +17,8 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_RSA_PKCS_KEY_PAIR_GEN;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static sun.security.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
+import static sun.security.pkcs11.wrapper.PKCS11Constants.CKA_MODIFIABLE;
 
 /**
 * Sample code is provided for educational purposes.
@@ -55,14 +57,14 @@ public class EncryptDecryptAsymmetricKey {
         System.exit (1);
     }
 
-    public static void main ( String[] args)
+    public static void main ( String[] args) throws Exception
     {
         String pin = null;
         String libPath = null;
         Vpkcs11Session session = null;
         String keyName = null;
         long publicKeyID, privateKeyID;
-        int modulusBits = 2048;
+        long modulusBits = 2048;
 
         for (int i=0; i<args.length; i+=2)
         {
@@ -112,12 +114,15 @@ public class EncryptDecryptAsymmetricKey {
 
                 CK_ATTRIBUTE[] privateKeyAttr = new CK_ATTRIBUTE[]
                         {
+                                new CK_ATTRIBUTE(CKA_LABEL, keyName),
                                 new CK_ATTRIBUTE(CKA_CLASS, CKO_PRIVATE_KEY),
                                 new CK_ATTRIBUTE(CKA_TOKEN, true),
                                 new CK_ATTRIBUTE(CKA_PRIVATE, true),
                                 new CK_ATTRIBUTE(CKA_SENSITIVE, true),
                                 new CK_ATTRIBUTE(CKA_DECRYPT, true),
                                 new CK_ATTRIBUTE(CKA_SIGN, true),
+                                new CK_ATTRIBUTE(CKA_EXTRACTABLE, true),
+                                new CK_ATTRIBUTE(CKA_MODIFIABLE, true),
                                 new CK_ATTRIBUTE(CKA_UNWRAP, true)
                         };
 
@@ -171,10 +176,14 @@ public class EncryptDecryptAsymmetricKey {
         catch (PKCS11Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            System.out.println("The Cause is " + e.getMessage() + ".");
+            throw e;
         }
         finally {
             Helper.closeDown(session);

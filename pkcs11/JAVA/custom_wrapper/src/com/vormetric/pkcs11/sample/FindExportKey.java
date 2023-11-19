@@ -4,13 +4,16 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKM_AES_CBC_PAD;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_SECRET_KEY;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_LABEL;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_CLASS;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_DATA;
 import static java.lang.System.exit;
 
 /**
-* Sample code is provided for educational purposes.
-* No warranty of any kind, either expressed or implied by fact or law.
-* Use of this item is not restricted by copyright or license terms.
-*/
+ * Sample code is provided for educational purposes.
+ * No warranty of any kind, either expressed or implied by fact or law.
+ * Use of this item is not restricted by copyright or license terms.
+ */
 
 /*
  ***************************************************************************
@@ -25,6 +28,7 @@ import static java.lang.System.exit;
  * 4. Export the key that was found.
  * 4. Clean up.
  */
+import com.vormetric.pkcs11.wrapper.CK_ATTRIBUTE;
 import com.vormetric.pkcs11.wrapper.CK_MECHANISM;
 import com.vormetric.pkcs11.wrapper.PKCS11Constants;
 import com.vormetric.pkcs11.wrapper.PKCS11Exception;
@@ -39,7 +43,7 @@ public class FindExportKey {
 
     public static String outputFileName = "wrappedKey.dat";
 
-    public static void usage()
+    public static void usage() 
     {
         System.out.println ("usage: java [-cp CLASSPATH] com.vormetric.pkcs11.sample.FindExportKey -p pin [-k sourceKeyName] [-w wrappingKeyName] [-f keyFile format] [-m module] [-c public keyName] [-v private keyName] [-o outputFileName]");
         System.out.println("-p: Username:Password of Keymanager");
@@ -50,7 +54,7 @@ public class FindExportKey {
         System.out.println("-o: Output filename");
         System.out.println("-c: Public keyName");
         System.out.println("-v: Private keyName");
-        
+
         exit (1);
     }
 
@@ -116,7 +120,7 @@ public class FindExportKey {
                 }
             }
 
-	        mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
+            mechanism = new CK_MECHANISM (CKM_AES_CBC_PAD, iv);
 
             if (wrappingKey == 0)
             {
@@ -131,11 +135,18 @@ public class FindExportKey {
             if (sourceKey != 0)
             {
                 System.out.println ("Exporting key ... ");
-               
+
+                CK_ATTRIBUTE[] wrappingKeyAttr = new CK_ATTRIBUTE[]{
+                        new CK_ATTRIBUTE(CKA_LABEL, "")
+                        , new CK_ATTRIBUTE(CKA_CLASS, CKO_DATA)};
+
+                session.p11.C_GetAttributeValue(session.sessionHandle, wrappingKey, wrappingKeyAttr);
+
                 if( formatName != null && formatName.equals("pem") )
                     mechanism.mechanism |= Helper.CKA_THALES_DEFINED | Helper.CKM_THALES_PEM_FORMAT;
-                else if( wrappingKey != 0 && !Helper.isKeySymmetric(wrappingKey) ) {
+                else if( wrappingKey != 0 && wrappingKeyAttr[1].pValue.equals(CKO_PUBLIC_KEY) ) {
                     mechanism.mechanism = Helper.CKA_THALES_DEFINED | PKCS11Constants.CKM_RSA_PKCS;
+                    mechanism.pParameter = null;
                 }
 
                 /* If the key is found, delete the key */
@@ -154,13 +165,13 @@ public class FindExportKey {
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         catch (Exception e)
         {
             e.printStackTrace();
             System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+            throw e;
         }
         finally {
             Helper.closeDown(session);

@@ -159,9 +159,10 @@ To run PKCS11 Java Samples :
 
 - The minimum Java version must be 8 (minimum 1.8.0_111).
 - CADP for C library must be installed.
-- cadp-pkcs11-wrapper-1.0 Jar must be in the classpath.
-- Add CADP for C PKCS11 Library Path inside Helper.Java sample. If Library path is not updated in Helper.java it can be provided as an input for the samples using [-m module] attribute or it will use the default library path.
-- Property file should be placed parallel to the library file.
+- cadp-pkcs11-wrapper-2.0 Jar must be in the classpath or added in java command using "-cp".
+- Add CADP for C PKCS11 Library Path inside Helper.java sample. If Library path is not updated in Helper.java it can be provided as an input for the samples using [-m module] attribute or it will use the default library path.
+- In linux properties file needs to be exported using command "export NAE_Properties_Conf_Filename=/*path to property file*/CADP_PKCS11.properties" if CADP for C is not installed on default path. 
+- In windows Property file should be placed parallel to the library file.
 
 ## CADP for C PKCS11 Library Path (Default Path)
 
@@ -186,12 +187,13 @@ Go to the src directory placed inside custom_wrapper or sun_pkcs11 according to 
 Run the following command to run the CreateKey.java sample from custom_wrapper:
 
 #### To Compile – 
-java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper.java  com.vormetric.pkcs11.sample.CreateKey.java
+javac -cp .;cadp-pkcs11-wrapper-2.0.jar com\vormetric\pkcs11\sample\Helper.java  com\vormetric\pkcs11\sample\CreateKey.java
 
 #### To Run - 
-java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper com.vormetric.pkcs11.sample.CreateKey
+java -cp .;cadp-pkcs11-wrapper-2.0.jar com.vormetric.pkcs11.sample.CreateKey
 
-    Note: On Linux replace ';' with ':' in -cp attribute.
+    Note: On Linux replace ';' with ':' in -cp attribute and '\' with '/'.
+    Note: Replace cadp-pkcs11-wrapper-2.0.jar with the complete path of cadp-pkcs11-wrapper-2.0.jar or place the jar in current directory.
 
 
 In a similar fashion, you can run other java samples.
@@ -201,7 +203,7 @@ In a similar fashion, you can run other java samples.
 
 Before running the code samples in Windows, learn how to run a sample by viewing its usage information (if you do not already know how to do so). To view usage information about a given sample, enter the name of the executable sample file from the directory in which the executable files are located. For example:
 
-java -cp .;cadp-pkcs11-wrapper-1.0.jar com.vormetric.pkcs11.sample.Helper  com.vormetric.pkcs11.sample.CreateKey usage
+java -cp .;cadp-pkcs11-wrapper-2.0.jar com.vormetric.pkcs11.sample.Helper  com.vormetric.pkcs11.sample.CreateKey usage
 
 The following displays: 
 
@@ -214,21 +216,25 @@ usage: java [-cp CLASSPATH] com.cadp.pkcs11.sample.CreateKey -p pin [-k keyName]
 
 ## Ant Build
 
+In linux properties file needs to be exported using command "export NAE_Properties_Conf_Filename=/*path to property file*/CADP_PKCS11.properties" if CADP for C is not installed on default path. 
+
+In windows Property file should be placed parallel to the library file.
+
 ### Build:
+
 You need ant to build the samples.
 
 Update Library path in Helper.java placed inside custom_wrapper/src/com/vormetric/pkcs11/sample/Helper.java
 
 Move to the directory where build.xml resides. i.e Inside customer_wrapper or sun_pkcs11.
 
-To run all the sample programs altogether, please first modify the following line in build.xml, property name="wrapper.jar" value="cadp-pkcs11-wrapper-1.0.jar", replace cadp-pkcs11-wrapper-1.0.jar with the complete path of cadp-pkcs11-wrapper-1.0.jar or place the jar in current directory.
+To run all the sample programs altogether, please first modify the following line in build.xml, property name="wrapper.jar" value="cadp-pkcs11-wrapper-2.0.jar", replace cadp-pkcs11-wrapper-2.0.jar with the complete path of cadp-pkcs11-wrapper-2.0.jar or place the jar in current directory.
 
 If you are using Java 11 or newer then modify the following line in build.xml, property name="jaxb.jar" value="jaxb-api-2.3.1.jar", replace jaxb-api-2.3.1.jar with the complete path of jaxb-api-2.3.1.jar or place the jar in current directory.
 
 To compile the sample files, simply type 'ant compile' in the terminal or cmd of directory.
 
 ### Execution 
-
 To run all the sample programs altogether, please first modify the following line in build.xml,
 property name="PIN" value="username:password"/
 replace "username:password" with the credentials you used to register with the CipherTrust Manager, then simply type 'ant' in the terminal or cmd of directory.
