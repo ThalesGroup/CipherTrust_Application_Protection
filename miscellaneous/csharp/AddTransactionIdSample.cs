@@ -115,8 +115,8 @@ namespace CADP.NetCoreNaeSamples
                     byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD));
                     Console.WriteLine($"Tag data: {BitConverter.ToString(tag).Replace("-", string.Empty)}");
 
-                    // Adding Transaction Id before decryption.
-                    LoggerWrapper.TransactionID = 456;
+                    // Remove Transaction Id before decryption, set -1 to the property.
+                    LoggerWrapper.TransactionID = -1;
                     byte[] decData = gcm.Decrypt(nonce, encData, tag, Encoding.ASCII.GetBytes(Default_AAD));
 
                     Console.WriteLine($"Decrypted data: {Encoding.Default.GetString(decData)}");
