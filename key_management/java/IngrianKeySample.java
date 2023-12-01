@@ -140,9 +140,11 @@ public class IngrianKeySample
 	    System.out.println("Number of restricted versions: " + newKey.getRestrictedKeyVersions());
 	    System.out.println("Number of retired versions: " + newKey.getRetiredKeyVersions());
 	    System.out.println("Key Version: " + newKey.getKeyVersion() + "\n");
-
+		
+		// get key instance by adding #all with keyname in order to get all versions of key under getKeyInfoData
+	    NAEKey keys = NAEKey.getSecretKey(keyName+"#all", session);
 	    // get key info for all versions of this key
-	    KeyInfoData[] infoData = newKey.getKeyInfoData(true);
+	    KeyInfoData[] infoData = keys.getKeyInfoData(true);
 	    System.out.println("Key data for each version");
 	    for (KeyInfoData element : infoData) {
 		System.out.println("Key version: " + element.getKeyVersion());
