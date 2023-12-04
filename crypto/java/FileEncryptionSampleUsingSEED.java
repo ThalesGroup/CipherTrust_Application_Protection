@@ -14,7 +14,7 @@ import com.ingrian.security.nae.NAESEEDCipher;
 import com.ingrian.security.nae.NAESession;
 
 /**
- * To perform file encryption operation using SEED in local mode.
+ * To perform file encryption operation using SEED.
  * 
  * File Name: FileEncryptionSampleUsingSEED.java
  */

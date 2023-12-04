@@ -14,8 +14,7 @@ import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAESession;
 
 /**
- * To perform file encryption
- * operation using ARIA in local mode.
+ * To perform file encryption operation using ARIA.
  * 
  * File Name: FileEncryptionSampleUsingARIA.java
  */
