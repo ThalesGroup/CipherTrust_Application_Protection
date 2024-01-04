@@ -71,7 +71,7 @@ namespace CADP.NetCoreNaeSamples
 
                 /* Create a new NAE Session using the username and password as string */
                 // Adding Transaction Id before session creation.
-                LoggerWrapper.TransactionID = 123;
+                LoggerWrapper.TransactionID = "123";
                 session = new NaeSession(user, pass, propertyFilePath);
 
                 Console.WriteLine("NaeSession created successfully.");
@@ -82,7 +82,7 @@ namespace CADP.NetCoreNaeSamples
 
                 // Gets or Generate the key.
                 // Adding Transaction Id before get key or key generation.
-                LoggerWrapper.TransactionID = 234;
+                LoggerWrapper.TransactionID = "234";
                 gcm = GetOrGenerateKey(nkm, session, keyname);
 
                 // If key is null, return. Else proceed with further steps.
@@ -111,12 +111,12 @@ namespace CADP.NetCoreNaeSamples
                     byte[] tag = null;
 
                     // Adding Transaction Id before encryption.
-                    LoggerWrapper.TransactionID = 345;
+                    LoggerWrapper.TransactionID = "345";
                     byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD));
                     Console.WriteLine($"Tag data: {BitConverter.ToString(tag).Replace("-", string.Empty)}");
 
-                    // Remove Transaction Id before decryption, set -1 to the property.
-                    LoggerWrapper.TransactionID = -1;
+                    // Remove Transaction Id before decryption, set string.Empty or "" to the property.
+                    LoggerWrapper.TransactionID = string.Empty;
                     byte[] decData = gcm.Decrypt(nonce, encData, tag, Encoding.ASCII.GetBytes(Default_AAD));
 
                     Console.WriteLine($"Decrypted data: {Encoding.Default.GetString(decData)}");
@@ -134,7 +134,7 @@ namespace CADP.NetCoreNaeSamples
 
                 //Delete Key
                 // Adding Transaction Id before key deletion.
-                LoggerWrapper.TransactionID = 567;
+                LoggerWrapper.TransactionID = "567";
                 nkm.DeleteKey(keyname);
                 Console.WriteLine($"Key {keyname}, deleted successfully.");
             }
