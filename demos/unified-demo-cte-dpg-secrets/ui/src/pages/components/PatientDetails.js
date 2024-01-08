@@ -151,6 +151,26 @@ const PatientDetails = (props) => {
                     </tbody>
                   </Table>
                   <Row>&nbsp;</Row>
+                  <h5 className="mb-4">Healthcare information</h5>
+                  <Table responsive className="table-centered table-nowrap rounded mb-0">
+                    <thead className="thead-light">
+                      <tr>
+                        <th className="border-0">Info</th>
+                        <th className="border-0">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Health Card Number</td>
+                        <td>123-456-7890</td>
+                      </tr>
+                      <tr>
+                        <td>Health Card Expiry</td>
+                        <td>01/01/2025</td>
+                      </tr>
+                    </tbody>
+                  </Table>
+                  <Row>&nbsp;</Row>
                   <h5 className="mb-4">Medical information</h5>
                   <Table responsive className="table-centered table-nowrap rounded mb-0">
                     <thead className="thead-light">

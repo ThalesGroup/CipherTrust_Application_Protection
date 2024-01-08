@@ -4,6 +4,7 @@
 package io.cpl.cdsp.controller;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -116,10 +117,17 @@ public class MainController {
 	
 	@GetMapping("/patients")
 	public ResponseEntity<ArrayList<Patient>> listPatients(
-			@RequestHeader(HttpHeaders.AUTHORIZATION) String header) {
+			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
+			@RequestParam("id") Optional<String> patientId) {
 		try {
 			ArrayList<Patient> patients = new ArrayList<Patient>();
-			patientRepo.findAll().forEach(patients::add);
+			Patient record = new Patient();
+			if(patientId != null && !patientId.isEmpty()) {
+				record = patientRepo.findById(Long.valueOf(patientId.get())).get();
+				patients.add(record);
+			} else {
+				patientRepo.findAll().forEach(patients::add);
+			}			
 			return new ResponseEntity<ArrayList<Patient>>(patients, 
 					HttpStatus.OK);
 		} catch (Exception e) {	
@@ -145,19 +153,28 @@ public class MainController {
 	@GetMapping("/appointments")
 	public ResponseEntity<ArrayList<Appointment>> listAppointments(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
-			@RequestParam String doctorId,
-			@RequestParam String patientId) {
+			@RequestParam("doctor_id") Optional<String> doctorId,
+			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
 			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
 			
-			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				appointmentRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(appointments::add);
-			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				appointmentRepository.findByDoctor(Long.valueOf(doctorId)).forEach(appointments::add);
-			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				appointmentRepository.findByPatient(Long.valueOf(patientId)).forEach(appointments::add);
+			if(doctorId.isPresent() && patientId.isPresent()) {
+				appointmentRepository.findByPatientAndDoctor(
+						Long.valueOf(patientId.get()), 
+						Long.valueOf(doctorId.get()))
+				.forEach(appointments::add);
+			} else if(doctorId.isPresent() && !patientId.isPresent()) {
+				appointmentRepository.findByDoctor(
+						Long.valueOf(doctorId.get()))
+				.forEach(appointments::add);
+			} else if(!doctorId.isPresent() && patientId.isPresent()) {
+				appointmentRepository.findByPatient(
+						Long.valueOf(patientId.get()))
+				.forEach(appointments::add);
 			} else {
-				appointmentRepository.findAll().forEach(appointments::add);
+				appointmentRepository
+				.findAll()
+				.forEach(appointments::add);
 			}
 			return new ResponseEntity<ArrayList<Appointment>>(appointments, 
 					HttpStatus.OK);
@@ -170,19 +187,28 @@ public class MainController {
 	@GetMapping("/prescriptions")
 	public ResponseEntity<ArrayList<Prescription>> listPrescriptions(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
-			@RequestParam String doctorId,
-			@RequestParam String patientId) {
+			@RequestParam("doctor_id") Optional<String> doctorId,
+			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
 			ArrayList<Prescription> prescriptions = new ArrayList<Prescription>();	
 			
-			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				prescriptionRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(prescriptions::add);
-			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				prescriptionRepository.findByDoctor(Long.valueOf(doctorId)).forEach(prescriptions::add);
-			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				prescriptionRepository.findByPatient(Long.valueOf(patientId)).forEach(prescriptions::add);
+			if(doctorId.isPresent() && patientId.isPresent()) {
+				prescriptionRepository.findByPatientAndDoctor(
+						Long.valueOf(patientId.get()), 
+						Long.valueOf(doctorId.get()))
+				.forEach(prescriptions::add);
+			} else if(doctorId.isPresent() && !patientId.isPresent()) {
+				prescriptionRepository.findByDoctor(
+						Long.valueOf(doctorId.get()))
+				.forEach(prescriptions::add);
+			} else if(!doctorId.isPresent() && patientId.isPresent()) {
+				prescriptionRepository.findByPatient(
+						Long.valueOf(patientId.get()))
+				.forEach(prescriptions::add);
 			} else {
-				prescriptionRepository.findAll().forEach(prescriptions::add);
+				prescriptionRepository
+				.findAll()
+				.forEach(prescriptions::add);
 			}
 			return new ResponseEntity<ArrayList<Prescription>>(prescriptions, 
 					HttpStatus.OK);
@@ -195,19 +221,28 @@ public class MainController {
 	@GetMapping("/lab-requests")
 	public ResponseEntity<ArrayList<LabRequest>> listLabRequests(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
-			@RequestParam String doctorId,
-			@RequestParam String patientId) {
+			@RequestParam("doctor_id") Optional<String> doctorId,
+			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
 			ArrayList<LabRequest> labRequests = new ArrayList<LabRequest>();
 			
-			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				labRequestRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(labRequests::add);
-			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				labRequestRepository.findByDoctor(Long.valueOf(doctorId)).forEach(labRequests::add);
-			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				labRequestRepository.findByPatient(Long.valueOf(patientId)).forEach(labRequests::add);
+			if(doctorId.isPresent() && patientId.isPresent()) {
+				labRequestRepository.findByPatientAndDoctor(
+						Long.valueOf(patientId.get()), 
+						Long.valueOf(doctorId.get()))
+				.forEach(labRequests::add);
+			} else if(doctorId.isPresent() && !patientId.isPresent()) {
+				labRequestRepository.findByDoctor(
+						Long.valueOf(doctorId.get()))
+				.forEach(labRequests::add);
+			} else if(!doctorId.isPresent() && patientId.isPresent()) {
+				labRequestRepository.findByPatient(
+						Long.valueOf(patientId.get()))
+				.forEach(labRequests::add);
 			} else {
-				labRequestRepository.findAll().forEach(labRequests::add);
+				labRequestRepository
+				.findAll()
+				.forEach(labRequests::add);
 			}
 			return new ResponseEntity<ArrayList<LabRequest>>(labRequests, 
 					HttpStatus.OK);

@@ -19,7 +19,6 @@ const PatientRecords = () => {
     axios
         .get(url, { headers: {"Authorization" : `Bearer ${accessToken}`} })
         .then((res) => {
-            console.log(res.data);
             setPatients(res.data);
         })
         .catch((err) => console.log(err));
