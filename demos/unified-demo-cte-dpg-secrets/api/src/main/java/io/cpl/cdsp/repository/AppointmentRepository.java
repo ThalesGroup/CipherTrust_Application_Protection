@@ -14,4 +14,5 @@ import io.cpl.cdsp.model.Appointment;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 	ArrayList<Appointment> findByDoctor(String doctor);
 	ArrayList<Appointment> findByPatient(String patient);
+	ArrayList<Appointment> findByPatientAndDoctor(String patient, String doctor);
 }

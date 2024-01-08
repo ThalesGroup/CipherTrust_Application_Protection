@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.cpl.cdsp.model.Appointment;
@@ -126,5 +127,93 @@ public class MainController {
 				HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
+	@GetMapping("/doctors")
+	public ResponseEntity<ArrayList<Doctor>> listDoctors(
+			@RequestHeader(HttpHeaders.AUTHORIZATION) String header) {
+		try {
+			ArrayList<Doctor> doctors = new ArrayList<Doctor>();
+			doctorRepository.findAll().forEach(doctors::add);
+			return new ResponseEntity<ArrayList<Doctor>>(doctors, 
+					HttpStatus.OK);
+		} catch (Exception e) {	
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GetMapping("/appointments")
+	public ResponseEntity<ArrayList<Appointment>> listAppointments(
+			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
+			@RequestParam String doctorId,
+			@RequestParam String patientId) {
+		try {
+			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
+			
+			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
+				appointmentRepository.findByPatientAndDoctor(patientId, doctorId).forEach(appointments::add);
+			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
+				appointmentRepository.findByDoctor(doctorId).forEach(appointments::add);
+			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
+				appointmentRepository.findByPatient(patientId).forEach(appointments::add);
+			} else {
+				appointmentRepository.findAll().forEach(appointments::add);
+			}
+			return new ResponseEntity<ArrayList<Appointment>>(appointments, 
+					HttpStatus.OK);
+		} catch (Exception e) {	
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GetMapping("/prescriptions")
+	public ResponseEntity<ArrayList<Prescription>> listPrescriptions(
+			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
+			@RequestParam String doctorId,
+			@RequestParam String patientId) {
+		try {
+			ArrayList<Prescription> prescriptions = new ArrayList<Prescription>();
+			
+			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
+				prescriptionRepository.findByPatientAndDoctor(patientId, doctorId).forEach(prescriptions::add);
+			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
+				prescriptionRepository.findByDoctor(doctorId).forEach(prescriptions::add);
+			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
+				prescriptionRepository.findByPatient(patientId).forEach(prescriptions::add);
+			} else {
+				prescriptionRepository.findAll().forEach(prescriptions::add);
+			}
+			return new ResponseEntity<ArrayList<Prescription>>(prescriptions, 
+					HttpStatus.OK);
+		} catch (Exception e) {	
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GetMapping("/lab-requests")
+	public ResponseEntity<ArrayList<LabRequest>> listLabRequests(
+			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
+			@RequestParam String doctorId,
+			@RequestParam String patientId) {
+		try {
+			ArrayList<LabRequest> labRequests = new ArrayList<LabRequest>();
+			
+			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
+				labRequestRepository.findByPatientAndDoctor(patientId, doctorId).forEach(labRequests::add);
+			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
+				labRequestRepository.findByDoctor(doctorId).forEach(labRequests::add);
+			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
+				labRequestRepository.findByPatient(patientId).forEach(labRequests::add);
+			} else {
+				labRequestRepository.findAll().forEach(labRequests::add);
+			}
+			return new ResponseEntity<ArrayList<LabRequest>>(labRequests, 
+					HttpStatus.OK);
+		} catch (Exception e) {	
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }

@@ -11,4 +11,5 @@ import io.cpl.cdsp.model.LabRequest;
 public interface LabRequestRepository extends JpaRepository<LabRequest, Long> {
 	ArrayList<LabRequest> findByDoctor(String doctor);
 	ArrayList<LabRequest> findByPatient(String patient);
+	ArrayList<LabRequest> findByPatientAndDoctor(String patient, String doctor);
 }
