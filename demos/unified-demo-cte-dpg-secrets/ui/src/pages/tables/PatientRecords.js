@@ -13,43 +13,26 @@ const PatientRecords = () => {
   const [patients, setPatients] = useState("");
   const { user, isAuthenticated, isLoading, getPermission, getPermissions, getToken } = useKindeAuth();
 
-  const TableRow = (props) => {
-    const { id, name, dob, city, contactNum, email, action } = props;
-    return (
-      <tr>
-        <td>
-          <Card.Link href="#" className="text-primary fw-bold">{id}</Card.Link>
-        </td>
-        <td className="fw-bold">
-          <Link to={{ pathname: '/patient/details', state: {uid: id}}}>{name}</Link>
-        </td>
-        <td>{dob}</td>
-        <td>{city}</td>
-        <td>{contactNum}</td>
-        <td>{email}</td>
-        <td>
-          <FontAwesomeIcon icon={faTrash} /> // <FontAwesomeIcon icon={faDownload} />
-        </td>
-      </tr>
-    );
-  };
-
-  const pageTraffic = [
-    { id: 1, name: "Jane Doe", dob: "01/01/2000", city: "Ottawa", contactNum: "+1 234-567-8901", email: "example@ciphertrust.io", action: faGlobeEurope },
-    { id: 2, name: "John Doe", dob: "10/10/2000", city: "Toronto", contactNum: "+1 098-765-4321", email: "patient@ciphertrust.io", action: faGlobeEurope },
-  ];
-
   useEffect(() => {
     let accessToken = sessionStorage.getItem('__T__');
     let url = 'http://localhost:8080/api/patients'
     axios
         .get(url, { headers: {"Authorization" : `Bearer ${accessToken}`} })
         .then((res) => {
-            console.log(res.data.accounts);
-            setPatients(res.data.accounts);
+            console.log(res.data);
+            setPatients(res.data);
         })
         .catch((err) => console.log(err));
   }, []);
+
+  const rows = {};
+  for (const patient of patients) {
+    if (patient.id in rows) {
+      rows[patient.id].push(patient);
+    } else {
+      rows[patient.id] = [patient];
+   }
+  }
 
   return (
     <>
@@ -82,7 +65,22 @@ const PatientRecords = () => {
               </tr>
             </thead>
             <tbody>
-              {pageTraffic.map(pt => <TableRow key={`page-traffic-${pt.id}`} {...pt} />)}
+              {
+                Object.entries(rows).map((entry) => {
+                  const row = entry[0];
+                  const details = entry[1];
+                  return(
+                    <tr key={`patient-${row}`}>
+                      <td><Card.Link href="#" className="text-primary fw-bold">{row}</Card.Link></td>
+                      <td className="fw-bold"><Link to={{ pathname: '/patient/details', state: {uid: row}}}>{details[0].firstName} {details[0].lastName}</Link></td>
+                      <td>{details[0].dateOfBirth}</td>
+                      <td>{details[0].city}</td>
+                      <td>{details[0].contactNumber}</td>
+                      <td>{details[0].email}</td>
+                      <td><FontAwesomeIcon icon={faTrash} /> // <FontAwesomeIcon icon={faDownload} /></td>
+                    </tr>
+                  )
+                })}              
             </tbody>
           </Table>
         </Card.Body>

@@ -18,7 +18,7 @@ async function addPatientRecord(data) {
 }
 
 export const GeneralInfoForm = () => {
-  const [dob, setDob] = useState("01/01/1990");
+  const [dateOfBirth, setDateOfBirth] = useState("01/01/1990");
   const [firstName, setFirstName] = useState('Jane');
   const [lastName, setLastName] = useState('Doe');
   const [gender, setGender] = useState('F')
@@ -37,7 +37,7 @@ export const GeneralInfoForm = () => {
     const record = await addPatientRecord({
       firstName,
       lastName,
-      dob,
+      dateOfBirth,
       gender,
       email,
       contactNumber,
@@ -86,17 +86,17 @@ export const GeneralInfoForm = () => {
                 <Form.Label>Birthday</Form.Label>
                 <Datetime
                   timeFormat={false}
-                  onChange={setDob}
+                  onChange={setDateOfBirth}
                   renderInput={(props, openCalendar) => (
                     <InputGroup>
                       <InputGroup.Text><FontAwesomeIcon icon={faCalendarAlt} /></InputGroup.Text>
                       <Form.Control
                         required
                         type="text"
-                        value={dob ? moment(dob).format("MM/DD/YYYY") : ""}
+                        value={dateOfBirth ? moment(dateOfBirth).format("MM/DD/YYYY") : ""}
                         placeholder="mm/dd/yyyy"
                         onFocus={openCalendar}
-                        onChange={e => setDob(e.target.value)} />
+                        onChange={e => setDateOfBirth(e.target.value)} />
                     </InputGroup>
                   )} />
               </Form.Group>
@@ -143,7 +143,7 @@ export const GeneralInfoForm = () => {
 
           <h5 className="my-4">HealthCare information</h5>
           <Row>
-            <Col sm={9} className="mb-3">
+            <Col sm={6} className="mb-3">
               <Form.Group id="address">
                 <Form.Label>Health Card Number</Form.Label>
                 <Form.Control 
@@ -155,7 +155,7 @@ export const GeneralInfoForm = () => {
                 />
               </Form.Group>
             </Col>
-            <Col sm={3} className="mb-3">
+            <Col sm={6} className="mb-3">
               <Form.Group id="addressNumber">
                 <Form.Label>Health Card Expiry</Form.Label>
                 <Datetime
