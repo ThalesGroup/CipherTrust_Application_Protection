@@ -6,9 +6,41 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, Card, Form, Button, InputGroup } from '@themesberg/react-bootstrap';
 
+async function addPatientRecord(data) {
+  console.log(
+    JSON.stringify(data)
+  )
+}
 
 export const GeneralInfoForm = () => {
   const [birthday, setBirthday] = useState("01/01/1990");
+  const [firstName, setFirstName] = useState('Jane');
+  const [lastName, setLastName] = useState('Doe');
+  const [gender, setGender] = useState('F')
+  const [email, setEmail] = useState('example@ciphetrust.io')
+  const [contact, setContact] = useState('+1 234-567-8901')
+  const [address, setAddress] = useState('123 Test Dr.')
+  const [number, setNumber] = useState('')
+  const [city, setCity] = useState('Arlington')
+  const [state, setState] = useState('VA')
+  const [zipCode, setZipCode] = useState('22202')
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+    const record = await addPatientRecord({
+      firstName,
+      lastName,
+      birthday,
+      gender,
+      email,
+      contact,
+      address,
+      number,
+      city,
+      state,
+      zipCode
+    });
+  };
 
   return (
     <Card border="light" className="bg-white shadow-sm mb-4">
@@ -19,13 +51,23 @@ export const GeneralInfoForm = () => {
             <Col md={6} className="mb-3">
               <Form.Group id="firstName">
                 <Form.Label>First Name</Form.Label>
-                <Form.Control required type="text" placeholder="Enter your first name" defaultValue={"Jane"} />
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Enter your first name" 
+                defaultValue={"Jane"} 
+                onChange={e => setFirstName(e.target.value)}/>
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <Form.Group id="lastName">
                 <Form.Label>Last Name</Form.Label>
-                <Form.Control required type="text" placeholder="Also your last name" defaultValue={"Doe"} />
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Also your last name" 
+                defaultValue={"Doe"}
+                onChange={e => setLastName(e.target.value)} />
               </Form.Group>
             </Col>
           </Row>
@@ -45,7 +87,7 @@ export const GeneralInfoForm = () => {
                         value={birthday ? moment(birthday).format("MM/DD/YYYY") : ""}
                         placeholder="mm/dd/yyyy"
                         onFocus={openCalendar}
-                        onChange={() => { }} />
+                        onChange={e => setBirthday(e.target.value)} />
                     </InputGroup>
                   )} />
               </Form.Group>
@@ -53,25 +95,37 @@ export const GeneralInfoForm = () => {
             <Col md={6} className="mb-3">
               <Form.Group id="gender">
                 <Form.Label>Gender</Form.Label>
-                <Form.Select defaultValue="1">
-                  <option value="0">Gender</option>
-                  <option value="1">Female</option>
-                  <option value="2">Male</option>
+                <Form.Select 
+                defaultValue="1"
+                onChange={e => setGender(e.target.value)}
+                value={gender}>
+                  <option value="">Gender</option>
+                  <option value="F">Female</option>
+                  <option value="M">Male</option>
                 </Form.Select>
               </Form.Group>
             </Col>
           </Row>
           <Row>
             <Col md={6} className="mb-3">
-              <Form.Group id="emal">
+              <Form.Group id="email">
                 <Form.Label>Email</Form.Label>
-                <Form.Control required type="email" placeholder="example@ciphetrust.io" />
+                <Form.Control 
+                required 
+                type="email" 
+                placeholder="example@ciphetrust.io" 
+                value={email}
+                />
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <Form.Group id="phone">
                 <Form.Label>Phone</Form.Label>
-                <Form.Control required type="number" placeholder="+1 234-567-8901" />
+                <Form.Control 
+                required 
+                type="text"
+                value={contact}
+                />
               </Form.Group>
             </Col>
           </Row>
@@ -81,13 +135,21 @@ export const GeneralInfoForm = () => {
             <Col sm={9} className="mb-3">
               <Form.Group id="address">
                 <Form.Label>Address</Form.Label>
-                <Form.Control required type="text" placeholder="Enter your home address" defaultValue={"Test Drive"} />
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Enter your home address" 
+                value={address} />
               </Form.Group>
             </Col>
             <Col sm={3} className="mb-3">
               <Form.Group id="addressNumber">
                 <Form.Label>Number</Form.Label>
-                <Form.Control required type="number" placeholder="No." defaultValue={"123"} />
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Number" 
+                value={number} />
               </Form.Group>
             </Col>
           </Row>
@@ -95,13 +157,19 @@ export const GeneralInfoForm = () => {
             <Col sm={4} className="mb-3">
               <Form.Group id="city">
                 <Form.Label>City</Form.Label>
-                <Form.Control required type="text" placeholder="City" defaultValue={"Arlington"} />
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="City" 
+                value={city} />
               </Form.Group>
             </Col>
             <Col sm={4} className="mb-3">
               <Form.Group className="mb-2">
                 <Form.Label>Select state</Form.Label>
-                <Form.Select id="state" defaultValue={"VA"} >
+                <Form.Select 
+                id="state" 
+                value={state} >
                   <option value="0">State</option>
                   <option value="AL">Alabama</option>
                   <option value="AK">Alaska</option>
@@ -160,12 +228,16 @@ export const GeneralInfoForm = () => {
             <Col sm={4}>
               <Form.Group id="zip">
                 <Form.Label>ZIP</Form.Label>
-                <Form.Control required type="tel" placeholder="ZIP" defaultValue={"22202"} />
+                <Form.Control 
+                required 
+                type="tel" 
+                placeholder="ZIP" 
+                value={zipCode} />
               </Form.Group>
             </Col>
           </Row>
           <div className="mt-3">
-            <Button variant="primary" type="submit">Save All</Button>
+            <Button variant="primary" type="submit" onClick={handleSubmit}>Save All</Button>
           </div>
         </Form>
       </Card.Body>
