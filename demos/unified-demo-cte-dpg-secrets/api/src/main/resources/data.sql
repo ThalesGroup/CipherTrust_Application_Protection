@@ -1,0 +1,2 @@
+INSERT INTO doctors (id, first_name, last_name, practice_type, email, gender, doctor_reg_number) VALUES (0, 'John', 'Doe', 'Internal Medicine', 'john.doe@c.io', 'M', 'DOC123456789');
+INSERT INTO doctors (id, first_name, last_name, practice_type, email, gender, doctor_reg_number) VALUES (1, 'Jane', 'Doe', 'Neurologist', 'jane.doe@c.io', 'F', 'DOC987654321');

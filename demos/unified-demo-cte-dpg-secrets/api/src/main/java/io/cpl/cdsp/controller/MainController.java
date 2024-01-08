@@ -151,11 +151,11 @@ public class MainController {
 			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
 			
 			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				appointmentRepository.findByPatientAndDoctor(patientId, doctorId).forEach(appointments::add);
+				appointmentRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(appointments::add);
 			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				appointmentRepository.findByDoctor(doctorId).forEach(appointments::add);
+				appointmentRepository.findByDoctor(Long.valueOf(doctorId)).forEach(appointments::add);
 			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				appointmentRepository.findByPatient(patientId).forEach(appointments::add);
+				appointmentRepository.findByPatient(Long.valueOf(patientId)).forEach(appointments::add);
 			} else {
 				appointmentRepository.findAll().forEach(appointments::add);
 			}
@@ -173,14 +173,14 @@ public class MainController {
 			@RequestParam String doctorId,
 			@RequestParam String patientId) {
 		try {
-			ArrayList<Prescription> prescriptions = new ArrayList<Prescription>();
+			ArrayList<Prescription> prescriptions = new ArrayList<Prescription>();	
 			
 			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				prescriptionRepository.findByPatientAndDoctor(patientId, doctorId).forEach(prescriptions::add);
+				prescriptionRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(prescriptions::add);
 			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				prescriptionRepository.findByDoctor(doctorId).forEach(prescriptions::add);
+				prescriptionRepository.findByDoctor(Long.valueOf(doctorId)).forEach(prescriptions::add);
 			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				prescriptionRepository.findByPatient(patientId).forEach(prescriptions::add);
+				prescriptionRepository.findByPatient(Long.valueOf(patientId)).forEach(prescriptions::add);
 			} else {
 				prescriptionRepository.findAll().forEach(prescriptions::add);
 			}
@@ -201,11 +201,11 @@ public class MainController {
 			ArrayList<LabRequest> labRequests = new ArrayList<LabRequest>();
 			
 			if((doctorId != null && !doctorId.isEmpty()) && (patientId != null && !patientId.isEmpty())) {
-				labRequestRepository.findByPatientAndDoctor(patientId, doctorId).forEach(labRequests::add);
+				labRequestRepository.findByPatientAndDoctor(Long.valueOf(patientId), Long.valueOf(doctorId)).forEach(labRequests::add);
 			} else if((doctorId != null && !doctorId.isEmpty()) && (patientId == null || patientId.isEmpty())) {
-				labRequestRepository.findByDoctor(doctorId).forEach(labRequests::add);
+				labRequestRepository.findByDoctor(Long.valueOf(doctorId)).forEach(labRequests::add);
 			} else if((patientId != null && !patientId.isEmpty()) && (doctorId == null || doctorId.isEmpty())) {
-				labRequestRepository.findByPatient(patientId).forEach(labRequests::add);
+				labRequestRepository.findByPatient(Long.valueOf(patientId)).forEach(labRequests::add);
 			} else {
 				labRequestRepository.findAll().forEach(labRequests::add);
 			}

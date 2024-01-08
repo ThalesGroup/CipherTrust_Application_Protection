@@ -5,40 +5,49 @@ import Datetime from "react-datetime";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, Card, Form, Button, InputGroup } from '@themesberg/react-bootstrap';
+import axios from "axios";
 
 async function addPatientRecord(data) {
   console.log(
     JSON.stringify(data)
   )
+  axios.post("http://localhost:8080/api/patients", data)
+  .then((response) => {
+    console.log(response);
+  });
 }
 
 export const GeneralInfoForm = () => {
-  const [birthday, setBirthday] = useState("01/01/1990");
+  const [dob, setDob] = useState("01/01/1990");
   const [firstName, setFirstName] = useState('Jane');
   const [lastName, setLastName] = useState('Doe');
   const [gender, setGender] = useState('F')
   const [email, setEmail] = useState('example@ciphetrust.io')
-  const [contact, setContact] = useState('+1 234-567-8901')
+  const [contactNumber, setContactNumber] = useState('+1 234-567-8901')
   const [address, setAddress] = useState('123 Test Dr.')
-  const [number, setNumber] = useState('')
+  const [houseNumber, setHouseNumber] = useState('')
   const [city, setCity] = useState('Arlington')
   const [state, setState] = useState('VA')
   const [zipCode, setZipCode] = useState('22202')
+  const [healthCardNumber, setHealthCardNumber] = useState('1EG4-TE5-MK72')
+  const [healthCardExpiry, setHealthCardExpiry] = useState("01/01/2025");
 
   const handleSubmit = async event => {
     event.preventDefault();
     const record = await addPatientRecord({
       firstName,
       lastName,
-      birthday,
+      dob,
       gender,
       email,
-      contact,
+      contactNumber,
       address,
-      number,
+      houseNumber,
       city,
       state,
-      zipCode
+      zipCode,
+      healthCardNumber,
+      healthCardExpiry
     });
   };
 
@@ -77,17 +86,17 @@ export const GeneralInfoForm = () => {
                 <Form.Label>Birthday</Form.Label>
                 <Datetime
                   timeFormat={false}
-                  onChange={setBirthday}
+                  onChange={setDob}
                   renderInput={(props, openCalendar) => (
                     <InputGroup>
                       <InputGroup.Text><FontAwesomeIcon icon={faCalendarAlt} /></InputGroup.Text>
                       <Form.Control
                         required
                         type="text"
-                        value={birthday ? moment(birthday).format("MM/DD/YYYY") : ""}
+                        value={dob ? moment(dob).format("MM/DD/YYYY") : ""}
                         placeholder="mm/dd/yyyy"
                         onFocus={openCalendar}
-                        onChange={e => setBirthday(e.target.value)} />
+                        onChange={e => setDob(e.target.value)} />
                     </InputGroup>
                   )} />
               </Form.Group>
@@ -115,6 +124,7 @@ export const GeneralInfoForm = () => {
                 type="email" 
                 placeholder="example@ciphetrust.io" 
                 value={email}
+                onChange={e => setEmail(e.target.value)}
                 />
               </Form.Group>
             </Col>
@@ -124,7 +134,45 @@ export const GeneralInfoForm = () => {
                 <Form.Control 
                 required 
                 type="text"
-                value={contact}
+                value={contactNumber}
+                onChange={e => setContactNumber(e.target.value)}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <h5 className="my-4">HealthCare information</h5>
+          <Row>
+            <Col sm={9} className="mb-3">
+              <Form.Group id="address">
+                <Form.Label>Health Card Number</Form.Label>
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Enter your Health Card Number" 
+                value={healthCardNumber}
+                onChange={e => setHealthCardNumber(e.target.value)} 
+                />
+              </Form.Group>
+            </Col>
+            <Col sm={3} className="mb-3">
+              <Form.Group id="addressNumber">
+                <Form.Label>Health Card Expiry</Form.Label>
+                <Datetime
+                  timeFormat={false}
+                  onChange={setHealthCardExpiry}
+                  renderInput={(props, openCalendar) => (
+                    <InputGroup>
+                      <InputGroup.Text><FontAwesomeIcon icon={faCalendarAlt} /></InputGroup.Text>
+                      <Form.Control
+                        required
+                        type="text"
+                        value={healthCardExpiry ? moment(healthCardExpiry).format("MM/DD/YYYY") : ""}
+                        placeholder="mm/dd/yyyy"
+                        onFocus={openCalendar}
+                        onChange={e => setHealthCardExpiry(e.target.value)} />
+                    </InputGroup>
+                  )} 
                 />
               </Form.Group>
             </Col>
@@ -139,17 +187,21 @@ export const GeneralInfoForm = () => {
                 required 
                 type="text" 
                 placeholder="Enter your home address" 
-                value={address} />
+                value={address}
+                onChange={e => setAddress(e.target.value)} 
+                />
               </Form.Group>
             </Col>
             <Col sm={3} className="mb-3">
               <Form.Group id="addressNumber">
-                <Form.Label>Number</Form.Label>
+                <Form.Label>House Number</Form.Label>
                 <Form.Control 
                 required 
                 type="text" 
                 placeholder="Number" 
-                value={number} />
+                value={houseNumber}
+                onChange={e => setHouseNumber(e.target.value)} 
+                />
               </Form.Group>
             </Col>
           </Row>
@@ -161,7 +213,9 @@ export const GeneralInfoForm = () => {
                 required 
                 type="text" 
                 placeholder="City" 
-                value={city} />
+                value={city} 
+                onChange={e => setCity(e.target.value)}
+                />
               </Form.Group>
             </Col>
             <Col sm={4} className="mb-3">
@@ -169,7 +223,8 @@ export const GeneralInfoForm = () => {
                 <Form.Label>Select state</Form.Label>
                 <Form.Select 
                 id="state" 
-                value={state} >
+                value={state}
+                onChange={e => setState(e.target.value)} >
                   <option value="0">State</option>
                   <option value="AL">Alabama</option>
                   <option value="AK">Alaska</option>
@@ -232,7 +287,9 @@ export const GeneralInfoForm = () => {
                 required 
                 type="tel" 
                 placeholder="ZIP" 
-                value={zipCode} />
+                value={zipCode}
+                onChange={e => setZipCode(e.target.value)}
+                />
               </Form.Group>
             </Col>
           </Row>

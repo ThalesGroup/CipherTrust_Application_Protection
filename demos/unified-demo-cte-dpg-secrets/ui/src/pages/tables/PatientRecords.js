@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Breadcrumb } from '@themesberg/react-bootstrap';
 import { faHome, faAngleDown, faAngleUp, faTrash, faDownload } from '@fortawesome/free-solid-svg-icons';
@@ -6,11 +6,15 @@ import { faGoogle, faTwitter, faYahoo, faYoutube } from '@fortawesome/free-brand
 import { faGlobeEurope, } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, Card, Table, ProgressBar } from '@themesberg/react-bootstrap';
 import { Link } from "react-router-dom";
+import axios from 'axios';
+import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 
 const PatientRecords = () => {
+  const [patients, setPatients] = useState("");
+  const { user, isAuthenticated, isLoading, getPermission, getPermissions, getToken } = useKindeAuth();
+
   const TableRow = (props) => {
     const { id, name, dob, city, contactNum, email, action } = props;
-
     return (
       <tr>
         <td>
@@ -34,6 +38,19 @@ const PatientRecords = () => {
     { id: 1, name: "Jane Doe", dob: "01/01/2000", city: "Ottawa", contactNum: "+1 234-567-8901", email: "example@ciphertrust.io", action: faGlobeEurope },
     { id: 2, name: "John Doe", dob: "10/10/2000", city: "Toronto", contactNum: "+1 098-765-4321", email: "patient@ciphertrust.io", action: faGlobeEurope },
   ];
+
+  useEffect(() => {
+    let accessToken = sessionStorage.getItem('__T__');
+    let url = 'http://localhost:8080/api/patients'
+    axios
+        .get(url, { headers: {"Authorization" : `Bearer ${accessToken}`} })
+        .then((res) => {
+            console.log(res.data.accounts);
+            setPatients(res.data.accounts);
+        })
+        .catch((err) => console.log(err));
+  }, []);
+
   return (
     <>
       <div className="d-xl-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">

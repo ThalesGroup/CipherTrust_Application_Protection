@@ -12,7 +12,7 @@ import io.cpl.cdsp.model.Prescription;
  *
  */
 public interface PrescriptionRepository extends JpaRepository<Prescription, Long> {
-	ArrayList<Prescription> findByDoctor(String doctor);
-	ArrayList<Prescription> findByPatient(String patient);
-	ArrayList<Prescription> findByPatientAndDoctor(String patient, String doctor);
+	ArrayList<Prescription> findByDoctor(long doctor);
+	ArrayList<Prescription> findByPatient(long patient);
+	ArrayList<Prescription> findByPatientAndDoctor(long patient, long doctor);
 }

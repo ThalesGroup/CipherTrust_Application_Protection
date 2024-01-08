@@ -16,9 +16,9 @@ export default () => {
     let accessToken;
     const getJWT = async () => {
       accessToken = await getToken();
-      console.log(user.email);
-      console.log(accessToken);
-      console.log(getPermissions());
+      sessionStorage.setItem('__T__', accessToken)
+      //console.log(user.email);
+      //console.log(getPermissions());
     }
     getJWT();
   }, []);
