@@ -3,6 +3,8 @@
  */
 package io.cpl.cdsp.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 /**
  * @author Anurag Jain, developer advocate Thales Group
  *
@@ -14,8 +16,9 @@ import jakarta.persistence.*;
 @Table(name = "patients")
 public class Patient {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	private String id;
 	
 	@Column(name = "first_name")
 	private String firstName;
@@ -55,12 +58,21 @@ public class Patient {
 	
 	@Column(name = "zip_code")
 	private String zipCode;
+	
+	@Column(name = "blood_group")
+	private String bloodGroup;
+	
+	@Column(name = "major_ailments")
+	private String ailments;
+	
+	@Column(name = "primary_physician")
+	private String primaryPhysician;
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -168,18 +180,43 @@ public class Patient {
 		this.zipCode = zipCode;
 	}
 
+	public String getBloodGroup() {
+		return bloodGroup;
+	}
+
+	public void setBloodGroup(String bloodGroup) {
+		this.bloodGroup = bloodGroup;
+	}
+
+	public String getAilments() {
+		return ailments;
+	}
+
+	public void setAilments(String ailments) {
+		this.ailments = ailments;
+	}
+
+	public String getPrimaryPhysician() {
+		return primaryPhysician;
+	}
+
+	public void setPrimaryPhysician(String primaryPhysician) {
+		this.primaryPhysician = primaryPhysician;
+	}
+
 	@Override
 	public String toString() {
 		return "Patient [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", contactNumber="
 				+ contactNumber + ", dateOfBirth=" + dateOfBirth + ", email=" + email + ", healthCardNumber="
 				+ healthCardNumber + ", healthCardExpiry=" + healthCardExpiry + ", gender=" + gender + ", address="
 				+ address + ", houseNumber=" + houseNumber + ", city=" + city + ", state=" + state + ", zipCode="
-				+ zipCode + "]";
+				+ zipCode + ", bloodGroup=" + bloodGroup + ", ailments=" + ailments + ", primaryPhysician="
+				+ primaryPhysician + "]";
 	}
 
-	public Patient(long id, String firstName, String lastName, String contactNumber, String dateOfBirth, String email,
+	public Patient(String id, String firstName, String lastName, String contactNumber, String dateOfBirth, String email,
 			String healthCardNumber, String healthCardExpiry, String gender, String address, String houseNumber,
-			String city, String state, String zipCode) {
+			String city, String state, String zipCode, String bloodGroup, String ailments, String primaryPhysician) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -195,6 +232,9 @@ public class Patient {
 		this.city = city;
 		this.state = state;
 		this.zipCode = zipCode;
+		this.bloodGroup = bloodGroup;
+		this.ailments = ailments;
+		this.primaryPhysician = primaryPhysician;
 	}
 
 	public Patient() {

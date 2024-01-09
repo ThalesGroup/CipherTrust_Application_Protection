@@ -3,10 +3,11 @@
  */
 package io.cpl.cdsp.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -19,8 +20,9 @@ import jakarta.persistence.Table;
 @Table(name = "doctors")
 public class Doctor {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	private String id;
 	
 	@Column(name = "first_name")
 	private String firstName;
@@ -40,11 +42,11 @@ public class Doctor {
 	@Column(name = "doctor_reg_number")
 	private String registrationNumber;
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -103,7 +105,7 @@ public class Doctor {
 				+ registrationNumber + "]";
 	}
 
-	public Doctor(long id, String firstName, String lastName, String practiceType, String email, String gender,
+	public Doctor(String id, String firstName, String lastName, String practiceType, String email, String gender,
 			String registrationNumber) {
 		super();
 		this.id = id;

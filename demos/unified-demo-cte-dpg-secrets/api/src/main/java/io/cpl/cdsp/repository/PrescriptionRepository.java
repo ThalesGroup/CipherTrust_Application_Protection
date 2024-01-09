@@ -11,8 +11,8 @@ import io.cpl.cdsp.model.Prescription;
  * @author Anurag Jain, developer advocate Thales Group
  *
  */
-public interface PrescriptionRepository extends JpaRepository<Prescription, Long> {
-	ArrayList<Prescription> findByDoctor(long doctor);
-	ArrayList<Prescription> findByPatient(long patient);
-	ArrayList<Prescription> findByPatientAndDoctor(long patient, long doctor);
+public interface PrescriptionRepository extends JpaRepository<Prescription, String> {
+	ArrayList<Prescription> findByDoctor(String doctor);
+	ArrayList<Prescription> findByPatient(String patient);
+	ArrayList<Prescription> findByPatientAndDoctor(String patient, String doctor);
 }

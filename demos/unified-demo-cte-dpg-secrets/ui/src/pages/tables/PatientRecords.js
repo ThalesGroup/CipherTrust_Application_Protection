@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Breadcrumb } from '@themesberg/react-bootstrap';
-import { faHome, faAngleDown, faAngleUp, faTrash, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faAngleDown, faAngleUp, faTrash, faDownload, faExpand, faPlus, faBoxOpen, faExpandArrowsAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 import { faGoogle, faTwitter, faYahoo, faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { faGlobeEurope, } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, Card, Table, ProgressBar } from '@themesberg/react-bootstrap';
@@ -70,8 +70,12 @@ const PatientRecords = () => {
                   const details = entry[1];
                   return(
                     <tr key={`patient-${row}`}>
-                      <td><Card.Link href="#" className="text-primary fw-bold">{row}</Card.Link></td>
-                      <td className="fw-bold"><Link to={{ pathname: '/patient/details', state: {uid: row}}}>{details[0].firstName} {details[0].lastName}</Link></td>
+                      <td><Card.Link href="#" className="text-primary fw-bold">
+                        <Link to={{ pathname: '/patient/details', state: {uid: details[0].id}}}><FontAwesomeIcon icon={faExpandAlt} /></Link>
+                      </Card.Link></td>
+                      <td className="fw-bold">
+                        <Link to={{ pathname: '/patient/details', state: {uid: details[0].id}}}>{details[0].firstName} {details[0].lastName}</Link>
+                      </td>
                       <td>{details[0].dateOfBirth}</td>
                       <td>{details[0].city}</td>
                       <td>{details[0].contactNumber}</td>
@@ -79,7 +83,7 @@ const PatientRecords = () => {
                       <td><FontAwesomeIcon icon={faTrash} /> // <FontAwesomeIcon icon={faDownload} /></td>
                     </tr>
                   )
-                })}              
+                })}
             </tbody>
           </Table>
         </Card.Body>

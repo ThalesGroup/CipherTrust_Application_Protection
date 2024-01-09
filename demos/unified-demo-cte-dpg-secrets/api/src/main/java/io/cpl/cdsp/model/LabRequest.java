@@ -3,10 +3,11 @@
  */
 package io.cpl.cdsp.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -17,17 +18,17 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "lab_requests")
-public class LabRequest {
-	
+public class LabRequest {	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
-	
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	private String id;
+
 	@Column(name = "doctor_id")
-    private long doctor;
-	
+	private String doctor;
+
 	@Column(name = "patient_id")
-    private long patient;
+	private String patient;
 	
 	@Column(name = "prescription_date")
 	private String prescriptionDate;
@@ -38,27 +39,27 @@ public class LabRequest {
 	@Column
 	private String symptoms;
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public long getDoctor() {
+	public String getDoctor() {
 		return doctor;
 	}
 
-	public void setDoctor(long doctor) {
+	public void setDoctor(String doctor) {
 		this.doctor = doctor;
 	}
 
-	public long getPatient() {
+	public String getPatient() {
 		return patient;
 	}
 
-	public void setPatient(long patient) {
+	public void setPatient(String patient) {
 		this.patient = patient;
 	}
 
@@ -86,7 +87,13 @@ public class LabRequest {
 		this.symptoms = symptoms;
 	}
 
-	public LabRequest(long id, long doctor, long patient, String prescriptionDate, String prescriptionPDF,
+	@Override
+	public String toString() {
+		return "LabRequest [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", prescriptionDate="
+				+ prescriptionDate + ", prescriptionPDF=" + prescriptionPDF + ", symptoms=" + symptoms + "]";
+	}
+
+	public LabRequest(String id, String doctor, String patient, String prescriptionDate, String prescriptionPDF,
 			String symptoms) {
 		super();
 		this.id = id;
@@ -100,11 +107,5 @@ public class LabRequest {
 	public LabRequest() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public String toString() {
-		return "LabRequest [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", prescriptionDate="
-				+ prescriptionDate + ", prescriptionPDF=" + prescriptionPDF + ", symptoms=" + symptoms + "]";
 	}
 }

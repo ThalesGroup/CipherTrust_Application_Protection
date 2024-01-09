@@ -10,6 +10,6 @@ import io.cpl.cdsp.model.Doctor;
  * @author Anurag Jain, developer advocate Thales Group
  *
  */
-public interface DoctorRepository extends JpaRepository<Doctor, Long> {
+public interface DoctorRepository extends JpaRepository<Doctor, String> {
 
 }

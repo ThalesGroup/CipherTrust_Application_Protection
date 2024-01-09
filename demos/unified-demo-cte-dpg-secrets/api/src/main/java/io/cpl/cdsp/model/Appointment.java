@@ -3,10 +3,11 @@
  */
 package io.cpl.cdsp.model;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -17,44 +18,45 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "appointments")
-public class Appointment {	
+public class Appointment {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id;
-	
+	@GeneratedValue(generator = "uuid")
+	@GenericGenerator(name = "uuid", strategy = "uuid2")
+	private String id;
+
 	@Column(name = "doctor_id")
-    private long doctor;
-	
+	private String doctor;
+
 	@Column(name = "patient_id")
-    private long patient;
-	
+	private String patient;
+
 	@Column(name = "appointment_date")
 	private String appointmentDate;
-	
+
 	@Column(name = "appointment_reason")
 	private String appointmentReason;
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public long getDoctor() {
+	public String getDoctor() {
 		return doctor;
 	}
 
-	public void setDoctor(long doctor) {
+	public void setDoctor(String doctor) {
 		this.doctor = doctor;
 	}
 
-	public long getPatient() {
+	public String getPatient() {
 		return patient;
 	}
 
-	public void setPatient(long patient) {
+	public void setPatient(String patient) {
 		this.patient = patient;
 	}
 
@@ -74,19 +76,19 @@ public class Appointment {
 		this.appointmentReason = appointmentReason;
 	}
 
-	@Override
-	public String toString() {
-		return "Appointment [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", appointmentDate="
-				+ appointmentDate + ", appointmentReason=" + appointmentReason + "]";
-	}
-
-	public Appointment(long id, long doctor, long patient, String appointmentDate, String appointmentReason) {
+	public Appointment(String id, String doctor, String patient, String appointmentDate, String appointmentReason) {
 		super();
 		this.id = id;
 		this.doctor = doctor;
 		this.patient = patient;
 		this.appointmentDate = appointmentDate;
 		this.appointmentReason = appointmentReason;
+	}
+
+	@Override
+	public String toString() {
+		return "Appointment [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", appointmentDate="
+				+ appointmentDate + ", appointmentReason=" + appointmentReason + "]";
 	}
 
 	public Appointment() {

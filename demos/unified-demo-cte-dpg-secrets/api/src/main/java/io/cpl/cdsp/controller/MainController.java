@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.cpl.cdsp.bean.PatientAppointmentsResponse;
+import io.cpl.cdsp.bean.PatientLabRequestsResponse;
+import io.cpl.cdsp.bean.PatientPrescriptionsResponse;
 import io.cpl.cdsp.model.Appointment;
 import io.cpl.cdsp.model.Doctor;
 import io.cpl.cdsp.model.LabRequest;
@@ -123,7 +126,7 @@ public class MainController {
 			ArrayList<Patient> patients = new ArrayList<Patient>();
 			Patient record = new Patient();
 			if(patientId != null && !patientId.isEmpty()) {
-				record = patientRepo.findById(Long.valueOf(patientId.get())).get();
+				record = patientRepo.findById(patientId.get()).get();
 				patients.add(record);
 			} else {
 				patientRepo.findAll().forEach(patients::add);
@@ -151,32 +154,63 @@ public class MainController {
 	}
 	
 	@GetMapping("/appointments")
-	public ResponseEntity<ArrayList<Appointment>> listAppointments(
+	public ResponseEntity<ArrayList<PatientAppointmentsResponse>> listAppointments(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
 			@RequestParam("doctor_id") Optional<String> doctorId,
 			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
-			ArrayList<Appointment> appointments = new ArrayList<Appointment>();
+			ArrayList<PatientAppointmentsResponse> appointments = new ArrayList<PatientAppointmentsResponse>();
 			
 			if(doctorId.isPresent() && patientId.isPresent()) {
-				appointmentRepository.findByPatientAndDoctor(
-						Long.valueOf(patientId.get()), 
-						Long.valueOf(doctorId.get()))
-				.forEach(appointments::add);
+				for (Appointment a : 
+					appointmentRepository
+					.findByPatientAndDoctor(
+						patientId.get(),
+						doctorId.get())) {
+					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
+					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDate(a.getAppointmentDate());
+					pa.setReason(a.getAppointmentReason());
+					appointments.add(pa);
+				}
 			} else if(doctorId.isPresent() && !patientId.isPresent()) {
-				appointmentRepository.findByDoctor(
-						Long.valueOf(doctorId.get()))
-				.forEach(appointments::add);
+				for (Appointment a : 
+					appointmentRepository
+					.findByDoctor(
+						doctorId.get())) {
+					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
+					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDate(a.getAppointmentDate());
+					pa.setReason(a.getAppointmentReason());
+					appointments.add(pa);
+				}
 			} else if(!doctorId.isPresent() && patientId.isPresent()) {
-				appointmentRepository.findByPatient(
-						Long.valueOf(patientId.get()))
-				.forEach(appointments::add);
+				for (Appointment a : 
+					appointmentRepository
+					.findByPatient(
+						patientId.get())) {
+					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
+					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDate(a.getAppointmentDate());
+					pa.setReason(a.getAppointmentReason());
+					appointments.add(pa);
+				}
 			} else {
-				appointmentRepository
-				.findAll()
-				.forEach(appointments::add);
+				for (Appointment a : 
+					appointmentRepository
+					.findAll()) {
+					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
+					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDate(a.getAppointmentDate());
+					pa.setReason(a.getAppointmentReason());
+					appointments.add(pa);
+				}
 			}
-			return new ResponseEntity<ArrayList<Appointment>>(appointments, 
+			return new ResponseEntity<ArrayList<PatientAppointmentsResponse>>(appointments, 
 					HttpStatus.OK);
 		} catch (Exception e) {	
 			return new ResponseEntity<>(null, 
@@ -185,32 +219,67 @@ public class MainController {
 	}
 	
 	@GetMapping("/prescriptions")
-	public ResponseEntity<ArrayList<Prescription>> listPrescriptions(
+	public ResponseEntity<ArrayList<PatientPrescriptionsResponse>> listPrescriptions(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
 			@RequestParam("doctor_id") Optional<String> doctorId,
 			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
-			ArrayList<Prescription> prescriptions = new ArrayList<Prescription>();	
+			ArrayList<PatientPrescriptionsResponse> prescriptions = new ArrayList<PatientPrescriptionsResponse>();	
 			
 			if(doctorId.isPresent() && patientId.isPresent()) {
-				prescriptionRepository.findByPatientAndDoctor(
-						Long.valueOf(patientId.get()), 
-						Long.valueOf(doctorId.get()))
-				.forEach(prescriptions::add);
+				for (Prescription p : 
+					prescriptionRepository
+					.findByPatientAndDoctor(
+						patientId.get(),
+						doctorId.get())) {
+					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDurationInDays(p.getPrescriptionLength());
+					pr.setFilename(p.getPrescriptionPDF());
+					pr.setPrescriptionDate(p.getPrescriptionDate());
+					prescriptions.add(pr);
+				}
 			} else if(doctorId.isPresent() && !patientId.isPresent()) {
-				prescriptionRepository.findByDoctor(
-						Long.valueOf(doctorId.get()))
-				.forEach(prescriptions::add);
+				for (Prescription p : 
+					prescriptionRepository
+					.findByDoctor(
+						doctorId.get())) {
+					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDurationInDays(p.getPrescriptionLength());
+					pr.setFilename(p.getPrescriptionPDF());
+					pr.setPrescriptionDate(p.getPrescriptionDate());
+					prescriptions.add(pr);
+				}
 			} else if(!doctorId.isPresent() && patientId.isPresent()) {
-				prescriptionRepository.findByPatient(
-						Long.valueOf(patientId.get()))
-				.forEach(prescriptions::add);
+				for (Prescription p : 
+					prescriptionRepository
+					.findByPatient(
+							patientId.get())) {
+					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDurationInDays(p.getPrescriptionLength());
+					pr.setFilename(p.getPrescriptionPDF());
+					pr.setPrescriptionDate(p.getPrescriptionDate());
+					prescriptions.add(pr);
+				}
 			} else {
-				prescriptionRepository
-				.findAll()
-				.forEach(prescriptions::add);
+				for (Prescription p : 
+					prescriptionRepository
+					.findAll()){
+					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDurationInDays(p.getPrescriptionLength());
+					pr.setFilename(p.getPrescriptionPDF());
+					pr.setPrescriptionDate(p.getPrescriptionDate());
+					prescriptions.add(pr);
+				}
 			}
-			return new ResponseEntity<ArrayList<Prescription>>(prescriptions, 
+			return new ResponseEntity<ArrayList<PatientPrescriptionsResponse>>(prescriptions, 
 					HttpStatus.OK);
 		} catch (Exception e) {	
 			return new ResponseEntity<>(null, 
@@ -219,32 +288,67 @@ public class MainController {
 	}
 	
 	@GetMapping("/lab-requests")
-	public ResponseEntity<ArrayList<LabRequest>> listLabRequests(
+	public ResponseEntity<ArrayList<PatientLabRequestsResponse>> listLabRequests(
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String header,
 			@RequestParam("doctor_id") Optional<String> doctorId,
 			@RequestParam("patient_id") Optional<String> patientId) {
 		try {
-			ArrayList<LabRequest> labRequests = new ArrayList<LabRequest>();
+			ArrayList<PatientLabRequestsResponse> labRequests = new ArrayList<PatientLabRequestsResponse>();
 			
 			if(doctorId.isPresent() && patientId.isPresent()) {
-				labRequestRepository.findByPatientAndDoctor(
-						Long.valueOf(patientId.get()), 
-						Long.valueOf(doctorId.get()))
-				.forEach(labRequests::add);
+				for (LabRequest lr : 
+					labRequestRepository
+					.findByPatientAndDoctor(
+						patientId.get(),
+						doctorId.get())) {
+					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setFilename(lr.getPrescriptionPDF());
+					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setSymptoms(lr.getSymptoms());
+					labRequests.add(pr);
+				}
 			} else if(doctorId.isPresent() && !patientId.isPresent()) {
-				labRequestRepository.findByDoctor(
-						Long.valueOf(doctorId.get()))
-				.forEach(labRequests::add);
+				for (LabRequest lr : 
+					labRequestRepository
+					.findByDoctor(
+						doctorId.get())) {
+					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setFilename(lr.getPrescriptionPDF());
+					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setSymptoms(lr.getSymptoms());
+					labRequests.add(pr);
+				}
 			} else if(!doctorId.isPresent() && patientId.isPresent()) {
-				labRequestRepository.findByPatient(
-						Long.valueOf(patientId.get()))
-				.forEach(labRequests::add);
+				for (LabRequest lr : 
+					labRequestRepository
+					.findByPatient(
+							patientId.get())) {
+					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setFilename(lr.getPrescriptionPDF());
+					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setSymptoms(lr.getSymptoms());
+					labRequests.add(pr);
+				}
 			} else {
-				labRequestRepository
-				.findAll()
-				.forEach(labRequests::add);
+				for (LabRequest lr : 
+					labRequestRepository
+					.findAll()) {
+					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
+					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
+					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setFilename(lr.getPrescriptionPDF());
+					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setSymptoms(lr.getSymptoms());
+					labRequests.add(pr);
+				}
 			}
-			return new ResponseEntity<ArrayList<LabRequest>>(labRequests, 
+			return new ResponseEntity<ArrayList<PatientLabRequestsResponse>>(labRequests, 
 					HttpStatus.OK);
 		} catch (Exception e) {	
 			return new ResponseEntity<>(null, 
