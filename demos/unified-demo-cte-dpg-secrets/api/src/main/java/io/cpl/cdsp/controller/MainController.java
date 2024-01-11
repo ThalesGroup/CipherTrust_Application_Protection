@@ -168,8 +168,8 @@ public class MainController {
 						patientId.get(),
 						doctorId.get())) {
 					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
-					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDoctor(doctorRepository.findById(a.getDoctor()).get());
+					pa.setPatient(patientRepo.findById(a.getPatient()).get());
 					pa.setDate(a.getAppointmentDate());
 					pa.setReason(a.getAppointmentReason());
 					appointments.add(pa);
@@ -180,8 +180,8 @@ public class MainController {
 					.findByDoctor(
 						doctorId.get())) {
 					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
-					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDoctor(doctorRepository.findById(a.getDoctor()).get());
+					pa.setPatient(patientRepo.findById(a.getPatient()).get());
 					pa.setDate(a.getAppointmentDate());
 					pa.setReason(a.getAppointmentReason());
 					appointments.add(pa);
@@ -192,8 +192,8 @@ public class MainController {
 					.findByPatient(
 						patientId.get())) {
 					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
-					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDoctor(doctorRepository.findById(a.getDoctor()).get());
+					pa.setPatient(patientRepo.findById(a.getPatient()).get());
 					pa.setDate(a.getAppointmentDate());
 					pa.setReason(a.getAppointmentReason());
 					appointments.add(pa);
@@ -203,8 +203,8 @@ public class MainController {
 					appointmentRepository
 					.findAll()) {
 					PatientAppointmentsResponse pa = new PatientAppointmentsResponse();
-					pa.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pa.setPatient(patientRepo.findById(patientId.get()).get());
+					pa.setDoctor(doctorRepository.findById(a.getDoctor()).get());
+					pa.setPatient(patientRepo.findById(a.getPatient()).get());
 					pa.setDate(a.getAppointmentDate());
 					pa.setReason(a.getAppointmentReason());
 					appointments.add(pa);
@@ -212,7 +212,7 @@ public class MainController {
 			}
 			return new ResponseEntity<ArrayList<PatientAppointmentsResponse>>(appointments, 
 					HttpStatus.OK);
-		} catch (Exception e) {	
+		} catch (Exception e) {
 			return new ResponseEntity<>(null, 
 				HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -233,8 +233,8 @@ public class MainController {
 						patientId.get(),
 						doctorId.get())) {
 					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDoctor(doctorRepository.findById(p.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(p.getPatient()).get());
 					pr.setDurationInDays(p.getPrescriptionLength());
 					pr.setFilename(p.getPrescriptionPDF());
 					pr.setPrescriptionDate(p.getPrescriptionDate());
@@ -246,8 +246,8 @@ public class MainController {
 					.findByDoctor(
 						doctorId.get())) {
 					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDoctor(doctorRepository.findById(p.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(p.getPatient()).get());
 					pr.setDurationInDays(p.getPrescriptionLength());
 					pr.setFilename(p.getPrescriptionPDF());
 					pr.setPrescriptionDate(p.getPrescriptionDate());
@@ -259,8 +259,8 @@ public class MainController {
 					.findByPatient(
 							patientId.get())) {
 					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDoctor(doctorRepository.findById(p.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(p.getPatient()).get());
 					pr.setDurationInDays(p.getPrescriptionLength());
 					pr.setFilename(p.getPrescriptionPDF());
 					pr.setPrescriptionDate(p.getPrescriptionDate());
@@ -271,8 +271,8 @@ public class MainController {
 					prescriptionRepository
 					.findAll()){
 					PatientPrescriptionsResponse pr = new PatientPrescriptionsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
+					pr.setDoctor(doctorRepository.findById(p.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(p.getPatient()).get());
 					pr.setDurationInDays(p.getPrescriptionLength());
 					pr.setFilename(p.getPrescriptionPDF());
 					pr.setPrescriptionDate(p.getPrescriptionDate());
@@ -302,10 +302,10 @@ public class MainController {
 						patientId.get(),
 						doctorId.get())) {
 					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
-					pr.setFilename(lr.getPrescriptionPDF());
-					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setDoctor(doctorRepository.findById(lr.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(lr.getPatient()).get());
+					pr.setFilename(lr.getLabRequisitionPDF());
+					pr.setRequestDate(lr.getLabRequisitionDate());
 					pr.setSymptoms(lr.getSymptoms());
 					labRequests.add(pr);
 				}
@@ -315,10 +315,10 @@ public class MainController {
 					.findByDoctor(
 						doctorId.get())) {
 					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
-					pr.setFilename(lr.getPrescriptionPDF());
-					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setDoctor(doctorRepository.findById(lr.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(lr.getPatient()).get());
+					pr.setFilename(lr.getLabRequisitionPDF());
+					pr.setRequestDate(lr.getLabRequisitionDate());
 					pr.setSymptoms(lr.getSymptoms());
 					labRequests.add(pr);
 				}
@@ -328,10 +328,10 @@ public class MainController {
 					.findByPatient(
 							patientId.get())) {
 					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
-					pr.setFilename(lr.getPrescriptionPDF());
-					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setDoctor(doctorRepository.findById(lr.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(lr.getPatient()).get());
+					pr.setFilename(lr.getLabRequisitionPDF());
+					pr.setRequestDate(lr.getLabRequisitionDate());
 					pr.setSymptoms(lr.getSymptoms());
 					labRequests.add(pr);
 				}
@@ -340,10 +340,10 @@ public class MainController {
 					labRequestRepository
 					.findAll()) {
 					PatientLabRequestsResponse pr = new PatientLabRequestsResponse();
-					pr.setDoctor(doctorRepository.findById(doctorId.get()).get());
-					pr.setPatient(patientRepo.findById(patientId.get()).get());
-					pr.setFilename(lr.getPrescriptionPDF());
-					pr.setRequestDate(lr.getPrescriptionDate());
+					pr.setDoctor(doctorRepository.findById(lr.getDoctor()).get());
+					pr.setPatient(patientRepo.findById(lr.getPatient()).get());
+					pr.setFilename(lr.getLabRequisitionPDF());
+					pr.setRequestDate(lr.getLabRequisitionDate());
 					pr.setSymptoms(lr.getSymptoms());
 					labRequests.add(pr);
 				}

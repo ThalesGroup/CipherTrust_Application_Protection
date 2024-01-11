@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "lab_requests")
-public class LabRequest {	
+public class LabRequest {
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -29,13 +29,13 @@ public class LabRequest {
 
 	@Column(name = "patient_id")
 	private String patient;
-	
-	@Column(name = "prescription_date")
-	private String prescriptionDate;
-	
-	@Column(name = "prescription_pdf")
-	private String prescriptionPDF;
-	
+
+	@Column(name = "request_date")
+	private String labRequisitionDate;
+
+	@Column(name = "request_form")
+	private String labRequisitionPDF;
+
 	@Column
 	private String symptoms;
 
@@ -63,20 +63,20 @@ public class LabRequest {
 		this.patient = patient;
 	}
 
-	public String getPrescriptionDate() {
-		return prescriptionDate;
+	public String getLabRequisitionDate() {
+		return labRequisitionDate;
 	}
 
-	public void setPrescriptionDate(String prescriptionDate) {
-		this.prescriptionDate = prescriptionDate;
+	public void setLabRequisitionDate(String labRequisitionDate) {
+		this.labRequisitionDate = labRequisitionDate;
 	}
 
-	public String getPrescriptionPDF() {
-		return prescriptionPDF;
+	public String getLabRequisitionPDF() {
+		return labRequisitionPDF;
 	}
 
-	public void setPrescriptionPDF(String prescriptionPDF) {
-		this.prescriptionPDF = prescriptionPDF;
+	public void setLabRequisitionPDF(String labRequisitionPDF) {
+		this.labRequisitionPDF = labRequisitionPDF;
 	}
 
 	public String getSymptoms() {
@@ -89,18 +89,18 @@ public class LabRequest {
 
 	@Override
 	public String toString() {
-		return "LabRequest [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", prescriptionDate="
-				+ prescriptionDate + ", prescriptionPDF=" + prescriptionPDF + ", symptoms=" + symptoms + "]";
+		return "LabRequest [id=" + id + ", doctor=" + doctor + ", patient=" + patient + ", labRequisitionDate="
+				+ labRequisitionDate + ", labRequisitionPDF=" + labRequisitionPDF + ", symptoms=" + symptoms + "]";
 	}
 
-	public LabRequest(String id, String doctor, String patient, String prescriptionDate, String prescriptionPDF,
+	public LabRequest(String id, String doctor, String patient, String labRequisitionDate, String labRequisitionPDF,
 			String symptoms) {
 		super();
 		this.id = id;
 		this.doctor = doctor;
 		this.patient = patient;
-		this.prescriptionDate = prescriptionDate;
-		this.prescriptionPDF = prescriptionPDF;
+		this.labRequisitionDate = labRequisitionDate;
+		this.labRequisitionPDF = labRequisitionPDF;
 		this.symptoms = symptoms;
 	}
 
@@ -108,4 +108,5 @@ public class LabRequest {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+
 }

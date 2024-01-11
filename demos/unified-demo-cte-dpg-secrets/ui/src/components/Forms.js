@@ -1,21 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import moment from "moment-timezone";
 import Datetime from "react-datetime";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { Col, Row, Card, Form, Button, InputGroup } from '@themesberg/react-bootstrap';
 import axios from "axios";
-
-async function addPatientRecord(data) {
-  console.log(
-    JSON.stringify(data)
-  )
-  axios.post("http://localhost:8080/api/patients", data)
-  .then((response) => {
-    console.log(response);
-  });
-}
 
 export const GeneralInfoForm = () => {
   const [dateOfBirth, setDateOfBirth] = useState("01/01/1990");
@@ -31,6 +22,43 @@ export const GeneralInfoForm = () => {
   const [zipCode, setZipCode] = useState('22202')
   const [healthCardNumber, setHealthCardNumber] = useState('1EG4-TE5-MK72')
   const [healthCardExpiry, setHealthCardExpiry] = useState("01/01/2025");
+  const [bloodGroup, setBloodGroup] = useState('Z+');
+  const [ailments, setAilments] = useState('TBD');
+  const [primaryPhysician, setPrimaryPhysician] = useState('');
+
+  const [doctors, setDoctors] = useState("");
+  const history = useHistory();
+
+  async function addPatientRecord(data) {
+    console.log(
+      JSON.stringify(data)
+    )
+    axios.post("http://localhost:8080/api/patients", data)
+    .then((response) => {
+      history.push('/records/patients');
+    });
+  }
+
+  useEffect(() => {
+    let accessToken = sessionStorage.getItem('__T__');
+    let url_get_doctors = 'http://localhost:8080/api/doctors'  
+    axios
+        .get(url_get_doctors, { headers: {"Authorization" : `Bearer ${accessToken}`} })
+        .then((res) => {
+          console.log(res.data);
+          setDoctors(res.data);
+        })
+        .catch((err) => console.log(err));
+  }, []);
+
+  const doctors_select_values = {};
+  for (const doctor of doctors) {
+    if (doctor.id in doctors_select_values) {
+      doctors_select_values[doctor.id].push(doctor);
+    } else {
+      doctors_select_values[doctor.id] = [doctor];
+    }
+  }
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -47,7 +75,10 @@ export const GeneralInfoForm = () => {
       state,
       zipCode,
       healthCardNumber,
-      healthCardExpiry
+      healthCardExpiry,
+      bloodGroup,
+      ailments,
+      primaryPhysician
     });
   };
 
@@ -141,7 +172,7 @@ export const GeneralInfoForm = () => {
             </Col>
           </Row>
 
-          <h5 className="my-4">HealthCare information</h5>
+          <h5 className="my-4">HealthCare Information</h5>
           <Row>
             <Col sm={6} className="mb-3">
               <Form.Group id="address">
@@ -174,6 +205,54 @@ export const GeneralInfoForm = () => {
                     </InputGroup>
                   )} 
                 />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <h5 className="my-4">Medical Information</h5>
+          <Row>
+            <Col sm={4} className="mb-3">
+              <Form.Group id="bloodGroup">
+                <Form.Label>Blood Group</Form.Label>
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Enter your Blood Group" 
+                value={bloodGroup}
+                onChange={e => setBloodGroup(e.target.value)} 
+                />
+              </Form.Group>
+            </Col>
+            <Col sm={4} className="mb-3">
+              <Form.Group id="ailments">
+                <Form.Label>Existing Conditions</Form.Label>
+                <Form.Control 
+                required 
+                type="text" 
+                placeholder="Any existing conditions" 
+                value={ailments}
+                onChange={e => setAilments(e.target.value)} 
+                />
+              </Form.Group>
+            </Col>
+            <Col sm={4} className="mb-3">
+              <Form.Group id="primaryPhysician">
+                <Form.Label>Select Physician</Form.Label>
+                <Form.Select 
+                  defaultValue="1"
+                  onChange={e => setPrimaryPhysician(e.target.value)}
+                  value={primaryPhysician}>
+                  <option value="">Select</option>
+                  {
+                    Object.entries(doctors_select_values).map((entry) => {
+                      const row = entry[0];
+                      const details = entry[1];
+                      return(
+                        <option value={row}>{details[0].firstName} {details[0].lastName}</option>      
+                      )
+                    })
+                  }
+                </Form.Select>
               </Form.Group>
             </Col>
           </Row>
