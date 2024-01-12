@@ -45,10 +45,16 @@ const PatientDetails = (props) => {
   const [symptoms, setSymptoms] = useState('Stiff Back');
   const [prescriptionDate, setPrescriptionDate] = useState(yesterday);
   const [prescriptionLength, setPrescriptionLength] = useState('90');
+  const [selectedFile, setSelectedFile] = useState('');
 
   const handleAppointmentModalClose = () => setShowAppointmentModal(false);
   const handleLabRequestModalClose = () => setShowLabRequestModal(false);
   const handlePrescriptionModalClose = () => setShowPrescriptionModal(false);
+
+  const onFileChange = (event) => {
+    console.log(event.target.files[0]);
+    setSelectedFile(event.target.files[0]);
+  };
 
   //Save Appointment Data
   async function addAppointment(data) {
@@ -60,6 +66,7 @@ const PatientDetails = (props) => {
 
   const submitAppointment = async event => {
     event.preventDefault();
+    
     const record = await addAppointment({
       doctor,
       patient,
@@ -86,7 +93,12 @@ const PatientDetails = (props) => {
 
   //Save Lab Result
   async function addLabResult(data) {
-    axios.post("http://localhost:8080/api/lab-requests", data)
+    axios({
+      method: "post",
+      url: "http://localhost:8080/api/lab-requests-attachment", 
+      data: data,
+      headers: { "Content-Type": "multipart/form-data" },
+    })
     .then((response) => {
       console.log(response);
     });
@@ -94,12 +106,19 @@ const PatientDetails = (props) => {
 
   const submitLabResultUpload = async event => {
     event.preventDefault();
-    const record = await addLabResult({
-      doctor,
-      patient,
-      labRequisitionDate,
-      symptoms
-    });    
+    const formData = new FormData();
+    // Update the formData object
+    formData.append(
+        "file",
+        selectedFile,
+        selectedFile.name
+    );
+    formData.append("doctor", doctor);
+    formData.append("patient", patient);
+    formData.append("labRequisitionDate", labRequisitionDate);
+    formData.append("symptoms", symptoms);
+
+    const record = await addLabResult(formData);
     axios
       .get(url_get_lab_reports, { headers: {"Authorization" : `Bearer ${sessionStorage.getItem('__T__')}`} })
       .then((res) => {
@@ -448,6 +467,18 @@ const PatientDetails = (props) => {
                     placeholder="Enter patient symptoms" 
                     defaultValue={symptoms} 
                     onChange={e => setSymptoms(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12} className="mb-3">
+                <Form.Group id="prescriptionPDF">
+                  <Form.Label>Upload Prescription</Form.Label>
+                  <Form.Control 
+                    required 
+                    type="file" 
+                    onChange={e => onFileChange(e)}
                   />
                 </Form.Group>
               </Col>

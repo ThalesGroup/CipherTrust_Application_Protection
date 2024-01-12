@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.cpl.cdsp.bean.PatientAppointmentsResponse;
 import io.cpl.cdsp.bean.PatientLabRequestsResponse;
@@ -32,6 +33,7 @@ import io.cpl.cdsp.repository.DoctorRepository;
 import io.cpl.cdsp.repository.LabRequestRepository;
 import io.cpl.cdsp.repository.PatientRepository;
 import io.cpl.cdsp.repository.PrescriptionRepository;
+import io.cpl.cdsp.service.AttachmentService;
 
 /**
  * @author Anurag Jain, developer advocate Thales Group
@@ -57,6 +59,9 @@ public class MainController {
 	
 	@Autowired
 	AppointmentRepository appointmentRepository;
+	
+	@Autowired
+	AttachmentService fileAttachmentService;
 	
 	@PostMapping("/patients")
 	public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
@@ -111,6 +116,30 @@ public class MainController {
 		try {
 			LabRequest _labRequest = labRequestRepository.save(labRequest);
 			return new ResponseEntity<>(_labRequest, 
+					HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PostMapping("/lab-requests-attachment")
+	public ResponseEntity<LabRequest> createLabRequestWithAttachment(
+			@RequestParam("file") MultipartFile file,
+			@RequestParam("doctor") String doctorId,
+			@RequestParam("patient") String patientId,
+			@RequestParam("labRequisitionDate") String labRequisitionDate,
+			@RequestParam("symptoms") String symptoms) {
+		try {
+			//LabRequest _labRequest = labRequestRepository.save(labRequest);
+			String pdfName = fileAttachmentService.saveAttachment(file);
+			LabRequest _labRequest = new LabRequest();
+			_labRequest.setDoctor(doctorId);
+			_labRequest.setPatient(patientId);
+			_labRequest.setLabRequisitionDate(labRequisitionDate);
+			_labRequest.setSymptoms(symptoms);
+			_labRequest.setLabRequisitionPDF(pdfName);
+			return new ResponseEntity<>(labRequestRepository.save(_labRequest), 
 					HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, 
