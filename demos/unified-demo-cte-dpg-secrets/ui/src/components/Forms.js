@@ -29,11 +29,18 @@ export const GeneralInfoForm = () => {
   const [doctors, setDoctors] = useState("");
   const history = useHistory();
 
+  let host="localhost"
+  let port="8080"
+  if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+      host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+      port=process.env.REACT_APP_BACKEND_PORT
+  }
+
   async function addPatientRecord(data) {
     console.log(
       JSON.stringify(data)
     )
-    axios.post("http://localhost:8080/api/patients", data)
+    axios.post('http://'+host+':'+port+'/api/patients', data)
     .then((response) => {
       history.push('/records/patients');
     });
@@ -41,7 +48,7 @@ export const GeneralInfoForm = () => {
 
   useEffect(() => {
     let accessToken = sessionStorage.getItem('__T__');
-    let url_get_doctors = 'http://localhost:8080/api/doctors'  
+    let url_get_doctors = 'http://'+host+':'+port+'/api/doctors'  
     axios
         .get(url_get_doctors, { headers: {"Authorization" : `Bearer ${accessToken}`} })
         .then((res) => {

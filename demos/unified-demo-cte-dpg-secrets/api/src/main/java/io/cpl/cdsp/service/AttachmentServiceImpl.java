@@ -30,7 +30,7 @@ public class AttachmentServiceImpl implements AttachmentService {
 			if (file.getBytes().length > (1024 * 1024)) {
 				throw new Exception("File size exceeds maximum limit");
 			}
-			File path = new File("C:\\Users\\<USERID>\\tmp\\" + file.getOriginalFilename());
+			File path = new File(System.getenv("PV_UPLOAD_PATH") + file.getOriginalFilename());
 			path.createNewFile();
 			FileOutputStream output = new FileOutputStream(path);
 			output.write(file.getBytes());

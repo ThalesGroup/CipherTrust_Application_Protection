@@ -14,11 +14,17 @@ import ProfileCover from "../../assets/img/profile-cover.jpg";
 
 const PatientDetails = (props) => {
   let accessToken = sessionStorage.getItem('__T__');
-  let url_get_patient = 'http://localhost:8080/api/patients?id=' + props.location.state.uid
-  let url_get_doctors = 'http://localhost:8080/api/doctors'
-  let url_get_appointments = 'http://localhost:8080/api/appointments?patient_id=' + props.location.state.uid
-  let url_get_lab_reports = 'http://localhost:8080/api/lab-requests?patient_id=' + props.location.state.uid
-  let url_get_prescriptions = 'http://localhost:8080/api/prescriptions?patient_id=' + props.location.state.uid
+  let host="localhost"
+  let port="8080"
+  if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+      host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+      port=process.env.REACT_APP_BACKEND_PORT
+  }
+  let url_get_patient = 'http://'+host+':'+port+'/api/patients?id=' + props.location.state.uid
+  let url_get_doctors = 'http://'+host+':'+port+'/api/doctors'
+  let url_get_appointments = 'http://'+host+':'+port+'/api/appointments?patient_id=' + props.location.state.uid
+  let url_get_lab_reports = 'http://'+host+':'+port+'/api/lab-requests?patient_id=' + props.location.state.uid
+  let url_get_prescriptions = 'http://'+host+':'+port+'/api/prescriptions?patient_id=' + props.location.state.uid
 
   const history = useHistory();
   var current = new Date();
@@ -58,7 +64,7 @@ const PatientDetails = (props) => {
 
   //Save Appointment Data
   async function addAppointment(data) {
-    axios.post("http://localhost:8080/api/appointments", data)
+    axios.post('http://'+host+':'+port+'/api/appointments', data)
     .then((response) => {
       console.log(response);
     });
@@ -95,7 +101,7 @@ const PatientDetails = (props) => {
   async function addLabResult(data) {
     axios({
       method: "post",
-      url: "http://localhost:8080/api/lab-requests-attachment", 
+      url: 'http://'+host+':'+port+'/api/lab-requests-attachment', 
       data: data,
       headers: { "Content-Type": "multipart/form-data" },
     })
@@ -139,7 +145,7 @@ const PatientDetails = (props) => {
 
   //Save Prescription
   async function addPrescription(data) {
-    axios.post("http://localhost:8080/api/prescriptions", data)
+    axios.post('http://'+host+':'+port+'/api/prescriptions', data)
     .then((response) => {
       console.log(response);
     });

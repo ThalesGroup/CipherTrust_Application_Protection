@@ -30,10 +30,10 @@ import ScrollToTop from "./components/ScrollToTop";
 
 ReactDOM.render(
   <KindeProvider
-		clientId=""
-		domain="https://cdsp.kinde.com"
-		redirectUri="http://localhost:3000"
-		logoutUri="http://localhost:3000"
+		clientId={process.env.REACT_APP_AUTH_KEY}
+		domain={process.env.REACT_APP_AUTH_URL}
+		redirectUri={process.env.REACT_APP_AUTH_REDIRECT_IP}
+		logoutUri={process.env.REACT_APP_AUTH_REDIRECT_IP}
     onRedirectCallback={(user, app_state) => {
       window.location = '/#/dashboard'
     }}

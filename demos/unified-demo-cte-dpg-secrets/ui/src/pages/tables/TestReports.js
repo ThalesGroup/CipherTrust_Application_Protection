@@ -10,12 +10,18 @@ import axios from 'axios';
 import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 
 const TestReports = () => {
+  let host="localhost"
+  let port="8080"
+  if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+      host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+      port=process.env.REACT_APP_BACKEND_PORT
+  }
   const [reports, setReports] = useState("");
   const { user, isAuthenticated, isLoading, getPermission, getPermissions, getToken } = useKindeAuth();
 
   useEffect(() => {
     let accessToken = sessionStorage.getItem('__T__');
-    let url = 'http://localhost:8080/api/lab-requests'
+    let url = 'http://'+host+':'+port+'/api/lab-requests'
     axios
         .get(url, { headers: {"Authorization" : `Bearer ${accessToken}`} })
         .then((res) => {

@@ -15,7 +15,14 @@ const PatientRecords = () => {
 
   useEffect(() => {
     let accessToken = sessionStorage.getItem('__T__');
-    let url = 'http://localhost:8080/api/patients'
+    let host="localhost"
+    let port="8080"
+    if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+        host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+        port=process.env.REACT_APP_BACKEND_PORT
+    }
+
+    let url = 'http://'+host+':'+port+'/api/patients'
     axios
         .get(url, { headers: {"Authorization" : `Bearer ${accessToken}`} })
         .then((res) => {
