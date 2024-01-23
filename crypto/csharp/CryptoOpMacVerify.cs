@@ -63,7 +63,7 @@ class NaeCryptoOpMACVerify
             var propertyFilePath = string.Empty;
             string path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var cadpPackage = Path.Combine(path, ".nuget", "packages", "ciphertrust.cadp.netcore");
-            var highestPackage = Directory.GetDirectories(cadpPackage).Select(x => Path.GetFileName(x)).OrderByDescending(e => new Version(e)).First();
+            var highestPackage = Directory.GetDirectories(cadpPackage).Select(x => Path.GetFileName(x)).OrderBy(x => Path.GetFileName(x)).Last();
             propertyFilePath = Path.Combine(cadpPackage, highestPackage, "content", "CADP.NETCore_Properties.xml");
 
             /*Initialize the CADP.NetCore library once for till library unloads. */
