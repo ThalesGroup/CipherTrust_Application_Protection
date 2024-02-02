@@ -17,49 +17,69 @@ public class PaymentData {
     @Column
     private String name;
     @Column
-    private String dob;
+    private String cc;
     @Column
-    private String healthCardNum;
+    private String cvv;
+    @Column
+    private String expiry;
     @Column
     private String zip;
     
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getDob() {
-		return dob;
-	}
-	public void setDob(String dob) {
-		this.dob = dob;
-	}
-	public String getHealthCardNum() {
-		return healthCardNum;
-	}
-	public void setHealthCardNum(String healthCardNum) {
-		this.healthCardNum = healthCardNum;
-	}
-	public String getZip() {
-		return zip;
-	}
-	public void setZip(String zip) {
-		this.zip = zip;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public PaymentData(String id, String name, String dob, String healthCardNum, String zip) {
-		this.id = id;
-		this.name = name;
-		this.dob = dob;
-		this.healthCardNum = healthCardNum;
-		this.zip = zip;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCc() {
+        return cc;
+    }
+
+    public void setCc(String cc) {
+        this.cc = cc;
+    }
+
+    public String getCvv() {
+        return cvv;
+    }
+
+    public void setCvv(String cvv) {
+        this.cvv = cvv;
+    }
+
+    public String getExpiry() {
+        return expiry;
+    }
+
+    public void setExpiry(String expiry) {
+        this.expiry = expiry;
+    }
+
+    public String getZip() {
+        return zip;
+    }
+
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
+
+	public PaymentData(String id, String name, String cc, String cvv, String expiry, String zip) {
+        this.id = id;
+        this.name = name;
+        this.cc = cc;
+        this.cvv = cvv;
+        this.expiry = expiry;
+        this.zip = zip;
 	}
     
 	public PaymentData() {
@@ -67,7 +87,7 @@ public class PaymentData {
 
 	@Override
 	public String toString() {
-		return "PaymentData [id=" + id + ", name=" + name + ", dob=" + dob + ", healthCardNum=" + healthCardNum
-				+ ", zip=" + zip + "]";
+		return "PaymentData [id=" + id + ", name=" + name + ", cc=" + cc + ", cvv=" + cvv + ", expiry=" + expiry
+		+ ", zip=" + zip + "]";
 	}  
 }

@@ -57,18 +57,16 @@ public class MainController {
 	public ResponseEntity<HealthData> createRecordPHI(
         @RequestParam("file") MultipartFile file,
         @RequestParam("name") String name,
-        @RequestParam("cc") String cc,
-        @RequestParam("cvv") String cvv,
-        @RequestParam("expiry") String expiry,
+        @RequestParam("dob") String dob,
+        @RequestParam("healthCardNum") String healthCardNumber,
         @RequestParam("zip") String zip) {
 		try {
 			String fileName = uploadService.saveAttachment(file);
             
             HealthData input = new HealthData();
             input.setName(name);
-            input.setCc(cc);
-            input.setCvv(cvv);
-            input.setExpiry(expiry);
+            input.setDob(dob);
+            input.setHealthCardNum(healthCardNumber);
             input.setZip(zip);
             input.setFileName(fileName);
 
