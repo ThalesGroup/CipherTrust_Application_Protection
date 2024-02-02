@@ -4,7 +4,6 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 // Standard JCE classes.
-import java.lang.Character.UnicodeBlock;
 import java.security.Provider;
 import java.security.Security;
 
@@ -12,6 +11,7 @@ import javax.crypto.Cipher;
 
 //CADP for JAVA specific classes.
 import com.ingrian.security.nae.FPECharset;
+import com.ingrian.security.nae.FPEFormat;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.IngrianProvider;
@@ -81,11 +81,12 @@ public class FF1EncryptionDecryptionSample
 			// FF1 algorithm which supports both ACVP and NIST test vectors.
 			String algorithm = "FPE/FF1v2/CARD10";
 
-			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).build();
+			// Initializes spec with tweak parameters and format
+			FPEParameterAndFormatSpec paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).setFpeFormat(FPEFormat.FIRST_TWO_LAST_FOUR).build();
 			// get a cipher
 			Cipher encryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
 			// initialize cipher to encrypt.
-			encryptCipher.init(Cipher.ENCRYPT_MODE, key, param);
+			encryptCipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
 
 			// encrypt data
 			byte[] outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
@@ -94,7 +95,7 @@ public class FF1EncryptionDecryptionSample
 
 			Cipher decryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
 			// to decrypt data, initialize cipher to decrypt
-			decryptCipher.init(Cipher.DECRYPT_MODE, key, param);
+			decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
 
 			// decrypt data
 			byte[] newbuf = decryptCipher.doFinal(outbuf);
@@ -111,7 +112,8 @@ public class FF1EncryptionDecryptionSample
 			//Create character set from characters in LATIN_EXTENDED_A Unicode block. Equivalent to FPECharset.getUnicodeRangeCharset("0100-017F"), where 0100-017F is code point range for LATIN_EXTENDED_A
 			//FPECharset charset = FPECharset.getUnicodeBlockCharset(UnicodeBlock.LATIN_EXTENDED_A);
 			
-			FPEParameterAndFormatSpec tweakCharsetParam = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_charset(charset).build();
+			// Initializes spec with tweak parameters, format and charset
+			FPEParameterAndFormatSpec tweakCharsetParam = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).setFpeFormat(FPEFormat.FIRST_TWO_LAST_FOUR).set_charset(charset).build();
 
 			encryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
 			// initialize cipher to encrypt.

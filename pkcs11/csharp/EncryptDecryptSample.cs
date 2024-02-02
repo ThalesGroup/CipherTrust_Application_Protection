@@ -1,4 +1,4 @@
-﻿//
+//
 // EncryptDecryptSample.cs
 //
 
@@ -531,7 +531,6 @@ namespace CADP.Pkcs11Sample
                             Buffer.BlockCopy(tagData, 0, encryptedData, 0, taglen);
                             Buffer.BlockCopy(encData, 0, encryptedData, taglen, encData.Length);
                             Console.WriteLine($"Tag Data: {ConvertUtils.BytesToHexString(tagData)}");
-                            
                         }
 
                         // Decrypt data

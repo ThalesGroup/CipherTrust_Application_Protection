@@ -123,7 +123,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="../pkcs11_sample_attributes.c" />
-    <ClCompile Include="../pkcs11_sample_helper.c" />
+    <ClCompile Include="../pkcs11_sample_helper.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/D "__WINDOWS__" %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
