@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 *  
 *  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
 *  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
-*  Was tested with CM 2.8 & CADP 8.13
+*  Was tested with CM 2.11 & CADP 8.13
 *  For more information on CADP see link below. 
 https://thalesdocs.com/ctp/con/cadp/cadp-java/latest/admin/index.html
 *  For more information on Snowflake External Functions see link below. 
@@ -46,6 +46,7 @@ public class ThalesGCPSnowCADPNbrDecryptFPE implements HttpFunction {
 		String tweakAlgo = null;
 		String tweakData = null;
 		String snowflakereturnstring = null;
+		NAESession session = null;
 	  
 	    try {
             
@@ -75,7 +76,7 @@ public class ThalesGCPSnowCADPNbrDecryptFPE implements HttpFunction {
             System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename", "CADP_for_JAVA.properties");
             IngrianProvider builder = new Builder().addConfigFileInputStream(getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
             //IngrianProvider builder = new Builder().addConfigFileInputStream(getClass().getClassLoader().getResourceAsStream("IngrianNAE.properties")).build();
-            NAESession session = NAESession.getSession(userName, password.toCharArray());
+            session = NAESession.getSession(userName, password.toCharArray());
             NAEKey key = NAEKey.getSecretKey(keyName, session);
 
     	    int row_number = 0;
@@ -129,14 +130,17 @@ public class ThalesGCPSnowCADPNbrDecryptFPE implements HttpFunction {
 			snowflakereturndata.append("]}");
 
 			 snowflakereturnstring = new String(snowflakereturndata);
-			System.out.println("string  = " + snowflakereturnstring);
-			//System.out.println(new Gson().toJson(snowflakereturnstring));
- 
+			 
         } catch (Exception e) {
        //     return "check exception";
         }
+	    finally{
+			if(session!=null) {
+				session.closeSession();
+			}
+		}
  
     response.getWriter().write(snowflakereturnstring);
-    //response.getWriter().write(new Gson().toJson(snowflakereturnstring));
+
   }
 }

@@ -1,7 +1,8 @@
-package com.example;
+
 
 
 import javax.crypto.Cipher;
+
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -19,9 +20,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import java.util.logging.Logger;
 
-/* This sample GCP Function is used to implement a Snowflake Database User Defined Function(UDF).  It is an example of how to use Thales Cipher Trust Manager Protect Application
+/* This test app to test the logic for a Snowflake Database User Defined Function(UDF).  It is an example of how to use Thales Cipher Trust Manager Protect Application
  * to protect sensitive data in a column.  This example uses Format Preserve Encryption (FPE) to maintain the original format of the 
- * data so applications or business intelligence tools do not have to change in order to use these columns.
+ * data so applications or business intelligence tools do not have to change in order to use these columns.  There is no need to deploy a function to run it.
 *  
 *  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
 *  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
@@ -34,12 +35,33 @@ https://docs.snowflake.com/en/sql-reference/external-functions-creating-gcp
  *@author  mwarner
  * 
  */
-public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
+public class GCPCloudFunctionTester implements HttpFunction {
 //  @Override
   
-  private static final Logger logger = Logger.getLogger(ThalesGCPSnowCADPNbrEncryptFPE.class.getName());
+  private static final Logger logger = Logger.getLogger(GCPCloudFunctionTester.class.getName());
   private static final Gson gson = new Gson();
-  public void service(HttpRequest request, HttpResponse response)
+  
+  public static void main(String[] args) throws Exception
+  {
+	  
+	  GCPCloudFunctionTester nw2 = new GCPCloudFunctionTester();
+
+		String request = "{ \"data\":\r\n" + 
+				"  [\r\n" + 
+				"    [ 0,  \"page\" ],\r\n" + 
+				"    [ 1,  \"life, the universe, and everything\" ]\r\n" + 
+				"  ]\r\n" + 
+				"}";
+		
+		String response = null;
+		nw2.service(request, response);
+
+		
+	  
+  }
+  
+  
+  public void service(String request, String response)
       throws Exception {
 	  
 	  String encdata = "";
@@ -55,7 +77,7 @@ public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
             JsonArray snowflakedata = null;
             
             try {
-              JsonElement requestParsed = gson.fromJson(request.getReader(), JsonElement.class);
+              JsonElement requestParsed = gson.fromJson(request, JsonElement.class);
               JsonObject requestJson = null;
 
               if (requestParsed != null && requestParsed.isJsonObject()) {
@@ -71,7 +93,7 @@ public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
               logger.severe("Error parsing JSON: " + e.getMessage());
             }
      
-          
+    
             System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename", "CADP_for_JAVA.properties");
             IngrianProvider builder = new Builder().addConfigFileInputStream(getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
             //IngrianProvider builder = new Builder().addConfigFileInputStream(getClass().getClassLoader().getResourceAsStream("IngrianNAE.properties")).build();
@@ -82,7 +104,7 @@ public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
 			StringBuffer snowflakereturndata = new StringBuffer();
 			// Serialization
 			snowflakereturndata.append("{ \"data\": [");
-			String algorithm = "FPE/FF1/CARD10";
+			String algorithm = "FPE/FF1/CARD62";
 			// String algorithm = "AES/CBC/PKCS5Padding";
 			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
 					.build();
@@ -127,7 +149,7 @@ public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
 			snowflakereturndata.append("]}");
 
 			 snowflakereturnstring = new String(snowflakereturndata);
-
+ 
  
         } catch (Exception e) {
        //     return "check exception";
@@ -137,8 +159,15 @@ public class ThalesGCPSnowCADPNbrEncryptFPE implements HttpFunction {
 				session.closeSession();
 			}
 		}
+ System.out.println(snowflakereturnstring);
+    //response.getWriter().write(snowflakereturnstring);
  
-    response.getWriter().write(snowflakereturnstring);
-
   }
+
+
+@Override
+public void service(HttpRequest request, HttpResponse response) throws Exception {
+	// TODO Auto-generated method stub
+	
+}
 }
