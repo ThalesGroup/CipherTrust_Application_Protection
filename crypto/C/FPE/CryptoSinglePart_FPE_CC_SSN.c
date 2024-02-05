@@ -97,7 +97,7 @@ void usage(void)
     fprintf(stderr, "usage: CryptoSinglePart_FPE_CC_SSN conf_file keyname algorithm indata iv passphrase user passwd tweakalgo tweakdata headerMode\n"
         "\n  conf_file - typically, CADP_CAPI.properties\n"
         "  keyname - key name\n"
-		"  algorithm - long FPE algorithm name only , current support: 'FPE/AES/CARD10' only\n"
+		"  algorithm - long FPE algorithm name only , current support: 'FPE/AES, FPE/FF1v2 and FPE/FF3-1' with CARD10, CARD26 and CARD62 only\n"
         "  indata - sample data to encrypt based on cardinality \n"
 	"  iv - initialization vector,not required, 'null'\n"
         "  passphrase - optional cache passphrase, 'null' for null passphrase\n"
