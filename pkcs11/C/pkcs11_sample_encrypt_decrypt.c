@@ -392,7 +392,7 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
  * Returns: CK_RV
  ************************************************************************
  */
-static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char cset_choc, char *charset, char *decrypted_file, char *encrypted_file, char *charsettype, char *header_version, int bOmitEncryption, char *tweakfilename)
+static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char cset_choc, char *charset, char *decrypted_file, char *encrypted_file, char *charsettype, char *header_version, int bOmitEncryption, char *tweakfilename, char *tweak_algo)
 {
     CK_BYTE		  def_iv[] = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F";
     CK_BYTE	      *pBuf = NULL;
@@ -453,6 +453,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_FPE_PARAMETER     fpeparams;
         CK_FPE_PARAMETER_UTF fpeparamsutf;
         CK_FF1_PARAMETER_UTF ff1paramsutf;
+        CK_FF31_PARAMETER ff31params;
         CK_MECHANISM	mechEncryptionPad =    { encheader|CKM_AES_CBC_PAD,   def_iv, 16 };
         CK_MECHANISM	mechEncryptionCtr =    { encheader|CKM_AES_CTR,       def_iv, 16 };
         CK_MECHANISM    mechEncryptionGCM =    { CKM_AES_GCM, &gcmParams, sizeof (CK_GCM_PARAMS) };
@@ -460,8 +461,8 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_MECHANISM    mechEncryptionRSA =    { encheader|CKM_RSA_PKCS, NULL, 0 };
         CK_MECHANISM	mechEncryptionFPE =    { encheader|CKM_THALES_FPE, &fpeparams, sizeof(fpeparams) };
         CK_MECHANISM	mechEncryptionFPEUTF = { encheader|CKM_THALES_FPE, &fpeparamsutf, sizeof(fpeparamsutf) };
-
         CK_MECHANISM	mechEncryptionFF1UTF = { encheader|CKM_THALES_FF1, &ff1paramsutf, sizeof(ff1paramsutf) };
+        CK_MECHANISM	mechEncryptionFF31 =   { encheader|CKM_THALES_FF3_1, &ff31params, sizeof(ff31params) };
         CK_MECHANISM    *pmechEncryption = NULL;
         CK_MECHANISM	mechDecryptionPad =    { decheader|CKM_AES_CBC_PAD,   def_iv, 16 };
         CK_MECHANISM	mechDecryptionCtr =    { decheader|CKM_AES_CTR,       def_iv, 16 };
@@ -471,6 +472,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_MECHANISM	mechDecryptionFPE =    { decheader|CKM_THALES_FPE, &fpeparams, sizeof(fpeparams) };
         CK_MECHANISM	mechDecryptionFPEUTF = { decheader|CKM_THALES_FPE, &fpeparamsutf, sizeof(fpeparamsutf) };
         CK_MECHANISM	mechDecryptionFF1UTF = { decheader|CKM_THALES_FF1, &ff1paramsutf, sizeof(ff1paramsutf) };
+        CK_MECHANISM	mechDecryptionFF31 = { decheader|CKM_THALES_FF3_1, &ff31params, sizeof(ff31params) };
         CK_MECHANISM    *pmechDecryption = NULL;
         CK_BYTE enc_mode = get_enc_mode(charsettype);
 
@@ -618,6 +620,28 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
                     ff1paramsutf.tweaklen = myhtonl(8);
                 }
                 else ff1paramsutf.tweaklen = myhtonl(0);
+            }
+            else if (!strcmp(operation, "FF3-1") ){
+                if(tweak_algo)
+                memcpy(ff31params.tweakAlgo, tweak_algo, strlen(tweak_algo));
+                ff31params.mode = enc_mode;
+                fpeparams.radix = 10;
+                if (ff31params.mode == CS_CARD10){
+                    memcpy(fpeparams.charset, "0123456789", 10);
+                    strcpy((char *)defPlainText, "98765432109876543210987");
+                    plaintextlen=18;
+                }
+                if (tweakfilename)
+                {
+                    FILE *pf=fopen(tweakfilename, "r");
+                    if (pf && fread(ff31params.tweak, 1, 14, pf)==14) ;
+                    if (pf) fclose(pf);
+                    ff31params.tweak[14] = '\0';
+                }
+                else{
+                    memcpy(ff31params.tweak, "D8E7920AFA330A", 14);
+                    ff31params.tweak[14] = '\0';
+                }               
             }
             else
             {
@@ -1044,6 +1068,12 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
             }
             bFpeMode = CK_TRUE;
         }
+        else if (!strcmp(operation, "FF3-1"))
+        {
+            pmechEncryption = &mechEncryptionFF31;
+            pmechDecryption = &mechDecryptionFF31;
+            bFpeMode = CK_TRUE;
+        }
         else if (!strcmp(operation, "FF1"))
         {
             pmechEncryption = &mechEncryptionFF1UTF;
@@ -1298,7 +1328,7 @@ FREE_RESOURCES:
         if(fp_write)
             fclose(fp_write);
 
-        if(bFpeMode)
+        if(bFpeMode && strcmp(operation, "FF3-1"))
             fprintf(stdout, "FPE/FF1 Tokenization: Encrypt/Decrypt matched error count = %d.\n", errorCount);
 
         return rc;
@@ -1310,7 +1340,7 @@ void usageEncryptDecrypt()
     printf ("Usage: pkcs11_sample_encrypt_decrypt -p pin [-s slotID] -k keyName [-i {k|m|u}:identifier] [-m module_path] [-o operation] [-f input_file_name] [-iv iv_in_hex] [-a AAD_in_hex] [-t tag_bits] ([-c charset_for_fpe_mode]|[-l literal_charset_filename_for_fpe_mode]|[-r ranged_charset_filename_for_fpe_mode]) [-d decrypted_file_name] [-e encrypted_file_name] [-u charsettype] [-h header_version] [-n] [-T tweakfile]\n");
     printf ("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     printf ("-z key_size key size for symmetric key in bytes.\n");
-    printf ("-o operation...CBC_PAD (default) or CTR or ECB or FPE or FF1\n");
+    printf ("-o operation...CBC_PAD (default) or CTR or ECB or GCM or FPE or FF1 or FF3-1\n");
     printf ("-c charset character set commandline typed input\n");
     printf ("-d optionally included decrypted file name.\n");
     printf ("-e optionally included encrypted file name.\n");
@@ -1320,6 +1350,7 @@ void usageEncryptDecrypt()
     printf ("-h header_version...v1.5 or v1.5base64 or v2.1 or v.2.7\n");
     printf ("-n... noencryption - decrypt only. Useful for decrypting a file\n");
     printf ("-T tweakfile ... read an 8-byte FPE/FF1 Tweak from a file\n");
+    printf ("-ta tweak algo ... NONE, SHA1, SHA256\n");
     exit(2);
 }
 
@@ -1361,6 +1392,7 @@ int main(int argc, char *argv[])
     char *charset = NULL;
     char *pAad = NULL;
 
+    char *tweak_algo = NULL;
     char *charsettype = "ASCII";
     char *header_version = NULL; /* NULL, v1.5, v1.5base64, v2.1, v2.7 allowed */
     int noencryption = 0; /* 0...encrypt&decrypt, 1...decrypt only */
@@ -1368,7 +1400,7 @@ int main(int argc, char *argv[])
 
     optind = 1;
 
-    while ((c = newgetopt(argc, argv, "p:k:m:o:f:l:iv:s:c:u:r:d:e:h:b:z:a:t:T:n;")) != EOF)
+    while ((c = newgetopt(argc, argv, "p:k:m:o:f:l:iv:s:c:u:r:d:e:h:b:ta:z:a:t:T:n;")) != EOF)
         switch (c)
         {
         case 'u':
@@ -1396,6 +1428,9 @@ int main(int argc, char *argv[])
             break;
         case 'f':
             filename = optarg;
+            break;
+        case ta:
+            tweak_algo = optarg;
             break;
         case 'T':
             tweakfilename = optarg;
@@ -1564,7 +1599,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        rc = encryptDecrypt(operation, filename, ivt, cset_choc, charset, decrypted_file, encrypted_file, charsettype, header_version, noencryption, tweakfilename);
+        rc = encryptDecrypt(operation, filename, ivt, cset_choc, charset, decrypted_file, encrypted_file, charsettype, header_version, noencryption, tweakfilename, tweak_algo);
         if (rc != CKR_OK)
         {
             break;

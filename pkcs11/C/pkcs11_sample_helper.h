@@ -90,6 +90,7 @@ extern CK_BBOOL             bNeverExtractable;
 #define op  ((int)'o' << 8 | (int)'p')
 #define np  ((int)'n' << 8 | (int)'p')
 #define iv  ((int)'i' << 8 | (int)'v')
+#define ta  ((int)'t' << 8 | (int)'a')
 
 #define ne  ((int)'n' << 8 | (int)'e')
 #define as  ((int)'a' << 8 | (int)'s')

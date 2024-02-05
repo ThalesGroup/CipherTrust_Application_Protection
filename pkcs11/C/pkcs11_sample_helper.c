@@ -2379,6 +2379,18 @@ CK_BYTE get_enc_mode(const char * charset_type)
     {
         enc_mode = CS_UTF8;
     }
+    else if (!strncmp(charset_type, "CARD10", 6))
+    {
+        enc_mode = CS_CARD10;
+    }
+    else if (!strncmp(charset_type, "CARD26", 6))
+    {
+        enc_mode = CS_CARD26;
+    }
+    else if (!strncmp(charset_type, "CARD62", 6))
+    {
+        enc_mode = CS_CARD62;
+    }
     else
     {
         fprintf(stderr, "Illegal character set type specified: Use one of ASCII, UTF16BE, UTF16LE, UTF32BE, UTF32LE, UTF8\n");
