@@ -1,26 +1,67 @@
-import * as React from 'react';
+import React, {useState} from 'react';
 import Grid from '@mui/material/Grid';
 import { TextField, Button } from '@mui/material';
+import axios from "axios";
 
 export default function ProtectHealthInfoCard() {
+  function getUID() {
+    return Date.now().toString(36);
+  }
+
+  const onFileChange = (event) => {
+    setUpload(event.target.files[0]);
+  };
+
+  async function addPHIData(data) {
+    axios({
+        method: "post",
+        url: 'http://192.168.2.221:8100/api/health-info/add', 
+        data: data,
+        headers: { "Content-Type": "application/json" },
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  }
+
+  async function uploadFile(data) {
+    axios({
+        method: "post",
+        url: 'http://192.168.2.221:8100/api/health-info/upload', 
+        data: data,
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  }
+
+  const submitPHIForm = async event => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append(
+        "file",
+        upload,
+        upload.name
+    );
+    formData.append("id", id);
+    try {
+        const res = await Promise.all([
+            addPHIData({id, name, healthCardNum, dob, zip}),
+            uploadFile(formData)
+        ])
+        console.log(res)
+    } catch {
+        throw Error("Data Submission Promise Failed!!!");
+    }
+  };
+
+  const[id, setId] = React.useState(getUID());
   const[name, setName] = React.useState('John Doe')
   const[healthCardNum, setHealthCardNum] = React.useState('123456-789-RL')
   const[dob, setDob] = React.useState('01/01/2000')
   const[zip, setZip] = React.useState('A1A1A1')
-
-  async function addPHIData(data) {
-    console.log(data)
-  }
-
-  const submitPHIForm = async event => {
-    event.preventDefault();    
-    await addPHIData({
-      name,
-      healthCardNum,
-      zip,
-      dob
-    });
-  };
+  const[upload, setUpload] = useState('');
 
   return (
     <form>
@@ -28,10 +69,35 @@ export default function ProtectHealthInfoCard() {
             <Grid item xs={6}>
                 <TextField
                     required
+                    id="phi-id"
+                    label="ID"
+                    disabled
+                    defaultValue={id}
+                    onChange={e => setId(e.target.value)}
+                    fullWidth
+                />
+            </Grid>
+            <Grid item xs={6}>
+                <TextField
+                    required
                     id="phi-fullname"
                     label="Patient Name"
                     defaultValue={name}
                     onChange={e => setName(e.target.value)}
+                    fullWidth
+                />
+            </Grid>
+        </Grid>
+        <Grid>&nbsp;</Grid>
+        <Grid container spacing={5}>
+            <Grid item xs={6}>
+                <TextField
+                    required
+                    id="phi-dob"
+                    label="Date of Birth"
+                    defaultValue={dob}
+                    onChange={e => setDob(e.target.value)}
+                    fullWidth
                 />
             </Grid>
             <Grid item xs={6}>
@@ -41,6 +107,7 @@ export default function ProtectHealthInfoCard() {
                     label="Health Card Name"
                     defaultValue={healthCardNum}
                     onChange={e => setHealthCardNum(e.target.value)}
+                    fullWidth
                 />
             </Grid>
         </Grid>
@@ -53,15 +120,19 @@ export default function ProtectHealthInfoCard() {
                     label="Zip Code"
                     defaultValue={zip}
                     onChange={e => setZip(e.target.value)}
+                    fullWidth
                 />
             </Grid>
             <Grid item xs={6}>
                 <TextField
-                    required
-                    id="phi-dob"
-                    label="Date of Birth"
-                    defaultValue={dob}
-                    onChange={e => setDob(e.target.value)}
+                    id="phi-upload"
+                    variant="outlined"
+                    type="file"
+                    inputProps={{
+                        multiple: true
+                    }}
+                    onChange={e => onFileChange(e)}
+                    fullWidth
                 />
             </Grid>
         </Grid>

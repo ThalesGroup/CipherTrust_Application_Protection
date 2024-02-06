@@ -53,26 +53,47 @@ public class MainController {
 		}
 	}
 
-    @PostMapping("/health-info")
-	public ResponseEntity<HealthData> createRecordPHI(
+    @PostMapping("/health-info/add")
+	public ResponseEntity<HealthData> createRecordPHI(@RequestBody HealthData data) {
+		try {
+			HealthData _record;
+			if(healthDataRepo.existsById(data.getId())) {
+				_record = healthDataRepo.getReferenceById(data.getId());
+				_record.setDob(data.getDob());
+				_record.setFileName("");
+				_record.setHealthCardNum(data.getHealthCardNum());
+				_record.setName(data.getName());
+				_record.setZip(data.getZip());
+			} else {
+				_record = data;
+			}
+			HealthData _response = healthDataRepo.save(_record);
+			return new ResponseEntity<>(_response, 
+					HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, 
+				HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+    @PostMapping("/health-info/upload")
+	public ResponseEntity<HealthData> uploadFilePHI(
         @RequestParam("file") MultipartFile file,
-        @RequestParam("name") String name,
-        @RequestParam("dob") String dob,
-        @RequestParam("healthCardNum") String healthCardNumber,
-        @RequestParam("zip") String zip) {
+        @RequestParam("id") String id) {
 		try {
 			String fileName = uploadService.saveAttachment(file);
-            
-            HealthData input = new HealthData();
-            input.setName(name);
-            input.setDob(dob);
-            input.setHealthCardNum(healthCardNumber);
-            input.setZip(zip);
-            input.setFileName(fileName);
-
-            HealthData _responseData = healthDataRepo.save(input);
-			return new ResponseEntity<>(_responseData, 
-					HttpStatus.CREATED);
+			HealthData _record;
+			if(healthDataRepo.existsById(id)) {
+				_record = healthDataRepo.getReferenceById(id);
+				_record.setFileName(fileName);
+			} else {
+				_record = new HealthData();
+				_record.setId(id);
+				_record.setFileName(fileName);
+			}
+			HealthData _response = healthDataRepo.save(_record);
+			return new ResponseEntity<>(_response, 
+					HttpStatus.CREATED);            
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, 
 				HttpStatus.INTERNAL_SERVER_ERROR);

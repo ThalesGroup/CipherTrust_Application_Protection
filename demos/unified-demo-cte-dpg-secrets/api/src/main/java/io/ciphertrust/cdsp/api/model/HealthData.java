@@ -1,6 +1,5 @@
 package io.ciphertrust.cdsp.api.model;
 
-import org.hibernate.annotations.GenericGenerator;
 import jakarta.persistence.*;
 
 /**
@@ -11,8 +10,6 @@ import jakarta.persistence.*;
 @Table(name = "phi")
 public class HealthData {
     @Id
-	@GeneratedValue(generator = "uuid")
-	@GenericGenerator(name = "uuid", strategy = "uuid2")
 	private String id;
     @Column
     private String name;
