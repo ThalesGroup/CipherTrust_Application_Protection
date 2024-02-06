@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios';
 import Grid from '@mui/material/Grid';
 import { TextField, Button } from '@mui/material';
 
@@ -10,11 +11,15 @@ export default function ProtectPaymentInfoCard() {
   const[zip, setZip] = React.useState('A1A1A1')
 
   async function addPCIData(data) {
-    // axios.post('http://'+host+':'+port+'/api/appointments', data)
-    // .then((response) => {
-    //   console.log(response);
-    // });
-    console.log(data)
+    axios({
+        method: "post",
+        url: 'http://192.168.2.221:8100/api/payment-info',
+        data: data,
+        headers: { "Content-Type": "application/json" },
+    })
+    .then((response) => {
+        console.log(response);
+    });
   }
 
   const submitPCIForm = async event => {

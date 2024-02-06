@@ -12,30 +12,6 @@ export default function ProtectHealthInfoCard() {
     setUpload(event.target.files[0]);
   };
 
-  async function addPHIData(data) {
-    axios({
-        method: "post",
-        url: 'http://192.168.2.221:8100/api/health-info/add', 
-        data: data,
-        headers: { "Content-Type": "application/json" },
-      })
-      .then((response) => {
-        console.log(response);
-      });
-  }
-
-  async function uploadFile(data) {
-    axios({
-        method: "post",
-        url: 'http://192.168.2.221:8100/api/health-info/upload', 
-        data: data,
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((response) => {
-        console.log(response);
-      });
-  }
-
   const submitPHIForm = async event => {
     event.preventDefault();
     const formData = new FormData();
@@ -45,15 +21,24 @@ export default function ProtectHealthInfoCard() {
         upload.name
     );
     formData.append("id", id);
-    try {
-        const res = await Promise.all([
-            addPHIData({id, name, healthCardNum, dob, zip}),
-            uploadFile(formData)
-        ])
-        console.log(res)
-    } catch {
-        throw Error("Data Submission Promise Failed!!!");
-    }
+
+    axios({
+        method: "post",
+        url: 'http://192.168.2.221:8100/api/health-info/add', 
+        data: {id, name, healthCardNum, dob, zip},
+        headers: { "Content-Type": "application/json" },
+    })
+    .then((response) => {
+        axios({
+            method: "post",
+            url: 'http://192.168.2.221:8100/api/health-info/upload', 
+            data: formData,
+            headers: { "Content-Type": "multipart/form-data" },
+        })
+        .then((response) => {
+            console.log(response);
+        });
+    });
   };
 
   const[id, setId] = React.useState(getUID());

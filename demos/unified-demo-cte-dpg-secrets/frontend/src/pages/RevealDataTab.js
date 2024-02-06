@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, {useEffect} from 'react';
+import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import MuiAccordion from '@mui/material/Accordion';
@@ -12,10 +13,6 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-
-const rowsPHI = [
-    { id: 1, name: 'John Doe', healthCard: '123456-789-RL', zip: 'K2V0P3', dob: '01/01/2000'},
-];
 
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -54,28 +51,54 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 export default function RevealDataTab() {
-  const ownerDataPCI = [
-    { id: 1, name: 'Test User', cc: '1234-5678-9012-3456', cvv: 888, expiry: '01/01/2025', zip: 'K2V0P3' },
-  ];
-  const operatorDataPCI = [
-    { id: 1, name: 'Test User', cc: '1234-xxxx-xxxx-xxxx', cvv: 888, expiry: '01/01/2025', zip: 'K2V0P3' },
-  ];
-  const unauthorizedDataPCI = [
-    { id: 1, name: 'Test User', cc: 'asdasjdadsjasydatsdio==', cvv: 888, expiry: '01/01/2025', zip: 'K2V0P3' },
-  ];
+  let pwdFake = "_F@keP@@S"
+  let host="192.168.2.221"
+  let port="8100"
+  if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+      host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+      port=process.env.REACT_APP_BACKEND_PORT
+  }
+
   const [expanded, setExpanded] = React.useState('panel1');
-  const [pciData, setPciData] = React.useState(unauthorizedDataPCI);
+  const [pciData, setPciData] = React.useState('');
+  const [phiData, setPhiData] = React.useState('');
   const [userType, setUserType] = React.useState('unauthorized');
+
+  useEffect(() => {
+    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
+    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
+    const authHeader = Buffer.from(`${userType}:${pwdFake}`).toString('base64');
+    axios
+        .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .then((res) => {
+          setPhiData(res.data.data);
+        })
+        .catch((err) => console.log(err));
+    axios
+        .get(urlPCI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .then((res) => {
+          setPciData(res.data.data);
+        })
+        .catch((err) => console.log(err));
+    }, [host, port, pwdFake, userType]);
 
   const handleUserChange = (event) => {
     setUserType(event.target.value)
-    if (event.target.value === "owner") {
-        setPciData(ownerDataPCI)
-    } else if (event.target.value === "operator") {
-        setPciData(operatorDataPCI)
-    } else {
-        setPciData(unauthorizedDataPCI)
-    }
+    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
+    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
+    const authHeader = Buffer.from(`${event.target.value}:${pwdFake}`).toString('base64');
+    axios
+        .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .then((res) => {
+          setPhiData(res.data.data);
+        })
+        .catch((err) => console.log(err));
+    axios
+        .get(urlPCI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .then((res) => {
+          setPciData(res.data.data);
+        })
+        .catch((err) => console.log(err));
   };
   const handleChange = (panel) => (event, newExpanded) => {
     setExpanded(newExpanded ? panel : false);
@@ -112,7 +135,7 @@ export default function RevealDataTab() {
           <Typography>Patient Health Information</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <RevealHealthDataCard rowsFromParent={rowsPHI} />
+          <RevealHealthDataCard rowsFromParent={phiData} />
         </AccordionDetails>
       </Accordion>      
     </div>
