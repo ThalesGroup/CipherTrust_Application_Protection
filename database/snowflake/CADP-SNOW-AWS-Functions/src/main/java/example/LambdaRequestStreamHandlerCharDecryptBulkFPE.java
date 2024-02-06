@@ -61,7 +61,7 @@ public class LambdaRequestStreamHandlerCharDecryptBulkFPE implements RequestStre
 	private static final Gson gson = new Gson();
 
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-		context.getLogger().log("Input: " + inputStream);
+		//context.getLogger().log("Input: " + inputStream);
 		String input = IOUtils.toString(inputStream, "UTF-8");
 
 		Map<Integer, String> decryptedErrorMapTotal = new HashMap<Integer, String>();
@@ -78,15 +78,14 @@ public class LambdaRequestStreamHandlerCharDecryptBulkFPE implements RequestStre
 		JsonArray snowflakedata = null;
 		StringBuffer snowflakereturndatasb = new StringBuffer();
 		StringBuffer snowflakereturndatasc = new StringBuffer();
-
+		NAESession session = null;
 		try {
 
 			String keyName = "testfaas";
 			// String keyName = System.getenv("CMKEYNAME");
 			String userName = System.getenv("CMUSER");
 			String password = System.getenv("CMPWD");
-			int batchsize = 1000;
-			// int batchsize = System.getenv("BATCHSIZE");
+			int batchsize = Integer.parseInt(System.getenv("BATCHSIZE")); 
 			if (batchsize >= BATCHLIMIT)
 				batchsize = BATCHLIMIT;
 			spec = new FPEParameterAndFormatSpec[batchsize];
@@ -117,7 +116,7 @@ public class LambdaRequestStreamHandlerCharDecryptBulkFPE implements RequestStre
 			IngrianProvider builder = new Builder().addConfigFileInputStream(
 					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
 
-			NAESession session = NAESession.getSession(userName, password.toCharArray());
+			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 
 			int row_number = 0;
@@ -160,7 +159,7 @@ public class LambdaRequestStreamHandlerCharDecryptBulkFPE implements RequestStre
 					for (int j = 0; j < snowflakerow.size(); j++) {
 
 						JsonPrimitive snowflakecolumn = snowflakerow.get(j).getAsJsonPrimitive();
-						System.out.print(snowflakecolumn + " ");
+						//System.out.print(snowflakecolumn + " ");
 						String sensitive = snowflakecolumn.getAsJsonPrimitive().toString();
 						// get a cipher
 						if (j == 1) {
@@ -254,6 +253,11 @@ public class LambdaRequestStreamHandlerCharDecryptBulkFPE implements RequestStre
 
 			System.out.println("in exception with ");
 			e.printStackTrace(System.out);
+		}
+		finally{
+			if(session!=null) {
+				session.closeSession();
+			}
 		}
 
 		JsonObject inputObj = gson.fromJson(snowflakereturnstring, JsonObject.class);

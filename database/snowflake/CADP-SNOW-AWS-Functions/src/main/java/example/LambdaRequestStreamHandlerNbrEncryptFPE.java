@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.crypto.Cipher;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.google.gson.Gson;
@@ -39,10 +41,8 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 	private static final Gson gson = new Gson();
 
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-		context.getLogger().log("Input: " + inputStream);
+	//	context.getLogger().log("Input: " + inputStream);
 		String input = IOUtils.toString(inputStream, "UTF-8");
-
-//		OutputStreamWriter output = new OutputStreamWriter(outputStream);
 
 		String encdata = "";
 		String tweakAlgo = null;
@@ -58,6 +58,7 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 		JsonArray snowflakedata = null;
 		StringBuffer snowflakereturndatasb = new StringBuffer();
 		StringBuffer snowflakereturndatasc = new StringBuffer();
+		NAESession session = null;
 		try {
 
 			String keyName = "testfaas";
@@ -73,9 +74,9 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 					//characters but it does not do it for snowflake json.  
 					JsonElement bodyele = snowflakeinput.get("body");
 					String bodystr = bodyele.getAsString().replaceAll(System.lineSeparator(),"");
-					System.out.println("bodystr before replace" + bodystr );
+					//System.out.println("bodystr before replace" + bodystr );
 					bodystr = bodystr.replaceAll("\\\\", "");
-					System.out.println("bodystr after replace" + bodystr );
+					//System.out.println("bodystr after replace" + bodystr );
 					body = gson.fromJson(bodystr, JsonObject.class);
 					snowflakedata = body.getAsJsonArray("data");
 				} else {
@@ -90,14 +91,9 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 					"CADP_for_JAVA.properties");
 			IngrianProvider builder = new Builder().addConfigFileInputStream(
 					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
-			NAESession session = NAESession.getSession(userName, password.toCharArray());
+			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
-	//		NAESecureRandom rng = new NAESecureRandom(session);
 
-	//		byte[] iv = new byte[16];
-	//		rng.nextBytes(iv);
-	//		IvParameterSpec ivSpec = new IvParameterSpec(iv);
-			System.out.println("Key Name is : " + key.getName());
 			int row_number = 0;
 
 			snowflakereturndatasb = new StringBuffer();
@@ -151,9 +147,9 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 			snowflakereturndatasc.append("] }");
 			snowflakereturndatasb.append(new Gson().toJson(snowflakereturndatasc));
 			snowflakereturndatasb.append("}");
-
 			snowflakereturnstring = new String(snowflakereturndatasb);
-			System.out.println("snowflakereturnstring  " + snowflakereturnstring);
+			//snowflakereturnstring = StringUtils.deleteWhitespace(snowflakereturnstring);
+			//System.out.println("snowflakereturnstring  " + snowflakereturnstring);
 
 		} catch (Exception e) {
 			statusCode = 400;
@@ -166,6 +162,11 @@ public class LambdaRequestStreamHandlerNbrEncryptFPE implements  RequestStreamHa
 			snowflakereturndatasb.append("] }}");
 			System.out.println("in exception with ");
 			e.printStackTrace(System.out);
+		}
+		finally{
+			if(session!=null) {
+				session.closeSession();
+			}
 		}
 			outputStream.write(snowflakereturnstring.getBytes());
 
