@@ -237,6 +237,7 @@ extern unsigned long ulCachedTime;
 #define 	keyIdMuid   0x0011
 #define 	keyIdImport 0x0100
 #define     keyIdAlias  0x0101
+#define	    keyIdAttr   0x0111
 
 
 int newgetopt(int argc, char* const *argv, const char *optstr);
