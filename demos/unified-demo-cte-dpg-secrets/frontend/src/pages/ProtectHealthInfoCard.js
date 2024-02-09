@@ -22,16 +22,25 @@ export default function ProtectHealthInfoCard() {
     );
     formData.append("id", id);
 
+    let host="localhost"
+    let port="8080"
+    if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
+        host=process.env.REACT_APP_BACKEND_IP_ADDRESS
+        port=process.env.REACT_APP_BACKEND_PORT
+    }
+    let url_add_json = 'http://'+host+':'+port+'/v1/api/health-info/add';
+    let url_upload = 'http://'+host+':'+port+'/v1/api/health-info/upload';
+
     axios({
         method: "post",
-        url: 'http://192.168.2.221:8100/api/health-info/add', 
+        url: url_add_json, 
         data: {id, name, healthCardNum, dob, zip},
         headers: { "Content-Type": "application/json" },
     })
     .then((response) => {
         axios({
             method: "post",
-            url: 'http://192.168.2.221:8100/api/health-info/upload', 
+            url: url_upload, 
             data: formData,
             headers: { "Content-Type": "multipart/form-data" },
         })
