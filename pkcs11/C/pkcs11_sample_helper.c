@@ -292,7 +292,7 @@ CK_RV findKeyByVersion( char* keyLabel, CK_ULONG keyVersion, CK_OBJECT_HANDLE_PT
     {
         rc = FunctionListFuncPtr->C_FindObjects( hSession,
                 phKey,
-                MAX_FIND_RETURN,
+				MAX_FIND_RETURN,
                 &numOfObjReturned );
 
         if (rc != CKR_OK )
@@ -453,6 +453,9 @@ parse_ksid_sel(char *sel, char **ppKsid)
     case 'u':
         sid_type = keyIdUuid;
         break;
+    case 'i':
+        sid_type = keyIdAttr;
+        break;
     case 'm':
         sid_type = keyIdMuid;
         break;
@@ -536,6 +539,10 @@ CK_RV findKey( char* keySearchId, int keyidType, CK_OBJECT_CLASS keyType, CK_OBJ
         findKeyTemplatePass[0].type = CKA_LABEL;
         break;
 
+    case keyIdAttr:
+        findKeyTemplatePass[0].type = CKA_ID;
+        break;
+
     case keyIdUuid:
         findKeyTemplatePass[0].type = CKA_THALES_OBJECT_UUID;
         break;
@@ -599,6 +606,80 @@ CK_RV findKey( char* keySearchId, int keyidType, CK_OBJECT_CLASS keyType, CK_OBJ
 
         if ((numOfObjReturned == 0) || (numOfObjReturned == 1))
         {
+            break;
+        }
+    }
+
+    rc = FunctionListFuncPtr->C_FindObjectsFinal(hSession);
+
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: Call to C_FindObjectsFinal failed; rc=0x%08x.\n", (unsigned int)rc);
+    }
+
+    return rc;
+}
+
+
+CK_RV findKeysByIdAttr(char* keySearchId, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys)
+{
+    CK_RV rc = CKR_OK;
+    CK_UTF8CHAR  *ksid = (CK_UTF8CHAR *) keySearchId;
+    CK_ULONG ksid_len = keySearchId ? (CK_ULONG) strlen(keySearchId) : 0;
+
+    /* find the key by CKA_ID. */
+    CK_ULONG  numOfObjReturned = 0;
+    CK_ATTRIBUTE_PTR findKeyTemplatePtr;
+    CK_ULONG  findKeyTemplateSize;
+
+    /* find the key by CKA_LABEL. */
+    CK_ATTRIBUTE findKeyTemplatePass[] =
+    {
+        {CKA_ID, ksid, ksid_len}
+    };
+
+	findKeyTemplatePtr = findKeyTemplatePass;
+    findKeyTemplateSize = sizeof(findKeyTemplatePass)/sizeof(CK_ATTRIBUTE);
+
+    /* call FindObjectsFinal just in case there's another search ongoing for this session. */
+    rc = FunctionListFuncPtr->C_FindObjectsFinal(hSession);
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: call to the first C_FindObjectsFinal() failed; rc=0x%08x\n", (unsigned int)rc);
+        *phKeys = CK_INVALID_HANDLE;
+        return rc;
+    }
+
+    rc = FunctionListFuncPtr->C_FindObjectsInit(hSession,
+            findKeyTemplatePtr,
+            findKeyTemplateSize
+                                               );
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: call to C_FindObjectsInit() failed: rc=0x%08x.\n", (unsigned int)rc);
+        *phKeys = CK_INVALID_HANDLE;
+        return rc;
+    }
+
+    /* loop thorugh C_FindObjcts until numOfObjReturned is 0 and we break out
+     * of the loop. we expect to find only 1  key that matches the name.
+     */
+
+    while (CK_TRUE)
+    {
+        rc = FunctionListFuncPtr->C_FindObjects( hSession,
+                phKeys,
+                *numObjects,
+                &numOfObjReturned);
+
+        if (rc != CKR_OK )
+        {
+            fprintf (stderr, "Error: call to C_FindObjects() returned %d objects with error; rc=0x%08x.\n", (int)numOfObjReturned, (unsigned int)rc);
+        }
+
+        if ((numOfObjReturned == 0) || (numOfObjReturned <= *numObjects))
+        {
+			*numObjects = numOfObjReturned;
             break;
         }
     }
@@ -1315,6 +1396,113 @@ CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATT
             printf("%s: year: %s, month: %s, day: %s.\n", pKeyDateDesc, ch_year, ch_mon, ch_mday);
     }
 
+    if( pKeyTemplate )
+    {
+        free ( pKeyTemplate );
+    }
+    return rc;
+}
+
+
+CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey)
+{
+    CK_RV		rc = CKR_OK;
+    CK_DATE     createDate, endDate;
+    CK_BYTE     keyIdBuf[256];
+    char        keyLabel[256];
+    char        keyUuid[128];
+    char        keyMuid[128];
+    char        keyImportedId[128];
+    char        keyAlias[256];
+    CK_ULONG    ulCachedTime, i;
+    CK_ULONG    ulLifeSpan=0;
+    CK_OBJECT_CLASS	keyCls;
+    CK_LONG     lKeyVersion;
+    char        ch_year[5];
+    char        ch_mon[3];
+    char        ch_mday[3];
+
+    char        serialno[256]= {0};
+    char        custom[5][1024];
+
+    CK_BBOOL    bCacheOnHost, bVersioned, blaSensitive, blnExtractable;
+    int         custom1Index = 17;
+
+    CK_ULONG    ulCreationTime, ulDeactivateTime = 0;
+    CK_ATTRIBUTE_PTR pKeyTemplate = NULL;
+    CK_DATE     keyTransDates[KEY_TRANS_DATES_MAX];
+    char        *pKeyDateDesc = NULL;
+
+    CK_ATTRIBUTE getAttrsTemplate[] =
+    {
+        {CKA_ID, keyIdBuf, sizeof(keyIdBuf) },                                    /*  0 */
+        {CKA_LABEL, keyLabel, sizeof(keyLabel) },                                 /*  1 */
+        {CKA_SERIAL_NUMBER, serialno, sizeof(serialno)},
+        {CKA_CLASS, &keyCls, sizeof(keyCls) },                                    /*  3 */
+
+        {CKA_THALES_OBJECT_UUID, keyUuid, sizeof(keyUuid)},                       /*  8 */
+        {CKA_THALES_OBJECT_MUID, keyMuid, sizeof(keyMuid)},
+        {CKA_THALES_OBJECT_ALIAS, keyAlias, sizeof(keyAlias)},                    /*  10 */
+        {CKA_THALES_OBJECT_IKID, keyImportedId, sizeof(keyImportedId)},           /* 11 */
+        {CKA_THALES_VERSIONED_KEY, &bVersioned, sizeof(bVersioned) },             /* 14 */
+
+        {CKA_ALWAYS_SENSITIVE,	&blaSensitive,	sizeof(CK_BBOOL)	},
+        {CKA_NEVER_EXTRACTABLE,	&blnExtractable,	sizeof(CK_BBOOL)	},
+
+        {CKA_THALES_CUSTOM_1, custom[0], sizeof(custom[0])},                          /* 17 */
+        {CKA_THALES_CUSTOM_2, custom[1], sizeof(custom[1])},
+        {CKA_THALES_CUSTOM_3, custom[2], sizeof(custom[2])},
+        {CKA_THALES_CUSTOM_4, custom[3], sizeof(custom[3])},                          /* 20 */
+        {CKA_THALES_CUSTOM_5, custom[4], sizeof(custom[4])}		                      /* 21 */
+    };
+    CK_ULONG getAttrsTemplateSize = sizeof(getAttrsTemplate)/sizeof(CK_ATTRIBUTE);
+
+    pKeyTemplate = (CK_ATTRIBUTE_PTR)calloc( (getAttrsTemplateSize), sizeof(CK_ATTRIBUTE) );
+    if(!pKeyTemplate)
+    {
+        printf ("Error allocating memory for pKeyTemplate!\n");
+        return CKR_HOST_MEMORY;
+    }
+
+    for(i=0; i<getAttrsTemplateSize; i++)
+    {
+        pKeyTemplate[i].type = getAttrsTemplate[i].type;
+        pKeyTemplate[i].pValue = getAttrsTemplate[i].pValue;
+        pKeyTemplate[i].ulValueLen = getAttrsTemplate[i].ulValueLen;
+    }
+
+    rc = FunctionListFuncPtr->C_GetAttributeValue(hSession,
+            hKey,
+            pKeyTemplate,
+            getAttrsTemplateSize);
+
+    if (rc != CKR_OK)
+    {
+        printf ("Error getting key attributes: %08x.\n", (unsigned int)rc);
+        return rc;
+    }
+
+    printf("CKA_ID: '%.*s'\n", (int)pKeyTemplate[0].ulValueLen, keyIdBuf);
+    printf("CKA_LABEL: '%.*s'\n", (int)pKeyTemplate[1].ulValueLen, keyLabel);
+    printf("CKA_CLASS: %08x\n", (unsigned int)keyCls);
+
+    printf("CKA_THALES_VERSIONED_KEY:  %s\n", bVersioned  ? "true" : "false");
+
+    printf("CKA_NEVER_EXTRACTABLE: \t%s\n", blnExtractable  ? "true" : "false");
+    printf("CKA_ALWAYS_SENSITIVE:  \t%s\n", blaSensitive  ? "true" : "false");
+
+    printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)pKeyTemplate[ 8].ulValueLen, keyUuid);
+    printf("CKA_THALES_OBJECT_MUID:  '%.*s'\n", (int)pKeyTemplate[ 9].ulValueLen, keyMuid);
+    printf("CKA_THALES_OBJECT_ALIAS: '%.*s'\n", (int)pKeyTemplate[10].ulValueLen, keyAlias);
+    printf("CKA_THALES_OBJECT_IKID:  '%.*s'\n", (int)pKeyTemplate[11].ulValueLen, keyImportedId);
+
+    for(i=0; i<5; i++)
+    {
+        custom[i][(int)pKeyTemplate[custom1Index+i].ulValueLen] = 0;
+        printf("CKA_THALES_CUSTOM_%d: '%s' (length %d)\n", (int)i+1, custom[i], (int)pKeyTemplate[custom1Index+i].ulValueLen);
+    }
+
+ 
     if( pKeyTemplate )
     {
         free ( pKeyTemplate );

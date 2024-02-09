@@ -302,6 +302,7 @@ void usage()
     printf ("-a alias: key alias, an alias can be used as part of template during key creation. Looking up an existing key by means of an alias is not supported in this sample program.\n");
     printf ("-ct cached_time cached time for key in minutes\n");
     printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.\n");
+    printf ("-I Non-unique searchable ID (CKA_ID).");
     printf ("-z key_size key size for symmetric key in bytes.\n");
     printf ("-c curve oid: for ECC keys only.\n");
     printf ("-C ... clear alias\n");
@@ -348,6 +349,7 @@ int main(int argc, char *argv[])
     char        *pKsid = NULL;
     int         ksid_type = keyIdLabel;
     char        *keyAlias = NULL;
+    char        *idattr = NULL;
     CK_ULONG     modulusBufLen = 520;
     CK_ULONG     privExpoBufLen = 512;
     CK_ULONG     pubExpoBufLen = 32;
@@ -365,7 +367,7 @@ int main(int argc, char *argv[])
     CK_BYTE     modulusBuf[ASYMKEY_BUF_LEN];
     unsigned long lifespan = 1;
 
-    while ((c = newgetopt(argc, argv, "c:p:kp:m:s:i:a:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
+    while ((c = newgetopt(argc, argv, "c:p:kp:m:s:i:a:I:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
     {
         switch (c)
         {
@@ -378,9 +380,11 @@ int main(int argc, char *argv[])
         case 'p':
             pin = optarg;
             break;
+        case 'I':
+			idattr = optarg;
+            break;
         case 'k':
             keyLabel = optarg;
-            symmetric = 1;
             break;
         case 'P':
             symmetric = 0;
@@ -460,6 +464,11 @@ int main(int argc, char *argv[])
         pKsid = keyLabel;
         ksid_type = keyIdLabel;
     }
+	else if (idattr)
+	{
+        pKsid = idattr;
+        ksid_type = keyIdAttr;
+	}
 
     if (NULL == pin || !pKsid) usage();
 
@@ -501,7 +510,22 @@ int main(int argc, char *argv[])
         loggedIn = 1;
         printf("Successfully logged in. \n");
 
-        if (symmetric == 0)
+		if (ksid_type = keyIdAttr)
+		{
+			CK_ULONG numObjects = 1000;
+			CK_OBJECT_HANDLE phKeys[1000];
+			int i = 0;
+
+			rc = findKeysByIdAttr(pKsid, &numObjects, phKeys);
+			if (rc != CKR_OK) {
+				break;
+			}
+			for (i = 0; i < numObjects; i++) {
+				printf("\nAttributes for key number %d\n", i + 1);
+				getAttributesValue(phKeys[i], 0, NULL, NULL);
+			}
+		}
+		else if (symmetric == 0)
         {
             rc = findKey(pKsid, ksid_type, CKO_PRIVATE_KEY, &hPrivateKey);
 
