@@ -24,6 +24,19 @@ import java.util.logging.Logger;
 
 public class ThalesGCPBigQueryCADPBulkFPE implements HttpFunction {
 //  @Override
+	/* This sample GCP Function is used to implement a User Defined Function(UDF) for Google Big Query.  It is an example of how to use Thales Cipher Trust Manager Protect Application
+	 * to protect sensitive data in a column.  This example uses Format Preserve Encryption (FPE) to maintain the original format of the 
+	 * data so applications or business intelligence tools do not have to change in order to use these columns.
+	*  
+	*  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
+	*  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
+	*  Was tested with CM 2.11 & CADP 8.13
+	*  For more information on CADP see link below. 
+	https://thalesdocs.com/ctp/con/cadp/cadp-java/latest/admin/index.html
+	 * 
+	 *@author  mwarnerr
+	 * 
+	 */
 
 	private static final Logger logger = Logger.getLogger(ThalesGCPBigQueryCADPBulkFPE.class.getName());
 	private static final Gson gson = new Gson();
@@ -54,6 +67,7 @@ public class ThalesGCPBigQueryCADPBulkFPE implements HttpFunction {
 		JsonElement bigqueryuserDefinedContext = null;
 		String mode = null;
 		String datatype = null;
+		NAESession session = null;
 
 		try {
 
@@ -82,7 +96,6 @@ public class ThalesGCPBigQueryCADPBulkFPE implements HttpFunction {
 				logger.severe("Error parsing JSON: " + e.getMessage());
 			}
 
-			// int batchsize = System.getenv("BATCHSIZE");
 			if (batchsize >= BATCHLIMIT)
 				batchsize = BATCHLIMIT;
 			spec = new FPEParameterAndFormatSpec[batchsize];
@@ -94,7 +107,7 @@ public class ThalesGCPBigQueryCADPBulkFPE implements HttpFunction {
 					"CADP_for_JAVA.properties");
 			IngrianProvider builder = new Builder().addConfigFileInputStream(
 					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
-			NAESession session = NAESession.getSession(userName, password.toCharArray());
+			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 
 			// Serialization
@@ -197,6 +210,12 @@ public class ThalesGCPBigQueryCADPBulkFPE implements HttpFunction {
 
 			e.printStackTrace(System.out);
 		}
+    finally{
+		if(session!=null) {
+			session.closeSession();
+		}
+	}
+		
 
 		String formattedString = formatString(bigqueryreturnstring);
 
