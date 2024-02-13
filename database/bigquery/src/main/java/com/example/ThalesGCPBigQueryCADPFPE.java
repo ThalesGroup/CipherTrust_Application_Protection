@@ -55,6 +55,7 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
       JsonElement bigqueryuserDefinedContext = null ;
       String mode = null;
       String datatype = null;
+      NAESession session = null;
    
 	    try {
             
@@ -97,8 +98,9 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 					"CADP_for_JAVA.properties");
 			IngrianProvider builder = new Builder().addConfigFileInputStream(
 					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
-			NAESession session = NAESession.getSession(userName, password.toCharArray());
+			 session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
+			
 			NAESecureRandom rng = new NAESecureRandom(session);
 
 			byte[] iv = new byte[16];
@@ -160,6 +162,11 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 
 			System.out.println("in exception with ");
 			e.printStackTrace(System.out);
+		}
+	    finally{
+			if(session!=null) {
+				session.closeSession();
+			}
 		}
 	    
 	    String formattedString = formatString(bigqueryreturnstring);

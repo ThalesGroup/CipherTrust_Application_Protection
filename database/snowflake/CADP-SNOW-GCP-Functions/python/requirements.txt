@@ -1,0 +1,5 @@
+# Function dependencies, for example:
+# package>=version
+functions-framework
+requests==2.26.0
+urllib3==1.26.8
