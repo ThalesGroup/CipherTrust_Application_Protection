@@ -31,11 +31,9 @@
  **************************************************************************
  */
 
-static CK_OBJECT_HANDLE	hKeyRSAPublic = 0x0;
-static CK_OBJECT_HANDLE	hKeyRSAPrivate = 0x0;
+static CK_OBJECT_HANDLE	hKeyPublic = 0x0;
+static CK_OBJECT_HANDLE	hKeyPrivate = 0x0;
 static CK_BYTE			data[] = { "some data" };
-static CK_OBJECT_HANDLE	hPublicKey = 0x0;
-static CK_OBJECT_HANDLE	hPrivateKey = 0x0;
 
 /*
  ************************************************************************
@@ -49,16 +47,21 @@ static CK_OBJECT_HANDLE	hPrivateKey = 0x0;
  ************************************************************************
  */
 
-static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
+static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits, char * curveOid)
 {
     /* C_GenerateKeyPair */
     CK_MECHANISM		mechanism = { CKM_RSA_PKCS_KEY_PAIR_GEN, NULL_PTR, 0 };
+    CK_MECHANISM		ecmechanism = { CKM_ECDSA_KEY_PAIR_GEN, NULL_PTR, 0 };
     CK_ULONG			modulusBits = mod_bits;
     CK_BYTE				publicExponent[4] = { 0x01, 0x00, 0x01, 0x00 }; /* 65537 in bytes */
     CK_BBOOL			bTrue = CK_TRUE;
     CK_OBJECT_CLASS		pubkey_class = CKO_PUBLIC_KEY;
     CK_ULONG            keyLabel_len = (CK_ULONG)strlen((const char *)keyLabel);
-
+    CK_KEY_TYPE         keytype = CKK_RSA;
+    if (curveOid) {
+        mechanism = ecmechanism;
+        keytype = CKK_EC;
+    }
     CK_ATTRIBUTE	publicKeyTemplate[] =
     {
         {CKA_LABEL, keyLabel, keyLabel_len }, /* Keyname */
@@ -85,8 +88,17 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
         {CKA_UNWRAP, &bTrue, sizeof(bTrue)},
         {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
         {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
+        {CKA_KEY_TYPE, &keytype, sizeof(keytype)},
         {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)}
     };
+
+    if (curveOid) {
+        CK_ATTRIBUTE keytypeAttr = {CKA_KEY_TYPE, &keytype, sizeof(keytype)};
+        CK_ATTRIBUTE ecParamAttr = {CKA_EC_PARAMS, curveOid, (CK_ULONG)strlen((const char *)curveOid)};
+        publicKeyTemplate[6] = keytypeAttr;
+        publicKeyTemplate[7] = ecParamAttr;
+        privateKeyTemplate[10] = ecParamAttr;
+    }
 
     CK_RV		rc = CKR_OK;
     CK_ULONG	publicKeyTemplateSize = sizeof(publicKeyTemplate)/sizeof(CK_ATTRIBUTE);
@@ -97,11 +109,11 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
              &mechanism,
              publicKeyTemplate, publicKeyTemplateSize,
              privateKeyTemplate, privateKeyTemplateSize,
-             &hKeyRSAPublic,
-             &hKeyRSAPrivate
+             &hKeyPublic,
+             &hKeyPrivate
          );
 
-    if (rc != CKR_OK || hKeyRSAPublic == 0 || hKeyRSAPrivate == 0)
+    if (rc != CKR_OK || hKeyPublic == 0 || hKeyPrivate == 0)
     {
         printf ("Error generating Key Pair\n");
         return rc;
@@ -112,7 +124,7 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
 /*
  ************************************************************************
  * Function: signData
- * Signs a piece of data with the RSA private key.
+ * Signs a piece of data with the RSA/ECC private key.
  * The caller is responsible for allocating a buffer of sufficient size
  * to hold the signed data.
  ************************************************************************
@@ -121,11 +133,11 @@ static CK_RV createKeyPair (char * keyLabel, unsigned mod_bits)
  ************************************************************************
  */
 
-static CK_RV signAndVerifyData ()
+static CK_RV signAndVerifyData (CK_MECHANISM_TYPE mechanismType)
 {
     CK_RV rc = CKR_OK;
 
-    CK_MECHANISM		signMech = { CKM_SHA1_RSA_PKCS, NULL_PTR, 0 };
+    CK_MECHANISM		signMech = { mechanismType, NULL_PTR, 0 };
     CK_ULONG			dataLen = (CK_ULONG)strlen((const char *)data);
     CK_BYTE*			pSig = NULL_PTR;
     CK_ULONG			sigLen = 0;
@@ -134,7 +146,7 @@ static CK_RV signAndVerifyData ()
     {
         rc = FunctionListFuncPtr->C_SignInit( hSession,
                                               &signMech,
-                                              hKeyRSAPrivate
+                                              hKeyPrivate
                                             );
         if (rc != CKR_OK)
         {
@@ -172,7 +184,7 @@ static CK_RV signAndVerifyData ()
         rc = FunctionListFuncPtr->C_VerifyInit(
                  hSession,
                  &signMech,
-                 hKeyRSAPublic
+                 hKeyPublic
              );
         if (rc != CKR_OK)
         {
@@ -203,9 +215,11 @@ static CK_RV signAndVerifyData ()
 
 void keypairSignUsage()
 {
-    printf ("Usage: pkcs11_keypair_create_sign -p pin -s slotID -kp keyName [-b modulus_bit_size] [-m module]\n");
+    printf ("Usage: pkcs11_keypair_create_sign -p pin -s slotID -kp keyName [-b modulus_bit_size] [-m module] [-c curve_Oid] [-a algorithm]\n");
     printf ("\n -kp to be created keypair name");
-    printf ("\n -b modulus bits size in bits");
+    printf ("\n -b modulus bits size in bits, for RSA keys only");
+    printf ("\n -c curve oid, for ECC keys only");
+    printf ("\n -a algorithm - RSA/EC");
     printf ("\n -n no deleion of key\n");
     exit (2);
 }
@@ -227,6 +241,8 @@ int main(int argc, char* argv[])
     char *libPath = NULL;
     char *foundPath = NULL;
     char *keyLabel = NULL;
+    char *curveOid = NULL;
+    char *algo = "RSA";
     int  slotId = 0;
     int  c;
     int  noDelete=0;
@@ -234,10 +250,13 @@ int main(int argc, char* argv[])
     extern int optind;
     int loggedIn = 0;
     unsigned int modBits = MODULUS_BITS;
+    CK_OBJECT_HANDLE hlPubKey = 0x0;
+    CK_OBJECT_HANDLE hlPrivKey = 0x0;
+    CK_MECHANISM_TYPE mechnism = CKM_RSA_PKCS;
 
     optind = 1; /* resets optind to 1 to call getopt() multiple times in sample_cli */
 
-    while ((c = newgetopt(argc, argv, "p:kp:m:s:b:np;ne;as;n")) != EOF)
+    while ((c = newgetopt(argc, argv, "p:kp:m:s:a:b:c:np;ne;as;n")) != EOF)
         switch (c)
         {
         case 'p':
@@ -264,6 +283,12 @@ int main(int argc, char* argv[])
             break;
         case 'n':
             noDelete = 1;
+            break;
+        case 'c':
+            curveOid = optarg;
+            break;
+        case 'a':
+            algo = optarg;
             break;
         case '?':
         default:
@@ -312,11 +337,11 @@ int main(int argc, char* argv[])
         loggedIn = 1;
         printf("Successfully logged in. \n");
 
-        rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hPrivateKey);
-        if (CK_INVALID_HANDLE == hPrivateKey)
+        rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hlPrivKey);
+        if (CK_INVALID_HANDLE == hlPrivKey)
         {
             printf("Key does not exist, Creating key pair...\n");
-            rc = createKeyPair(keyLabel, modBits);
+            rc = createKeyPair(keyLabel, modBits, curveOid);
             if (rc != CKR_OK)
             {
                 break;
@@ -326,8 +351,8 @@ int main(int argc, char* argv[])
         else
         {
             printf("Asymmetric key pair already exists.\n");
-            hKeyRSAPrivate = hPrivateKey;
-            rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hKeyRSAPublic);
+            hKeyPrivate = hlPrivKey;
+            rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hKeyPublic);
             if (rc != CKR_OK)
             {
                 fprintf(stderr, "Error finding public key %s : %lu", keyLabel, rc);
@@ -335,10 +360,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        rc = signAndVerifyData();
+        if (curveOid || strncmp(algo, "EC", 2) == 0)
+            mechnism = CKM_ECDSA_SHA256;
+
+        rc = signAndVerifyData(mechnism);
         if (rc != CKR_OK)
         {
-            rc = deleteKey(hPublicKey ? hPublicKey : hKeyRSAPublic, CK_TRUE);
+            rc = deleteKey(hlPubKey ? hlPubKey : hKeyPublic, CK_TRUE);
             if (rc == CKR_OK)
                 printf("Successfully deleted public/private key pair!\n");
             else
@@ -348,36 +376,36 @@ int main(int argc, char* argv[])
         }
         printf("PASS: C_Sign and C_Verify, Successfully signed data and verify the signature.\n");
 
-        rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hPrivateKey);
-        if (CK_INVALID_HANDLE == hPrivateKey)
+        rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hlPrivKey);
+        if (CK_INVALID_HANDLE == hlPrivKey)
         {
             printf("Finding private key failed.\n");
         }
         else
         {
-            printf("Successfully found private key; handle: %u.\n", (unsigned int)hPrivateKey );
+            printf("Successfully found private key; handle: %u.\n", (unsigned int)hlPrivKey );
         }
 
-        rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hPublicKey);
-        if (CK_INVALID_HANDLE == hPublicKey)
+        rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hlPubKey);
+        if (CK_INVALID_HANDLE == hlPubKey)
         {
             printf("Finding public key failed.\n");
         }
         else
         {
-            printf("Successfully found public key; handle: %u.\n", (unsigned int)hPublicKey);
+            printf("Successfully found public key; handle: %u.\n", (unsigned int)hlPubKey);
         }
 
         if (!noDelete)
         {
-            rc = deleteKey(hPublicKey, CK_FALSE);
+            rc = deleteKey(hlPubKey, CK_FALSE);
             if (rc == CKR_OK)
                 printf("Successfully deleted public/private key pair!\n");
             else
                 printf("Deleting public/private key pair failed: %lu.\n", rc);
 
-            rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hPublicKey);
-            if (CK_INVALID_HANDLE == hPublicKey)
+            rc = findKey(keyLabel, keyIdLabel, CKO_PUBLIC_KEY, &hlPubKey);
+            if (CK_INVALID_HANDLE == hlPubKey)
             {
                 printf("Finding public key non-existent! \n");
             }
@@ -386,8 +414,8 @@ int main(int argc, char* argv[])
                 printf("Finding public key again; delete unsuccessful! \n");
             }
 
-            rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hPrivateKey);
-            if (CK_INVALID_HANDLE == hPrivateKey)
+            rc = findKey(keyLabel, keyIdLabel, CKO_PRIVATE_KEY, &hlPrivKey);
+            if (CK_INVALID_HANDLE == hlPrivKey)
             {
                 printf("Finding private key non-existent! \n");
             }

@@ -972,17 +972,20 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     CK_ULONG    ulCachedTime = 0;
 
     char       *pAttr = NULL;
+    CK_BYTE    curveId[64] = {0};
+    CK_KEY_TYPE keytype = CKK_RSA;
 
     CK_ATTRIBUTE getAttrsTemplate[] =
     {
         {CKA_ID, keyIdBuf, sizeof(keyIdBuf) },                              /*  0 */
         {CKA_LABEL, (CK_UTF8CHAR *)keyLabel, sizeof(keyLabel) },
         {CKA_CLASS, &objClass, sizeof(objClass) },
+        {CKA_KEY_TYPE, &keytype, sizeof(keytype) },
 
-        {CKA_THALES_OBJECT_UUID, keyUuid, sizeof(keyUuid)},                       /*  3 */
-        {CKA_THALES_OBJECT_MUID, keyMuid, sizeof(keyMuid)},                       /*  4 */
-        {CKA_THALES_OBJECT_ALIAS, keyAlias, sizeof(keyAlias)},                    /*  5 */
-        {CKA_THALES_OBJECT_IKID, keyImportedId, sizeof(keyImportedId)},           /*  6 */
+        {CKA_THALES_OBJECT_UUID, keyUuid, sizeof(keyUuid)},                       /*  4 */
+        {CKA_THALES_OBJECT_MUID, keyMuid, sizeof(keyMuid)},                       /*  5 */
+        {CKA_THALES_OBJECT_ALIAS, keyAlias, sizeof(keyAlias)},                    /*  6 */
+        {CKA_THALES_OBJECT_IKID, keyImportedId, sizeof(keyImportedId)},           /*  7 */
 
         {CKA_THALES_CUSTOM_1, custom1, sizeof(custom1)},
         {CKA_THALES_CUSTOM_2, custom2, sizeof(custom2)},
@@ -1001,14 +1004,15 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
         {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)},
         {CKA_MODULUS, modulusBuf, *pModulusBufSize },
         {CKA_PUBLIC_EXPONENT, exponentBuf, *pExponentBufSize },
+        {CKA_EC_PARAMS, curveId, 64 }
     };
-    CK_ULONG getAttrsTemplateSize = sizeof(getAttrsTemplate)/sizeof(CK_ATTRIBUTE);
 
-    exponentIdx = getAttrsTemplateSize-1;
+    CK_ULONG getAttrsTemplateSize = sizeof(getAttrsTemplate)/sizeof(CK_ATTRIBUTE);
+    exponentIdx = getAttrsTemplateSize-2;
 
     if(objClass == CKO_SECRET_KEY)
     {
-        getAttrsTemplateSize -= 3;
+        getAttrsTemplateSize -= 4;
     }
     else if (objClass == CKO_PRIVATE_KEY)
     {
@@ -1030,70 +1034,73 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     printf("Key Handle: %08x,\n", (unsigned int)hKey);
     printf("CKA_LABEL: '%.*s'\n", (int) getAttrsTemplate[1].ulValueLen, keyLabel);
     printf("CKA_CLASS: %08x.\n", (unsigned int)objClass);
-
-    printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)getAttrsTemplate[3].ulValueLen, keyUuid);
-    printf("CKA_THALES_OBJECT_MUID:  '%.*s'\n", (int)getAttrsTemplate[4].ulValueLen, keyMuid);
-    printf("CKA_THALES_OBJECT_ALIAS: '%.*s'\n", (int)getAttrsTemplate[5].ulValueLen, keyAlias);
-    printf("CKA_THALES_OBJECT_IKID:  '%.*s'\n", (int)getAttrsTemplate[6].ulValueLen, keyImportedId);
+  
+    printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)getAttrsTemplate[4].ulValueLen, keyUuid);
+    printf("CKA_THALES_OBJECT_MUID:  '%.*s'\n", (int)getAttrsTemplate[5].ulValueLen, keyMuid);
+    printf("CKA_THALES_OBJECT_ALIAS: '%.*s'\n", (int)getAttrsTemplate[6].ulValueLen, keyAlias);
+    printf("CKA_THALES_OBJECT_IKID:  '%.*s'\n", (int)getAttrsTemplate[7].ulValueLen, keyImportedId);
 
     printf("CKA_THALES_CACHE_ON_HOST:  %s\n", bCacheOnHost==CK_TRUE ? "Yes" : "No" );
     printf("CKA_THALES_CACHED_TIME:  %u.\n", (unsigned int)ulCachedTime);
 
     if(objClass != CKO_SECRET_KEY)
     {
-        printf("CKA_MODULUS: ");
-        attrValueLen = getAttrsTemplate[getAttrsTemplateSize-2].ulValueLen;
-        printf( " %u, ", (unsigned int)attrValueLen );
-        *pModulusBufSize = attrValueLen;
+        if (keytype == CKK_EC) {
+            printf("CKA_EC_PARAMS: '%.*s'\n", (int) getAttrsTemplate[getAttrsTemplateSize-1].ulValueLen, curveId);
+        } else {
+            printf("CKA_MODULUS: ");
+            attrValueLen = getAttrsTemplate[exponentIdx-1].ulValueLen;
+            printf( " %u, ", (unsigned int)attrValueLen );
+            *pModulusBufSize = attrValueLen;
 
-        pAttr = (char *)calloc(sizeof(CK_BYTE), attrValueLen*2+1);
-        if(pAttr == NULL)
-        {
-            printf("Error allocating memory.");
-            return CKR_HOST_MEMORY;
+            pAttr = (char *)calloc(sizeof(CK_BYTE), attrValueLen*2+1);
+            if(pAttr == NULL)
+            {
+                printf("Error allocating memory.");
+                return CKR_HOST_MEMORY;
+            }
+
+            for(i = 0; i<attrValueLen; i++)
+            {
+                snprintf(pAttr+i*2, 3, "%02x", modulusBuf[i]);
+            }
+            pAttr[i*2] = '\0';
+            printf("\t %s.\n", pAttr);
+            if(pAttr)
+            {
+                free(pAttr);
+                pAttr = NULL;
+            }
+
+            if( objClass == CKO_PUBLIC_KEY )
+                printf("CKA_PUBLIC_EXPONENT: ");
+            else if( objClass == CKO_PRIVATE_KEY )
+                printf("CKA_PRIVATE_EXPONENT: ");
+
+            attrValueLen = getAttrsTemplate[exponentIdx].ulValueLen;
+            printf( " %u, ", (unsigned int)attrValueLen );
+            *pExponentBufSize = attrValueLen;
+
+            pAttr = (char *)calloc(sizeof(CK_BYTE), attrValueLen*2+1);
+            if(pAttr == NULL)
+            {
+                printf("Error allocating memory.");
+                return CKR_HOST_MEMORY;
+            }
+
+            for(i = 0; i<attrValueLen; i++)
+            {
+                snprintf(pAttr+i*2, 3, "%02x", exponentBuf[i]);
+            }
+            pAttr[i*2] = '\0';
+            printf("\t %s.\n", pAttr);
+
+            if(pAttr)
+            {
+                free(pAttr);
+                pAttr = NULL;
+            }
         }
-
-        for(i = 0; i<attrValueLen; i++)
-        {
-            snprintf(pAttr+i*2, 3, "%02x", modulusBuf[i]);
-        }
-        pAttr[i*2] = '\0';
-        printf("\t %s.\n", pAttr);
-        if(pAttr)
-        {
-            free(pAttr);
-            pAttr = NULL;
-        }
-
-        if( objClass == CKO_PUBLIC_KEY )
-            printf("CKA_PUBLIC_EXPONENT: ");
-        else if( objClass == CKO_PRIVATE_KEY )
-            printf("CKA_PRIVATE_EXPONENT: ");
-
-        attrValueLen = getAttrsTemplate[exponentIdx].ulValueLen;
-        printf( " %u, ", (unsigned int)attrValueLen );
-        *pExponentBufSize = attrValueLen;
-
-        pAttr = (char *)calloc(sizeof(CK_BYTE), attrValueLen*2+1);
-        if(pAttr == NULL)
-        {
-            printf("Error allocating memory.");
-            return CKR_HOST_MEMORY;
-        }
-
-        for(i = 0; i<attrValueLen; i++)
-        {
-            snprintf(pAttr+i*2, 3, "%02x", exponentBuf[i]);
-        }
-        pAttr[i*2] = '\0';
-        printf("\t %s.\n", pAttr);
-
-        if(pAttr)
-        {
-            free(pAttr);
-            pAttr = NULL;
-        }
-
         printf("CKA_MODULUS_BITS: %u.\n", (unsigned int)modulusBits);
     }
 
