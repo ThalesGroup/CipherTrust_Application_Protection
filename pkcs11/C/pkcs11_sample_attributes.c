@@ -1,4 +1,4 @@
-/*************************************************************************
+ /*************************************************************************
 **                                                                      **
 ** Copyright(c) 2022                              Confidential Material **
 **                                                                      **
@@ -52,26 +52,28 @@ extern unsigned long ulCachedTime;
 /*
  ************************************************************************
  * Function: createKeyPair
- * Creates an RSA keypair on the Key Manager.
+ * Creates an RSA/ECC keypair on the Key Manager.
  * The keyLabel is the name of the key displayed on the Key Manager.
- * modulusBits is the key strength. In this case, 2048 bits
+ * curveOid for ECC keys only
  ************************************************************************
  * Parameters: none
  * Returns: CK_RV
  ************************************************************************
  */
 
-static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *custom3)
+static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *custom3, char *curveOid)
 {
     /* C_GenerateKeyPair */
-    CK_OBJECT_HANDLE    hKeyRSAPublic, hKeyRSAPrivate;
+    CK_OBJECT_HANDLE    hKeyPublic, hKeyPrivate;
     CK_MECHANISM    mechanism = { CKM_RSA_PKCS_KEY_PAIR_GEN, NULL_PTR, 0 };
+    CK_MECHANISM	ecmechanism = { CKM_ECDSA_KEY_PAIR_GEN, NULL_PTR, 0 };
     CK_ULONG    modulusBits = 2048;
     CK_BYTE     publicExponent[4] = { 0x01, 0x00, 0x01, 0x00 }; /* 65537 in bytes */
     CK_BBOOL    bTrue = CK_TRUE;
     CK_OBJECT_CLASS   pubkey_class = CKO_PUBLIC_KEY;
     CK_OBJECT_CLASS   privkey_class = CKO_PRIVATE_KEY;
     CK_ULONG     keyLabel_len = (CK_ULONG)strlen((const char *)keyLabel);
+    CK_KEY_TYPE  keytype = CKK_RSA;
 
     CK_UTF8CHAR  *ca1 = (CK_UTF8CHAR *)custom1;
     CK_ULONG     caLen1 = custom1 ? (CK_ULONG) strlen(custom1) : 0;
@@ -79,6 +81,11 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
     CK_ULONG     caLen2 = custom2 ? (CK_ULONG) strlen(custom2) : 0;
     CK_UTF8CHAR  *ca3 = (CK_UTF8CHAR *)custom3;
     CK_ULONG     caLen3 = custom3 ? (CK_ULONG) strlen(custom3) : 0;
+
+    if (curveOid) {
+        mechanism = ecmechanism;
+        keytype = CKK_EC;
+    }
 
     CK_ATTRIBUTE publicKeyTemplate[] =
     {
@@ -110,8 +117,17 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
         {CKA_THALES_CUSTOM_3, ca3, caLen3 },
         {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
         {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
+        {CKA_KEY_TYPE, &keytype, sizeof(keytype)},
         {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)}
     };
+
+    if (curveOid) {
+        CK_ATTRIBUTE keytypeAttr = {CKA_KEY_TYPE, &keytype, sizeof(keytype)};
+        CK_ATTRIBUTE ecParamAttr = {CKA_EC_PARAMS, curveOid, (CK_ULONG)strlen((const char *)curveOid)};
+        publicKeyTemplate[6] = keytypeAttr;
+        publicKeyTemplate[7] = ecParamAttr;
+        privateKeyTemplate[14] = ecParamAttr;
+    }
 
     CK_RV    rc = CKR_OK;
     CK_ULONG publicKeyTemplateSize = sizeof(publicKeyTemplate)/sizeof(CK_ATTRIBUTE);
@@ -121,11 +137,11 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
             &mechanism,
             publicKeyTemplate, publicKeyTemplateSize,
             privateKeyTemplate, privateKeyTemplateSize,
-            &hKeyRSAPublic,
-            &hKeyRSAPrivate
+            &hKeyPublic,
+            &hKeyPrivate
                                                );
 
-    if (rc != CKR_OK || hKeyRSAPublic == 0 || hKeyRSAPrivate == 0)
+    if (rc != CKR_OK || hKeyPublic == 0 || hKeyPrivate == 0)
     {
         printf ("Error generating Key Pair: rc=0x%8x\n", (unsigned int)rc);
         return rc;
@@ -280,13 +296,14 @@ static CK_RV setKeyLabel(CK_OBJECT_HANDLE hKey, char *newlabel)
 
 void usage()
 {
-    printf ("Usage: pkcs11_sample_attributes -p pin -s slotID [-k keyName] [-kp keyPairName] [-i {k|m|u}:identifier] [-g gen_key_action] [-a alias] [-z key_size] [-ct cached_time] [-ls lifespan] [-1 customAttribute1] [-2 customAttribute2] [-3 customAttribute3] [-4 customAttribute4] [-5 customAttribute5] [-C] [-D] [-Z] [-m module]\n");
+    printf ("Usage: pkcs11_sample_attributes -p pin -s slotID [-k keyName] [-kp keyPairName] [-i {k|m|u}:identifier] [-g gen_key_action] [-a alias] [-c curve_oid] [-z key_size] [-ct cached_time] [-ls lifespan] [-1 customAttribute1] [-2 customAttribute2] [-3 customAttribute3] [-4 customAttribute4] [-5 customAttribute5] [-C] [-D] [-Z] [-m module]\n");
     printf ("-g gen_key_action: 0, 1, 2, or 3.  versionCreate: 0, versionRotate: 1, versionMigrate: 2, nonVersionCreate: 3\n");
     printf ("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     printf ("-a alias: key alias, an alias can be used as part of template during key creation. Looking up an existing key by means of an alias is not supported in this sample program.\n");
     printf ("-ct cached_time cached time for key in minutes\n");
-    printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.");
-    printf ("-z key_size key size for symmetric key in bytes.");
+    printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.\n");
+    printf ("-z key_size key size for symmetric key in bytes.\n");
+    printf ("-c curve oid: for ECC keys only.\n");
     printf ("-C ... clear alias\n");
     printf ("-D ... delete custom attributes (see below)\n");
     printf ("-Z ... zap label\n");
@@ -317,6 +334,7 @@ int main(int argc, char *argv[])
     char *custom3 = DEFAULT_CUSTOM_VALUE; /* for a newly created key */
     char *custom4 = DEFAULT_CUSTOM_VALUE;
     char *custom5 = DEFAULT_CUSTOM_VALUE;
+    char *curveOid = NULL;
     int  symmetric = 1;
     int  slotId = 0;
     int  bDeleteTwoAttributes = CK_FALSE;
@@ -347,10 +365,13 @@ int main(int argc, char *argv[])
     CK_BYTE     modulusBuf[ASYMKEY_BUF_LEN];
     unsigned long lifespan = 1;
 
-    while ((c = newgetopt(argc, argv, "p:kp:m:s:i:a:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
+    while ((c = newgetopt(argc, argv, "c:p:kp:m:s:i:a:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
     {
         switch (c)
         {
+        case 'c':
+            curveOid = optarg;
+            break;
         case 'D':
             bDeleteTwoAttributes = CK_TRUE;
             break;
@@ -487,7 +508,7 @@ int main(int argc, char *argv[])
             if (CK_INVALID_HANDLE == hPrivateKey)
             {
                 printf("Keypair does not exist, Creating key pair...\n");
-                rc = createKeyPair(keyLabel, custom1, custom2, custom3);
+                rc = createKeyPair(keyLabel, custom1, custom2, custom3, curveOid);
                 if (rc != CKR_OK)
                 {
                     break;
