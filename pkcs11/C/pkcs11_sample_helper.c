@@ -1419,7 +1419,7 @@ CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey)
     char        custom[5][1024];
 
     CK_BBOOL    bCacheOnHost, bVersioned, blaSensitive, blnExtractable;
-    int         custom1Index = 17;
+    int         custom1Index = 11;
 
     CK_ULONG    ulCreationTime, ulDeactivateTime = 0;
     CK_ATTRIBUTE_PTR pKeyTemplate = NULL;
@@ -1433,20 +1433,20 @@ CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey)
         {CKA_SERIAL_NUMBER, serialno, sizeof(serialno)},
         {CKA_CLASS, &keyCls, sizeof(keyCls) },                                    /*  3 */
 
-        {CKA_THALES_OBJECT_UUID, keyUuid, sizeof(keyUuid)},                       /*  8 */
+        {CKA_THALES_OBJECT_UUID, keyUuid, sizeof(keyUuid)},                       /*  4 */
         {CKA_THALES_OBJECT_MUID, keyMuid, sizeof(keyMuid)},
-        {CKA_THALES_OBJECT_ALIAS, keyAlias, sizeof(keyAlias)},                    /*  10 */
-        {CKA_THALES_OBJECT_IKID, keyImportedId, sizeof(keyImportedId)},           /* 11 */
-        {CKA_THALES_VERSIONED_KEY, &bVersioned, sizeof(bVersioned) },             /* 14 */
+        {CKA_THALES_OBJECT_ALIAS, keyAlias, sizeof(keyAlias)},                    /*  6 */
+        {CKA_THALES_OBJECT_IKID, keyImportedId, sizeof(keyImportedId)},           /* 7 */
+        {CKA_THALES_VERSIONED_KEY, &bVersioned, sizeof(bVersioned) },             /* 8 */
 
         {CKA_ALWAYS_SENSITIVE,	&blaSensitive,	sizeof(CK_BBOOL)	},
         {CKA_NEVER_EXTRACTABLE,	&blnExtractable,	sizeof(CK_BBOOL)	},
 
-        {CKA_THALES_CUSTOM_1, custom[0], sizeof(custom[0])},                          /* 17 */
+        {CKA_THALES_CUSTOM_1, custom[0], sizeof(custom[0])},                          /* 11 */
         {CKA_THALES_CUSTOM_2, custom[1], sizeof(custom[1])},
         {CKA_THALES_CUSTOM_3, custom[2], sizeof(custom[2])},
-        {CKA_THALES_CUSTOM_4, custom[3], sizeof(custom[3])},                          /* 20 */
-        {CKA_THALES_CUSTOM_5, custom[4], sizeof(custom[4])}		                      /* 21 */
+        {CKA_THALES_CUSTOM_4, custom[3], sizeof(custom[3])},                          /* 14 */
+        {CKA_THALES_CUSTOM_5, custom[4], sizeof(custom[4])}		                      /* 15 */
     };
     CK_ULONG getAttrsTemplateSize = sizeof(getAttrsTemplate)/sizeof(CK_ATTRIBUTE);
 
@@ -1484,18 +1484,17 @@ CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey)
     printf("CKA_NEVER_EXTRACTABLE: \t%s\n", blnExtractable  ? "true" : "false");
     printf("CKA_ALWAYS_SENSITIVE:  \t%s\n", blaSensitive  ? "true" : "false");
 
-    printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)pKeyTemplate[ 8].ulValueLen, keyUuid);
-    printf("CKA_THALES_OBJECT_MUID:  '%.*s'\n", (int)pKeyTemplate[ 9].ulValueLen, keyMuid);
-    printf("CKA_THALES_OBJECT_ALIAS: '%.*s'\n", (int)pKeyTemplate[10].ulValueLen, keyAlias);
-    printf("CKA_THALES_OBJECT_IKID:  '%.*s'\n", (int)pKeyTemplate[11].ulValueLen, keyImportedId);
+    printf("CKA_THALES_OBJECT_UUID:  '%.*s'\n", (int)pKeyTemplate[4].ulValueLen, keyUuid);
+    printf("CKA_THALES_OBJECT_MUID:  '%.*s'\n", (int)pKeyTemplate[5].ulValueLen, keyMuid);
+    printf("CKA_THALES_OBJECT_ALIAS: '%.*s'\n", (int)pKeyTemplate[6].ulValueLen, keyAlias);
+    printf("CKA_THALES_OBJECT_IKID:  '%.*s'\n", (int)pKeyTemplate[7].ulValueLen, keyImportedId);
 
-    for(i=0; i<5; i++)
+	for(i=0; i<5; i++)
     {
         custom[i][(int)pKeyTemplate[custom1Index+i].ulValueLen] = 0;
         printf("CKA_THALES_CUSTOM_%d: '%s' (length %d)\n", (int)i+1, custom[i], (int)pKeyTemplate[custom1Index+i].ulValueLen);
     }
 
- 
     if( pKeyTemplate )
     {
         free ( pKeyTemplate );
