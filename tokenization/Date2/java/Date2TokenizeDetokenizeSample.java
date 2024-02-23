@@ -56,7 +56,6 @@ public class Date2TokenizeDetokenizeSample
 		NAESession session  = null;
 		try {
 
-			Security.addProvider(new IngrianProvider());
 			// create the Date2ParameterSpec
 			Date2ParameterSpec date2ParameterSpec = new Date2ParameterSpec.Date2ParameterBuilder(startYear, endYear,tweakData).build();
 
