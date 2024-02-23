@@ -66,8 +66,8 @@ export default function RevealDataTab() {
   const [userType, setUserType] = React.useState('unauthorized');
 
   useEffect(() => {
-    let urlPHI = 'http://'+host+':'+port+'/v1/api/health-info'
-    let urlPCI = 'http://'+host+':'+port+'/v1/api/payment-info'
+    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
+    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${userType}:${pwdFake}`).toString('base64');
     axios
         .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
@@ -85,8 +85,8 @@ export default function RevealDataTab() {
 
   const handleUserChange = (event) => {
     setUserType(event.target.value)
-    let urlPHI = 'http://'+host+':'+port+'/v1/api/health-info'
-    let urlPCI = 'http://'+host+':'+port+'/v1/api/payment-info'
+    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
+    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${event.target.value}:${pwdFake}`).toString('base64');
     axios
         .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })

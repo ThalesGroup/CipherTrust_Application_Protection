@@ -17,7 +17,7 @@ export default function ProtectPaymentInfoCard() {
         host=process.env.REACT_APP_BACKEND_IP_ADDRESS
         port=process.env.REACT_APP_BACKEND_PORT
     }
-    let url = 'http://'+host+':'+port+'/v1/api/payment-info'
+    let url = 'http://'+host+':'+port+'/api/payment-info'
     axios({
         method: "post",
         url: url,

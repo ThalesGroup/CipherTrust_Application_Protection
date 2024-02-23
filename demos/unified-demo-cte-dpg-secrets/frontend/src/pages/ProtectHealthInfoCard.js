@@ -28,8 +28,8 @@ export default function ProtectHealthInfoCard() {
         host=process.env.REACT_APP_BACKEND_IP_ADDRESS
         port=process.env.REACT_APP_BACKEND_PORT
     }
-    let url_add_json = 'http://'+host+':'+port+'/v1/api/health-info/add';
-    let url_upload = 'http://'+host+':'+port+'/v1/api/health-info/upload';
+    let url_add_json = 'http://'+host+':'+port+'/api/health-info/add';
+    let url_upload = 'http://'+host+':'+port+'/api/health-info/upload';
 
     axios({
         method: "post",
