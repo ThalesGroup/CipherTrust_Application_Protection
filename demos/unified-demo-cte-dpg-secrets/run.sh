@@ -11,7 +11,7 @@ do
 done
 
 # Setup Minikube cluster
-if [ "$DOCKER" = "true" ];
+if [ "$MINIKUBE" = "true" ];
 then
   minikube stop
   minikube delete
