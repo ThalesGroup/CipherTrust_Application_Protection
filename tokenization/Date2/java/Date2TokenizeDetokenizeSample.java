@@ -53,6 +53,11 @@ public class Date2TokenizeDetokenizeSample
 		// add Ingrian provider to the list of JCE providers
 		Security.addProvider(new IngrianProvider());	
 		
+		 // Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+		
 		NAESession session  = null;
 		try {
 
