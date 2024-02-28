@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
             else
             {
                 printf("Finding public key succeeded, about to retrieve its attributes.\n");
-                getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen);
+                getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen, privExponentBuf, &privExpoBufLen);
 
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
@@ -530,7 +530,7 @@ int main(int argc, char *argv[])
             {
                 printf("Finding private key succeeded, about to retrieve its attributes.\n");
                 modulusBufLen = 520;
-                getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf, &modulusBufLen, privExponentBuf, &privExpoBufLen);
+                getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen, privExponentBuf, &privExpoBufLen);
 
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
