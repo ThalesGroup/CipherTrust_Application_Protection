@@ -48,7 +48,10 @@ public class Date2TokenizeDetokenizeSample
 		String endYear   = args[4];
 		String dateFormat = args[5];
 		String dateToTokenize = args[6];
-		String tweakData = args[7];
+		String tweakData = null;
+		if(!args[7].contains("null")) {
+			tweakData   = args[7];
+		}
 		
 		
 		// add Ingrian provider to the list of JCE providers
