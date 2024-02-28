@@ -452,7 +452,7 @@ CK_RV logout(void);
 */
 
 CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, CK_BYTE modulusBuf[], CK_ULONG *pModulusBufSize,
-						 CK_BYTE exponentBuf[], CK_ULONG *pExponentBufSize);
+						 CK_BYTE pubExponentBuf[], CK_ULONG *ppubExponentBufSize, CK_BYTE privExponentBuf[], CK_ULONG *pprivExponentBufSize);
 
 CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATTRIBUTE_TYPE attrTypes[], char *pLabel);
 
