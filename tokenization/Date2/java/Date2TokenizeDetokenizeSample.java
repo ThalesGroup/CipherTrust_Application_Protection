@@ -23,10 +23,9 @@ public class Date2TokenizeDetokenizeSample
 	public static void main( String[] args ) throws Exception
 	{
 		
-		if (args.length != 8)
+		if (args.length < 7)
 		{
 			System.err.println("Usage: java Date2EncryptionDecryptionSample user password keyname startYear endYear dateFormat inputDate tweakData(Optional)");
-			System.err.println("Mention null for optional parameter if you don't want to pass it");
 			/*
 			 * Usage: user key manager user name
 			 * Usage: password key manager password
@@ -48,8 +47,11 @@ public class Date2TokenizeDetokenizeSample
 		String endYear   = args[4];
 		String dateFormat = args[5];
 		String dateToTokenize = args[6];
-		String tweakData = args[7];
-		
+		String tweakData = null;
+
+		if (args.length > 7) {
+			tweakData = args[7];
+		}
 		
 		// add Ingrian provider to the list of JCE providers
 		Security.addProvider(new IngrianProvider());	
