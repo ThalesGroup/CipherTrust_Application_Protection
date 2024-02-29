@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: {{.Values.runlabel}}
+  name: demo-cte-dpg-secrets-api
+spec:
+  template:
+     metadata:
+        name: {{.Values.deployment.name}}
+        labels:
+          run: {{.Values.runlabel}}
+     spec:
+        volumes:
+          - name: test-vol
+            persistentVolumeClaim:
+              claimName: cte-claim
+        containers:
+            - image: {{.Values.deployment.appimage}}
+              imagePullPolicy: {{.Values.deployment.pullPolicy}}
+              name: {{.Values.deployment.appimagename}}
+              env:
+                - name: PV_UPLOAD_PATH
+                  value: "/data/cte/"
+              volumeMounts:
+                - mountPath: "/data/cte/"
+                  name: test-vol
+{{- if .Values.configuration.addSideContainer }}
+            - image: {{.Values.deployment.dpgimage}}
+              imagePullPolicy: {{.Values.deployment.pullPolicy}}
+              name: {{.Values.deployment.dpgimagename}}
+              env:
+                - name: KMS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: {{.Values.configuration.configmapname}}
+                      key: KMS
+                - name: CERT_PATH
+                  valueFrom:
+                      secretKeyRef:
+                        name: dpg-secret
+                        key: server.crt
+                - name: KEY_PATH
+                  valueFrom:
+                      secretKeyRef:
+                        name: dpg-secret
+                        key: server.key
+                - name: TLS_ENABLED
+                  valueFrom:
+                      configMapKeyRef:
+                        name: {{.Values.configuration.configmapname}}
+                        key: TLS_ENABLED
+                - name: REG_TOKEN
+                  valueFrom:
+                      configMapKeyRef:
+                        name: {{.Values.configuration.configmapname}}
+                        key: REG_TOKEN
+                - name: DESTINATION_URL
+                  valueFrom:
+                      configMapKeyRef:
+                        name: {{.Values.configuration.configmapname}}
+                        key: DESTINATION_URL
+{{- end }}
+
+  replicas: {{.Values.deployment.replicas}}
+  selector:
+      matchLabels:
+        run: {{.Values.runlabel}}
+
+---
+apiVersion: v1
+data:
+  server.crt: {{.Values.configuration.servercrt}}
+  server.key: {{.Values.configuration.serverkey}}
+kind: Secret
+metadata:
+  name: {{.Values.configuration.secretname}}
+type: Opaque
+---
+
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    TLS_ENABLED: {{.Values.configuration.tlsenabled | quote}}
+    KMS: {{.Values.configuration.kms}}
+    REG_TOKEN:  {{.Values.configuration.reg_token}}
+    DESTINATION_URL:  {{.Values.configuration.appurl}}
+  kind: ConfigMap
+  metadata:
+    name: {{.Values.configuration.configmapname}}
+kind: List
+metadata:

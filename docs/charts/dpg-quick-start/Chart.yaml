@@ -1,0 +1,14 @@
+apiVersion: v2
+name: dpg-quick-start
+description: A Helm chart for running quick demo for DPG on Kubernetes
+
+type: application
+
+# Starting with 1.0.0. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 1.0.0
+
+# This is the latest version of Thales CipherTrust Data Protection Gateway used for testing out the
+# application deployed via this chart
+appVersion: "1.2.0"

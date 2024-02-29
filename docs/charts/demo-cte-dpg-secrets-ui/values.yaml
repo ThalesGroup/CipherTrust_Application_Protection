@@ -1,0 +1,22 @@
+runlabel: appserver
+
+deployment:
+  name: demo-cte-dpg-secrets-ui
+  appimagename: demo-ui
+  replicas: 1
+  appimage: localhost:5000/unified-demo-ui
+
+service:
+  name: svc
+  type: NodePort
+  uiappname: app-ui-port
+  uiappnodePort: 32080
+  uiappPort: 3000
+  uiapptargetPort: 3000
+
+configuration:
+  api_server_ip: "localhost"
+  api_server_port: "32081"
+  #auth_server: "https://cdsp.kinde.com"
+  #auth_server_client_id: "key"
+  #auth_server_redirect_url: "http://localhost:32080"

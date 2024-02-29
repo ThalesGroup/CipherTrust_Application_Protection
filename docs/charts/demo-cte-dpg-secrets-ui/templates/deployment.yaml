@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: {{.Values.runlabel}}
+  name: demo-cte-dpg-secrets-ui
+spec:
+  template:
+     metadata:
+        name: {{.Values.deployment.name}}
+        labels:
+          run: {{.Values.runlabel}}
+     spec:
+        containers:
+          - image: {{.Values.deployment.appimage}}
+            imagePullPolicy: {{.Values.deployment.pullPolicy}}
+            name: {{.Values.deployment.appimagename}}
+            env:
+              - name: API_IP
+                value: {{.Values.configuration.api_server_ip}}
+              - name: API_PORT
+                value: "9000"
+              # - name: AUTH_SERVER
+              #   value: {{.Values.configuration.auth_server}}
+              # - name: AUTH_CLIENT
+              #   value: {{.Values.configuration.auth_server_client_id}}
+              # - name: AUTH_REDIRECT_URL
+              #   value: {{.Values.configuration.auth_server_redirect_url}}
+
+  replicas: {{.Values.deployment.replicas}}
+  selector:
+      matchLabels:
+        run: {{.Values.runlabel}}

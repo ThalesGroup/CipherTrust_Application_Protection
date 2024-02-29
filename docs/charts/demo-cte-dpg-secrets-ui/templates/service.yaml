@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.service.name}}
+spec:
+  selector:
+    run: {{.Values.runlabel}}
+  type: {{.Values.service.type}}
+  ports:
+    - name: {{.Values.service.uiappname}}
+      port: {{.Values.service.uiappPort}}
+      targetPort: {{.Values.service.uiapptargetPort}}
+      nodePort: {{.Values.service.uiappnodePort}}
