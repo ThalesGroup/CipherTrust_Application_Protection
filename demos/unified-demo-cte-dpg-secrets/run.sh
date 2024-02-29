@@ -10,6 +10,7 @@ do
    export "$KEY"="$VALUE"
 done
 
+# docker run -d --restart unless-stopped -v /home/aj/registry-vol:/var/lib/registry -p 5000:5000 --name registry registry:2.7
 # Setup Minikube cluster
 if [ "$MINIKUBE" = "true" ];
 then
