@@ -3,45 +3,45 @@ entries:
   banking-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-23T11:42:05.7049346-05:00"
+    created: "2024-02-29T11:08:48.7637497-05:00"
     description: A Helm chart for Kubernetes
     digest: 1dde9cb06e2071aa818ee84fcb8fd85e9633a398e2f0a03af2016eafb49e04ac
     name: banking-api
     type: application
     urls:
-    - https://anugram.github.io/helm-charts/banking-api-1.0.0.tgz
+    - https://thalesgroup.github.io/CipherTrust_Application_Protection/banking-api-1.0.0.tgz
     version: 1.0.0
   demo-cte-dpg-secrets-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-23T11:42:05.7068874-05:00"
+    created: "2024-02-29T11:08:48.7660508-05:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo Backend
     digest: 3ee2ce98d8aa08ac52effb27a8ce30d26b3d79cc1e30a2c7f1548d0631670d70
     name: demo-cte-dpg-secrets-api
     type: application
     urls:
-    - https://anugram.github.io/helm-charts/demo-cte-dpg-secrets-api-0.1.0.tgz
+    - https://thalesgroup.github.io/CipherTrust_Application_Protection/demo-cte-dpg-secrets-api-0.1.0.tgz
     version: 0.1.0
   demo-cte-dpg-secrets-ui:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-23T11:42:05.707864-05:00"
+    created: "2024-02-29T11:08:48.7684757-05:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo UI
     digest: ca853dd9ef73e010cd29dd6789bbd0cb0803a436bd6373afffee4586ed663d9e
     name: demo-cte-dpg-secrets-ui
     type: application
     urls:
-    - https://anugram.github.io/helm-charts/demo-cte-dpg-secrets-ui-0.1.0.tgz
+    - https://thalesgroup.github.io/CipherTrust_Application_Protection/demo-cte-dpg-secrets-ui-0.1.0.tgz
     version: 0.1.0
   dpg-quick-start:
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2024-02-23T11:42:05.7166517-05:00"
+    created: "2024-02-29T11:08:48.7766013-05:00"
     description: A Helm chart for running quick demo for DPG on Kubernetes
     digest: 77609bade22d176b22471f60e6d83a5da085fda37f75ce08578f90ea1c9d32e7
     name: dpg-quick-start
     type: application
     urls:
-    - https://anugram.github.io/helm-charts/dpg-quick-start-1.0.0.tgz
+    - https://thalesgroup.github.io/CipherTrust_Application_Protection/dpg-quick-start-1.0.0.tgz
     version: 1.0.0
-generated: "2024-02-23T11:42:05.697122-05:00"
+generated: "2024-02-29T11:08:48.7601863-05:00"
