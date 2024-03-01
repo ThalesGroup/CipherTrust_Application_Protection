@@ -67,7 +67,7 @@ fi
 # Pull Helm Repo
 if [ "$PULL_HELM" = "true" ];
 then
-  helm repo add --force-update cdsp https://anugram.github.io/helm-charts/
+  helm repo add --force-update cdsp https://thalesgroup.github.io/CipherTrust_Application_Protection/
 fi
 
 # Helm Install Chart with custom values file
@@ -84,7 +84,7 @@ then
     RETRIES=$((RETRIES + 1))
     sleep 5
   done
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8080
+  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8080 --address 0.0.0.0 &
   
   RETRIES=0
   CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-ui -n kubecon"
@@ -93,16 +93,18 @@ then
     RETRIES=$((RETRIES + 1))
     sleep 5
   done
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000
+  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000 --address 0.0.0.0 &
 fi
 
 # Helm Upgrade Chart with custom values file
 if [ "$HELM_OP" = "upgrade" ];
 then
   pkill -f port-forward
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000
+  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000 --address 0.0.0.0 &
   
-  helm upgrade -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api
+  #helm upgrade -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api
+  helm delete kubecon-demo-api -n kubecon
+  helm install -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
   RETRIES=0
   CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-api -n kubecon"
   until $CHK_ROLLOUT || [ $RETRIES -eq 30 ]; do
@@ -110,7 +112,7 @@ then
     RETRIES=$((RETRIES + 1))
     sleep 5
   done
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990
+  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990 --address 0.0.0.0 &
   
 fi
   
