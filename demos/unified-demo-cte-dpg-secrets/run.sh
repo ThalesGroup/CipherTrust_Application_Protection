@@ -40,7 +40,7 @@ fi
 # Run the Ansible script
 if [ "$ANSIBLE" = "true" ];
 then
-  docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host kubecon-demo-ansible
+  docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:demo-dpg-cte-secrets-ansible
 
   docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=192.168.2.233" -e "CM_USERNAME=admin" -e "CM_PASSWORD=ChangeIt01!" -e "LOCAL_CA_ID=50e566a1-9cff-4787-9741-d4f545f7657f" -e "ADD_DPG_FLAG=false" -e "SERVER_IP"="192.168.2.221" -e "SERVER_PORT"="9000" -v
 fi
