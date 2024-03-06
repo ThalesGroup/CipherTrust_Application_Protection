@@ -56,9 +56,13 @@ spec:
             - name: KEY_VALUE
               valueFrom:
                 secretKeyRef:
-                name: {{.Values.configuration.secretname}}
-                key: trustedca
+                    name: {{.Values.configuration.secretname}}
+                    key: server.key
             - name: TRUSTED_CA
+              valueFrom:
+                secretKeyRef:
+                    name: {{.Values.configuration.secretname}}
+                    key: ca.crt
 
   replicas: {{.Values.replicaCount}}
   selector:
@@ -69,6 +73,7 @@ spec:
 apiVersion: v1
 data:
   server.crt: {{.Values.configuration.servercrt}}
+  ca.crt: {{.Values.configuration.trustedca}}
   server.key: {{.Values.configuration.serverkey}}
 kind: Secret
 metadata:
