@@ -1,61 +1,90 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "crdp.fullname" . }}
   labels:
-    {{- include "crdp.labels" . | nindent 4 }}
+    run: {{.Values.runlabel}}
+  name: crdp-deployment
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
-  selector:
-    matchLabels:
-      {{- include "crdp.selectorLabels" . | nindent 6 }}
   template:
-    metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      labels:
-        {{- include "crdp.selectorLabels" . | nindent 8 }}
-    spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "crdp.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+     metadata:
+        name: {{.Values.deployment.name}}
+        labels:
+          run: {{.Values.runlabel}}
+     spec:
+     {{- with .Values.imagePullSecrets }}
+        imagePullSecrets:
+          {{- toYaml . | nindent 8 }}
+     {{- end }}
+        containers:
+          - image: {{.Values.deployment.crdpimage}}
+            name: {{.Values.deployment.crdpimagename}}
+            readinessProbe:
+              httpGet:
+                path: /healthz
+                port: 8990
+                scheme: HTTP
+              initialDelaySeconds: 10
+              periodSeconds: 5
+            livenessProbe:
+              httpGet:
+                path: /liveness
+                port: 8990
+                scheme: HTTP
+              initialDelaySeconds: 10
+              periodSeconds: 10
+            env:
+            - name: KEY_MANAGER_HOST
+              valueFrom:
+                configMapKeyRef:
+                    name: {{.Values.configuration.configmapname}}
+                    key: KEY_MANAGER_HOST
+            - name: SERVER_MODE
+              valueFrom:
+                configMapKeyRef:
+                    name: {{.Values.configuration.configmapname}}
+                    key: SERVER_MODE
+            - name: REGISTRATION_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                    name: {{.Values.configuration.configmapname}}
+                    key: REGISTRATION_TOKEN
+            - name: CERT_VALUE
+              valueFrom:
+                secretKeyRef:
+                    name: {{.Values.configuration.secretname}}
+                    key: server.crt
+            - name: KEY_VALUE
+              valueFrom:
+                secretKeyRef:
+                name: {{.Values.configuration.secretname}}
+                key: trustedca
+            - name: TRUSTED_CA
+
+  replicas: {{.Values.replicaCount}}
+  selector:
+      matchLabels:
+        run: {{.Values.runlabel}}
+
+---
+apiVersion: v1
+data:
+  server.crt: {{.Values.configuration.servercrt}}
+  server.key: {{.Values.configuration.serverkey}}
+kind: Secret
+metadata:
+  name: {{.Values.configuration.secretname}}
+type: Opaque
+---
+
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    SERVER_MODE: {{.Values.configuration.servermode | quote}}
+    KEY_MANAGER_HOST: {{.Values.configuration.kms}}
+    REGISTRATION_TOKEN:  {{.Values.configuration.rtoken}}
+  kind: ConfigMap
+  metadata:
+    name: {{.Values.configuration.configmapname}}
+kind: List
+metadata:

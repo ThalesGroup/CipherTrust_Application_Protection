@@ -3,7 +3,7 @@ entries:
   banking-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-29T11:08:48.7637497-05:00"
+    created: "2024-03-06T13:57:30.3651527-05:00"
     description: A Helm chart for Kubernetes
     digest: 1dde9cb06e2071aa818ee84fcb8fd85e9633a398e2f0a03af2016eafb49e04ac
     name: banking-api
@@ -11,10 +11,21 @@ entries:
     urls:
     - https://thalesgroup.github.io/CipherTrust_Application_Protection/banking-api-1.0.0.tgz
     version: 1.0.0
+  crdp:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-03-06T13:57:30.3676375-05:00"
+    description: A Helm chart for CRDP Container in Kubernetes
+    digest: 734c3848398bd043a720ca83e0e90cda1bbc75335cc2616f5614048146ce7592
+    name: crdp
+    type: application
+    urls:
+    - https://thalesgroup.github.io/CipherTrust_Application_Protection/crdp-1.0.0.tgz
+    version: 1.0.0
   demo-cte-dpg-secrets-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-29T11:08:48.7660508-05:00"
+    created: "2024-03-06T13:57:30.3813398-05:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo Backend
     digest: 3ee2ce98d8aa08ac52effb27a8ce30d26b3d79cc1e30a2c7f1548d0631670d70
     name: demo-cte-dpg-secrets-api
@@ -25,7 +36,7 @@ entries:
   demo-cte-dpg-secrets-ui:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-02-29T11:08:48.7684757-05:00"
+    created: "2024-03-06T13:57:30.3930606-05:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo UI
     digest: ca853dd9ef73e010cd29dd6789bbd0cb0803a436bd6373afffee4586ed663d9e
     name: demo-cte-dpg-secrets-ui
@@ -36,7 +47,7 @@ entries:
   dpg-quick-start:
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2024-02-29T11:08:48.7766013-05:00"
+    created: "2024-03-06T13:57:30.4045278-05:00"
     description: A Helm chart for running quick demo for DPG on Kubernetes
     digest: 77609bade22d176b22471f60e6d83a5da085fda37f75ce08578f90ea1c9d32e7
     name: dpg-quick-start
@@ -44,4 +55,4 @@ entries:
     urls:
     - https://thalesgroup.github.io/CipherTrust_Application_Protection/dpg-quick-start-1.0.0.tgz
     version: 1.0.0
-generated: "2024-02-29T11:08:48.7601863-05:00"
+generated: "2024-03-06T13:57:30.3529606-05:00"
