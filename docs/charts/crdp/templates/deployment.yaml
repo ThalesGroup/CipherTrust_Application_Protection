@@ -18,20 +18,21 @@ spec:
         containers:
           - image: {{.Values.deployment.crdpimage}}
             name: {{.Values.deployment.crdpimagename}}
-            readinessProbe:
-              httpGet:
-                path: /healthz
-                port: 8990
-                scheme: HTTP
-              initialDelaySeconds: 10
-              periodSeconds: 5
-            livenessProbe:
-              httpGet:
-                path: /liveness
-                port: 8990
-                scheme: HTTP
-              initialDelaySeconds: 10
-              periodSeconds: 10
+            imagePullPolicy: IfNotPresent
+            # readinessProbe:
+            #   httpGet:
+            #     path: /healthz
+            #     port: 8990
+            #     scheme: HTTP
+            #   initialDelaySeconds: 10
+            #   periodSeconds: 5
+            # livenessProbe:
+            #   httpGet:
+            #     path: /liveness
+            #     port: 8990
+            #     scheme: HTTP
+            #   initialDelaySeconds: 10
+            #   periodSeconds: 10
             env:
             - name: KEY_MANAGER_HOST
               valueFrom:
