@@ -14,6 +14,9 @@ configuration:
   servermode: <servermode>
   kms: <IP/FQDN of CipherTrust Manager>
   rtoken: <REG_TOKEN>
+service:
+  type: NodePort
+  crdpNodePort: 32001
 ```
 
 | Parameter  | Description  | Required |
@@ -24,6 +27,7 @@ configuration:
 | servercrt  | Certificate in case of TLS enabled | Optional |
 | serverkey  | Private Key in case of TLS enabled | Optional |
 | trustedca  | CA Certificate in case of TLS enabled | Optional |
+| service | Here you can define what type of networking you would like to set for your CRDP service running in Kubernetes. In this example, NodePort is being used and 32001 port is being exposed that is internally mapped to the CRDP exposed port | Optional | 
 
 ## Install CRDP Chart
 ```
