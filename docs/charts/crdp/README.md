@@ -32,3 +32,9 @@ helm install -f values_crdp.yaml crdp cdsp/crdp
 
 # Test APIs
 ## Using Postman
+### Protect Data
+<kbd>![image](https://github.com/ThalesGroup/CipherTrust_Application_Protection/assets/111074839/f3c92454-040c-4e80-a2b5-72c28e6ee44b)</kbd>
+
+### Reveal Data
+<kbd>![image](https://github.com/ThalesGroup/CipherTrust_Application_Protection/assets/111074839/920ae4f7-72b0-4f06-8ed9-2aa6a3892e1d)</kbd>
+
