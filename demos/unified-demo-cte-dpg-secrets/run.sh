@@ -16,7 +16,7 @@ if [ "$MINIKUBE" = "true" ];
 then
   minikube stop
   minikube delete
-  minikube start --memory 8192 --cpus 3"
+  minikube start --memory 8192 --cpus 3
 fi
 
 # Push images to Docker Registry
