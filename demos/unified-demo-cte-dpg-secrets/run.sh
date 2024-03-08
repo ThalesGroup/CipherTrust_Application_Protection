@@ -16,7 +16,7 @@ if [ "$MINIKUBE" = "true" ];
 then
   minikube stop
   minikube delete
-  minikube start --memory 8192 --cpus 3 --insecure-registry="192.168.2.221/24"
+  minikube start --memory 8192 --cpus 3"
 fi
 
 # Push images to Docker Registry
@@ -28,12 +28,12 @@ then
   docker push localhost:5000/kubecon-demo-api
 fi
 
-# Set the Vault token
+# Set the Akeyless Vault token
 if [ "$TOKEN" = "true" ];
 then
-  TOKEN=`akeyless auth --access-id "p-t23bmtngine1am" --access-key "+rhGnyiHPVpK8RdfYLi3YELowOnwhNzQrfg5jluqGXU=" --json true | awk '/token/ { gsub(/[",]/,"",$2); print $2}'`
-  rm -rf /home/aj/.vault-token
-  echo $TOKEN >> /home/aj/.vault-token
+  T=`akeyless auth --access-id "$CSM_ACCESS_ID" --access-key "$CSM_ACCESS_KEY" --json true | awk '/token/ { gsub(/[",]/,"",$2); print $2}'`
+  rm -rf /home/$USER/.vault-token
+  echo $T >> /home/$USER/.vault-token
   vault login token=$TOKEN
 fi
 
@@ -41,14 +41,13 @@ fi
 if [ "$ANSIBLE" = "true" ];
 then
   docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:demo-dpg-cte-secrets-ansible
-
-  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=192.168.2.233" -e "CM_USERNAME=admin" -e "CM_PASSWORD=ChangeIt01!" -e "LOCAL_CA_ID=50e566a1-9cff-4787-9741-d4f545f7657f" -e "ADD_DPG_FLAG=false" -e "SERVER_IP"="192.168.2.221" -e "SERVER_PORT"="9000" -v
+  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -v
 fi
 
 # Install CTE for kubernetes
 if [ "$INSTALL_CTE" = "true" ];
 then
-  cd /home/aj/Desktop/kubeConSetup/cte/
+  cd /home/$USER/Desktop/kubeConSetup/cte/
   ./deploy.sh
 fi
 
@@ -113,10 +112,4 @@ then
     sleep 5
   done
   kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990 --address 0.0.0.0 &
-  
-fi
-  
-if [ "$FAKE" = "true" ];
-then
-  echo "Fake Stuff"
 fi
