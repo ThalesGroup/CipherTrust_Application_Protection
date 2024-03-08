@@ -11,8 +11,8 @@ helm repo add --force-update cdsp https://thalesgroup.github.io/CipherTrust_Appl
 Create values file for your environment -
 ```
 configuration:
-  servermode: no-tls
-  kms: <IP/FQDN>
+  servermode: <servermode>
+  kms: <IP/FQDN of CipherTrust Manager>
   rtoken: <REG_TOKEN>
 ```
 
