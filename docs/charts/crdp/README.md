@@ -19,7 +19,7 @@ configuration:
 | Parameter  | Description  | Required |
 |---|---|--|
 | kms  | IP address/Hostname of the CipherTrust Manager (CM) | Required |
-| servermode  | Specifies the mode in which Client will communicate with CRDP. Valid options are no-tls, tls-cert-opt, tls-cert. Choose no-tls to disable TLS, tls-cert-opt to keep TLS enabled without certificate validation or tls-cert to enforce TLS with validation | Required |
+| servermode  | Specifies the mode in which Client will communicate with CRDP. Valid options are <ul><li>no-tls</li> <li>tls-cert-opt</li> <li>tls-cert</li></ul>. Choose <ul><li>no-tls to disable TLS</li><li>tls-cert-opt to keep TLS enabled without certificate validation</li><li>tls-cert to enforce TLS with validation</li></ul> | Required |
 | rtoken  | Application Registration Token from CM | Required |
 | servercrt  | Certificate in case of TLS enabled | Optional |
 | serverkey  | Private Key in case of TLS enabled | Optional |
