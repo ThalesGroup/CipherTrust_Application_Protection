@@ -47,7 +47,9 @@ fi
 # Install CTE for kubernetes
 if [ "$INSTALL_CTE" = "true" ];
 then
-  cd /home/$USER/Desktop/kubeConSetup/cte/
+  cd /tmp
+  git clone https://github.com/thalescpl-io/ciphertrust-transparent-encryption-kubernetes.git
+  cd ciphertrust-transparent-encryption-kubernetes
   ./deploy.sh
 fi
 
