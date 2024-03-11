@@ -76,8 +76,20 @@ if [ "$HELM_OP" = "install" ];
 then
   pkill -f port-forward
   helm install -f /tmp/values_api.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
-  helm install -f /tmp/values_ui.yaml kubecon-demo-ui cdsp/demo-cte-dpg-secrets-ui --insecure-skip-tls-verify -n kubecon
-  
+  helm install -f /tmp/values_ui.yaml kubecon-demo-ui cdsp/demo-cte-dpg-secrets-ui --insecure-skip-tls-verify -n kubecon  
+fi
+
+# Helm Upgrade Chart with custom values file
+if [ "$HELM_OP" = "upgrade" ];
+then
+  pkill -f port-forward
+  helm delete kubecon-demo-api -n kubecon
+  helm install -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
+fi
+
+# Enable Port-Forward if true
+if [ "$PORT_FWD" = "true" ];
+then
   RETRIES=0
   CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-api -n kubecon"
   until $CHK_ROLLOUT || [ $RETRIES -eq 30 ]; do
@@ -85,7 +97,15 @@ then
     RETRIES=$((RETRIES + 1))
     sleep 5
   done
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8080 --address 0.0.0.0 &
+    
+  if [ "$HELM_OP" = "install" ];
+  then
+    kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8080 --address 0.0.0.0 &
+  fi
+  if [ "$HELM_OP" = "upgrade" ];
+  then
+    kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990 --address 0.0.0.0 &
+  fi
   
   RETRIES=0
   CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-ui -n kubecon"
@@ -95,23 +115,4 @@ then
     sleep 5
   done
   kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000 --address 0.0.0.0 &
-fi
-
-# Helm Upgrade Chart with custom values file
-if [ "$HELM_OP" = "upgrade" ];
-then
-  pkill -f port-forward
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000 --address 0.0.0.0 &
-  
-  #helm upgrade -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api
-  helm delete kubecon-demo-api -n kubecon
-  helm install -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
-  RETRIES=0
-  CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-api -n kubecon"
-  until $CHK_ROLLOUT || [ $RETRIES -eq 30 ]; do
-    $CHK_ROLLOUT
-    RETRIES=$((RETRIES + 1))
-    sleep 5
-  done
-  kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990 --address 0.0.0.0 &
 fi
