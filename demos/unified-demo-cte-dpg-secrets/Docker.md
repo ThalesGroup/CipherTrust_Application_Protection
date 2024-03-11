@@ -25,6 +25,7 @@ Parameters as below -
 ## Ouput
 This Docker image will configure the CipherTrust Manager for CTE and DPG that we need to run this demo.
 This will also generate a bunch of files in /tmp directory that we can use to configure our Kubernetes cluster so that Persistent Volume Claim and the Storage Class are configured correctly. It will also create files for installing our Helm Charts correctly as described in the documentation for [Helm](Helm.md)
+
 List of files created -
 | Name | Description |
 |--|--|
