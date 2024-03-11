@@ -116,3 +116,8 @@ then
   done
   kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-ui 9001:3000 --address 0.0.0.0 &
 fi
+
+echo "=========================================="
+echo "You may now access the UI of the demo at -"
+echo "http://$KUBE_PUBLIC_IP:9001"
+echo "=========================================="
