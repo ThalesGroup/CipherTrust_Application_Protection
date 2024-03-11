@@ -72,8 +72,29 @@ Different flags
   # This will run the playbook within the container with arguments provided as part of the command line args
   docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -v
   ```
+
 * INSTALL_CTE
+  If set to trus, this will pull the CTE for Kubernetes deployment script from GitHub and deploy the required containers on your Kubernetes cluster.
+  Commands executed are as below -
+  ```
+  git clone https://github.com/thalescpl-io/ciphertrust-transparent-encryption-kubernetes.git
+  cd ciphertrust-transparent-encryption-kubernetes
+  ./deploy.sh
+  ```
+  
 * SETUP_KUBE
+  The Ansible flag will create few YAML files in the /tmp directory that are pre-populated with the required tokens and configurations required to run this demo. It assumes you will be using an NFS server for storing files that are to be secured by CTE.
+
+  Following commads will be executed -
+  ```
+  kubectl apply -f /tmp/namespace.yaml
+  kubectl apply -f /tmp/cm-token-secret.yaml
+  kubectl apply -f /tmp/storage-class.yaml
+  kubectl apply -f /tmp/nfs-pv.yaml
+  kubectl apply -f /tmp/nfs-pvc.yaml
+  kubectl apply -f /tmp/cte-pvc.yaml
+  ```
+  
 * HELM_OP
 
 ## References
