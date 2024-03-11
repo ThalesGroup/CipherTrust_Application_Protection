@@ -96,6 +96,22 @@ Different flags
   ```
   
 * HELM_OP
+  This flag can take two value, one for "install" without Data Protection Gateway and the other one "upgrade" that will re-install but with Data Protection Gateway installed as well, remember this Data Protection Gateway is already configured using the Ansible step. The Ansible flag will also create three YAML files that act as values.yaml files for the installation of charts -
+  * UI service (/tmp/values_ui.yaml)
+  * API service without DPG (/tmp/values_api.yaml)
+  * API Service with DPG (/tmp/values_api_with_dpg.yaml)
+
+    Below commands will be executed when run without DPG
+    ```
+    helm install -f /tmp/values_api.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
+    helm install -f /tmp/values_ui.yaml kubecon-demo-ui cdsp/demo-cte-dpg-secrets-ui --insecure-skip-tls-verify -n kubecon
+    ```
+    run.sh script has been written to also do a port-forward to allow user to access the UI/APIs outside the cluster, but you may remove it in case you already have your ingress sorted out
+
+    with"upgrade option, below command will be executed
+    ```
+    helm install -f /tmp/values_api_with_dpg.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
+    ```
 
 ## References
 ### How to get Local CA ID
