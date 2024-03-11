@@ -276,9 +276,182 @@ Creates a userset named plain with username owner in it. We will later use this 
 ```
 
 ### Creating Access Policy
+Creates Access Policy with default CipherText, Plaintext for plain UserSet, Masked for masked UserSet
+```
+# Get the Masking Format ID first
+- name: "Get dynamic masket format ID"
+  thalesgroup.ciphertrust.cm_resource_get_id_from_name:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    query_param: "name"
+    query_param_value: "SHOW_LAST_FOUR"
+    resource_type: "masking-formats"
+  register: masking_format_dynamic
+  ignore_errors: true
+
+# Now Create the Access Policy
+- name: "Create Access Policy"
+  thalesgroup.ciphertrust.dpg_access_policy_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: "create"
+    name: accessPolicy
+    default_reveal_type: "Ciphertext"
+    user_set_policy:
+      - reveal_type: Plaintext
+        user_set_id: "{{ user_set_plain['response']['id'] }}"
+      - reveal_type: "Masked Value"
+        user_set_id: "{{ user_set_masked['response']['id'] }}"
+        masking_format_id: "{{ masking_format_dynamic['response']['id'] }}"
+  register: access_policy
+```
 
 ### Creating Protection Policy
+Create CharSet and the Protection Policy using CharSet, Masking Format and Key created above
+```
+# First get the masking format ID from name
+- name: "Get static masket format ID"
+  thalesgroup.ciphertrust.cm_resource_get_id_from_name:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    query_param: "name"
+    query_param_value: "LAST_FOUR"
+    resource_type: "masking-formats"
+  register: masking_format_static
+  ignore_errors: true
+
+# Create DPG CharSet next
+- name: "Create Character Set"
+  thalesgroup.ciphertrust.dpg_character_set_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: create
+    name: charSet
+    range:
+      - 0030-0039
+      - 0041-005A
+      - 0061-007A
+    encoding: UTF-8
+  register: charset
+
+# Now create the protection policy
+- name: "Create Protection Policy"
+  thalesgroup.ciphertrust.dpg_protection_policy_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: create
+    access_policy_name: protectionPolicy
+    masking_format_id: "{{ masking_format_static['response']['id'] }}"
+    name: protectionPolicy
+    key: dpgKey
+    tweak: "1628462495815733"
+    tweak_algorithm: "SHA1"
+    algorithm: "FPE/AES/UNICODE"
+    character_set_id: "{{ charset['response']['id'] }}"
+  register: protection_policy
+```
 
 ### Creating DPG Policy
+This is where we will map our REST API endpoints with the DPG policy.
+We are protecting the API endpoints -
+* /api/payment-info (GET/POST)
+  * Fields
+    * cc
+    * cvv
+    * zip
+* /api/health-info/add (POST)
+  * healthCardNum
+  * zip
+* /api/health-info (GET)
+  * healthCardNum
+  * zip
+```
+- name: "Create DPG Policy"
+  thalesgroup.ciphertrust.dpg_policy_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: create
+    name: dpgPolicy
+    proxy_config:
+      - api_url: "/api/payment-info"
+        json_request_post_tokens:
+          - name: "cc"
+            operation: "protect"
+            protection_policy: protectionPolicy
+          - name: "cvv"
+            operation: "protect"
+            protection_policy: protectionPolicy
+          - name: "zip"
+            operation: "protect"
+            protection_policy: protectionPolicy
+        json_response_get_tokens:
+          - name: "data.[*].cc"
+            operation: "reveal"
+            protection_policy: protectionPolicy
+            access_policy: accessPolicy
+          - name: "data.[*].cvv"
+            operation: "reveal"
+            protection_policy: protectionPolicy
+            access_policy: accessPolicy
+          - name: "data.[*].zip"
+            operation: "reveal"
+            protection_policy: protectionPolicy
+            access_policy: accessPolicy
+      - api_url: "/api/health-info/add"
+        json_request_post_tokens:
+          - name: "healthCardNum"
+            operation: "protect"
+            protection_policy: protectionPolicy
+          - name: "zip"
+            operation: "protect"
+            protection_policy: protectionPolicy
+      - api_url: "/api/health-info"
+        json_response_get_tokens:
+          - name: "data.[*].healthCardNum"
+            operation: "reveal"
+            protection_policy: protectionPolicy
+            access_policy: accessPolicy
+          - name: "data.[*].zip"
+            operation: "reveal"
+            protection_policy: protectionPolicy
+            access_policy: accessPolicy
+  register: policy
+```
 
 ### Creating DPG Client Profile
