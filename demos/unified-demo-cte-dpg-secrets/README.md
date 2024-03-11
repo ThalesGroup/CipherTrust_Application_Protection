@@ -14,9 +14,6 @@ This project will provide you -
   * Docker image to automate configuration of CipherTrust Manager
   * Utility file to stitch everything together
 
-## Architecture
-<kbd>TBD</kbd>
-
 ## Prerequisites
 * Existing Kubernetes Environment - cloud or on-prem
 * Docker to automate CipherTrust Manager configuration for DPG and CTE for Kubernetes as well as create Helm Chart's values file
@@ -62,4 +59,4 @@ Once installed, you may run below command to upgrade the deployment and add DPG 
 
 ## References
 ### How to get Local CA ID
-<kbd>TBD</kbd>
+<kbd>![image](https://github.com/ThalesGroup/CipherTrust_Application_Protection/assets/111074839/cccd43d7-9387-4433-ad0d-69b1cc5d2408)</kbd>
