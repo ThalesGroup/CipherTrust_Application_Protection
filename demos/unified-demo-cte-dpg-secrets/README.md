@@ -35,11 +35,13 @@ Detailed steps are available on the Community Edition URL above.
 Clone this repo on your Windows workstation
 ```
 git clone https://github.com/thalescpl-io/CipherTrust_Application_Protection
-cd ./CipherTrust_Application_Protection/demos/sample-banking-app
+cd ./CipherTrust_Application_Protection/demos/unified-demo-cte-dpg-secrets
 ```
-#### 3) Configure PowerShell script
-Once you have the CM installed and repo cloned, the only thing you need to change are some of the variables in the bundled ps1 file i.e. 'deploy-demo-win-ps-71.ps1'
-Updated below variables at the top of the file -
+#### 3) Deploy demo using run.sh
+To install the demo without Data Protection Gateway
+```
+./run.sh ANSIBLE=true CM_IP=<CM_IP> CM_USERNAME=<CM_USERNAME> CM_PASSWORD=<CM_PASSWORD> CA_ID=<LOCAL_CA_ID> KUBE_PUBLIC_IP=<IP/FQDN of Kubernetes Public access or Ingress> INSTALL_CTE=true SETUP_KUBE=true HELM_OP=install
+```
 
 | Variable | Description |
 | --- | --- |
