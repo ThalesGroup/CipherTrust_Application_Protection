@@ -455,3 +455,34 @@ We are protecting the API endpoints -
 ```
 
 ### Creating DPG Client Profile
+Finally create DPG client with above policy and resources
+```
+- name: "Create DPG Client Profile"
+  thalesgroup.ciphertrust.dpg_client_profile_save:
+    name: dpgProfile
+    op_type: create
+    app_connector_type: DPG
+    lifetime: 30d
+    cert_duration: 730
+    max_clients: 200
+    ca_id: "{{ ca_id }}"
+    nae_iface_port: 9006
+    csr_parameters:
+      csr_cn: admin
+    policy_id: "{{ policy['response']['id'] }}"    
+    configurations:
+      auth_method_used:
+        scheme_name: Basic
+      tls_to_appserver:
+        tls_skip_verify: true
+        tls_enabled: false
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+  register: profile
+```
