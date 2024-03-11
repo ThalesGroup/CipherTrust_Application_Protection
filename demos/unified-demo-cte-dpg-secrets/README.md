@@ -52,7 +52,7 @@ To install the demo without Data Protection Gateway
 | SETUP_KUBE | If true, this will create Namespace, Storage Class, Persistent Volume Claim on your Kubernetes cluster. These files are auto generated for you by the [Ansible](Ansible.md) Playbook in the /tmp directory of the machine where this run.sh is being executed |
 | HELM_OP | Can be either "install" or "upgrade". Install option will deploy UI and API service without Data Protection Gateway, while upgrade will setup with Data Protection Gateway. You have to first install before running upgrade |
 | NFS_SERVER_IP | IP or FQDN of the NFS Server that you intend to use for storing the confidential files protected by CTE |
-| PORT_FWD | This, if set true, will port forward to allow external access to the service. Omit this if you have separate ingress service enabled/running |
+| PORT_FWD | This, if set true, will port forward to allow external access to the service. Omit this if you have separate ingress service enabled/running. Default configuration will expose UI service on 3000, API service on 8080, and DPG on 8990 |
 
 Once installed, you may run below command to upgrade the deployment and add DPG to the deployment
 
