@@ -55,34 +55,6 @@ Creates an AES 256 bytes key with encrypt/decrypt as key usage and suitable for 
     register: key
 ```
 
-### Creating Interface
-Creates an NAE interface with port as 9006, TLS with cert auth and password optional, and associated with Certificate Authority as ca_id
-```
-- name: "Create Interface"
-  thalesgroup.ciphertrust.interface_save:
-    localNode:
-      server_ip: "{{ cm_ip }}"
-      server_private_ip: "{{ cm_private_ip }}"
-      server_port: 5432
-      user: "{{ cm_username }}"
-      password: "{{ cm_password }}"
-      verify: False
-      auth_domain_path:
-    op_type: create
-    port: 9006
-    auto_gen_ca_id: "{{ ca_id }}"
-    auto_registration: true
-    allow_unregistered: true
-    cert_user_field: CN
-    interface_type: nae
-    mode: tls-cert-pw-opt
-    network_interface: all
-    trusted_cas:
-      local:
-        - "{{ ca_id }}"
-  ignore_errors: true
-```
-
 ### Creating CTE ResourceSet
 Create a ResourceSet for the CTE Guard Point that would protect all files in /data/cte 
 ```
@@ -207,3 +179,106 @@ Create a registration token that we will eventually put in our kubernetes config
       auth_domain_path:
   register: _result_create_reg_token
 ```
+
+## For Data Protection Gateway
+### Creating Key for DPG
+Creates an AES 256 bytes key with encrypt/decrypt, FPE encrypt/decrypt as key usage and suitable for a DPG client
+```
+- name: "Create Key"
+  thalesgroup.ciphertrust.vault_keys2_save:
+    op_type: create
+    name: dpgKey
+    algorithm: aes
+    size: 256
+    usageMask: 3145740
+    unexportable: false
+    undeletable: false
+    meta:
+      ownerId: admin
+      versionedKey: true
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+  ignore_errors: true
+```
+
+### Creating Interface
+Creates an NAE interface with port as 9006, TLS with cert auth and password optional, and associated with Certificate Authority as ca_id
+```
+- name: "Create Interface"
+  thalesgroup.ciphertrust.interface_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: create
+    port: 9006
+    auto_gen_ca_id: "{{ ca_id }}"
+    auto_registration: true
+    allow_unregistered: true
+    cert_user_field: CN
+    interface_type: nae
+    mode: tls-cert-pw-opt
+    network_interface: all
+    trusted_cas:
+      local:
+        - "{{ ca_id }}"
+  ignore_errors: true
+```
+
+### Creating UserSet for masked reveal
+Creates a userset named masked with username operator in it. We will later use this to assign corresponding access policy
+```
+- name: "User Set for masked info"
+  thalesgroup.ciphertrust.dpg_user_set_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: "create"
+    name: masked
+    users:
+      - operator
+  register: user_set_masked
+```
+
+### Creating UserSet for plaintext reveal
+Creates a userset named plain with username owner in it. We will later use this to assign corresponding access policy
+```
+- name: "User Set for plaintext"
+  thalesgroup.ciphertrust.dpg_user_set_save:
+    localNode:
+      server_ip: "{{ cm_ip }}"
+      server_private_ip: "{{ cm_private_ip }}"
+      server_port: 5432
+      user: "{{ cm_username }}"
+      password: "{{ cm_password }}"
+      verify: False
+      auth_domain_path:
+    op_type: "create"
+    name: plain
+    users:
+      - owner
+  register: user_set_plain
+```
+
+### Creating Access Policy
+
+### Creating Protection Policy
+
+### Creating DPG Policy
+
+### Creating DPG Client Profile
