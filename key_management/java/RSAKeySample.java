@@ -90,7 +90,7 @@ public class RSAKeySample {
 	    // Import the key pair back to the Key Manager
 	    // key pair name is keyName+"Dup", keys are exportable and not deletable
 	    NAEParameterSpec spec_dup =
-		 new NAEParameterSpec(keyName + "Dup", true, false, session);
+		 new NAEParameterSpec(keyName + "Dup", true, true, session);
 	    // private key contains both public and private key data
 	    privKey.importKey (privKeyData, "RSA", spec_dup);
 	    System.out.println("Imported key data; Duplicate Key pair " + privKey.getName() +

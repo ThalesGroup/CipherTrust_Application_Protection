@@ -8,7 +8,7 @@ namespace CADP.Pkcs11Sample
     {
         static void Usage()
         {
-            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i ] [-k|-kp keyname] [-o encryption mode] [-f input File] ");
+            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d ] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] ");
             Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false])");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
@@ -25,10 +25,12 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t b. Compute message digest for the default test string. ");
             Console.WriteLine("\t c. Compute message digest for a given input file. ");
             Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
+            Console.WriteLine("\t d. Encrypt and decrypt with GCM mode sample. ");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");
             Console.WriteLine("\t CBC ... CBC mode");
+            Console.WriteLine("\t GCM ... GCM mode");
             Console.WriteLine("\t CBC_PAD ... CBC_PAD mode");
             Console.WriteLine("\t sha256  ... SHA256 mode");
             Console.WriteLine("\t sha384  ... SHA384 mode");
@@ -36,6 +38,13 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t sha256-HMAC  ... SHA256-HMAC mode");
             Console.WriteLine("\t sha384-HMAC  ... SHA384-HMAC mode");
             Console.WriteLine("\t sha512-HMAC  ... SHA512-HMAC mode");
+            Console.WriteLine("");
+            Console.WriteLine("\t Choices for the -O option: ");
+            Console.WriteLine("\t true    ... Opaque object");
+            Console.WriteLine("\t false   ... non Opaque object");
+            Console.WriteLine("");
+            Console.WriteLine("\t Choices for the -TagLen option: ");
+            Console.WriteLine("\t 4 - 16 ... bytes taglength for GCM");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -g option:");
             Console.WriteLine("\t 0 ... generate a versioned key");
@@ -91,6 +100,8 @@ namespace CADP.Pkcs11Sample
             bool bAlwSen = false;
             bool bNevExtr = false;
             string newkeyLabel = keyLabel + "_imp";
+            bool bOpaqueObj = false;
+            int tagLen = 12;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -98,7 +109,7 @@ namespace CADP.Pkcs11Sample
                 if (optArg.StartsWith("-"))
                 {
                     switch (optArg[1])
-                    {
+                    {                      
                         case 'n':
 
                             if (optArg.Length > 2)
@@ -111,6 +122,9 @@ namespace CADP.Pkcs11Sample
                             else
                                 nodelete = true;
                             break;
+                        case 'O':
+                            bOpaqueObj= Convert.ToBoolean(args[++i]);
+                            break;                            
                         case 'g':
 
                             if (i < args.Length - 1 && uint.TryParse(args[i + 1], out genAction))
@@ -188,7 +202,11 @@ namespace CADP.Pkcs11Sample
                             newkeyfile = true;
                             break;
                         case 'T':
-                            if (i < args.Length - 1)
+                            if(optArg == "-TagLen")
+                            {
+                                tagLen = Convert.ToInt32(args[++i]);
+                            }
+                            else if (i < args.Length - 1)
                                 tweakInput = args[++i];
                             break;
                         case 'H':
@@ -239,7 +257,7 @@ namespace CADP.Pkcs11Sample
                         sample.Run(new object[] { pin, wrappingKeyLabel, 0, preactive, nodelete, bAlwSen, bNevExtr });
 
                         sample = new CreateObjectSample();
-                        sample.Run(new object[] { pin, keyValue, keyLabel });
+                        sample.Run(new object[] { pin, keyValue, keyLabel, bOpaqueObj, genAction });
 
                         sample = new EncryptDecryptSample();
                         sample.Run(new object[] { pin, keyLabel });
@@ -282,7 +300,7 @@ namespace CADP.Pkcs11Sample
 
                     case '2':   // run create key object sample
                         sample = new CreateObjectSample();
-                        sample.Run(new object[] { pin, keyValue, keyLabel });
+                        sample.Run(new object[] { pin, keyValue, keyLabel, bOpaqueObj, genAction });
                         break;
 
                     case '3':   // run find and delete key sample
@@ -299,7 +317,10 @@ namespace CADP.Pkcs11Sample
                         sample = new EncryptDecryptSample();
                         sample.Run(new object[] { pin, keyLabel, opName, headerMode, fileName, charSetChoc, charSetInput, utfMode, tweakInput });
                         break;
-
+                    case 'd':   // run encrypt and decrypt a short message with GCM
+                        sample = new EncryptDecryptSample();
+                        sample.Run(new object[] { pin, keyLabel, opName, tagLen });
+                        break;
                     case '6':   // run create a key (or key pair) and sign the message sample
                         sample = new KeypairSignSample();
                         sample.Run(new object[] { pin, keyLabel, opName, headerMode, nodelete });

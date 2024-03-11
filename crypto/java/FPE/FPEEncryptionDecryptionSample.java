@@ -10,8 +10,10 @@ import java.security.Security;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
+import com.ingrian.security.nae.FPEFormat;
+import com.ingrian.security.nae.FPEParameterAndFormatSpec;
+import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.IngrianProvider;
-import com.ingrian.security.nae.NAEIvAndTweakDataParameter;
 //CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAESecureRandom;
@@ -86,26 +88,53 @@ public class FPEEncryptionDecryptionSample
 	    iv = IngrianProvider.hex2ByteArray(_iv);
 	    
 	    IvParameterSpec ivSpec = new IvParameterSpec(iv);
-	    // Initializes IV and tweak parameters
-	    NAEIvAndTweakDataParameter ivtweak = null;
-	    ivtweak = new NAEIvAndTweakDataParameter(ivSpec, tweakData, tweakAlgo);
+	    // Initializes spec with IV, tweak parameters and  static format
+	    FPEParameterAndFormatSpec paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_spec(ivSpec).setFpeFormat(FPEFormat.FIRST_TWO_LAST_FOUR).build();
 	    // get a cipher
 	    Cipher encryptCipher = Cipher.getInstance("FPE/AES/CARD10", "IngrianProvider");
 	    // initialize cipher to encrypt.
-	   	encryptCipher.init(Cipher.ENCRYPT_MODE, key, ivtweak);
+	   	encryptCipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
 	    
 	    // encrypt data
 	    byte[] outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 	    
-	    System.out.println("encrypted data data  \"" + new String(outbuf) + "\"");
+	    System.out.println("Encrypted data   \"" + new String(outbuf) + "\"");
 	    
 	    Cipher decryptCipher = Cipher.getInstance("FPE/AES/CARD10", "IngrianProvider");
 	    // to decrypt data, initialize cipher to decrypt
-	    decryptCipher.init(Cipher.DECRYPT_MODE, key, ivtweak);
+	    decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
 	    
 	    // decrypt data
 	    byte[] newbuf = decryptCipher.doFinal(outbuf);
 	    System.out.println("Decrypted data  \"" + new String(newbuf) + "\"");
+	    
+	    /**
+	     * For using custom format, Create FPEFormat to fetch the custom format ,Set numberOfElementsFromStart and numberOfElementsBeforeEnd.
+	     */
+	    
+		FPEFormat format = FPEFormat.getCustomFormat();
+		//initaialize start and end values
+		format.setNumberOfElementsBeforeEnd(0);
+		format.setNumberOfElementsFromStart(6);
+		
+		// Initializes spec with IV, tweak parameters and format
+		paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).setFpeFormat(format).build();
+
+		// initialize cipher to encrypt.
+		encryptCipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
+
+		// encrypt data
+		outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
+
+		System.out.println("Encrypted data \"" + new String(outbuf) + "\"");
+
+		// to decrypt data, initialize cipher to decrypt
+		decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
+
+		// decrypt data
+		newbuf = decryptCipher.doFinal(outbuf);
+		System.out.println("Decrypted data  \"" + new String(newbuf) + "\"");
+
 	    // close the session
 	    session.closeSession();
 	} catch (Exception e) {

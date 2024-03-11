@@ -94,7 +94,7 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
         {CKA_THALES_CUSTOM_2, ca2, caLen2 },
         {CKA_THALES_CUSTOM_3, ca3, caLen3 }
     };
-
+    // In CipherTrust mode, By default EXTRACTABLE and MODIFIABLE are not set to True
     CK_ATTRIBUTE privateKeyTemplate[] =
     {
         {CKA_LABEL, keyLabel, keyLabel_len }, /* Keyname*/
@@ -107,7 +107,10 @@ static CK_RV createKeyPair(char *keyLabel, char *custom1, char *custom2, char *c
         {CKA_UNWRAP, &bTrue, sizeof(bTrue)},
         {CKA_THALES_CUSTOM_1, ca1, caLen1 },
         {CKA_THALES_CUSTOM_2, ca2, caLen2 },
-        {CKA_THALES_CUSTOM_3, ca3, caLen3 }
+        {CKA_THALES_CUSTOM_3, ca3, caLen3 },
+        {CKA_EXTRACTABLE, &bTrue, sizeof(bTrue)},
+        {CKA_MODIFIABLE, &bTrue, sizeof(bTrue)},
+        {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)}
     };
 
     CK_RV    rc = CKR_OK;
@@ -505,7 +508,7 @@ int main(int argc, char *argv[])
             else
             {
                 printf("Finding public key succeeded, about to retrieve its attributes.\n");
-                getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen);
+                getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen, privExponentBuf, &privExpoBufLen);
 
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
@@ -527,7 +530,7 @@ int main(int argc, char *argv[])
             {
                 printf("Finding private key succeeded, about to retrieve its attributes.\n");
                 modulusBufLen = 520;
-                getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf, &modulusBufLen, privExponentBuf, &privExpoBufLen);
+                getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen, privExponentBuf, &privExpoBufLen);
 
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
