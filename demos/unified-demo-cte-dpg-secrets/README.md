@@ -59,6 +59,23 @@ Once installed, you may run below command to upgrade the deployment and add DPG 
 ./run.sh HELM_OP=upgrade
 ```
 
+#### 4) Understanding run.sh file
+Different flags
+* ANSIBLE
+  If set to true, it will execute commands to run the Ansible container (refer [Ansible](Ansible.md) for more info) that will configure CM for the demo (CTE and DPG configuration) as well as create files that you may use to setup PV/PVC/StorageClass on your Kubernetes environment as well as install Helm Charts to deploy the whole application. Commands are as below -
+  ```
+  # Pull the docker image from hub and start the container
+  # Image is ciphertrust/automation:demo-dpg-cte-secrets-ansible
+  # Container name is ansible
+  docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:demo-dpg-cte-secrets-ansible
+  
+  # This will run the playbook within the container with arguments provided as part of the command line args
+  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -v
+  ```
+* INSTALL_CTE
+* SETUP_KUBE
+* HELM_OP
+
 ## References
 ### How to get Local CA ID
 <kbd>![image](https://github.com/ThalesGroup/CipherTrust_Application_Protection/assets/111074839/cccd43d7-9387-4433-ad0d-69b1cc5d2408)</kbd>
