@@ -11,16 +11,17 @@ docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/
 
 ## Run the docker container
 ```
-docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=192.168.2.233" -e "CM_USERNAME=admin" -e "CM_PASSWORD=ChangeIt01!" -e "LOCAL_CA_ID=50e566a1-9cff-4787-9741-d4f545f7657f" -e "ADD_DPG_FLAG=false" -e "SERVER_IP"="192.168.2.221" -e "SERVER_PORT"="9000" -v
+docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=<CM_IP>" -e "CM_USERNAME=<CM_USERNAME>" -e "CM_PASSWORD=<CM_PASSWORD>" -e "LOCAL_CA_ID=<LOCAL_CA_ID>" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=<CLUSTER_OR_INGRESS_IP>" -e "SERVER_PORT"="9000" -e "NFS_IP=<NFS_SERVER_IP>" -v
 ```
 Parameters as below -
-| Name | Description | Comment |
-|--|--|--|
-| CM_IP | IP or FQDN of the CipherTrust Manager | |
-| CM_USERNAME | Username for teh above CM | |
-| CM_PASSWORD | Password of the above CM | |
-| LOCAL_CA_ID | Certificate Authority ID for one of the Local CAs | |
-| SERVER_IP | IP or FQDN of the Kubernetes cluster or the Ingress controller. UI service will reach API service on this IP | |
+| Name | Description |
+|--|--|
+| CM_IP | IP or FQDN of the CipherTrust Manager |
+| CM_USERNAME | Username for teh above CM |
+| CM_PASSWORD | Password of the above CM |
+| LOCAL_CA_ID | Certificate Authority ID for one of the Local CAs |
+| SERVER_IP | IP or FQDN of the Kubernetes cluster or the Ingress controller. UI service will reach API service on this IP |
+| NFS_IP | IP or FQDN of the NFS Server IP |
 
 ## Ouput
 This Docker image will configure the CipherTrust Manager for CTE and DPG that we need to run this demo.
