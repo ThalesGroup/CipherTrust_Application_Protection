@@ -82,8 +82,8 @@ configuration:
   addSideContainer: true
   secretname: dpg-secret
   configmapname: dpg-configmap
-  kms: 192.168.2.233
+  kms: <CM_IP>
   appurl: http://localhost:8080
   tlsenabled: false
-  reg_token: E9DVMWXUlZOW1OrFfZSFY1GUYY2tWAYITp1Djzgoqs1PJegUW6p9Ev8ksCiXJhei
+  reg_token: <REG_TOKEN>
 ```
