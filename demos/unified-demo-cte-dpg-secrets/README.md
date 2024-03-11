@@ -38,7 +38,7 @@ cd ./CipherTrust_Application_Protection/demos/unified-demo-cte-dpg-secrets
 #### 3) Deploy demo using run.sh
 To install the demo without Data Protection Gateway
 ```
-./run.sh ANSIBLE=true CM_IP=<CM_IP> CM_USERNAME=<CM_USERNAME> CM_PASSWORD=<CM_PASSWORD> CA_ID=<LOCAL_CA_ID> KUBE_PUBLIC_IP=<IP/FQDN of Kubernetes Public access or Ingress> INSTALL_CTE=true SETUP_KUBE=true HELM_OP=install
+./run.sh ANSIBLE=true CM_IP=<CM_IP> CM_USERNAME=<CM_USERNAME> CM_PASSWORD=<CM_PASSWORD> CA_ID=<LOCAL_CA_ID> KUBE_PUBLIC_IP=<IP/FQDN of Kubernetes Public access or Ingress> INSTALL_CTE=true SETUP_KUBE=true HELM_OP=install NFS_SERVER_IP=<NFS_SERVER_IP>
 ```
 
 | Variable | Description |
@@ -51,6 +51,7 @@ To install the demo without Data Protection Gateway
 | INSTALL_CTE | This will deploy CipherTrust Transparent Encryption agent on your Kubernetes cluster |
 | SETUP_KUBE | If true, this will create Namespace, Storage Class, Persistent Volume Claim on your Kubernetes cluster. These files are auto generated for you by the [Ansible](Ansible.md) Playbook in the /tmp directory of the machine where this run.sh is being executed |
 | HELM_OP | Can be either "install" or "upgrade". Install option will deploy UI and API service without Data Protection Gateway, while upgrade will setup with Data Protection Gateway. You have to first install before running upgrade |
+| NFS_SERVER_IP | IP or FQDN of the NFS Server that you intend to use for storing the confidential files protected by CTE |
 
 Once installed, you may run below command to upgrade the deployment and add DPG to the deployment
 
