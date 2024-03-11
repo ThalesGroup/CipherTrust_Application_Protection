@@ -19,6 +19,7 @@ This project will provide you -
 * Docker to automate CipherTrust Manager configuration for DPG and CTE for Kubernetes as well as create Helm Chart's values file
 * Helm to deploy the application and connectors on Kubernetes
 * CipherTrust Manager - community edition or enterprise edition with CiherTrust Secrets Manager (via Akeyless) enabled and configured
+* An NFS server that will be used as a file storage backend to test CTE for Kubernetes 
 
 ## Network Requirements
 You might have to open a few ports to ensure that application and CipherTrust components are reachable either internally or externally. We will cover this in more detail in below sections.
