@@ -798,7 +798,7 @@ int main(int argc, char *argv[])
                 if(hPublicKey != CK_INVALID_HANDLE)
                 {
 
-                    getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExpoBuf, &pubExpoBufLen);
+                    getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExpoBuf, &pubExpoBufLen, privExpoBuf, &privExpoBufLen);
                     printf("CKA_MODULUS (Public Key): size=%u\n", (unsigned int)modulusBufLen);
                     printf("CKA_PUBLIC_EXPONENT: size=%u; \n", (unsigned int)pubExpoBufLen);
                 }
@@ -813,7 +813,7 @@ int main(int argc, char *argv[])
                 if(hPrivateKey != CK_INVALID_HANDLE)
                 {
 
-                    getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf2, &modulusBufLen2, privExpoBuf, &privExpoBufLen);
+                    getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf2, &modulusBufLen2, pubExpoBuf, &pubExpoBufLen, privExpoBuf, &privExpoBufLen);
                     printf("CKA_MODULUS (Priv Key): size=%u\n", (unsigned int)modulusBufLen2);
                     printf("CKA_PRIVATE_EXPONENT: size=%u; \n", (unsigned int)privExpoBufLen);
                 }
