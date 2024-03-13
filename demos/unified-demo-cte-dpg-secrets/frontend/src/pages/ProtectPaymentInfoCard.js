@@ -9,6 +9,11 @@ export default function ProtectPaymentInfoCard() {
   const[cvv, setCvv] = React.useState('888')
   const[expiry, setExpiry] = React.useState('01/01/2025')
   const[zip, setZip] = React.useState('A1A1A1')
+  const https = require('https')
+
+  const agent = new https.Agent({
+    rejectUnauthorized: false,
+  })
 
   async function addPCIData(data) {
     let host="http://localhost"
@@ -23,6 +28,7 @@ export default function ProtectPaymentInfoCard() {
         url: url,
         data: data,
         headers: { "Content-Type": "application/json" },
+        httpsAgent: agent,
     })
     .then((response) => {
         console.log(response);

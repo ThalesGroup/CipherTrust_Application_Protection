@@ -51,6 +51,12 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }));
 
 export default function RevealDataTab() {
+  const https = require('https')
+
+  const agent = new https.Agent({
+    rejectUnauthorized: false,
+  })
+
   let pwdFake = "_F@keP@@S"
 
   let host="http://localhost"
@@ -70,13 +76,25 @@ export default function RevealDataTab() {
     let urlPCI = host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${userType}:${pwdFake}`).toString('base64');
     axios
-        .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .get(
+          urlPHI, 
+          { 
+            headers: {"Authorization" : `Basic ${authHeader}`},
+            httpsAgent: agent,
+          }
+        )
         .then((res) => {
           setPhiData(res.data.data);
         })
         .catch((err) => console.log(err));
     axios
-        .get(urlPCI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .get(
+          urlPCI, 
+          { 
+            headers: {"Authorization" : `Basic ${authHeader}`},
+            httpsAgent: agent,
+          }
+        )
         .then((res) => {
           setPciData(res.data.data);
         })
@@ -89,13 +107,25 @@ export default function RevealDataTab() {
     let urlPCI = host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${event.target.value}:${pwdFake}`).toString('base64');
     axios
-        .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .get(
+          urlPHI, 
+          { 
+            headers: {"Authorization" : `Basic ${authHeader}`},
+            httpsAgent: agent,
+          }
+        )
         .then((res) => {
           setPhiData(res.data.data);
         })
         .catch((err) => console.log(err));
     axios
-        .get(urlPCI, { headers: {"Authorization" : `Basic ${authHeader}`} })
+        .get(
+          urlPCI, 
+          { 
+            headers: {"Authorization" : `Basic ${authHeader}`},
+            httpsAgent: agent,
+          }
+        )
         .then((res) => {
           setPciData(res.data.data);
         })

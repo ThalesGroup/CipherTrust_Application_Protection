@@ -4,6 +4,12 @@ import { TextField, Button } from '@mui/material';
 import axios from "axios";
 
 export default function ProtectHealthInfoCard() {
+  const https = require('https')
+
+  const agent = new https.Agent({
+    rejectUnauthorized: false,
+  })
+
   function getUID() {
     return Date.now().toString(36);
   }
@@ -36,6 +42,7 @@ export default function ProtectHealthInfoCard() {
         url: url_add_json, 
         data: {id, name, healthCardNum, dob, zip},
         headers: { "Content-Type": "application/json" },
+        httpsAgent: agent,
     })
     .then((response) => {
         axios({
@@ -43,6 +50,7 @@ export default function ProtectHealthInfoCard() {
             url: url_upload, 
             data: formData,
             headers: { "Content-Type": "multipart/form-data" },
+            httpsAgent: agent,
         })
         .then((response) => {
             console.log(response);
