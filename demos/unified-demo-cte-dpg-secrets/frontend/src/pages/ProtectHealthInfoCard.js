@@ -22,14 +22,14 @@ export default function ProtectHealthInfoCard() {
     );
     formData.append("id", id);
 
-    let host="localhost"
+    let host="http://localhost"
     let port="8080"
     if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
         host=process.env.REACT_APP_BACKEND_IP_ADDRESS
         port=process.env.REACT_APP_BACKEND_PORT
     }
-    let url_add_json = 'http://'+host+':'+port+'/api/health-info/add';
-    let url_upload = 'http://'+host+':'+port+'/api/health-info/upload';
+    let url_add_json = host+':'+port+'/api/health-info/add';
+    let url_upload = host+':'+port+'/api/health-info/upload';
 
     axios({
         method: "post",

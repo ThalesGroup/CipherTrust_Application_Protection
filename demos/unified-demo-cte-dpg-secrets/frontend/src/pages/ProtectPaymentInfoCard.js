@@ -11,13 +11,13 @@ export default function ProtectPaymentInfoCard() {
   const[zip, setZip] = React.useState('A1A1A1')
 
   async function addPCIData(data) {
-    let host="localhost"
+    let host="http://localhost"
     let port="8080"
     if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
         host=process.env.REACT_APP_BACKEND_IP_ADDRESS
         port=process.env.REACT_APP_BACKEND_PORT
     }
-    let url = 'http://'+host+':'+port+'/api/payment-info'
+    let url = host+':'+port+'/api/payment-info'
     axios({
         method: "post",
         url: url,

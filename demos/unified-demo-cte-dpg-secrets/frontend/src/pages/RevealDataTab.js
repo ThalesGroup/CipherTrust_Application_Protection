@@ -53,7 +53,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 export default function RevealDataTab() {
   let pwdFake = "_F@keP@@S"
 
-  let host="localhost"
+  let host="http://localhost"
   let port="8080"
   if (process.env.REACT_APP_BACKEND_IP_ADDRESS !== undefined) {
       host=process.env.REACT_APP_BACKEND_IP_ADDRESS
@@ -66,8 +66,8 @@ export default function RevealDataTab() {
   const [userType, setUserType] = React.useState('unauthorized');
 
   useEffect(() => {
-    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
-    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
+    let urlPHI = host+':'+port+'/api/health-info'
+    let urlPCI = host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${userType}:${pwdFake}`).toString('base64');
     axios
         .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
@@ -85,8 +85,8 @@ export default function RevealDataTab() {
 
   const handleUserChange = (event) => {
     setUserType(event.target.value)
-    let urlPHI = 'http://'+host+':'+port+'/api/health-info'
-    let urlPCI = 'http://'+host+':'+port+'/api/payment-info'
+    let urlPHI = host+':'+port+'/api/health-info'
+    let urlPCI = host+':'+port+'/api/payment-info'
     const authHeader = Buffer.from(`${event.target.value}:${pwdFake}`).toString('base64');
     axios
         .get(urlPHI, { headers: {"Authorization" : `Basic ${authHeader}`} })
