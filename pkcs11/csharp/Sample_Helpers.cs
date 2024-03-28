@@ -227,7 +227,7 @@ namespace CADP.Pkcs11Sample
         /// </summary>
         /// <param name='session'>Read-write session with user logged in</param>
         /// <returns>Object handle</returns>
-        public static IObjectHandle GenerateKey(ISession session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false)
+        public static IObjectHandle GenerateKey(ISession session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false, string cka_idInput = null)
         {
             // genAction: 0, 1, 2, or 3.  versionCreate...0, versionRotate...1, versionMigrate...2, nonVersionCreate...3 (default)
 
@@ -261,7 +261,11 @@ namespace CADP.Pkcs11Sample
 
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyLabel));
 
-
+	    // Add the CKA_ID attribute if the cka id input has value.
+            if (!string.IsNullOrEmpty(cka_idInput))
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+            } 
             if (preActive == true)
                 objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_ACTIVATION_DATE, activateTime));
 
