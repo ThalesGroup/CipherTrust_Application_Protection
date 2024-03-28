@@ -9,7 +9,7 @@ namespace CADP.Pkcs11Sample
         static void Usage()
         {
             Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d ] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] ");
-            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false])");
+            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID]");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
             Console.WriteLine("\t 1. Create key sample.                                     Parameters: -p pin -k keyname [-g gen_key_action] [-n false|true]");
@@ -84,6 +84,7 @@ namespace CADP.Pkcs11Sample
             string testOpt = "0";
             string tweakInput = null;
             string headerMode = null;
+            string cka_idInput = null;
             bool symmetric = true;
             bool genWrappingKey = false;
             bool nodelete = false;
@@ -217,6 +218,10 @@ namespace CADP.Pkcs11Sample
                             if (i < args.Length - 1)
                                 needmetadata = Convert.ToBoolean(args[++i]); // true or false
                             break;
+                        case 'I':
+                            if (i < args.Length - 1)
+                                cka_idInput = args[++i];
+                            break;
                         case 'h':
                         default:
                             Usage();
@@ -295,12 +300,12 @@ namespace CADP.Pkcs11Sample
 
                     case '1':   // run generate key sample
                         sample = new CreateKeySample();
-                        sample.Run(new object[] { pin, keyLabel, genAction, preactive, nodelete, bAlwSen, bNevExtr });
+                        sample.Run(new object[] { pin, keyLabel, genAction, preactive, nodelete, bAlwSen, bNevExtr, cka_idInput });
                         break;
 
                     case '2':   // run create key object sample
                         sample = new CreateObjectSample();
-                        sample.Run(new object[] { pin, keyValue, keyLabel, bOpaqueObj, genAction });
+                        sample.Run(new object[] { pin, keyValue, keyLabel, bOpaqueObj, genAction, cka_idInput });
                         break;
 
                     case '3':   // run find and delete key sample
