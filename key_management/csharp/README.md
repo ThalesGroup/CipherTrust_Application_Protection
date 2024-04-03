@@ -3,6 +3,8 @@
 ## Overview
 The following samples shows how to manage keys.
 
+* NaeGetKeyVersionById.cs
+  *  This sample shows how to *fetch key name, key version and corresponding version header bytes using UUID for NAE versioned key*.
 * NaeKeyManagement.cs
   * This sample shows how to *get the attributes of the key*.
 * ExportWrappedKey.cs
@@ -12,6 +14,7 @@ The following samples shows how to manage keys.
 In order to run C# samples, 
 1. .NET 6.0 or higher must be installed.
 1. CipherTrust.CADP.NETCore NuGet package must be installed.
+1. Key must be present on CipherTrust Manager. For NaeGetKeyVersionById.cs, key should be NAE versioned.
 
 ## Usage: 
 1. Create a console application. Let's say `SampleApp`.
