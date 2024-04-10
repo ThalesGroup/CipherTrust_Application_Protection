@@ -404,6 +404,41 @@ int setDefaultForFF3_1(CK_FF31_PARAMETER *ff31params, char *tweakfilename, char 
                 strcpy((char *)defPlainText, "0123456789ABCDEabcde");
                 plaintextlen=20;
                 break;
+        case CS_UTF8:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(30);
+                memcpy(ff31params->charset, "\xE2\x82\x80\xE2\x82\x81\xE2\x82\x82\xE2\x82\x83\xE2\x82\x84\xE2\x82\x85\xE2\x82\x86\xE2\x82\x87\xE2\x82\x88\xE2\x82\x89", 30); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\xE2\x82\x88\xE2\x82\x89\xE2\x82\x80\xE2\x82\x81\xE2\x82\x82\xE2\x82\x81\xE2\x82\x82\xE2\x82\x83\xE2\x82\x84\xE2\x82\x85\xE2\x82\x86\xE2\x82\x87\xE2\x82\x88\xE2\x82\x89\xE2\x82\x80\xE2\x82\x80\xE2\x82\x80\xE2\x82\x80");
+                plaintextlen=18*3;
+                break;
+        case CS_UTF16LE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(20);
+                memcpy(ff31params->charset, "\x80\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20", 20); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\x88\x20\x89\x20\x80\x20\x81\x20\x82\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20\x80\x20\x80\x20\x80\x20\x80\x20");
+                plaintextlen=18*2;
+                break;
+        case CS_UTF16BE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(20);
+                memcpy(ff31params->charset, "\x20\x80\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89", 20); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\x20\x88\x20\x89\x20\x80\x20\x81\x20\x82\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20\x80\x20\x80\x20\x80\x20\x80");
+                plaintextlen=18*2;
+                break;
+        case CS_UTF32LE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(40);
+                memcpy(ff31params->charset, "\x80\x20\0\0\x81\x20\0\0\x82\x20\0\0\x83\x20\0\0\x84\x20\0\0\x85\x20\0\0\x86\x20\0\0\x87\x20\0\0\x88\x20\0\0\x89\x20\0\0", 40); /* subscript 0-9 */
+                memcpy(defPlainText, "\x88\x20\0\0\x89\x20\0\0\x80\x20\0\0\x81\x20\0\0\x82\x20\0\0\x81\x20\0\0\x82\x20\0\0\x83\x20\0\0\x84\x20\0\0\x85\x20\0\0\x86\x20\0\0\x87\x20\0\0\x88\x20\0\0\x89\x20\0\0\x80\x20\0\0\x80\x20\0\0\x80\x20\0\0\x80\x20\0\0", 4*18);
+                plaintextlen=18*4;
+                break;
+        case CS_UTF32BE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(40);
+                memcpy(ff31params->charset, "\0\0\x20\x80\0\0\x20\x81\0\0\x20\x82\0\0\x20\x83\0\0\x20\x84\0\0\x20\x85\0\0\x20\x86\0\0\x20\x87\0\0\x20\x88\0\0\x20\x89", 40); /* subscript 0-9 */
+                memcpy(defPlainText, "\0\0\x20\x88\0\0\x20\x89\0\0\x20\x80\0\0\x20\x81\0\0\x20\x82\0\0\x20\x81\0\0\x20\x82\0\0\x20\x83\0\0\x20\x84\0\0\x20\x85\0\0\x20\x86\0\0\x20\x87\0\0\x20\x88\0\0\x20\x89\0\0\x20\x80\0\0\x20\x80\0\0\x20\x80\0\0\x20\x80", 4*18);
+                plaintextlen=18*4;
+                break;
         default: printf("provided charset type is invalid \n");
     }
     if (tweakfilename)
@@ -1385,7 +1420,7 @@ void usageEncryptDecrypt()
     printf ("-c charset character set commandline typed input\n");
     printf ("-d optionally included decrypted file name.\n");
     printf ("-e optionally included encrypted file name.\n");
-    printf ("-u charsettype...ASCII or UTF8 or UTF16LE or UTF16BE or UTF32LE or UTF32BE (for FPE or FF1 only)\n");
+    printf ("-u charsettype...ASCII or UTF8 or UTF16LE or UTF16BE or UTF32LE or UTF32BE (for FPE or FF1 or FF3-1 only)\n");
     printf ("Note* CARD10, CARD26 and CARD62 is only supported for FF3-1\n");
     printf ("-l literal charset file name for the FPE, or FF1 mode.\n");
     printf ("-r range charset file name for the FPE, or FF1 mode.\n");
