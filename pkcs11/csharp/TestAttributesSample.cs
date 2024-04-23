@@ -7,6 +7,7 @@ namespace CADP.Pkcs11Sample
 {
     class TestAttributesSample : ISample
     {
+        public const int cka_id_handle_max_keys = 1000;
         public bool Run(object[] inputParams)
         {
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
@@ -26,10 +27,13 @@ namespace CADP.Pkcs11Sample
                     bool preactive = false;
                     bool bAlwSen = false;
                     bool bNevExtr = false;
+                    string cka_idInput = null;
+                    int numberOfHandle = 1;
 
                     if (inputParams.Length >= 4) preactive = Convert.ToBoolean(inputParams[3]);
                     if (inputParams.Length >= 5) bAlwSen = Convert.ToBoolean(inputParams[4]);
                     if (inputParams.Length >= 6) bNevExtr = Convert.ToBoolean(inputParams[5]);
+                    if (inputParams.Length >= 7) cka_idInput = inputParams[6] != null ? inputParams[6].ToString() : null;
 
                     uint keySize = 32;
 
@@ -41,7 +45,18 @@ namespace CADP.Pkcs11Sample
                     List<IObjectAttribute> getAttributes;
 
                     List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();
-                    findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+
+
+                    // Add the CKA_ID attribute if the cka id input has value.
+                    if (!string.IsNullOrEmpty(cka_idInput))
+                    {
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                        numberOfHandle = cka_id_handle_max_keys;
+                    }
+                    else
+                    {
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+                    }
 
                     if (symmetric == false)
                         findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
@@ -52,7 +67,10 @@ namespace CADP.Pkcs11Sample
                     session.FindObjectsInit(findAttributes);
 
                     // Get search results
-                    List<IObjectHandle> foundObjects = session.FindObjects(1);
+                    List<IObjectHandle> foundObjects = session.FindObjects(numberOfHandle);
+                    
+                    // Get search results
+                    List<IObjectHandle> privateKeyHandles = new List<IObjectHandle>();
 
                     // Terminate searching
                     session.FindObjectsFinal();
@@ -64,7 +82,7 @@ namespace CADP.Pkcs11Sample
                     else if (symmetric == true)
                     {
                         // Generate symmetric key object
-                        keyHandle = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr);
+                        keyHandle = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr, cka_idInput);
                         if (keyHandle != null)
                         {
                             Console.WriteLine(keyLabel + " key generated!");
@@ -78,24 +96,34 @@ namespace CADP.Pkcs11Sample
                     if (symmetric == false)
                     {
                         if (keyHandle == null)
-                            Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel);
+                            Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel, cka_idInput);
                         else
                         {
 
                             findAttributes = new List<IObjectAttribute>();
                             findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PRIVATE_KEY));
-                            findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+
+                            // Add the CKA_ID attribute if the cka id input has value.
+                            if (!string.IsNullOrEmpty(cka_idInput))
+                            {
+                                findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                                numberOfHandle = cka_id_handle_max_keys;
+                            }
+                            else
+                            {
+                                findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
+                            }
 
                             session.FindObjectsInit(findAttributes);
 
                             // Get search results
-                            foundObjects = session.FindObjects(1);
+                            privateKeyHandles = session.FindObjects(numberOfHandle);
 
                             // Terminate searching
                             session.FindObjectsFinal();
 
-                            if (foundObjects != null && foundObjects.Count != 0)
-                                privateKeyHandle = foundObjects[0];
+                            if (privateKeyHandles != null && privateKeyHandles.Count != 0)
+                                privateKeyHandle = privateKeyHandles[0];
                         }
                     }
 
@@ -110,6 +138,7 @@ namespace CADP.Pkcs11Sample
                         attrNames.Add(CKA.CKA_MODULUS);
                         attrNames.Add(CKA.CKA_PRIVATE_EXPONENT);
                         attrNames.Add(CKA.CKA_PUBLIC_EXPONENT);
+                        attrNames.Add(CKA.CKA_ID);
                     }
                     else
                     {
@@ -118,35 +147,45 @@ namespace CADP.Pkcs11Sample
                         attrNames.Add(CKA.CKA_KEY_TYPE);
                         attrNames.Add(CKA.CKA_END_DATE);
                         attrNames.Add(CKA.CKA_THALES_OBJECT_CREATE_DATE_EL);
+                        attrNames.Add(CKA.CKA_ID);
                     }
 
+                    bool if_CKA_APP_add = false;
 
-                    if (keyHandle != null)
+                    foreach (var foundObject in foundObjects)
                     {
                         Console.WriteLine(symmetric ? "Attributes of symmetric key:" : "Attributes of public key:");
-                        getAttributes = session.GetAttributeValue(keyHandle, attrNames);
+                        getAttributes = session.GetAttributeValue(foundObject, attrNames);
                         Helpers.PrintAttributes(getAttributes);
 
                         if (symmetric == true)
                         {
                             Console.WriteLine("\n\nAbout to add ApplicationName attribute with value as {0}...", Settings.ApplicationName);
-                            attrNames.Add(CKA.CKA_APPLICATION);
+                            if (!if_CKA_APP_add)
+                            {
+                                attrNames.Add(CKA.CKA_APPLICATION);
+                                if_CKA_APP_add = true;
+                            }
+                            
                             List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
                             objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                            session.SetAttributeValue(keyHandle, objAttributes);
+                            session.SetAttributeValue(foundObject, objAttributes);
 
 
                             Console.WriteLine(symmetric ? "\n\nAttributes of symmetric key (again):" : "\n\nAttributes of public key (again):");
-                            getAttributes = session.GetAttributeValue(keyHandle, attrNames);
+                            getAttributes = session.GetAttributeValue(foundObject, attrNames);
                             Helpers.PrintAttributes(getAttributes);
+                            
                         }
+                        Console.WriteLine("------------------");
                     }
 
-                    if (privateKeyHandle != null)
+                    foreach (var privateHandle in privateKeyHandles)
                     {
                         Console.WriteLine("Attributes of private key:");
-                        getAttributes = session.GetAttributeValue(privateKeyHandle, attrNames);
+                        getAttributes = session.GetAttributeValue(privateHandle, attrNames);
                         Helpers.PrintAttributes(getAttributes);
+                        Console.WriteLine("------------------");
                     }
 
                     session.Logout();

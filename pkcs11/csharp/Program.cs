@@ -351,7 +351,7 @@ namespace CADP.Pkcs11Sample
 
                     case 'a':
                         sample = new TestAttributesSample();
-                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr });
+                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr, cka_idInput });
                         break;
 
                     case 'b':

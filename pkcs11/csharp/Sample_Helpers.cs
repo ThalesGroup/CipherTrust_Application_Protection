@@ -104,7 +104,7 @@ namespace CADP.Pkcs11Sample
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
-
+ 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
             // Get search results
@@ -261,7 +261,7 @@ namespace CADP.Pkcs11Sample
 
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyLabel));
 
-	    // Add the CKA_ID attribute if the cka id input has value.
+	        // Add the CKA_ID attribute if the cka id input has value.
             if (!string.IsNullOrEmpty(cka_idInput))
             {
                 objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
@@ -286,7 +286,7 @@ namespace CADP.Pkcs11Sample
         /// <param name='session'>Read-write session with user logged in</param>
         /// <param name='publicKeyHandle'>Output parameter for public key object handle</param>
         /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
-        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, string keyPairLabel)
+        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, string keyPairLabel, string cka_idInput = null)
         {
             // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
             // byte[] ckaId = session.GenerateRandom(20);
@@ -321,6 +321,13 @@ namespace CADP.Pkcs11Sample
             //privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyPairLabel));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
+
+            // Add the CKA_ID input in case the value is not null or empty.
+            if (!string.IsNullOrEmpty(cka_idInput))
+            {
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+            }
 
             // Specify key generation mechanism
             IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
@@ -361,7 +368,7 @@ namespace CADP.Pkcs11Sample
                             break;
                         case (uint)CKA.CKA_MODULUS_BITS:
                         case (uint)CKA.CKA_ID:
-                            Console.WriteLine(name + " : " + attr.GetValueAsUlong());
+                            Console.WriteLine(name + " : " + attr.GetValueAsString());
                             break;
                         case (uint)CKA.CKA_LABEL:
                             Console.WriteLine(name + " : " + attr.GetValueAsString());
