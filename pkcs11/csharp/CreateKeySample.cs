@@ -27,13 +27,15 @@ namespace CADP.Pkcs11Sample
                     bool nodelete = false; // 1...do not delete   0...delete as usual
                     bool bAlwSen = false;
                     bool bNevExtr = false;
+                    string cka_idInput = null;
 
                     if (inputParams.Length >= 3) genAction = Convert.ToUInt32(inputParams[2]);
                     if (inputParams.Length >= 4) preactive = Convert.ToBoolean(inputParams[3]);
                     if (inputParams.Length >= 5) nodelete = Convert.ToBoolean(inputParams[4]);
                     if (inputParams.Length >= 6) bAlwSen = Convert.ToBoolean(inputParams[5]);
                     if (inputParams.Length >= 7) bNevExtr = Convert.ToBoolean(inputParams[6]);
-
+                    if (inputParams.Length >= 8) cka_idInput = inputParams[7].ToString();
+                    
                     Console.WriteLine("genAction specified as " + genAction);
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
@@ -49,7 +51,7 @@ namespace CADP.Pkcs11Sample
                     else
                     {
                         // Generate symetric key
-                        IObjectHandle generatedKey = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr); // three of four genAction cases are handled in GenerateKey
+                        IObjectHandle generatedKey = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr, cka_idInput); // three of four genAction cases are handled in GenerateKey
                         if (null != generatedKey)
                         {
                             if (genAction == 1)

@@ -22,7 +22,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 ## Usage: 
 ### Run sample from executable(only on windows):
 CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID])
 
 #### Example
      CADP_PKCS11_Samples.exe -p username:password -k testkey1 -t 1
@@ -31,7 +31,7 @@ CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b
 
 ### Run sample from dotnet cli:
 dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID])
 
 #### Example
      dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
