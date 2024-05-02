@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   labels:
     run: {{.Values.runlabel}}
+  annotations:
+    akeyless/enabled: "true"
   name: demo-cte-dpg-secrets-api
 spec:
   template:
