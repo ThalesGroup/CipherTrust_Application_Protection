@@ -92,8 +92,8 @@ fi
 # Apply k8s scripts
 if [ "$SETUP_KUBE" = "true" ];
 then
-  akeyless delete-secret --name /cm/cte_encoded_reg_token
-  akeyless delete-secret --name /cm/dpg_reg_token
+  akeyless delete-item --name /cm/cte_encoded_reg_token
+  akeyless delete-item --name /cm/dpg_reg_token
   sh /tmp/akeyless-create-secrets.sh
   pkill -f "port-forward"
   kubectl apply -f /tmp/cm-token-secret.yaml
