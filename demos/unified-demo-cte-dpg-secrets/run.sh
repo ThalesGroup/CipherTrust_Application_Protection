@@ -37,11 +37,47 @@ then
   vault login token=$TOKEN
 fi
 
+# Run akeyless script
+if [ "$SETUP_AKL" = "true" ];
+then
+  akeyless delete-auth-method --name CMAPISecret
+  output=$(akeyless create-auth-method --name CMAPISecret)
+  access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
+  access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
+
+  helm repo add akeyless https://akeylesslabs.github.io/helm-charts
+  helm repo update
+
+  kubectl apply -f /tmp/namespace.yaml
+  kubectl label namespace kubecon name=kubecon
+
+  CM_IP_WITHOUT_PROTOCOL=$(echo ${CM_IP} | awk -F/ '{print $3}')
+
+  helm install aks akeyless/akeyless-secrets-injection --namespace kubecon --set AKEYLESS_ACCESS_ID=${access_id} --set AKEYLESS_API_KEY=${access_key} --set AKEYLESS_ACCESS_TYPE=${api_key} --set AKEYLESS_URL="https://${CM_IP}:8080"
+  sh /tmp/akeyless-create-secrets.sh
+fi
+
+# if [ "$SETUP_AKL" = "true" ];
+# then
+#   akeyless delete-auth-method --name CMAPISecret
+#   output=$(akeyless create-auth-method --name CMAPISecret)
+#   access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
+#   access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
+
+#   akeyless create-role --name /CM/akl_role
+#   akeyless assoc-role-am --role-name /CM/akl_role --am-name CM/akl_auth
+#   akeyless set-role-rule --role-name /CM/akl_role --path /CM/'*' --capability read --capability list
+
+#   helm repo add akeyless https://akeylesslabs.github.io/helm-charts
+#   helm repo update
+#   helm install aks akeyless/akeyless-secrets-injection --namespace kubecon -f /tmp/akeyless-helm-values.yaml
+# fi
+
 # Run the Ansible script
 if [ "$ANSIBLE" = "true" ];
 then
-  docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:demo-dpg-cte-secrets-ansible
-  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -v
+  docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:star-demo-ansible
+  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -e "AKL_ACCESS_ID=$access_id" -e "AKL_ACCESS_KEY=$access_key" -vvv
 fi
 
 # Install CTE for kubernetes
@@ -57,7 +93,6 @@ fi
 if [ "$SETUP_KUBE" = "true" ];
 then
   pkill -f "port-forward"
-  kubectl apply -f /tmp/namespace.yaml
   kubectl apply -f /tmp/cm-token-secret.yaml
   kubectl apply -f /tmp/storage-class.yaml
   kubectl apply -f /tmp/nfs-pv.yaml
@@ -76,7 +111,7 @@ if [ "$HELM_OP" = "install" ];
 then
   pkill -f port-forward
   helm install -f /tmp/values_api.yaml kubecon-demo-api cdsp/demo-cte-dpg-secrets-api --insecure-skip-tls-verify -n kubecon
-  helm install -f /tmp/values_ui.yaml kubecon-demo-ui cdsp/demo-cte-dpg-secrets-ui --insecure-skip-tls-verify -n kubecon  
+  helm install -f /tmp/values_ui.yaml kubecon-demo-ui cdsp/demo-cte-dpg-secrets-ui --insecure-skip-tls-verify -n kubecon
 fi
 
 # Helm Upgrade Chart with custom values file
@@ -97,7 +132,7 @@ then
     RETRIES=$((RETRIES + 1))
     sleep 5
   done
-    
+
   if [ "$HELM_OP" = "install" ];
   then
     kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8080 --address 0.0.0.0 &
@@ -106,7 +141,7 @@ then
   then
     kubectl port-forward -n kubecon deployment/demo-cte-dpg-secrets-api 9000:8990 --address 0.0.0.0 &
   fi
-  
+
   RETRIES=0
   CHK_ROLLOUT="kubectl rollout status deployment/demo-cte-dpg-secrets-ui -n kubecon"
   until $CHK_ROLLOUT || [ $RETRIES -eq 30 ]; do
@@ -119,5 +154,5 @@ fi
 
 echo "=========================================="
 echo "You may now access the UI of the demo at -"
-echo "http://$KUBE_PUBLIC_IP:9001"
+echo "$KUBE_PUBLIC_IP:9001"
 echo "=========================================="
