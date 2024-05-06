@@ -55,7 +55,6 @@ then
   CM_IP_WITHOUT_PROTOCOL=$(echo ${CM_IP} | awk -F/ '{print $3}')
 
   helm install aks akeyless/akeyless-secrets-injection --namespace kubecon --set AKEYLESS_ACCESS_ID=${access_id} --set AKEYLESS_API_KEY=${access_key} --set AKEYLESS_ACCESS_TYPE=${api_key} --set AKEYLESS_URL="https://${CM_IP}:8080"
-  sh /tmp/akeyless-create-secrets.sh
 fi
 
 # if [ "$SETUP_AKL" = "true" ];
@@ -93,6 +92,7 @@ fi
 # Apply k8s scripts
 if [ "$SETUP_KUBE" = "true" ];
 then
+  sh /tmp/akeyless-create-secrets.sh
   pkill -f "port-forward"
   kubectl apply -f /tmp/cm-token-secret.yaml
   kubectl apply -f /tmp/storage-class.yaml
