@@ -37,24 +37,30 @@ then
   vault login token=$TOKEN
 fi
 
-# Run akeyless script
+# Configure kubernetes and akelyess to work with each other
 if [ "$SETUP_AKL" = "true" ];
 then
-  akeyless delete-auth-method --name CMAPISecret
-  output=$(akeyless create-auth-method --name CMAPISecret)
-  access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
-  access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
+  helm repo add external-secrets https://charts.external-secrets.io
+  helm install external-secrets external-secrets/external-secrets -n kubecon --create-namespace
 
-  helm repo add akeyless https://akeylesslabs.github.io/helm-charts
-  helm repo update
+  kubectl apply -f /tmp/akeyless-auth-secret.yaml -n kubecon
+  kubectl apply -f /tmp/akl-external-secret-store.yaml -n kubecon
+  kubectl apply -f /tmp/akl-external-secret.yaml -n kubecon
 
-  #kubectl apply -f /tmp/namespace.yaml
-  kubectl create ns kubecon
-  kubectl label namespace kubecon name=kubecon
+  #akeyless delete-auth-method --name CMAPISecret
+  #output=$(akeyless create-auth-method --name CMAPISecret)
+  #access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
+  #access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
 
-  CM_IP_WITHOUT_PROTOCOL=$(echo ${CM_IP} | awk -F/ '{print $3}')
+  #helm repo add akeyless https://akeylesslabs.github.io/helm-charts
+  #helm repo update
 
-  helm install aks akeyless/akeyless-secrets-injection --namespace kubecon --set AKEYLESS_ACCESS_ID=${access_id} --set AKEYLESS_API_KEY=${access_key} --set AKEYLESS_ACCESS_TYPE=${api_key} --set AKEYLESS_URL="https://${CM_IP}:8080"
+  #kubectl create ns kubecon
+  #kubectl label namespace kubecon name=kubecon
+
+  #CM_IP_WITHOUT_PROTOCOL=$(echo ${CM_IP} | awk -F/ '{print $3}')
+
+  #helm install aks akeyless/akeyless-secrets-injection --namespace kubecon --set AKEYLESS_ACCESS_ID=${access_id} --set AKEYLESS_API_KEY=${access_key} --set AKEYLESS_ACCESS_TYPE=${api_key} --set AKEYLESS_URL="https://${CM_IP}:8080"
 fi
 
 # if [ "$SETUP_AKL" = "true" ];
