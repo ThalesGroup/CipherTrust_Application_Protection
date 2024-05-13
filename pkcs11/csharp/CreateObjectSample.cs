@@ -20,11 +20,11 @@ namespace CADP.Pkcs11Sample
                     string pin = Convert.ToString(inputParams[0]);
                     string keyValue = new string((char[])inputParams[1]);
                     string keyLabel = Convert.ToString(inputParams[2]);
-                    bool isOpaqueObj = inputParams.Length > 2 ? Convert.ToBoolean(inputParams[3]) : false;
-                    int version = inputParams.Length > 3 ? Convert.ToInt32(inputParams[4]) : 0;
+                    bool isOpaqueObj = inputParams.Length > 3 ? Convert.ToBoolean(inputParams[3]) : false;
+                    int version = inputParams.Length > 4 ? Convert.ToInt32(inputParams[4]) : 0;
                     uint keySize = (uint)keyValue.Length;
                     DateTime endTime = DateTime.UtcNow.AddDays(31);
-                    string cka_idInput = inputParams.Length > 4 ? Convert.ToString(inputParams[5]) : null;
+                    string cka_idInput = inputParams.Length >5 ? Convert.ToString(inputParams[5]) : null;
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
