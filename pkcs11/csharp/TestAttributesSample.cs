@@ -30,10 +30,14 @@ namespace CADP.Pkcs11Sample
                     string cka_idInput = null;
                     int numberOfHandle = 1;
 
+                    string asymmetricAlgoName = null;
+                    string curveOid = null;
+
                     if (inputParams.Length >= 4) preactive = Convert.ToBoolean(inputParams[3]);
                     if (inputParams.Length >= 5) bAlwSen = Convert.ToBoolean(inputParams[4]);
                     if (inputParams.Length >= 6) bNevExtr = Convert.ToBoolean(inputParams[5]);
-                    if (inputParams.Length >= 7) cka_idInput = inputParams[6] != null ? inputParams[6].ToString() : null;
+                    if (inputParams.Length >= 7 && inputParams[6] != null) cka_idInput = inputParams[6].ToString();
+                    if (inputParams.Length >= 8 && inputParams[7] != null) asymmetricAlgoName = inputParams[7].ToString().ToUpper();
 
                     uint keySize = 32;
 
@@ -79,24 +83,33 @@ namespace CADP.Pkcs11Sample
                     {
                         keyHandle = foundObjects[0];
                     }
-                    else if (symmetric == true)
+                    else if (symmetric)
                     {
                         // Generate symmetric key object
                         keyHandle = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr, cka_idInput);
                         if (keyHandle != null)
                         {
                             Console.WriteLine(keyLabel + " key generated!");
+                            foundObjects.Add(keyHandle);
                         }
                         else
                         {
                             Console.WriteLine("Key: " + keyLabel + " Not generated! ");
                         }
+                        
                     }
 
-                    if (symmetric == false)
+                    if (!symmetric)
                     {
                         if (keyHandle == null)
-                            Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel, cka_idInput);
+                        {
+                            if (asymmetricAlgoName == "EC")
+                            { curveOid = "06052b81040020"; }
+
+                            Helpers.GenerateKeyPair(session, out keyHandle, out privateKeyHandle, keyLabel, cka_idInput, curveOid);
+                            foundObjects.Add(keyHandle);
+                            privateKeyHandles.Add(privateKeyHandle);
+                        }
                         else
                         {
 
@@ -129,16 +142,20 @@ namespace CADP.Pkcs11Sample
 
                     List<CKA> attrNames = new List<CKA>();
 
-                    if (symmetric == false)
+                    if (!symmetric)
                     {
                         attrNames.Add(CKA.CKA_LABEL);
                         attrNames.Add(CKA.CKA_CLASS);
                         attrNames.Add(CKA.CKA_KEY_TYPE);
-                        attrNames.Add(CKA.CKA_MODULUS_BITS);
-                        attrNames.Add(CKA.CKA_MODULUS);
-                        attrNames.Add(CKA.CKA_PRIVATE_EXPONENT);
-                        attrNames.Add(CKA.CKA_PUBLIC_EXPONENT);
                         attrNames.Add(CKA.CKA_ID);
+                        attrNames.Add(CKA.CKA_MODULUS_BITS);
+                        if (asymmetricAlgoName == "EC")
+                        { attrNames.Add(CKA.CKA_EC_PARAMS); }
+                        else
+                        {
+                            attrNames.Add(CKA.CKA_MODULUS);
+                            attrNames.Add(CKA.CKA_PUBLIC_EXPONENT);
+                        }
                     }
                     else
                     {
@@ -158,30 +175,34 @@ namespace CADP.Pkcs11Sample
                         getAttributes = session.GetAttributeValue(foundObject, attrNames);
                         Helpers.PrintAttributes(getAttributes);
 
-                        if (symmetric == true)
+                        Console.WriteLine("\n\nAbout to add ApplicationName attribute with value as {0}...", Settings.ApplicationName);
+                        if (!if_CKA_APP_add)
                         {
-                            Console.WriteLine("\n\nAbout to add ApplicationName attribute with value as {0}...", Settings.ApplicationName);
-                            if (!if_CKA_APP_add)
-                            {
-                                attrNames.Add(CKA.CKA_APPLICATION);
-                                if_CKA_APP_add = true;
-                            }
-                            
-                            List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
-                            objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
-                            session.SetAttributeValue(foundObject, objAttributes);
-
-
-                            Console.WriteLine(symmetric ? "\n\nAttributes of symmetric key (again):" : "\n\nAttributes of public key (again):");
-                            getAttributes = session.GetAttributeValue(foundObject, attrNames);
-                            Helpers.PrintAttributes(getAttributes);
-                            
+                            attrNames.Add(CKA.CKA_APPLICATION);
+                            if_CKA_APP_add = true;
                         }
+
+                        List<IObjectAttribute> objAttributes = new List<IObjectAttribute>();
+                        objAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_APPLICATION, Settings.ApplicationName));
+                        session.SetAttributeValue(foundObject, objAttributes);
+
+
+                        Console.WriteLine(symmetric ? "\n\nAttributes of symmetric key (again):" : "\n\nAttributes of public key (again):");
+                        getAttributes = session.GetAttributeValue(foundObject, attrNames);
+                        Helpers.PrintAttributes(getAttributes);
+
+
                         Console.WriteLine("------------------");
                     }
 
                     foreach (var privateHandle in privateKeyHandles)
                     {
+                        if (asymmetricAlgoName != "EC")
+                        {
+                            attrNames.Remove(CKA.CKA_PUBLIC_EXPONENT);
+                            attrNames.Add(CKA.CKA_PRIVATE_EXPONENT);
+                        }
+
                         Console.WriteLine("Attributes of private key:");
                         getAttributes = session.GetAttributeValue(privateHandle, attrNames);
                         Helpers.PrintAttributes(getAttributes);

@@ -8,7 +8,7 @@ namespace CADP.Pkcs11Sample
     {
         static void Usage()
         {
-            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d ] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] ");
+            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d | e] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] [-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used");
             Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID]");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
@@ -26,6 +26,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t c. Compute message digest for a given input file. ");
             Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
             Console.WriteLine("\t d. Encrypt and decrypt with GCM mode sample. ");
+            Console.WriteLine("\t e. Create a ECC key pair and sign the message sample. ");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");
@@ -38,6 +39,10 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t sha256-HMAC  ... SHA256-HMAC mode");
             Console.WriteLine("\t sha384-HMAC  ... SHA384-HMAC mode");
             Console.WriteLine("\t sha512-HMAC  ... SHA512-HMAC mode");
+            Console.WriteLine("\t SHA1-ECDSA  ... SHA1-ECDSA mode");
+            Console.WriteLine("\t SHA256-ECDSA  ... SHA256-ECDSA mode");
+            Console.WriteLine("\t SHA384-ECDSA  ... SHA384-ECDSA mode");
+            Console.WriteLine("\t SHA512-ECDSA  ... SHA512-ECDSA mode");
             Console.WriteLine("");
             Console.WriteLine("\t Choices for the -O option: ");
             Console.WriteLine("\t true    ... Opaque object");
@@ -65,7 +70,19 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code");
             Console.WriteLine("\t v2.1 ... use version 2.1 header");
             Console.WriteLine("\t v2.7 ... use version 2.7 header");
-            Console.WriteLine("");          
+            Console.WriteLine("");
+            Console.WriteLine("\tChoices for the -CurveOid option:");
+            Console.WriteLine("\t secp224k1-225-06052b81040020, secp224r1-224-06052b81040021, secp256k1-256-06052b8104000a, " +
+                "secp384r1-384-06052b81040022, secp521r1-521-06052b81040023, prime256v1-256-06082a8648ce3d030107, " +
+                "brainpoolP224r1-224-06092b2403030208010105, brainpoolP224t1-224-06092b2403030208010106, " +
+                "brainpoolP256r1-256-06092b2403030208010107, brainpoolP256t1-256-06092b2403030208010108, " +
+                "brainpoolP384r1-384-06092b240303020801010b, brainpoolP384t1-384-06092b240303020801010c, " +
+                "brainpoolP512r1-512-06092b240303020801010d, brainpoolP512t1-512-06092b240303020801010e");
+            Console.WriteLine("");
+            Console.WriteLine("\tChoices for the -Aa option:");
+            Console.WriteLine("\t RSA ... RSA Keypair");
+            Console.WriteLine("\t EC ... ECC keypair");
+            Console.WriteLine("");
             Console.WriteLine("Note: In case of success exit value is 0, otherwise -1");
             Environment.Exit(-1);
         }
@@ -103,6 +120,8 @@ namespace CADP.Pkcs11Sample
             string newkeyLabel = keyLabel + "_imp";
             bool bOpaqueObj = false;
             int tagLen = 12;
+            string curveoid = null;
+            string asymmetricAlgoName = "RSA";
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -145,6 +164,12 @@ namespace CADP.Pkcs11Sample
                             else if (i < args.Length - 1)
                                 preactive = Convert.ToBoolean(args[++i]);
                             break;
+                        case 'A':
+                            if (optArg == "-Aa")
+                            {
+                                asymmetricAlgoName = args[++i];
+                            }
+                            break;
                         case 'k':
                             if (optArg.Length == 3 && optArg[2] == 'p')
                                 symmetric = false;
@@ -180,6 +205,12 @@ namespace CADP.Pkcs11Sample
                         case 'o':
                             if (i < args.Length - 1)
                                 opName = args[++i];
+                            break;
+                        case 'C':
+                            if (optArg == "-CurveOid")
+                            {
+                                curveoid = args[++i];
+                            }
                             break;
                         //Changes option "S" to "c" according to V6.4.3.4
                         case 'c':
@@ -275,6 +306,10 @@ namespace CADP.Pkcs11Sample
                         sample.Run(new object[] { pin, keyLabel, "SHA384-HMAC", "" });
                         sample.Run(new object[] { pin, keyLabel, "SHA256-HMAC", "" });
                         sample.Run(new object[] { pin, keyLabel, "SHA224-HMAC", "" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA1-ECDSA" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA256-ECDSA" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA384-ECDSA" });
+                        sample.Run(new object[] { pin, keyLabel, "SHA512-ECDSA" });
 
                         sample = new FindExportKeySample();
                         sample.Run(new object[] { pin, keyLabel, keyType, wrappingKeyLabel, wrappingKeyType, formatType, keyFilename, genWrappingKey });
@@ -328,9 +363,12 @@ namespace CADP.Pkcs11Sample
                         break;
                     case '6':   // run create a key (or key pair) and sign the message sample
                         sample = new KeypairSignSample();
-                        sample.Run(new object[] { pin, keyLabel, opName, headerMode, nodelete });
+                        sample.Run(new object[] { pin, keyLabel, opName, headerMode, nodelete});
                         break;
-
+                    case 'e':   // run create an EC key pair and sign the message sample
+                        sample = new KeypairSignSample();
+                        sample.Run(new object[] { pin, keyLabel, opName, curveoid, nodelete});
+                        break;
                     case '7':   // run Find and Export Key sample
                         if (newkeyfile == true)
                             keyFilename = fileName;
@@ -351,7 +389,7 @@ namespace CADP.Pkcs11Sample
 
                     case 'a':
                         sample = new TestAttributesSample();
-                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr, cka_idInput });
+                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr, cka_idInput, asymmetricAlgoName});
                         break;
 
                     case 'b':
