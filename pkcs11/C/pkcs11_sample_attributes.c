@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
         loggedIn = 1;
         printf("Successfully logged in. \n");
 
-		if (ksid_type = keyIdAttr)
+		if (ksid_type == keyIdAttr)
 		{
 			CK_ULONG numObjects = 1000;
 			CK_OBJECT_HANDLE phKeys[1000];
