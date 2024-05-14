@@ -45,8 +45,8 @@ then
   
   akeyless delete-auth-method --name CMAPISecret
   output=$(akeyless create-auth-method --name CMAPISecret)
-  access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
-  access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
+  access_id=$(echo "$output" | awk -F 'Access ID: ' '{print $2}' | awk -F ' - Access Key: ' '{print $1}')
+  access_key=$(echo "$output" | awk -F 'Access Key: ' '{print $2}')
 
   #helm repo add akeyless https://akeylesslabs.github.io/helm-charts
   #helm repo update
