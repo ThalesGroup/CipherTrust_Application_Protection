@@ -1,4 +1,3 @@
-package com.example;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -13,16 +12,17 @@ import com.ingrian.security.nae.NAESecureRandom;
 import com.ingrian.security.nae.NAESession;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.IngrianProvider.Builder;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
-import java.io.BufferedWriter;
+
 import java.util.logging.Logger;
 
-public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
+public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 //  @Override
 	/*
 	 * This test app to test the logic for a BigQuery Database User Defined
@@ -31,21 +31,38 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 	 * Format Preserve Encryption (FPE) to maintain the original format of the data
 	 * so applications or business intelligence tools do not have to change in order
 	 * to use these columns. There is no need to deploy a function to run it.
-	 * This example uses the bulk API.
 	 * 
 	 * Note: This source code is only to be used for testing and proof of concepts.
 	 * Not production ready code. Was not tested for all possible data sizes and
 	 * combinations of encryption algorithms and IV, etc. Was tested with CM 2.14 &
-	 * CADP 8.16 For more information on CADP see link below.
+	 * CADP 8.15.0.001 For more information on CADP see link below.
 	 * https://thalesdocs.com/ctp/con/cadp/cadp-java/latest/admin/index.html
 	 * 
 	 * @author mwarner
 	 * 
 	 */
-	private static final Logger logger = Logger.getLogger(ThalesGCPBigQueryCADPFPE.class.getName());
+	private static final Logger logger = Logger.getLogger(GCPBigQueryUDFTesterSingle.class.getName());
 	private static final Gson gson = new Gson();
 
-	public void service(HttpRequest request, HttpResponse response) throws Exception {
+	public static void main(String[] args) throws Exception
+
+	{
+		GCPBigQueryUDFTesterSingle nw2 = new GCPBigQueryUDFTesterSingle();
+
+		String request = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
+				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
+				+ "  \"sessionUser\": \"test1-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
+				+ "    \"mode\": \"encrypt\",\r\n" + "    \"datatype\": \"char\"\r\n" + "  },\r\n"
+				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"Mark Warner\"\r\n" + "    ],\r\n" + "    [\r\n"
+				+ "      \"Bill Krott\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"David Cullen\"\r\n" + "    ]\r\n"
+				+ "  ]\r\n" + "}";
+
+		String response = null;
+		nw2.service(request, response);
+
+	}
+
+	public void service(String request, String response) throws Exception {
 
 		String encdata = "";
 		String keyName = "testfaas";
@@ -83,11 +100,11 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 		JsonArray bigquerydata = null;
 
 		try {
-
+		
 			// Parse JSON request and check for "name" field
 			JsonObject requestJson = null;
 			try {
-				JsonElement requestParsed = gson.fromJson(request.getReader(), JsonElement.class);
+				JsonElement requestParsed = gson.fromJson(request, JsonElement.class);
 
 				if (requestParsed != null && requestParsed.isJsonObject()) {
 					requestJson = requestParsed.getAsJsonObject();
@@ -95,7 +112,7 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 
 				if (requestJson != null && requestJson.has("sessionUser")) {
 					bigquerysessionUser = requestJson.get("sessionUser").getAsString();
-					// System.out.println("name " + bigquerysessionUser);
+					System.out.println("name " + bigquerysessionUser);
 				}
 
 				if (requestJson != null && requestJson.has("userDefinedContext")) {
@@ -109,16 +126,16 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 			} catch (JsonParseException e) {
 				logger.severe("Error parsing JSON: " + e.getMessage());
 			}
+			
 			bigquerydata = requestJson.getAsJsonArray("calls");
 			
 			if (usersetlookupbool) {
 				// Convert the string to an integer
 				int num = Integer.parseInt(usersetlookup);
-				// make sure cmuser is in Application Data Protection Clients Group
+// make sure cmuser is in Application Data Protection Clients Group
 				if (num >= 1) {
-					boolean founduserinuserset = findUserInUserSet(bigquerysessionUser, userName, password, usersetID,
-							userSetLookupIP);
-					// System.out.println("Found User " + founduserinuserset);
+					boolean founduserinuserset = findUserInUserSet(bigquerysessionUser, userName,password, usersetID,userSetLookupIP);
+					System.out.println("Found User " + founduserinuserset);
 					if (!founduserinuserset)
 						throw new CustomException("1001, User Not in User Set", 1001);
 
@@ -129,27 +146,22 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 			} else {
 				usersetlookupbool = false;
 			}
+			
 
-
+		
+			System.setProperty("com.ingrian.security.nae.IngrianNAE_Properties_Conf_Filename",
+					"D:\\product\\Build\\IngrianNAE-134.properties");
 
 			// System.setProperty("com.ingrian.security.nae.NAE_IP.1", "10.20.1.9");
-			System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
-					"CADP_for_JAVA.properties");
-			IngrianProvider builder = new Builder().addConfigFileInputStream(
-					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
+			// System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
+			// "CADP_for_JAVA.properties");
+			//// IngrianProvider builder = new Builder().addConfigFileInputStream(
+			// getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
 			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 
-			NAESecureRandom rng = new NAESecureRandom(session);
-
-			byte[] iv = new byte[16];
-			rng.nextBytes(iv);
-			IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
-			// Serialization
-
-			bigqueryreturndata.append("{ \"replies\": [");
-
+			
+			
 			int cipherType = 0;
 			String algorithm = "FPE/FF1/CARD62";
 
@@ -157,7 +169,8 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 				cipherType = Cipher.ENCRYPT_MODE;
 			else
 				cipherType = Cipher.DECRYPT_MODE;
-
+			
+			
 			if (datatype.equals("char"))
 				algorithm = "FPE/FF1/CARD62";
 			else if (datatype.equals("charint"))
@@ -165,38 +178,53 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 			else
 				algorithm = "FPE/FF1/CARD10";
 
-			String tweakAlgo = null;
-			String tweakData = null;
-			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
-					.build();
-			///
-			ivSpec = param;
-			Cipher thalesCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+				NAESecureRandom rng = new NAESecureRandom(session);
 
-			for (int i = 0; i < bigquerydata.size(); i++) {
-				JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
-				String sensitive = bigquerytrow.getAsString();
-				// String sensitive = bigquerycolumn.getAsJsonPrimitive().toString();
-				// initialize cipher to encrypt.
+				byte[] iv = new byte[16];
+				rng.nextBytes(iv);
+				IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-				thalesCipher.init(cipherType, key, ivSpec);
-				// encrypt data
-				byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
-				encdata = new String(outbuf);
-				// System.out.println("Enc data : " + encdata);
+				// Serialization
 
-				bigqueryreturndata.append(encdata);
-				if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
-					continue;
-				else
-					bigqueryreturndata.append(",");
-			}
+				bigqueryreturndata.append("{ \"replies\": [");
 
-			bigqueryreturndata.append("]}");
+				// String algorithm = "AES/CBC/PKCS5Padding";
+				String tweakAlgo = null;
+				String tweakData = null;
+				FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData)
+						.set_tweakAlgorithm(tweakAlgo).build();
+				///
+				ivSpec = param;
+				Cipher thalesCipher = Cipher.getInstance(algorithm, "IngrianProvider");
 
-			bigqueryreturnstring = new String(bigqueryreturndata);
-	        formattedString = formatString(bigqueryreturnstring);
-			
+				for (int i = 0; i < bigquerydata.size(); i++) {
+					JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
+					String sensitive = bigquerytrow.getAsString();
+					// String sensitive = bigquerycolumn.getAsJsonPrimitive().toString();
+					// initialize cipher to encrypt.
+
+					thalesCipher.init(cipherType, key, ivSpec);
+					// encrypt data
+					byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
+					encdata = new String(outbuf);
+					// System.out.println("Enc data : " + encdata);
+
+					bigqueryreturndata.append(encdata);
+					if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
+						continue;
+					else
+						bigqueryreturndata.append(",");
+				
+
+					
+				}
+
+				bigqueryreturndata.append("]}");
+
+				bigqueryreturnstring = new String(bigqueryreturndata);
+				formattedString = formatString(bigqueryreturnstring);
+
+
 		} catch (Exception e) {
 
 			System.out.println("in exception with " + e.getMessage());
@@ -204,55 +232,25 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 				if (e.getMessage().contains("1401") || (e.getMessage().contains("1001") || (e.getMessage().contains("1002"))) ) {
 					JsonObject result = new JsonObject();
 					JsonArray replies = new JsonArray();
-					if (bigquerydata != null) {
-						for (int i = 0; i < bigquerydata.size(); i++) {
-							JsonArray innerArray = bigquerydata.get(i).getAsJsonArray();
-							replies.add(innerArray.get(0).getAsString());
-						}
-						result.add("replies", replies);
-						formattedString = result.toString();
-					} else {
-						response.setStatusCode(500);
-						BufferedWriter writer = response.getWriter();
-						writer.write("Internal Server Error Review logs for details");
+					for (int i = 0; i < bigquerydata.size(); i++) {
+						JsonArray innerArray = bigquerydata.get(i).getAsJsonArray();
+						replies.add(innerArray.get(0).getAsString());
 					}
+					result.add("replies", replies);
+					formattedString = result.toString();
 
-				} else {
+				} else
 					e.printStackTrace(System.out);
-					response.setStatusCode(500);
-					BufferedWriter writer = response.getWriter();
-					writer.write("Internal Server Error Review logs for details");
-				}
-			} else {
+			} else
 				e.printStackTrace(System.out);
-				response.setStatusCode(500);
-				BufferedWriter writer = response.getWriter();
-				writer.write("Internal Server Error Review logs for details");
-			}
-		} finally
-
-		{
+		} finally {
 			if (session != null) {
 				session.closeSession();
 			}
 		}
-
-		response.getWriter().write(formattedString);
-
-	}
-
-	
-	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
-			String userSetLookupIP) throws Exception {
-
-		CMUserSetHelper cmuserset = new CMUserSetHelper(userSetID, userSetLookupIP);
-
-		String jwthtoken = CMUserSetHelper.geAuthToken(cmuserset.authUrl, cmuserid, cmpwd);
-		String newtoken = "Bearer " + CMUserSetHelper.removeQuotes(jwthtoken);
-
-		boolean founduserinuserset = cmuserset.findUserInUserSet(userName, newtoken);
-
-		return founduserinuserset;
+		 
+		System.out.println(formattedString);
+		// response.getWriter().write(formattedString);
 
 	}
 
@@ -271,4 +269,24 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 				"[" + formattedArray.deleteCharAt(formattedArray.length() - 1) + "]");
 	}
 
+	@Override
+	public void service(HttpRequest request, HttpResponse response) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+	
+	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID, String userSetLookupIP) throws Exception {
+
+		CMUserSetHelper cmuserset = new CMUserSetHelper(userSetID,userSetLookupIP);
+
+		String jwthtoken = CMUserSetHelper.geAuthToken(cmuserset.authUrl,cmuserid,cmpwd);
+		String newtoken = "Bearer " + CMUserSetHelper.removeQuotes(jwthtoken);
+
+		boolean founduserinuserset = cmuserset.findUserInUserSet(userName, newtoken);
+
+
+		return founduserinuserset;
+
+	}
+	
 }
