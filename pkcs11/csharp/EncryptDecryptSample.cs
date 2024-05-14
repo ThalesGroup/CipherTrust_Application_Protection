@@ -246,6 +246,14 @@ namespace CADP.Pkcs11Sample
                                 //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
                                 encoding = getUTFEncoding(utfmode, out umode);
                                 charSetArray = encoding.GetBytes(charSet);
+                                
+                                // In Case of FF3-1 and mode is UTF-8/16LE/16/32LE/32 setting the radix
+                                if (opName == "FF3-1" && (umode >= 1 && umode <= 5))
+                                {
+                                    radix = (ushort)charSet.Length;
+                                }
+
+
                                 if (umode == 0) radix = (ushort)charSet.Length;
                                 else Console.WriteLine("Please only specify an ASCII character set on the command line.");
                             }
