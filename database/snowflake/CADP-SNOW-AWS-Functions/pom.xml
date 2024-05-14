@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>Thales</groupId>
-	<artifactId>CADP-SNOW-AWS-TokenizeChar</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Thales</groupId>
+  <artifactId>CADP-SNOW-AWS-UDF</artifactId>
+  <version>0.0.2-SNAPSHOT</version>
+
+<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
@@ -13,7 +12,7 @@
 		<bouncycastle.version>1.70</bouncycastle.version>
 		<org.apache.commons.codec.version>1.10
 		</org.apache.commons.codec.version>
-		<guava.version>32.0.0-jre</guava.version>
+		<guava.version>31.1-jre</guava.version>
 		<gson.version>2.9.0</gson.version>
 		<log4j-api.version>2.17.2</log4j-api.version>
 		<log4j-core.version>2.17.2</log4j-core.version>
@@ -25,7 +24,7 @@
 		<dependency>
 			<groupId>io.github.thalescpl-io.cadp</groupId>
 			<artifactId>CADP_for_JAVA</artifactId>
-			<version>8.13.1.000</version>
+			<version>8.15.0.001</version>
 		</dependency>
 
 		<dependency>
@@ -84,7 +83,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
@@ -166,5 +165,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	<name>CADP-SNOW-AWS-TokenizeChar</name>
+	<name>CADP-SNOW-AWS-UDF</name>
 </project>

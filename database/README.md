@@ -6,3 +6,5 @@ Integrations or Sample Code for databases using CipherTrust Database Protection 
 
 [Vertica](vertica)
 [Snowflake](snowflake)
+[Snowflake](bigquery)
+[Snowflake](redshift)
