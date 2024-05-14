@@ -74,7 +74,7 @@ fi
 if [ "$ANSIBLE" = "true" ];
 then
   docker run --detach --privileged --name ansible --volume=/sys/fs/cgroup:/sys/fs/cgroup:rw --volume=/home/aj/.kube:/root/.kube --volume=/tmp:/tmp:rw --cgroupns=host ciphertrust/automation:star-demo-ansible
-  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -e "AKL_ACCESS_ID=$access_id" -e "AKL_ACCESS_KEY=$access_key" -v
+  docker exec --tty ansible env TERM=xterm ansible-playbook /root/run_demo.yml -e "CM_IP=$CM_IP" -e "CM_USERNAME=$CM_USERNAME" -e "CM_PASSWORD=$CM_PASSWORD" -e "LOCAL_CA_ID=$CA_ID" -e "ADD_DPG_FLAG=false" -e "SERVER_IP=$KUBE_PUBLIC_IP" -e "SERVER_PORT=9000" -e "NFS_IP=$NFS_SERVER_IP" -e "AKL_ACCESS_ID=$access_id" -e "AKL_ACCESS_KEY=$access_key" -e "AKEYLESS_API_ACCESS_ID=$access_id" -e "AKEYLESS_API_ACCESS_KEY=$access_key" -v
 fi
 
 # Install CTE for kubernetes
