@@ -42,15 +42,11 @@ if [ "$SETUP_AKL" = "true" ];
 then
   helm repo add external-secrets https://charts.external-secrets.io
   helm install external-secrets external-secrets/external-secrets -n kubecon --create-namespace
-
-  kubectl apply -f /tmp/akeyless-auth-secret.yaml -n kubecon
-  kubectl apply -f /tmp/akl-external-secret-store.yaml -n kubecon
-  kubectl apply -f /tmp/akl-external-secret.yaml -n kubecon
-
-  #akeyless delete-auth-method --name CMAPISecret
-  #output=$(akeyless create-auth-method --name CMAPISecret)
-  #access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
-  #access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
+  
+  akeyless delete-auth-method --name CMAPISecret
+  output=$(akeyless create-auth-method --name CMAPISecret)
+  access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
+  access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
 
   #helm repo add akeyless https://akeylesslabs.github.io/helm-charts
   #helm repo update
@@ -65,11 +61,6 @@ fi
 
 # if [ "$SETUP_AKL" = "true" ];
 # then
-#   akeyless delete-auth-method --name CMAPISecret
-#   output=$(akeyless create-auth-method --name CMAPISecret)
-#   access_id=$(echo "$output" | grep 'Access ID' | awk '{print $3}')
-#   access_key=$(echo "$output" | grep 'Access Key' | awk '{print $3}')
-
 #   akeyless create-role --name /CM/akl_role
 #   akeyless assoc-role-am --role-name /CM/akl_role --am-name CM/akl_auth
 #   akeyless set-role-rule --role-name /CM/akl_role --path /CM/'*' --capability read --capability list
@@ -101,6 +92,11 @@ then
   akeyless delete-item --name /cm/cte_encoded_reg_token
   akeyless delete-item --name /cm/dpg_reg_token
   sh /tmp/akeyless-create-secrets.sh
+  
+  kubectl apply -f /tmp/akeyless-auth-secret.yaml -n kubecon
+  kubectl apply -f /tmp/akl-external-secret-store.yaml -n kubecon
+  kubectl apply -f /tmp/akl-external-secret.yaml -n kubecon
+
   pkill -f "port-forward"
   kubectl apply -f /tmp/cm-token-secret.yaml
   kubectl apply -f /tmp/storage-class.yaml
