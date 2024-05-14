@@ -9,7 +9,7 @@ namespace CADP.Pkcs11Sample
         static void Usage()
         {
             Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d | e] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] [-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used");
-            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID]");
+            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-Ta Tweak algo] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID]");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
             Console.WriteLine("\t 1. Create key sample.                                     Parameters: -p pin -k keyname [-g gen_key_action] [-n false|true]");
@@ -43,6 +43,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t SHA256-ECDSA  ... SHA256-ECDSA mode");
             Console.WriteLine("\t SHA384-ECDSA  ... SHA384-ECDSA mode");
             Console.WriteLine("\t SHA512-ECDSA  ... SHA512-ECDSA mode");
+            Console.WriteLine("\t FF3-1  ... FF3-1 mode");
             Console.WriteLine("");
             Console.WriteLine("\t Choices for the -O option: ");
             Console.WriteLine("\t true    ... Opaque object");
@@ -71,6 +72,11 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t v2.1 ... use version 2.1 header");
             Console.WriteLine("\t v2.7 ... use version 2.7 header");
             Console.WriteLine("");
+            Console.WriteLine("\tChoices for the -Ta tweak algo FF3-1 option:");
+            Console.WriteLine("\t SHA1 ... SHA1");
+            Console.WriteLine("\t SHA256 ... SHA256");
+            Console.WriteLine("\t NONE ... NONE");
+            Console.WriteLine("");
             Console.WriteLine("\tChoices for the -CurveOid option:");
             Console.WriteLine("\t 06052b81040020, 06052b81040021, 06052b8104000a, " +
                 "06052b81040022, 06052b81040023, 06082a8648ce3d030107, " +
@@ -82,6 +88,17 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\tChoices for the -Aa option:");
             Console.WriteLine("\t RSA ... RSA Keypair");
             Console.WriteLine("\t EC ... ECC keypair");
+            Console.WriteLine("");
+            Console.WriteLine("\tChoices for the -U utf mode option:");
+            Console.WriteLine("\t ASCII ........ASCII");
+            Console.WriteLine("\t UTF-8 ....... UTF-8");
+            Console.WriteLine("\t UTF-16LE .... UTF 16 LittleEndian");
+            Console.WriteLine("\t UTF-16 .....UTF 16 BigEndian");
+            Console.WriteLine("\t UTF-32LE .....UTF 16 LittleEndian");
+            Console.WriteLine("\t UTF-32 .......UTF 32 BigEndian");
+            Console.WriteLine("\t CARD10 ...... Cardinality as 10");
+            Console.WriteLine("\t CARD26 ...... Cardinality as 26");
+            Console.WriteLine("\t CARD62 ...... Cardinality as 62");
             Console.WriteLine("");
             Console.WriteLine("Note: In case of success exit value is 0, otherwise -1");
             Environment.Exit(-1);
@@ -102,6 +119,7 @@ namespace CADP.Pkcs11Sample
             string tweakInput = null;
             string headerMode = null;
             string cka_idInput = null;
+            string tweakAlgo = null;
             bool symmetric = true;
             bool genWrappingKey = false;
             bool nodelete = false;
@@ -238,6 +256,10 @@ namespace CADP.Pkcs11Sample
                             {
                                 tagLen = Convert.ToInt32(args[++i]);
                             }
+                            else if (optArg == "-Ta")
+                            {
+                                tweakAlgo = args[++i]; // NONE, SHA1, SHA256
+                            }
                             else if (i < args.Length - 1)
                                 tweakInput = args[++i];
                             break;
@@ -355,7 +377,7 @@ namespace CADP.Pkcs11Sample
 
                     case '5':   // run encrypt and decrypt a short message with different mode, FPE/FF1 mode requires inputFile and character set
                         sample = new EncryptDecryptSample();
-                        sample.Run(new object[] { pin, keyLabel, opName, headerMode, fileName, charSetChoc, charSetInput, utfMode, tweakInput });
+                        sample.Run(new object[] { pin, keyLabel, opName, headerMode, fileName, charSetChoc, charSetInput, utfMode, tweakInput, tweakAlgo });
                         break;
                     case 'd':   // run encrypt and decrypt a short message with GCM
                         sample = new EncryptDecryptSample();
