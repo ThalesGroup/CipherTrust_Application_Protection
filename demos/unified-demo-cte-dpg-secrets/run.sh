@@ -95,10 +95,12 @@ then
   
   kubectl apply -f /tmp/akeyless-auth-secret.yaml -n kubecon
   kubectl apply -f /tmp/akl-external-secret-store.yaml -n kubecon
+  sleep 5s
   kubectl apply -f /tmp/akl-external-secret.yaml -n kubecon
+  sleep 5s
 
   pkill -f "port-forward"
-  kubectl apply -f /tmp/cm-token-secret.yaml
+  #kubectl apply -f /tmp/cm-token-secret.yaml
   kubectl apply -f /tmp/storage-class.yaml
   kubectl apply -f /tmp/nfs-pv.yaml
   kubectl apply -f /tmp/nfs-pvc.yaml
