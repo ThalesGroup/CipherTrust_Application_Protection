@@ -69,6 +69,7 @@ fi
 if [ "$ANSIBLE" = "true" ];
 then
   akeyless delete-auth-method --name CMAPISecret
+  akeyless delete-role --name "CMAPIRole" 
   output=$(akeyless create-auth-method --name CMAPISecret)
   access_id=$(echo "$output" | awk -F 'Access ID: ' '{print $2}' | awk -F ' - Access Key: ' '{print $1}' | tr -d '\n')
   access_key=$(echo "$output" | awk -F 'Access Key: ' '{print $2}' | tr -d '\n')
