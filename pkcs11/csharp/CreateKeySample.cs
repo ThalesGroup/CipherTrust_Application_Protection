@@ -34,7 +34,7 @@ namespace CADP.Pkcs11Sample
                     if (inputParams.Length >= 5) nodelete = Convert.ToBoolean(inputParams[4]);
                     if (inputParams.Length >= 6) bAlwSen = Convert.ToBoolean(inputParams[5]);
                     if (inputParams.Length >= 7) bNevExtr = Convert.ToBoolean(inputParams[6]);
-                    if (inputParams.Length >= 8) cka_idInput = inputParams[7].ToString();
+                    if (inputParams.Length >= 8) cka_idInput = inputParams[7] == null ? null : Convert.ToString(inputParams[7]);
                     
                     Console.WriteLine("genAction specified as " + genAction);
                     // Login as normal user
