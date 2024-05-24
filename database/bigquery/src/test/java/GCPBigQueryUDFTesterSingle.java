@@ -26,11 +26,11 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 //  @Override
 	/*
 	 * This test app to test the logic for a BigQuery Database User Defined
-	 * Function(UDF). It is an example of how to use Thales Cipher Trust Application Data Protection (CADP)
-	 * to protect sensitive data in a column. This example uses
-	 * Format Preserve Encryption (FPE) to maintain the original format of the data
-	 * so applications or business intelligence tools do not have to change in order
-	 * to use these columns. There is no need to deploy a function to run it.
+	 * Function(UDF). It is an example of how to use Thales Cipher Trust Application
+	 * Data Protection (CADP) to protect sensitive data in a column. This example
+	 * uses Format Preserve Encryption (FPE) to maintain the original format of the
+	 * data so applications or business intelligence tools do not have to change in
+	 * order to use these columns. There is no need to deploy a function to run it.
 	 * 
 	 * Note: This source code is only to be used for testing and proof of concepts.
 	 * Not production ready code. Was not tested for all possible data sizes and
@@ -66,26 +66,33 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 
 		String encdata = "";
 		String keyName = "testfaas";
-		//The following must be entered in as environment variables in the GCP Cloud Function. 
-		//CM User and CM Password.  These can also be provided as secrets in GCP as well.
+		// The following must be entered in as environment variables in the GCP Cloud
+		// Function.
+		// CM User and CM Password. These can also be provided as secrets in GCP as
+		// well.
 		String userName = System.getenv("CMUSER");
 		String password = System.getenv("CMPWD");
-		//returnciphertextforuserwithnokeyaccess = is a environment variable to express how  data should be
-		//returned when the user above does not have access to the key and if doing a lookup in the userset 
-		//and the user does not exist.  If returnciphertextforuserwithnokeyaccess = null then an error will be 
-		//returned to the query, else the results set will provide ciphertext. 
+		// returnciphertextforuserwithnokeyaccess = is a environment variable to express
+		// how data should be
+		// returned when the user above does not have access to the key and if doing a
+		// lookup in the userset
+		// and the user does not exist. If returnciphertextforuserwithnokeyaccess = null
+		// then an error will be
+		// returned to the query, else the results set will provide ciphertext.
 		// validvalues are 1 or null
 		// 1 will return cipher text
 		// null will return error.
 		String returnciphertextforuserwithnokeyaccess = System.getenv("returnciphertextforuserwithnokeyaccess");
 		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.matches("-?\\d+"); // Using regular
-		
-		//usersetlookup = should a userset lookup be done on the user from Big Query?  1 = true 0 = false. 
+
+		// usersetlookup = should a userset lookup be done on the user from Big Query? 1
+		// = true 0 = false.
 		String usersetlookup = System.getenv("usersetlookup");
-		//usersetID = should be the usersetid in CM to query.  
+		// usersetID = should be the usersetid in CM to query.
 		String usersetID = System.getenv("usersetidincm");
-		//usersetlookupip = this is the IP address to query the userset.  Currently it is 
-		//the userset in CM but could be a memcache or other in memory db. 
+		// usersetlookupip = this is the IP address to query the userset. Currently it
+		// is
+		// the userset in CM but could be a memcache or other in memory db.
 		String userSetLookupIP = System.getenv("usersetlookupip");
 		boolean usersetlookupbool = usersetlookup.matches("-?\\d+");
 
@@ -100,7 +107,7 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 		JsonArray bigquerydata = null;
 
 		try {
-		
+
 			// Parse JSON request and check for "name" field
 			JsonObject requestJson = null;
 			try {
@@ -126,15 +133,16 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 			} catch (JsonParseException e) {
 				logger.severe("Error parsing JSON: " + e.getMessage());
 			}
-			
+
 			bigquerydata = requestJson.getAsJsonArray("calls");
-			
+
 			if (usersetlookupbool) {
 				// Convert the string to an integer
 				int num = Integer.parseInt(usersetlookup);
 // make sure cmuser is in Application Data Protection Clients Group
 				if (num >= 1) {
-					boolean founduserinuserset = findUserInUserSet(bigquerysessionUser, userName,password, usersetID,userSetLookupIP);
+					boolean founduserinuserset = findUserInUserSet(bigquerysessionUser, userName, password, usersetID,
+							userSetLookupIP);
 					System.out.println("Found User " + founduserinuserset);
 					if (!founduserinuserset)
 						throw new CustomException("1001, User Not in User Set", 1001);
@@ -146,9 +154,7 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 			} else {
 				usersetlookupbool = false;
 			}
-			
 
-		
 			System.setProperty("com.ingrian.security.nae.IngrianNAE_Properties_Conf_Filename",
 					"D:\\product\\Build\\IngrianNAE-134.properties");
 
@@ -160,8 +166,6 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 
-			
-			
 			int cipherType = 0;
 			String algorithm = "FPE/FF1/CARD62";
 
@@ -169,8 +173,7 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 				cipherType = Cipher.ENCRYPT_MODE;
 			else
 				cipherType = Cipher.DECRYPT_MODE;
-			
-			
+
 			if (datatype.equals("char"))
 				algorithm = "FPE/FF1/CARD62";
 			else if (datatype.equals("charint"))
@@ -178,58 +181,74 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 			else
 				algorithm = "FPE/FF1/CARD10";
 
-				NAESecureRandom rng = new NAESecureRandom(session);
+			NAESecureRandom rng = new NAESecureRandom(session);
 
-				byte[] iv = new byte[16];
-				rng.nextBytes(iv);
-				IvParameterSpec ivSpec = new IvParameterSpec(iv);
+			byte[] iv = new byte[16];
+			rng.nextBytes(iv);
+			IvParameterSpec ivSpec = new IvParameterSpec(iv);
 
-				// Serialization
+			// Serialization
 
-				bigqueryreturndata.append("{ \"replies\": [");
+			bigqueryreturndata.append("{ \"replies\": [");
 
-				// String algorithm = "AES/CBC/PKCS5Padding";
-				String tweakAlgo = null;
-				String tweakData = null;
-				FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData)
-						.set_tweakAlgorithm(tweakAlgo).build();
-				///
-				ivSpec = param;
-				Cipher thalesCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+			// String algorithm = "AES/CBC/PKCS5Padding";
+			String tweakAlgo = null;
+			String tweakData = null;
+			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
+					.build();
+			///
+			ivSpec = param;
+			Cipher thalesCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+			thalesCipher.init(cipherType, key, ivSpec);
+			String sensitive = null;
+			for (int i = 0; i < bigquerydata.size(); i++) {
+				JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
+				if (bigquerytrow != null && bigquerytrow.size() > 0) {
+					JsonElement element = bigquerytrow.get(0); // Assuming you want the first element
+					if (element != null && !element.isJsonNull()) {
+						sensitive = element.getAsString();
+						if (sensitive.isEmpty() || sensitive.length() < 2) {
+							encdata = sensitive;
+						} else {
+							if (sensitive.equalsIgnoreCase("null")) {
+								encdata = sensitive;
+							} else {
+								byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
+								encdata = new String(outbuf);
 
-				for (int i = 0; i < bigquerydata.size(); i++) {
-					JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
-					String sensitive = bigquerytrow.getAsString();
-					// String sensitive = bigquerycolumn.getAsJsonPrimitive().toString();
-					// initialize cipher to encrypt.
-
-					thalesCipher.init(cipherType, key, ivSpec);
-					// encrypt data
-					byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
-					encdata = new String(outbuf);
-					// System.out.println("Enc data : " + encdata);
-
-					bigqueryreturndata.append(encdata);
-					if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
-						continue;
-					else
-						bigqueryreturndata.append(",");
-				
-
-					
+								System.out.println("Sensitive data: " + sensitive);
+							}
+						}
+					} else {
+						System.out.println("Sensitive data is null or empty.");
+						encdata = sensitive;
+					}
+				} else {
+					System.out.println("bigquerytrow is null or empty.");
+					encdata = sensitive;
 				}
 
-				bigqueryreturndata.append("]}");
+				bigqueryreturndata.append(encdata);
+				if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
+					continue;
+				else
+					bigqueryreturndata.append(",");
 
-				bigqueryreturnstring = new String(bigqueryreturndata);
-				formattedString = formatString(bigqueryreturnstring);
+			}
 
+			bigqueryreturndata.append("]}");
 
-		} catch (Exception e) {
+			bigqueryreturnstring = new String(bigqueryreturndata);
+			formattedString = formatString(bigqueryreturnstring);
+
+		} catch (
+
+		Exception e) {
 
 			System.out.println("in exception with " + e.getMessage());
 			if (returnciphertextbool) {
-				if (e.getMessage().contains("1401") || (e.getMessage().contains("1001") || (e.getMessage().contains("1002"))) ) {
+				if (e.getMessage().contains("1401")
+						|| (e.getMessage().contains("1001") || (e.getMessage().contains("1002")))) {
 					JsonObject result = new JsonObject();
 					JsonArray replies = new JsonArray();
 					for (int i = 0; i < bigquerydata.size(); i++) {
@@ -248,7 +267,7 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 				session.closeSession();
 			}
 		}
-		 
+
 		System.out.println(formattedString);
 		// response.getWriter().write(formattedString);
 
@@ -274,19 +293,19 @@ public class GCPBigQueryUDFTesterSingle implements HttpFunction {
 		// TODO Auto-generated method stub
 
 	}
-	
-	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID, String userSetLookupIP) throws Exception {
 
-		CMUserSetHelper cmuserset = new CMUserSetHelper(userSetID,userSetLookupIP);
+	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
+			String userSetLookupIP) throws Exception {
 
-		String jwthtoken = CMUserSetHelper.geAuthToken(cmuserset.authUrl,cmuserid,cmpwd);
+		CMUserSetHelper cmuserset = new CMUserSetHelper(userSetID, userSetLookupIP);
+
+		String jwthtoken = CMUserSetHelper.geAuthToken(cmuserset.authUrl, cmuserid, cmpwd);
 		String newtoken = "Bearer " + CMUserSetHelper.removeQuotes(jwthtoken);
 
 		boolean founduserinuserset = cmuserset.findUserInUserSet(userName, newtoken);
 
-
 		return founduserinuserset;
 
 	}
-	
+
 }
