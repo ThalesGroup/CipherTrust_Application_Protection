@@ -379,7 +379,7 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
     else return CKR_OK;
 }
 
-int setDefaultForFF3_1(CK_FF31_PARAMETER *ff31params, char *tweakfilename, char *tweak_algo){
+int setDefaultForFF3_1(CK_FPE_GENERIC_PARAMETER *ff31params, char *tweakfilename, char *tweak_algo){
     int tweak_file_size = 0;
     if(tweak_algo){
         ff31params->tweakAlgolen = strlen(tweak_algo);
@@ -534,7 +534,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_FPE_PARAMETER     fpeparams;
         CK_FPE_PARAMETER_UTF fpeparamsutf;
         CK_FF1_PARAMETER_UTF ff1paramsutf;
-        CK_FF31_PARAMETER ff31params;
+        CK_FPE_GENERIC_PARAMETER ff31params;
         CK_MECHANISM	mechEncryptionPad =    { encheader|CKM_AES_CBC_PAD,   def_iv, 16 };
         CK_MECHANISM	mechEncryptionCtr =    { encheader|CKM_AES_CTR,       def_iv, 16 };
         CK_MECHANISM    mechEncryptionGCM =    { CKM_AES_GCM, &gcmParams, sizeof (CK_GCM_PARAMS) };
