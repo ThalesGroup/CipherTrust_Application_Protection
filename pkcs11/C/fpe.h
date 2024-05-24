@@ -30,6 +30,7 @@
 #define CKM_THALES_FPE                 0x80004001
 #define CKM_THALES_FF1                 0x80004002
 #define CKM_THALES_FF3_1               0x80004003
+#define CKM_THALES_FF1_V2              0x80004004
 #define CKR_RADIX_TOO_LARGE            0x00000300
 
 typedef struct FPE_PARAMETER {
@@ -55,16 +56,16 @@ typedef struct FF1_PARAMETER_UTF {
   CK_BYTE        charset[4*65536]; /* this is an open array with a minimum length of 2 bytes and a theoretical maximum length of 65535*4 bytes */
   /* tweak data is optional - if present, it immediately follows the charset data (within the charset array) */
 } CK_FF1_PARAMETER_UTF;
-typedef struct FF31_PARAMETER {
+typedef struct FPE_GEN_PARAMETER {
   CK_BYTE        tweakAlgo[8];
   unsigned       tweakAlgolen;
   CK_BYTE        tweak[256];
   unsigned       tweaklen;
-  CK_BYTE        mode;       /* 0...ASCII, 1...UTF8, 2...UTF16LE, 3...UTF16BE, 4...UTF32LE, 5...UTF32BE, 6...CS_CARD10, 7...CS_CARD26, 8...CS_CARD62 */
+  unsigned short mode;       /* 0...ASCII, 1...UTF8, 2...UTF16LE, 3...UTF16BE, 4...UTF32LE, 5...UTF32BE, 6...CS_CARD10, 7...CS_CARD26, 8...CS_CARD62 */
   unsigned short radix;      /* radix in network byte order, 2..65535 */
   unsigned       charsetlen; /* length of character set data in bytes, in network byte order */
   CK_BYTE        charset[4*65535];
-} CK_FF31_PARAMETER;
+} CK_FPE_GENERIC_PARAMETER;
 
 
 #if defined(_AIX) || defined(__hpux) || defined(__sun) || defined(__s390x__)
