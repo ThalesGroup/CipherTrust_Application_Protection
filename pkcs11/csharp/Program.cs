@@ -8,8 +8,8 @@ namespace CADP.Pkcs11Sample
     {
         static void Usage()
         {
-            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d | e] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] [-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used");
-            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID]");
+            Console.WriteLine("Usage: -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | i | d | e] [-k|-kp keyname] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File] [-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used]");
+            Console.WriteLine("[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-H headermode] [-T tweak] [-w wrappingkeyname] [-n false|true] [-m true|false]) [-I Non-unique searchable ID CKA_ID] [-kt cka_keyType, useful with '-t j' sample option only]");
             Console.WriteLine("\tChoices for the -t option:");
             Console.WriteLine("\t 0. Run all samples. ");
             Console.WriteLine("\t 1. Create key sample.                                     Parameters: -p pin -k keyname [-g gen_key_action] [-n false|true]");
@@ -27,6 +27,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
             Console.WriteLine("\t d. Encrypt and decrypt with GCM mode sample. ");
             Console.WriteLine("\t e. Create a ECC key pair and sign the message sample. ");
+            Console.WriteLine("\t j. Find keys using CKA_KeyType and print attributes sample.        Parameters: -p pin -kt cka_keytype");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");
@@ -83,6 +84,16 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t RSA ... RSA Keypair");
             Console.WriteLine("\t EC ... ECC keypair");
             Console.WriteLine("");
+            Console.WriteLine("\tChoices for the -kt option:");
+            Console.WriteLine("\t AES ... AES KeyType");
+            Console.WriteLine("\t RSA ... RSA Keypair");
+            Console.WriteLine("\t EC ... EC Keypair");
+            Console.WriteLine("\t SHA1-HMAC ... CKK_SHA_1_HMAC Key");
+            Console.WriteLine("\t SHA224-HMAC ... CKK_SHA_224_HMAC Key");
+            Console.WriteLine("\t SHA256-HMAC ... CKK_SHA_256_HMAC Key");
+            Console.WriteLine("\t SHA384-HMAC ... CKK_SHA_384_HMAC Key");
+            Console.WriteLine("\t SHA512-HMAC ... CKK_SHA_512_HMAC Key");
+            Console.WriteLine("");
             Console.WriteLine("Note: In case of success exit value is 0, otherwise -1");
             Environment.Exit(-1);
         }
@@ -122,6 +133,7 @@ namespace CADP.Pkcs11Sample
             int tagLen = 12;
             string curveoid = null;
             string asymmetricAlgoName = "RSA";
+            string cka_keyType = "AES";
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -171,12 +183,17 @@ namespace CADP.Pkcs11Sample
                             }
                             break;
                         case 'k':
-                            if (optArg.Length == 3 && optArg[2] == 'p')
-                                symmetric = false;
+                            if (optArg == "-kt")
+                            { cka_keyType = args[++i]; }
                             else
-                                symmetric = true;
-                            if (i < args.Length - 1)
-                                keyLabel = args[++i];
+                            {
+                                if (optArg.Length == 3 && optArg[2] == 'p')
+                                    symmetric = false;
+                                else
+                                    symmetric = true;
+                                if (i < args.Length - 1)
+                                    keyLabel = args[++i];
+                            }       
                             break;
 
                         case 'u':
@@ -295,6 +312,9 @@ namespace CADP.Pkcs11Sample
                         sample = new CreateObjectSample();
                         sample.Run(new object[] { pin, keyValue, keyLabel, bOpaqueObj, genAction });
 
+                        sample = new FindKeysByCkaSample();
+                        sample.Run(new object[] { pin, cka_keyType });
+
                         sample = new EncryptDecryptSample();
                         sample.Run(new object[] { pin, keyLabel });
 
@@ -408,6 +428,13 @@ namespace CADP.Pkcs11Sample
 
                         sample = new UnwrapImportKeySample();
                         sample.Run(new object[] { pin, keyLabel, keyType, wrappingKeyLabel, wrappingKeyType, formatType, keyFilename });
+                        break;
+
+                    case 'j':
+                        //  Pre-requisites: keys should be created on CM
+                        //  Find keys using CKA_KeyType and print attributes sample
+                        sample = new FindKeysByCkaSample();
+                        sample.Run(new object[] { pin, cka_keyType });
                         break;
                     default:
                         Usage();
