@@ -172,24 +172,41 @@ public class ThalesGCPBigQueryCADPFPE implements HttpFunction {
 			///
 			ivSpec = param;
 			Cipher thalesCipher = Cipher.getInstance(algorithm, "IngrianProvider");
-
+			thalesCipher.init(cipherType, key, ivSpec);
+			String sensitive = null;
 			for (int i = 0; i < bigquerydata.size(); i++) {
 				JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
-				String sensitive = bigquerytrow.getAsString();
-				// String sensitive = bigquerycolumn.getAsJsonPrimitive().toString();
-				// initialize cipher to encrypt.
+				if (bigquerytrow != null && bigquerytrow.size() > 0) {
+					JsonElement element = bigquerytrow.get(0);
+					if (element != null && !element.isJsonNull()) {
+						sensitive = element.getAsString();
+						if (sensitive.isEmpty() || sensitive.length() < 2) {
+							encdata = sensitive;
+						} else {
+							if (sensitive.equalsIgnoreCase("null")) {
+								encdata = sensitive;
+							} else {
+								byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
+								encdata = new String(outbuf);
 
-				thalesCipher.init(cipherType, key, ivSpec);
-				// encrypt data
-				byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
-				encdata = new String(outbuf);
-				// System.out.println("Enc data : " + encdata);
+								//System.out.println("Sensitive data: " + sensitive);
+							}
+						}
+					} else {
+						//System.out.println("Sensitive data is null or empty.");
+						encdata = sensitive;
+					}
+				} else {
+					//System.out.println("bigquerytrow is null or empty.");
+					encdata = sensitive;
+				}
 
 				bigqueryreturndata.append(encdata);
 				if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
 					continue;
 				else
 					bigqueryreturndata.append(",");
+
 			}
 
 			bigqueryreturndata.append("]}");

@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
@@ -176,51 +179,51 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 					.build();
 
 			Cipher decryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
-			String encdata = "";
+			// initialize cipher to encrypt.
+			decryptCipher.init(Cipher.DECRYPT_MODE, key, param);
 
-			for (int i = 0; i < redshiftdata.size(); i++) {
-				JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
-
-				JsonPrimitive redshiftcolumn = redshiftrow.get(0).getAsJsonPrimitive();
-
-				String sensitive = redshiftcolumn.getAsJsonPrimitive().toString();
-
-				// initialize cipher to decrypt.
-				decryptCipher.init(Cipher.DECRYPT_MODE, key, param);
-				// decrypt data
-				byte[] outbuf = decryptCipher.doFinal(sensitive.getBytes());
-				encdata = new String(outbuf);
-
-				redshiftreturndata.append(encdata);
-				if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
-					continue;
-				else
-					redshiftreturndata.append(",");
-			}
-
-			redshiftreturndata.append("]}");
-
-			redshiftreturnstring = new String(redshiftreturndata);
+			redshiftreturnstring = doTransform(decryptCipher, redshiftdata, redshiftreturndata);
 
 
 		} catch (Exception e) {
+			String sensitive = null;
+
 			System.out.println("in exception with " + e.getMessage());
 			if (returnciphertextbool) {
-				if (e.getMessage().contains("1401") || (e.getMessage().contains("1001") || (e.getMessage().contains("1002"))) ) {
-					 
+				if (e.getMessage().contains("1401")
+						|| (e.getMessage().contains("1001") || (e.getMessage().contains("1002")))) {
+
 					for (int i = 0; i < redshiftdata.size(); i++) {
 						JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
+						if (redshiftrow != null && redshiftrow.size() > 0) {
+							JsonElement element = redshiftrow.get(0);
+							if (element != null && !element.isJsonNull()) {
+								sensitive = element.getAsString();
+								if (sensitive.isEmpty()) {
+									JsonElement elementforNull = new JsonPrimitive("null");
+									sensitive = elementforNull.getAsJsonPrimitive().toString();
+								} else {
+									sensitive = element.getAsJsonPrimitive().toString();
+								}
 
-						JsonPrimitive redshiftcolumn = redshiftrow.get(0).getAsJsonPrimitive();
+							} else {
+								JsonElement elementforNull = new JsonPrimitive("null");
+								sensitive = elementforNull.getAsJsonPrimitive().toString();
+								System.out.println("Sensitive data is null or empty.");
+							}
+						} else {
+							System.out.println("redshiftrow  is null or empty.");
 
-						String sensitive = redshiftcolumn.getAsJsonPrimitive().toString();
+						}
 
 						redshiftreturndata.append(sensitive);
 						if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
 							continue;
 						else
 							redshiftreturndata.append(",");
+
 					}
+
 					redshiftreturndata.append("]}");
 
 					redshiftreturnstring = new String(redshiftreturndata);
@@ -260,6 +263,68 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		return founduserinuserset;
 
 	}
+	
+	public String doTransform(Cipher encryptCipher, JsonArray redshiftdata, StringBuffer redshiftreturndata)
+			throws IllegalBlockSizeException, BadPaddingException {
+		String decdata = "";
+		String redshiftreturnstring = null;
+		String sensitive = null;
+		for (int i = 0; i < redshiftdata.size(); i++) {
+			JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
+
+			if (redshiftrow != null && redshiftrow.size() > 0) {
+				JsonElement element = redshiftrow.get(0);
+				if (element != null && !element.isJsonNull()) {
+					sensitive = element.getAsString();
+					if (sensitive.isEmpty() || sensitive.length() < 2) {
+						if (sensitive.isEmpty()) {
+							JsonElement elementforNull = new JsonPrimitive("null");
+							sensitive = elementforNull.getAsJsonPrimitive().toString();
+						} else {
+							sensitive = element.getAsJsonPrimitive().toString();
+						}
+						decdata = sensitive;
+					} else {
+						if (sensitive.equalsIgnoreCase("null")) {
+							sensitive = element.getAsJsonPrimitive().toString();
+							decdata = sensitive;
+						} else {
+							sensitive = element.getAsJsonPrimitive().toString();
+							byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
+							decdata = new String(outbuf);
+
+							System.out.println("Sensitive data: " + sensitive);
+						}
+					}
+				} else {
+					JsonElement elementforNull = new JsonPrimitive("null");
+					sensitive = elementforNull.getAsJsonPrimitive().toString();
+					System.out.println("Sensitive data is null or empty.");
+					decdata = sensitive;
+				}
+			} else {
+				JsonElement elementforNull = new JsonPrimitive("null");
+				sensitive = elementforNull.getAsJsonPrimitive().toString();
+				System.out.println("redshiftrow  is null or empty.");
+				decdata = sensitive;
+			}
+
+			redshiftreturndata.append(decdata);
+			if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
+				continue;
+			else
+				redshiftreturndata.append(",");
+
+		}
+
+		redshiftreturndata.append("]}");
+
+		redshiftreturnstring = new String(redshiftreturndata);
+
+		return redshiftreturnstring;
+
+	}
+	
 
 	public String formatReturnValue(int statusCode)
 

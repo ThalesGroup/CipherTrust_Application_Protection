@@ -276,9 +276,8 @@ public class ThalesAWSRedshiftCADPBulkTester implements RequestStreamHandler {
 
 					for (int enc = 0; enc < encryptedData.length; enc++) {
 
-						redshiftreturndatasc.append("[");
 						redshiftreturndatasc.append(new String(encryptedData[enc]));
-						redshiftreturndatasc.append("],");
+						redshiftreturndatasc.append(",");
 						index++;
 
 					}
@@ -300,16 +299,15 @@ public class ThalesAWSRedshiftCADPBulkTester implements RequestStreamHandler {
 				byte[][] encryptedData = encryptCipher.doFinalBulk(data, spec, encryptedErrorMap);
 				for (int enc = 0; enc < encryptedData.length; enc++) {
 
-					redshiftreturndatasc.append("[");
 					redshiftreturndatasc.append(new String(encryptedData[enc]));
-					redshiftreturndatasc.append("],");
+					redshiftreturndatasc.append(",");
 					index++;
 					totalRowsLeft--;
 
 				}
 			}
 
-			redshiftreturndatasc.append("] }");
+			redshiftreturndatasc.append("] ");
 			redshiftreturndatasb.append(redshiftreturndatasc);
 			redshiftreturndatasb.append("}");
 
