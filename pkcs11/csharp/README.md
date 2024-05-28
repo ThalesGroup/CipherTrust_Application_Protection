@@ -23,7 +23,7 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 ### Run sample from executable(only on windows):
 CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-Ta Tweak algo] [-TagLen length of Tag in AES/GCM] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID]
-[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used)
+[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used] [-kt cka_keyType, useful with '-t j' sample option only])
 
 #### Example
      CADP_PKCS11_Samples.exe -p username:password -k testkey1 -t 1
@@ -33,7 +33,7 @@ CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b
 ### Run sample from dotnet cli:
 dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode][-Ta Tweak algo] [-TagLen length of Tag in AES/GCM] [-f input File]
 [-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID]
-[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used)
+[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used] [-kt cka_keyType, useful with '-t j' sample option only])
 
 #### Example
      dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
@@ -55,6 +55,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
     c. Compute message digest for a given input file.
     d. Encrypt and decrypt with GCM mode sample.
     e. Create a ECC key pair and sign the message sample.
+    j. Find keys using CKA_KeyType and print attributes sample.
 ### Choices for the -o option:
      ECB ... ECB mode
      CBC ... CBC mode
@@ -108,6 +109,16 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
       SHA256 ... SHA256"
       NONE ... NONE"
 
+### Choices for the -kt option::
+     AES ... AES KeyType
+     RSA ... RSA KeyType
+     EC ... EC KeyType
+     SHA1-HMAC ... SHA1-HMAC KeyType
+     SHA224-HMAC ... SHA224-HMAC KeyType
+     SHA256-HMAC ... SHA256-HMAC KeyType
+     SHA384-HMAC ... SHA384-HMAC KeyType
+     SHA512-HMAC ... SHA512-HMAC KeyType
+     
 ### Choices for the -U utf mode option:
     ASCII ... ASCII
     UTF-8 ... UTF-8
