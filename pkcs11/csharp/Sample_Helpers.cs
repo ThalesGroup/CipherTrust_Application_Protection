@@ -389,6 +389,11 @@ namespace CADP.Pkcs11Sample
                                 case 3: Console.WriteLine(name + " : EC"); break;
                                 case 31: Console.WriteLine(name + " : AES"); break;
                                 case 19: Console.WriteLine(name + " : Opaque"); break;
+				case 40: Console.WriteLine(name + " : SHA1-HMAC"); break;
+				case 46: Console.WriteLine(name + " : SHA224-HMAC"); break;
+				case 43: Console.WriteLine(name + " : SHA256-HMAC"); break;
+				case 44: Console.WriteLine(name + " : SHA384-HMAC"); break;
+				case 45: Console.WriteLine(name + " : SHA512-HMAC"); break;
 
                                 default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
                             }
