@@ -107,7 +107,7 @@ public class CachingSample
        String keyname,
        String algorithm,
        String plainText,
-       String ivStr) 
+       String ivStr) throws Exception 
     {
        Cipher encryptCipher = null;
        Cipher decryptCipher = null;
@@ -157,5 +157,7 @@ public class CachingSample
             passPhrase[7] = 'z';
             return passPhrase;
         }
+    }
+}       
     }
 }       
