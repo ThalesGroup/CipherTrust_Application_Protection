@@ -98,7 +98,7 @@ public class FPEEncryptionDecryptionSample
 	    // encrypt data
 	    byte[] outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 	    
-	    System.out.println("encrypted data data  \"" + new String(outbuf) + "\"");
+	    System.out.println("Encrypted data   \"" + new String(outbuf) + "\"");
 	    
 	    Cipher decryptCipher = Cipher.getInstance("FPE/AES/CARD10", "IngrianProvider");
 	    // to decrypt data, initialize cipher to decrypt
@@ -126,7 +126,7 @@ public class FPEEncryptionDecryptionSample
 		// encrypt data
 		outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 
-		System.out.println("encrypted data data  \"" + new String(outbuf) + "\"");
+		System.out.println("Encrypted data \"" + new String(outbuf) + "\"");
 
 		// to decrypt data, initialize cipher to decrypt
 		decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
