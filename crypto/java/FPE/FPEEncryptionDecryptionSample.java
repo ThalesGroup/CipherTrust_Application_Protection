@@ -98,7 +98,7 @@ public class FPEEncryptionDecryptionSample
 	    // encrypt data
 	    byte[] outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 	    
-	    System.out.println("Encrypted data   \"" + new String(outbuf) + "\"");
+	    System.out.println("encrypted data data  \"" + new String(outbuf) + "\"");
 	    
 	    Cipher decryptCipher = Cipher.getInstance("FPE/AES/CARD10", "IngrianProvider");
 	    // to decrypt data, initialize cipher to decrypt
@@ -118,7 +118,7 @@ public class FPEEncryptionDecryptionSample
 		format.setNumberOfElementsFromStart(6);
 		
 		// Initializes spec with IV, tweak parameters and format
-		paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).setFpeFormat(format).build();
+		paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_spec(ivSpec).setFpeFormat(format).build();
 
 		// initialize cipher to encrypt.
 		encryptCipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
@@ -126,7 +126,7 @@ public class FPEEncryptionDecryptionSample
 		// encrypt data
 		outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 
-		System.out.println("Encrypted data \"" + new String(outbuf) + "\"");
+		System.out.println("encrypted data data  \"" + new String(outbuf) + "\"");
 
 		// to decrypt data, initialize cipher to decrypt
 		decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
@@ -147,4 +147,3 @@ public class FPEEncryptionDecryptionSample
 	}
     }
 }
-    
