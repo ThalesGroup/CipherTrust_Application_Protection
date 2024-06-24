@@ -23,6 +23,8 @@ The following samples show how to perform crypto operations with various ciphers
   * This sample shows how to encrypt and decrypt data using FPE Unicode with different Encodings
 * PersistentCachingSample.cs
   * This sample shows how to perform *crypto operations* using persistent cache.
+* CryptoOpFileEncryptionDecryption.cs
+  * This sample shows how to perform Encrypt and Decrypt a file.
   
 ## Prerequisites: 
 In order to run C# samples, 
