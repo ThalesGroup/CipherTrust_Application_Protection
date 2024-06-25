@@ -1,4 +1,4 @@
-using CADP.NetCore.Crypto;
+﻿using CADP.NetCore.Crypto;
 using CADP.NetCore.KeyManagement;
 using CADP.NetCore.Sessions;
 using System;
@@ -242,7 +242,6 @@ namespace CADP.NetCoreNaeSamples
                             int bytesRead;
                             do
                             {
-                                var pos = fsIn.Position;
                                 bytesRead = fsIn.Read(buffer, 0, bufferLen);
                                 cs.Write(buffer, 0, bytesRead);
                             }
@@ -264,7 +263,7 @@ namespace CADP.NetCoreNaeSamples
 
         public static bool AreEqual(string expFilepath, string actFilePath)
         {
-            int bytesRead1;
+            int bytesRead;
             int BufferSize = 81920;
             using (var expectFs = new FileStream(expFilepath, FileMode.Open, FileAccess.Read))
             {
@@ -280,13 +279,13 @@ namespace CADP.NetCoreNaeSamples
 
                     do
                     {
-                        bytesRead1 = expectFs.Read(expBuffer);
+                        bytesRead = expectFs.Read(expBuffer);
                         actFs.Read(actBuffer);
 
                         if (!expBuffer.SequenceEqual(actBuffer))
                         { return false; }
 
-                    } while (bytesRead1 != 0);
+                    } while (bytesRead != 0);
 
                     return true;
                 }
