@@ -484,4 +484,8 @@ void put_BOM_mode(CK_BYTE bom_mode, FILE* stream);
 
 
 CK_RV readObjectBytes( FILE * fp, CK_BYTE_PTR pObjBuf, CK_ULONG * pulObjLen, int format_type );
+
+CK_RV findKeysByIdAttr(char* keySearchId, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys);
+
+CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey);
 #endif /* __pkcs11_sample_helper_h__ */

@@ -72,6 +72,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      SHA384-ECDSA  ... SHA384-ECDSA mode
      SHA512-ECDSA  ... SHA512-ECDSA mode
      FF3-1 ... FF3-1
+     FF1v2 ... FF1v2
 ### Choices for the -O option:
     true    ... Opaque object
     false   ... Non Opaque object
@@ -105,9 +106,11 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      EC  ... ECC keypair
      
 ### Choices for the -Ta tweak algo FF3-1 option:
-      SHA1 ... SHA1");
+      SHA1 ... SHA1";
       SHA256 ... SHA256"
       NONE ... NONE"
+        
+      NOTE: For FF3-1, tweak data is mandatory. If tweak algorithm is NONE, the tweak data must be of 7 bytes (14 characters HEX encoded string).
 
 ### Choices for the -kt option::
      AES ... AES KeyType
@@ -118,7 +121,8 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      SHA256-HMAC ... SHA256-HMAC KeyType
      SHA384-HMAC ... SHA384-HMAC KeyType
      SHA512-HMAC ... SHA512-HMAC KeyType
-     
+    
+
 ### Choices for the -U utf mode option:
     ASCII ... ASCII
     UTF-8 ... UTF-8

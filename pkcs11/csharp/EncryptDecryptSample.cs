@@ -71,7 +71,7 @@ namespace CADP.Pkcs11Sample
                     ICkFPEParams mechanismFPEParams = null;
                     byte[] gcm_iv = { 0xae, 0xc6, 0x12, 0xbe, 0x7c, 0x1d, 0xdb, 0x65, 0x9a, 0x4b, 0x31, 0x5c };
                     byte[] def_aad = { 0x38, 0x59, 0xb3, 0xc9, 0xd0, 0xb4, 0x2d, 0x45, 0xc4, 0x3e, 0x8e, 0xbd, 0x4c, 0x8c, 0xbd, 0xe1 };// 0xb6, 0xeb, 0x21, 0x06 };
-
+                    
 
                     if (inputParams.Length >= 2)
                     {
@@ -231,10 +231,10 @@ namespace CADP.Pkcs11Sample
                         }
                     }
 
-                    if (opName.Equals("FPE") || opName.Equals("FF1") || opName.Equals("FF3-1"))
+                    if (opName.Equals("FPE") || opName.Equals("FF1") || opName.Equals("FF3-1") || opName.Equals("FF1v2"))
                     {
                         // Do not set charset in case Algo is FF3-1 and Cardinality is CARD10, Card26, CARD62
-                        if (opName.Equals("FF3-1") && (umode == 6 || umode == 7 || umode == 8))
+                        if ((opName.Equals("FF3-1") || opName.Equals("FF1v2")) && (umode == 6 || umode == 7 || umode == 8))
                         {
                             // Ignore the charset.
                             charSet = string.Empty;
@@ -246,9 +246,9 @@ namespace CADP.Pkcs11Sample
                                 //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
                                 encoding = getUTFEncoding(utfmode, out umode);
                                 charSetArray = encoding.GetBytes(charSet);
-                                
+
                                 // In Case of FF3-1 and mode is UTF-8/16LE/16/32LE/32 setting the radix
-                                if (opName == "FF3-1" && (umode >= 1 && umode <= 5))
+                                if ((opName.Equals("FF3-1") || opName.Equals("FF1v2")) && (umode >= 1 && umode <= 5))
                                 {
                                     radix = (ushort)charSet.Length;
                                 }
@@ -420,14 +420,21 @@ namespace CADP.Pkcs11Sample
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                     }
-                    else if (opName.Equals("FF3-1"))
+                    else if (opName.Equals("FF3-1") || opName.Equals("FF1v2"))
                     {
+
                         byte[] tweakAlgoBytes = Encoding.UTF8.GetBytes(tweakAlgo);
                         byte[] tweak = Encoding.UTF8.GetBytes(tweakStr);
                         var mode = getUTFEncoding(utfmode, out umode);
                         mechanismFPEParams = session.Factories.MechanismParamsFactory.CreateCkFPEParams(tweakAlgoBytes, tweak, umode, radix, charSetArray);
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF3_1, mechanismFPEParams);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF3_1, mechanismFPEParams);
+
+                        var fpeopName = CKM.CKM_THALES_FF3_1;
+                        if (opName.Equals("FF1v2"))
+                        {
+                            fpeopName = CKM.CKM_THALES_FF1v2;
+                        }
+                        encmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
+                        decmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
                     }
 
                     // Specify encryption mechanism with initialization vector as parameter
