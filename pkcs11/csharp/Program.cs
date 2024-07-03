@@ -27,7 +27,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
             Console.WriteLine("\t d. Encrypt and decrypt with GCM mode sample. ");
             Console.WriteLine("\t e. Create a ECC key pair and sign the message sample. ");
-            Console.WriteLine("\t j. Find keys using CKA_KeyType and print attributes sample.        Parameters: -p pin -kt cka_keytype");
+            Console.WriteLine("\t j. Find keys using CKA_KeyType and print attributes sample.        Parameters: 1. -p pin -kt cka_keytype 2. -p pin -I cka_id");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");
@@ -433,7 +433,7 @@ namespace CADP.Pkcs11Sample
 
                     case 'a':
                         sample = new TestAttributesSample();
-                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr, cka_idInput, asymmetricAlgoName});
+                        sample.Run(new object[] { pin, keyLabel, symmetric, preactive, bAlwSen, bNevExtr, asymmetricAlgoName});
                         break;
 
                     case 'b':
@@ -457,8 +457,9 @@ namespace CADP.Pkcs11Sample
                     case 'j':
                         //  Pre-requisites: keys should be created on CM
                         //  Find keys using CKA_KeyType and print attributes sample
+                        //  Find keys using CKA_Id and print attributes sample
                         sample = new FindKeysByCkaSample();
-                        sample.Run(new object[] { pin, cka_keyType });
+                        sample.Run(new object[] { pin, cka_keyType, cka_idInput });
                         break;
                     default:
                         Usage();

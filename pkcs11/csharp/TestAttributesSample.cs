@@ -7,7 +7,6 @@ namespace CADP.Pkcs11Sample
 {
     class TestAttributesSample : ISample
     {
-        public const int cka_id_handle_max_keys = 1000;
         public bool Run(object[] inputParams)
         {
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
@@ -36,8 +35,7 @@ namespace CADP.Pkcs11Sample
                     if (inputParams.Length >= 4) preactive = Convert.ToBoolean(inputParams[3]);
                     if (inputParams.Length >= 5) bAlwSen = Convert.ToBoolean(inputParams[4]);
                     if (inputParams.Length >= 6) bNevExtr = Convert.ToBoolean(inputParams[5]);
-                    if (inputParams.Length >= 7 && inputParams[6] != null) cka_idInput = inputParams[6].ToString();
-                    if (inputParams.Length >= 8 && inputParams[7] != null) asymmetricAlgoName = inputParams[7].ToString().ToUpper();
+                    if (inputParams.Length >= 7 && inputParams[6] != null) asymmetricAlgoName = inputParams[6].ToString();
 
                     uint keySize = 32;
 
@@ -51,16 +49,7 @@ namespace CADP.Pkcs11Sample
                     List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();
 
 
-                    // Add the CKA_ID attribute if the cka id input has value.
-                    if (!string.IsNullOrEmpty(cka_idInput))
-                    {
-                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
-                        numberOfHandle = cka_id_handle_max_keys;
-                    }
-                    else
-                    {
-                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
-                    }
+                    findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
                     if (symmetric == false)
                         findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PUBLIC_KEY));
@@ -71,8 +60,8 @@ namespace CADP.Pkcs11Sample
                     session.FindObjectsInit(findAttributes);
 
                     // Get search results
-                    List<IObjectHandle> foundObjects = session.FindObjects(numberOfHandle);
-                    
+                    List<IObjectHandle> foundObjects = session.FindObjects(1);
+
                     // Get search results
                     List<IObjectHandle> privateKeyHandles = new List<IObjectHandle>();
 
@@ -86,7 +75,7 @@ namespace CADP.Pkcs11Sample
                     else if (symmetric)
                     {
                         // Generate symmetric key object
-                        keyHandle = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr, cka_idInput);
+                        keyHandle = Helpers.GenerateKey(session, keyLabel, keySize, genAction, preactive, bAlwSen, bNevExtr);
                         if (keyHandle != null)
                         {
                             Console.WriteLine(keyLabel + " key generated!");
@@ -116,16 +105,7 @@ namespace CADP.Pkcs11Sample
                             findAttributes = new List<IObjectAttribute>();
                             findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_PRIVATE_KEY));
 
-                            // Add the CKA_ID attribute if the cka id input has value.
-                            if (!string.IsNullOrEmpty(cka_idInput))
-                            {
-                                findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
-                                numberOfHandle = cka_id_handle_max_keys;
-                            }
-                            else
-                            {
-                                findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
-                            }
+                            findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
 
                             session.FindObjectsInit(findAttributes);
 
