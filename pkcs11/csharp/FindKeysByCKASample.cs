@@ -11,7 +11,8 @@ namespace CADP.Pkcs11Sample
         //  Pre-requisites: keys should be created on CM
         //  Find keys using CKA_KeyType and print attributes sample
 
-        public const int max_keys = 50;
+        public int max_keys = 50;
+        public const int cka_id_handle_max_keys = 1000;
         public bool Run(object[] inputParams)
         {
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
@@ -24,6 +25,12 @@ namespace CADP.Pkcs11Sample
                 { 
                     string pin = Convert.ToString(inputParams[0]);
                     string keyType = Convert.ToString(inputParams[1]).ToUpper().Trim();
+                    string cka_idInput = null;
+                    if (inputParams.Length > 2 && inputParams[2] != null)
+                    {
+                        cka_idInput = Convert.ToString(inputParams[2]);
+                    }
+
                     CKK cka_keyType;
 
                     switch (keyType)
@@ -65,10 +72,18 @@ namespace CADP.Pkcs11Sample
 
                     List<IObjectAttribute> getAttributes;
 
-                    List<IObjectAttribute> findAttributes = new List<IObjectAttribute>
+                    List<IObjectAttribute> findAttributes = new List<IObjectAttribute>();
+
+                    // Add the CKA_ID attribute if the cka id input has value.
+                    if (!string.IsNullOrEmpty(cka_idInput))
                     {
-                        session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, cka_keyType)
-                    };        
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                        max_keys = cka_id_handle_max_keys;
+                    }
+                    else
+                    {
+                        findAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, cka_keyType));
+                    }
 
                     // Initialize searching
                     session.FindObjectsInit(findAttributes);

@@ -55,7 +55,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
     c. Compute message digest for a given input file.
     d. Encrypt and decrypt with GCM mode sample.
     e. Create a ECC key pair and sign the message sample.
-    j. Find keys using CKA_KeyType and print attributes sample.
+    j. Find keys using CKA_KeyType or CKA_ID and print attributes sample.
 ### Choices for the -o option:
      ECB ... ECB mode
      CBC ... CBC mode
