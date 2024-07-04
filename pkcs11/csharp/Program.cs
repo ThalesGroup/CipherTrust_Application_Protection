@@ -27,7 +27,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t i. Unwrap and import a key into key manager sample. ");
             Console.WriteLine("\t d. Encrypt and decrypt with GCM mode sample. ");
             Console.WriteLine("\t e. Create a ECC key pair and sign the message sample. ");
-            Console.WriteLine("\t j. Find keys using CKA_KeyType and print attributes sample.        Parameters: 1. -p pin -kt cka_keytype 2. -p pin -I cka_id");
+            Console.WriteLine("\t j. Find keys using CKA_KeyType or CKA_ID and print attributes sample.        Parameters: 1. -p pin -kt cka_keytype 2. -p pin -I cka_id");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -o option:");
             Console.WriteLine("\t ECB ... ECB mode");
