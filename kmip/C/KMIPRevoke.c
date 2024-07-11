@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     I_KS_Result result;
     int  argp = 0,revocationCode =0;
     char *path = NULL,*uniqueID_p = NULL,*revocationMsg = NULL;
-    time_t compromise_Occurence_Date = NULL;
+    time_t compromise_Occurence_Date = 0;
 
     if (argc < 4)
         usage(); // exit
