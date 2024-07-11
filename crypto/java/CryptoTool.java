@@ -432,11 +432,6 @@ public final class CryptoTool {
     		System.err.println("Missing algorithm name");
     		return false;
     	}
-    	if (iv == null && algName.indexOf("CBC") > 0) {
-    		iv = new byte[16];
-    		for (int i = 0; i < iv.length; i++) 
-    			iv[i] = 0x00;
-    	}
     	if (iv != null && algName.indexOf("CBC") < 0) {
     		System.err.println("IV is not required for this algorithm.");
     		return false;
