@@ -44,6 +44,14 @@ void addWrappingMethodType (I_KO_AttributeList attrList,int value);
 void addBlockCipherMode (I_KO_AttributeList attrList,int value);
 void addEncodingOption(I_KO_AttributeList attrList, int value);
 
+void addCryptographicUsageMask(I_KO_AttributeList attrList);
+void addRSACryptographicAlgorithm(I_KO_AttributeList attrList);
+void addCryptographicUsageMask_public(I_KO_AttributeList attrList);
+void addCryptographicUsageMask_private(I_KO_AttributeList attrList);
+void printAttributeValue(I_KS_Attribute *attribute);
+void addRSACryptographicLength(I_KO_AttributeList attrList);
+void addOffset(I_KO_AttributeList attrList, int value);
+
 I_KS_Result batch_Create(BatchHandle hBatch, char *keyname1,char *keyname2,I_KT_ObjectType obj_type,I_T_UINT *opid_Create);
 I_KS_Result batch_Register(BatchHandle hBatch, char *keyname1,char *keyname2,I_KT_ObjectType obj_type,I_T_UINT *opid_Register);
 I_KS_Result batch_Locate(BatchHandle hBatch,char *name,I_T_UINT *opid_Locate);
