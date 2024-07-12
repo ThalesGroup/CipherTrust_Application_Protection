@@ -1,4 +1,3 @@
-package example;
 
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -34,34 +33,53 @@ import com.ingrian.security.nae.IngrianProvider.Builder;
  * to protect sensitive data in a column. This example uses
  * Format Preserve Encryption (FPE) to maintain the original format of the data
  * so applications or business intelligence tools do not have to change in order
- * to use these columns.  
-*  
-*  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
-*  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
-*  Was tested with CM 2.11 & CADP 8.12.6 or above.  
+ * to use these columns. There is no need to deploy a function to run it.
+ * 
+ * Note: This source code is only to be used for testing and proof of concepts.
+ * Not production ready code. Was not tested for all possible data sizes and
+ * combinations of encryption algorithms and IV, etc. Was tested with CM 2.14 &
+ * CADP 8.15.0.001 For more information on CADP see link below.   
 *  For more details on how to write Redshift UDF's please see
 *  https://docs.aws.amazon.com/redshift/latest/dg/udf-creating-a-lambda-sql-udf.html#udf-lambda-json
 *     
  */
 
-public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler {
-	private static final Logger logger = Logger.getLogger(ThalesAWSRedshiftCADPNbrDecryptFPE.class.getName());
+public class ThalesAWSRedshiftCADPNbrEncryptFPETester implements RequestStreamHandler {
+	private static final Logger logger = Logger.getLogger(ThalesAWSRedshiftCADPNbrEncryptFPETester.class.getName());
 	private static final Gson gson = new Gson();
+
 	/**
-	* Returns an String that will be the encrypted value
-	* <p>
-	* Examples:
-	* select thales_token_cadp_char(eventname) as enceventname  , eventname from event where len(eventname) > 5
-	*
-	* @param is any column in the database or any value that needs to be encrypted.  Mostly used for ELT processes.  
-	*/
+	 * Returns an String that will be the encrypted value
+	 * <p>
+	 * Examples: select thales_token_cadp_char(eventname) as enceventname ,
+	 * eventname from event where len(eventname) > 5
+	 *
+	 * @param is any column in the database or any value that needs to be encrypted.
+	 *           Mostly used for ELT processes.
+	 */
+	public static void main(String[] args) throws Exception {
+
+		ThalesAWSRedshiftCADPNbrEncryptFPETester nw2 = new ThalesAWSRedshiftCADPNbrEncryptFPETester();
+
+		String request = "{\r\n" + "  \"request_id\" : \"23FF1F97-F28A-44AA-AB67-266ED976BF40\",\r\n"
+				+ "  \"cluster\" : \"arn:aws:redshift:xxxx\",\r\n" + "  \"user\" : \"adminuser\",\r\n"
+				+ "  \"database\" : \"db1\",\r\n" + "  \"external_function\": \"public.foo\",\r\n"
+				+ "  \"query_id\" : 5678234,\r\n" + "  \"num_records\" : 5,\r\n" + "  \"arguments\" : [\r\n"
+				+ "     [ \"5678234\"],\r\n" + "     [ \"45345366345\"],\r\n"
+				+ "     [ \"2342342342424\"],\r\n" + "     [ \"2424\"],\r\n"
+				+ "     [ \"234234234255667777\"]\r\n" + "   ]\r\n" + " }";
+
+		String response = null;
+		String testJson = null;
+		nw2.handleRequest(request, null, null);
+
+	}
 	
-	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-
-
-
+	public void handleRequest(String inputStream, String outputStream, Context context)
+			throws IOException, CustomException {
 		// context.getLogger().log("Input: " + inputStream);
-		String input = IOUtils.toString(inputStream, "UTF-8");
+		// String input = IOUtils.toString(inputStream, "UTF-8");
+		String input = inputStream;
 		JsonParser parser = new JsonParser();
 		NAESession session = null;
 		int statusCode = 200;
@@ -96,7 +114,7 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		String nbr_of_rows_json_str = nbr_of_rows_json.getAsJsonPrimitive().toString();
 		int nbr_of_rows_json_int = new Integer(nbr_of_rows_json_str);
 
-		//System.out.println("number of records " + nbr_of_rows_json_str);
+		// System.out.println("number of records " + nbr_of_rows_json_str);
 
 		String keyName = "testfaas";
 		String userName = System.getenv("CMUSER");
@@ -126,7 +144,6 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		String userSetLookupIP = System.getenv("usersetlookupip");
 		boolean usersetlookupbool = usersetlookup.equalsIgnoreCase("yes");
 
-
 		try {
 
 			// Serialization
@@ -151,11 +168,14 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 				usersetlookupbool = false;
 			}
 
-			//System.setProperty("com.ingrian.security.nae.NAE_IP.1", "10.20.1.9");
-			System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
-					"CADP_for_JAVA.properties");
-			IngrianProvider builder = new Builder().addConfigFileInputStream(
-					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
+			// System.setProperty("com.ingrian.security.nae.NAE_IP.1", "10.20.1.9");
+			// System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
+			// "CADP_for_JAVA.properties");
+			 System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
+			 "D:\\product\\Build\\IngrianNAE-134.properties");
+			// IngrianProvider builder = new Builder().addConfigFileInputStream(
+			// getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
+
 
 			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
@@ -167,16 +187,16 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
 					.build();
 
-			Cipher decryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+			Cipher encryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+			String encdata = "";
 			// initialize cipher to encrypt.
-			decryptCipher.init(Cipher.DECRYPT_MODE, key, param);
-
-			redshiftreturnstring = doTransform(decryptCipher, redshiftdata, redshiftreturndata);
-
+			encryptCipher.init(Cipher.ENCRYPT_MODE, key, param);
+			redshiftreturnstring = doTransform(encryptCipher, redshiftdata, redshiftreturndata);
 
 		} catch (Exception e) {
-			String sensitive = null;
 
+			String sensitive = null;
+			int sensitiveint = 0;
 			System.out.println("in exception with " + e.getMessage());
 			if (returnciphertextbool) {
 				if (e.getMessage().contains("1401")
@@ -234,11 +254,22 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 				session.closeSession();
 			}
 		}
-		//System.out.println("string  = " + redshiftreturnstring);
-		outputStream.write(new Gson().toJson(redshiftreturnstring).getBytes());
+System.out.println(new Gson().toJson(redshiftreturnstring).getBytes());
+	//	outputStream.write(new Gson().toJson(redshiftreturnstring).getBytes());
 
 	}
-
+	public static boolean isNumeric(String strNum) {
+	    if (strNum == null) {
+	        return false;
+	    }
+	    try {
+	        double d = Double.parseDouble(strNum);
+	    } catch (NumberFormatException nfe) {
+	        return false;
+	    }
+	    return true;
+	}
+	
 	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
 			String userSetLookupIP) throws Exception {
 
@@ -252,12 +283,13 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		return founduserinuserset;
 
 	}
-	
+
 	public String doTransform(Cipher encryptCipher, JsonArray redshiftdata, StringBuffer redshiftreturndata)
 			throws IllegalBlockSizeException, BadPaddingException {
-		String decdata = "";
+		String encdata = "";
 		String redshiftreturnstring = null;
 		String sensitive = null;
+		int sensitiveint = 0;
 		for (int i = 0; i < redshiftdata.size(); i++) {
 			JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
 
@@ -267,38 +299,40 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 					sensitive = element.getAsString();
 					if (sensitive.isEmpty() || sensitive.length() < 2) {
 						if (sensitive.isEmpty()) {
-							JsonElement elementforNull = new JsonPrimitive("null");
-							sensitive = elementforNull.getAsJsonPrimitive().toString();
+							JsonElement elementforNull = new JsonPrimitive(0);
+							//sensitive = elementforNull.getAsJsonPrimitive().toString();
+							sensitiveint = elementforNull.getAsJsonPrimitive().getAsInt();
 						} else {
-							sensitive = element.getAsJsonPrimitive().toString();
+							sensitiveint = element.getAsJsonPrimitive().getAsInt();
+							//sensitive = element.getAsJsonPrimitive().toString();
 						}
-						decdata = sensitive;
+						//encdata = sensitive;
 					} else {
-						if (sensitive.equalsIgnoreCase("null")) {
-							sensitive = element.getAsJsonPrimitive().toString();
-							decdata = sensitive;
-						} else {
-							sensitive = element.getAsJsonPrimitive().toString();
+						    //sensitiveint = element.getAsJsonPrimitive().getAsInt();
+						sensitive = element.getAsString();
+							//sensitive = element.getAsJsonPrimitive().toString();
 							byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
-							decdata = new String(outbuf);
+							encdata = new String(outbuf);
+							sensitiveint =  Integer.parseInt(encdata);
 
-							
-						}
+							System.out.println("Sensitive data: " + sensitive);
 					}
 				} else {
-					JsonElement elementforNull = new JsonPrimitive("null");
-					sensitive = elementforNull.getAsJsonPrimitive().toString();
+					JsonElement elementforNull = new JsonPrimitive(0);
+					//sensitive = elementforNull.getAsJsonPrimitive().toString();
+					sensitiveint = elementforNull.getAsJsonPrimitive().getAsInt();
 					System.out.println("Sensitive data is null or empty.");
-					decdata = sensitive;
+					//encdata = sensitive;
 				}
 			} else {
-				JsonElement elementforNull = new JsonPrimitive("null");
-				sensitive = elementforNull.getAsJsonPrimitive().toString();
+				JsonElement elementforNull = new JsonPrimitive(0);
+				//sensitive = elementforNull.getAsJsonPrimitive().toString();
+				sensitiveint = elementforNull.getAsJsonPrimitive().getAsInt();
 				System.out.println("redshiftrow  is null or empty.");
-				decdata = sensitive;
+				//encdata = sensitive;
 			}
 
-			redshiftreturndata.append(decdata);
+			redshiftreturndata.append(sensitiveint);
 			if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
 				continue;
 			else
@@ -313,7 +347,6 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		return redshiftreturnstring;
 
 	}
-	
 
 	public String formatReturnValue(int statusCode)
 
@@ -336,4 +369,9 @@ public class ThalesAWSRedshiftCADPNbrDecryptFPE implements RequestStreamHandler 
 		return redshiftreturndata.toString();
 	}
 
+	@Override
+	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
 }

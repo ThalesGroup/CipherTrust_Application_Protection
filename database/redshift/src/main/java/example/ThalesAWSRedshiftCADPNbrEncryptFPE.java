@@ -35,7 +35,7 @@ import com.ingrian.security.nae.IngrianProvider.Builder;
  * to protect sensitive data in a column. This example uses
  * Format Preserve Encryption (FPE) to maintain the original format of the data
  * so applications or business intelligence tools do not have to change in order
- * to use these columns. There is no need to deploy a function to run it.
+ * to use these columns.  
  * 
  * Note: This source code is only to be used for testing and proof of concepts.
  * Not production ready code. Was not tested for all possible data sizes and
@@ -114,7 +114,7 @@ public class ThalesAWSRedshiftCADPNbrEncryptFPE implements RequestStreamHandler 
 		// 1 will return cipher text
 		// null will return error.
 		String returnciphertextforuserwithnokeyaccess = System.getenv("returnciphertextforuserwithnokeyaccess");
-		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.matches("-?\\d+"); // Using regular
+		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.equalsIgnoreCase("yes");
 
 		// usersetlookup = should a userset lookup be done on the user from Big Query? 1
 		// = true 0 = false.
@@ -125,7 +125,7 @@ public class ThalesAWSRedshiftCADPNbrEncryptFPE implements RequestStreamHandler 
 		// is
 		// the userset in CM but could be a memcache or other in memory db.
 		String userSetLookupIP = System.getenv("usersetlookupip");
-		boolean usersetlookupbool = usersetlookup.matches("-?\\d+");
+		boolean usersetlookupbool = usersetlookup.equalsIgnoreCase("yes");
 
 		try {
 
@@ -139,26 +139,14 @@ public class ThalesAWSRedshiftCADPNbrEncryptFPE implements RequestStreamHandler 
 			redshiftreturndata.append(" \"results\": [");
 
 			if (usersetlookupbool) {
-				// Convert the string to an integer
-				int num = Integer.parseInt(usersetlookup);
-				// make sure cmuser is in Application Data Protection Clients Group
-				if (num >= 1) {
-					boolean founduserinuserset = true;
-					try {
-						founduserinuserset = findUserInUserSet(redshiftuserstr, userName, password, usersetID,
-								userSetLookupIP);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					// System.out.println("Found User " + founduserinuserset);
-					if (!founduserinuserset)
-						throw new CustomException("1001, User Not in User Set", 1001);
+			// make sure cmuser is in Application Data Protection Clients Group
 
-				}
+				boolean founduserinuserset = findUserInUserSet(redshiftuserstr, userName, password, usersetID,
+						userSetLookupIP);
+				// System.out.println("Found User " + founduserinuserset);
+				if (!founduserinuserset)
+					throw new CustomException("1001, User Not in User Set", 1001);
 
-				else
-					usersetlookupbool = false;
 			} else {
 				usersetlookupbool = false;
 			}
@@ -295,7 +283,7 @@ public class ThalesAWSRedshiftCADPNbrEncryptFPE implements RequestStreamHandler 
 							byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
 							encdata = new String(outbuf);
 
-							System.out.println("Sensitive data: " + sensitive);
+					
 						}
 					}
 				} else {

@@ -6,11 +6,13 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigInteger;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -19,14 +21,13 @@ import com.google.gson.JsonObject;
 
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.ingrian.security.nae.AbstractNAECipher;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec;
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.NAEKey;
+import com.ingrian.security.nae.NAESecureRandom;
 import com.ingrian.security.nae.NAESession;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.IngrianProvider.Builder;
-import com.ingrian.security.nae.NAECipher;
 
 /*
  * This test app to test the logic for a Redshift Database User Defined
@@ -35,37 +36,18 @@ import com.ingrian.security.nae.NAECipher;
  * Format Preserve Encryption (FPE) to maintain the original format of the data
  * so applications or business intelligence tools do not have to change in order
  * to use these columns.  
- * 
- * Note: This source code is only to be used for testing and proof of concepts.
- * Not production ready code. Was not tested for all possible data sizes and
- * combinations of encryption algorithms and IV, etc. Was tested with CM 2.14 &
- * CADP 8.15.0.001 For more information on CADP see link below.   
+*  
+*  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
+*  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
+*  Was tested with CM 2.11 & CADP 8.12.6 or above.  
 *  For more details on how to write Redshift UDF's please see
 *  https://docs.aws.amazon.com/redshift/latest/dg/udf-creating-a-lambda-sql-udf.html#udf-lambda-json
 *     
-Notes: This example uses the CADP bulk API.  
-Maximum elements supported are 10000 and each data element must be of size <= 3500. If the data
-element has Unicode characters then the supported size limit would be 1750 characters
-
-Size of spec array should be same as the number of elements if user wants to use separate spec values
-for each data index.  Spec array of size equal to data size is passed. Each spec array index represents corresponding data
-index.
- * 
- *@author  mwarner
- * 
  */
 
-public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHandler {
-	private static final Logger logger = Logger.getLogger(ThalesAWSRedshiftCADPCharEncryptBulkFPE.class.getName());
+public class ThalesAWSRedshiftCADPNbrDecryptFPEdNbr implements RequestStreamHandler {
+	private static final Logger logger = Logger.getLogger(ThalesAWSRedshiftCADPNbrDecryptFPEdNbr.class.getName());
 	private static final Gson gson = new Gson();
-	
-	private static byte[][] data;
-	private static AlgorithmParameterSpec[] spec;
- 
-
-	private static int BATCHLIMIT = 10000;
-	
-	
 	/**
 	* Returns an String that will be the encrypted value
 	* <p>
@@ -76,35 +58,29 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 	*/
 	
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
- 
+
+
+
+		// context.getLogger().log("Input: " + inputStream);
 		String input = IOUtils.toString(inputStream, "UTF-8");
 		JsonParser parser = new JsonParser();
+		NAESession session = null;
 		int statusCode = 200;
 
 		String redshiftreturnstring = null;
 		StringBuffer redshiftreturndata = new StringBuffer();
 
 		boolean status = true;
-		int numberofchunks = 0;
+
 		JsonObject redshiftinput = null;
 		JsonElement rootNode = parser.parse(input);
 		JsonArray redshiftdata = null;
 		String redshiftuserstr = null;
 
-		Map<Integer, String> encryptedErrorMapTotal = new HashMap<Integer, String>();
-		Map<Integer, String> encryptedErrorMap = new HashMap<Integer, String>();
-		// https://www.baeldung.com/java-aws-lambda
-
-		StringBuffer redshiftreturndatasb = new StringBuffer();
-		StringBuffer redshiftreturndatasc = new StringBuffer();
-
-		NAESession session = null;
-
 		if (rootNode.isJsonObject()) {
 			redshiftinput = rootNode.getAsJsonObject();
 			if (redshiftinput != null) {
 				redshiftdata = redshiftinput.getAsJsonArray("arguments");
-
 				JsonPrimitive userjson = redshiftinput.getAsJsonPrimitive("user");
 				redshiftuserstr = userjson.getAsJsonPrimitive().toString();
 				redshiftuserstr = redshiftuserstr.replace("\"", "");
@@ -113,7 +89,7 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 
 			}
 		} else {
-			System.out.println("Bad data from Redshift.");
+			System.out.println("Bad data from snowflake.");
 
 		}
 
@@ -121,9 +97,8 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 		String nbr_of_rows_json_str = nbr_of_rows_json.getAsJsonPrimitive().toString();
 		int nbr_of_rows_json_int = new Integer(nbr_of_rows_json_str);
 
-		System.out.println("number of records " + nbr_of_rows_json_str);
+		//System.out.println("number of records " + nbr_of_rows_json_str);
 
-		// apiuser
 		String keyName = "testfaas";
 		String userName = System.getenv("CMUSER");
 		String password = System.getenv("CMPWD");
@@ -151,31 +126,18 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 		// the userset in CM but could be a memcache or other in memory db.
 		String userSetLookupIP = System.getenv("usersetlookupip");
 		boolean usersetlookupbool = usersetlookup.equalsIgnoreCase("yes");
-		int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
-		if (batchsize >= BATCHLIMIT)
-			batchsize = BATCHLIMIT;
-		spec = new FPEParameterAndFormatSpec[batchsize];
-		data = new byte[batchsize][];
+
 
 		try {
 
-			System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
-					"CADP_for_JAVA.properties");
-			IngrianProvider builder = new Builder().addConfigFileInputStream(
-					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
-			session = NAESession.getSession(userName, password.toCharArray());
-			NAEKey key = NAEKey.getSecretKey(keyName, session);
-
-			int row_number = 0;
-
 			// Serialization
-			redshiftreturndatasb.append("{ \"success\":");
-			redshiftreturndatasb.append(status);
-			redshiftreturndatasb.append(",");
-			redshiftreturndatasb.append(" \"num_records\":");
-			redshiftreturndatasb.append(nbr_of_rows_json_int);
-			redshiftreturndatasb.append(",");
-			redshiftreturndatasb.append(" \"results\": [");
+			redshiftreturndata.append("{ \"success\":");
+			redshiftreturndata.append(status);
+			redshiftreturndata.append(",");
+			redshiftreturndata.append(" \"num_records\":");
+			redshiftreturndata.append(nbr_of_rows_json_int);
+			redshiftreturndata.append(",");
+			redshiftreturndata.append(" \"results\": [");
 
 			if (usersetlookupbool) {
 			// make sure cmuser is in Application Data Protection Clients Group
@@ -190,118 +152,68 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 				usersetlookupbool = false;
 			}
 
-			String algorithm = "FPE/FF1/CARD62";
+			//System.setProperty("com.ingrian.security.nae.NAE_IP.1", "10.20.1.9");
+			System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
+					"CADP_for_JAVA.properties");
+			IngrianProvider builder = new Builder().addConfigFileInputStream(
+					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
 
+			session = NAESession.getSession(userName, password.toCharArray());
+			NAEKey key = NAEKey.getSecretKey(keyName, session);
+
+			String algorithm = "FPE/FF1/CARD10";
+			// String algorithm = "AES/CBC/PKCS5Padding";
 			String tweakAlgo = null;
 			String tweakData = null;
-			int totalRowsLeft = redshiftdata.size();
-			AbstractNAECipher encryptCipher = NAECipher.getInstanceForBulkData(algorithm, "IngrianProvider");
-			
-			encryptCipher.init(Cipher.ENCRYPT_MODE, key, spec[0]);
-			
-			int i = 0;
-			int index = 0;
-			int count = 0;
-			boolean newchunk = true;
-			int dataIndex = 0;
-			int specIndex = 0;
+			FPEParameterAndFormatSpec param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
+					.build();
 
-			while (i < redshiftdata.size()) {
-				index = 0;
+			Cipher decryptCipher = Cipher.getInstance(algorithm, "IngrianProvider");
+			// initialize cipher to encrypt.
+			decryptCipher.init(Cipher.DECRYPT_MODE, key, param);
 
-				if (newchunk) {
-					if (totalRowsLeft < batchsize) {
-						spec = new FPEParameterAndFormatSpec[totalRowsLeft];
-						data = new byte[totalRowsLeft][];
+			redshiftreturnstring = doTransform(decryptCipher, redshiftdata, redshiftreturndata);
 
-					} else {
-						spec = new FPEParameterAndFormatSpec[batchsize];
-						data = new byte[batchsize][];
 
-					}
-					newchunk = false;
-				}
+		} catch (Exception e) {
+			String sensitive = null;
 
-				JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
-
-				JsonPrimitive redshiftcolumn = redshiftrow.get(0).getAsJsonPrimitive();
-				//System.out.print(redshiftcolumn + " ");
-				String sensitive = redshiftcolumn.getAsJsonPrimitive().toString();
-				data[dataIndex++] = sensitive.getBytes();
-				spec[specIndex++] = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).build();
-
-				if (count == batchsize - 1) {
-
-				// Map to store exceptions while encryption
-					encryptedErrorMap = new HashMap<Integer, String>();
-
-					// performing bulk operation
-					byte[][] encryptedData = encryptCipher.doFinalBulk(data, spec, encryptedErrorMap);
-
-					for (Map.Entry<Integer, String> entry : encryptedErrorMap.entrySet()) {
-						Integer mkey = entry.getKey();
-						String mvalue = entry.getValue();
-						encryptedErrorMapTotal.put(mkey, mvalue);
-					}
-
-					for (int enc = 0; enc < encryptedData.length; enc++) {
-
-						redshiftreturndatasc.append(new String(encryptedData[enc]));
-						redshiftreturndatasc.append(",");
-						index++;
-
-					}
-
-					numberofchunks++;
-					newchunk = true;
-					count = 0;
-					dataIndex = 0;
-					specIndex = 0;
-				} else
-					count++;
-
-				totalRowsLeft--;
-				i++;
-			}
-
-			if (count > 0) {
-				numberofchunks++;
-				byte[][] encryptedData = encryptCipher.doFinalBulk(data, spec, encryptedErrorMap);
-				for (int enc = 0; enc < encryptedData.length; enc++) {
-					redshiftreturndatasc.append(new String(encryptedData[enc]));
-					redshiftreturndatasc.append(",");
-					index++;
-					totalRowsLeft--;
-
-				}
-			}
-
-			redshiftreturndatasc.append("] ");
-			redshiftreturndatasb.append(redshiftreturndatasc);
-			redshiftreturndatasb.append("}");
-
-			redshiftreturnstring = new String(redshiftreturndatasb);
-
-		} catch (
-
-		Exception e) {
 			System.out.println("in exception with " + e.getMessage());
 			if (returnciphertextbool) {
-				if (e.getMessage().contains("1401") || (e.getMessage().contains("1001") || (e.getMessage().contains("1002"))) ) {
+				if (e.getMessage().contains("1401")
+						|| (e.getMessage().contains("1001") || (e.getMessage().contains("1002")))) {
 
 					for (int i = 0; i < redshiftdata.size(); i++) {
 						JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
+						if (redshiftrow != null && redshiftrow.size() > 0) {
+							JsonElement element = redshiftrow.get(0);
+							if (element != null && !element.isJsonNull()) {
+								sensitive = element.getAsString();
+								if (sensitive.isEmpty()) {
+									JsonElement elementforNull = new JsonPrimitive("null");
+									sensitive = elementforNull.getAsJsonPrimitive().toString();
+								} else {
+									sensitive = element.getAsJsonPrimitive().toString();
+								}
 
-						JsonPrimitive redshiftcolumn = redshiftrow.get(0).getAsJsonPrimitive();
+							} else {
+								JsonElement elementforNull = new JsonPrimitive("null");
+								sensitive = elementforNull.getAsJsonPrimitive().toString();
+								System.out.println("Sensitive data is null or empty.");
+							}
+						} else {
+							System.out.println("redshiftrow  is null or empty.");
 
-						String sensitive = redshiftcolumn.getAsJsonPrimitive().toString();
+						}
 
 						redshiftreturndata.append(sensitive);
 						if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
 							continue;
 						else
 							redshiftreturndata.append(",");
+
 					}
+
 					redshiftreturndata.append("]}");
 
 					redshiftreturnstring = new String(redshiftreturndata);
@@ -317,22 +229,15 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 				redshiftreturnstring = formatReturnValue(statusCode);
 				e.printStackTrace(System.out);
 			}
-		}
 
-		finally {
+		} finally {
 			if (session != null) {
 				session.closeSession();
 			}
 		}
-		int lastIndex = redshiftreturnstring.lastIndexOf(",");
-		// Replace the comma before the closing square bracket if it exists
-		if (lastIndex != -1) {
-			redshiftreturnstring = redshiftreturnstring.substring(0, lastIndex)
-					+ redshiftreturnstring.substring(lastIndex + 1);
-		}
-		System.out.println("string  = " + redshiftreturnstring);
-		System.out.println("numberofchunks  = " + numberofchunks);
+		//System.out.println("string  = " + redshiftreturnstring);
 		outputStream.write(new Gson().toJson(redshiftreturnstring).getBytes());
+
 	}
 
 	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
@@ -348,7 +253,79 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 		return founduserinuserset;
 
 	}
+	
+	public String doTransform(Cipher encryptCipher, JsonArray redshiftdata, StringBuffer redshiftreturndata)
+			throws IllegalBlockSizeException, BadPaddingException {
+		String decdata = "";
+		String redshiftreturnstring = null;
+		String sensitive = null;
+		BigInteger sensitiveBI = new BigInteger("0");
 
+		for (int i = 0; i < redshiftdata.size(); i++) {
+			JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
+
+			if (redshiftrow != null && redshiftrow.size() > 0) {
+				JsonElement element = redshiftrow.get(0);
+				if (element != null && !element.isJsonNull()) {
+					sensitive = element.getAsString();
+					if (sensitive.isEmpty() || sensitive.length() < 2) {
+						if (sensitive.isEmpty()) {
+							JsonElement elementforNull = new JsonPrimitive(0);
+							sensitiveBI = new BigInteger("0");
+						} else {
+							boolean isvalid = isNumeric(sensitive);
+							if (isvalid)
+								sensitiveBI = element.getAsJsonPrimitive().getAsBigInteger();
+							else
+								sensitiveBI = new BigInteger("0");
+						}
+
+					} else {
+
+						sensitive = element.getAsString();
+
+						byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
+						decdata = new String(outbuf);
+
+						sensitiveBI = new BigInteger(decdata);
+					}
+				} else {
+					sensitiveBI = new BigInteger("0");
+
+				}
+			} else {
+				sensitiveBI = new BigInteger("0");
+
+			}
+			redshiftreturndata.append(sensitiveBI);
+
+			if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
+				continue;
+			else
+				redshiftreturndata.append(",");
+
+		}
+
+		redshiftreturndata.append("]}");
+
+		redshiftreturnstring = new String(redshiftreturndata);
+
+		return redshiftreturnstring;
+
+	}
+	
+	public static boolean isNumeric(String strNum) {
+		if (strNum == null) {
+			return false;
+		}
+		try {
+			double d = Double.parseDouble(strNum);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
+	
 	public String formatReturnValue(int statusCode)
 
 	{
@@ -359,11 +336,13 @@ public class ThalesAWSRedshiftCADPCharEncryptBulkFPE implements RequestStreamHan
 		redshiftreturndata.append(false);
 		redshiftreturndata.append(" \"num_records\":");
 		redshiftreturndata.append(0);
+		// redshiftreturndata.append(nbr_of_rows_json_int);
 		redshiftreturndata.append(",");
 		redshiftreturndata.append(" \"error_msg\":");
 		redshiftreturndata.append(errormsg);
 		redshiftreturndata.append(",");
 		redshiftreturndata.append(" \"results\": [] }");
+		// outputStream.write(redshiftreturnstring.getBytes());
 
 		return redshiftreturndata.toString();
 	}

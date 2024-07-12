@@ -73,7 +73,6 @@ public class CMUserSetHelper {
 		String cmip = args[2];
 		String usersetid = args[3];
 		String filePath = args[4];
-		// CMUserSetHelper("716f01a6-5cab-4799-925a-6dc2d8712fc1","20.241.70.238");
 		// CMUserSetHelper("32d89a8d-efac-4c50-9b53-f51d0c03413e",
 		CMUserSetHelper cmusersetHelper = new CMUserSetHelper(usersetid, cmip);
 		int totalrecords = 0;
