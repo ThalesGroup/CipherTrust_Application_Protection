@@ -1,8 +1,11 @@
+
+
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>Thales</groupId>
-  <artifactId>CADP-SNOW-GCP-Tokenize</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>CADP-SNOW-GCP-UDF</artifactId>
+  <version>0.0.2-SNAPSHOT</version>
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
@@ -11,25 +14,29 @@
 		<bouncycastle.version>1.70</bouncycastle.version>
 		<org.apache.commons.codec.version>1.10
 		</org.apache.commons.codec.version>
-		<guava.version>32.0.0-jre</guava.version>
+		<guava.version>31.1-jre</guava.version>
 		<gson.version>2.9.0</gson.version>
 		<log4j-api.version>2.17.2</log4j-api.version>
 		<log4j-core.version>2.17.2</log4j-core.version>
 		<jar.version>.000</jar.version>
 	</properties>
-	<name>CADP-GCP-Function</name>
+	<name>CADP-SNOW-GCP-UDF</name>
 	<dependencies>
 			<dependency>
 			<groupId>io.github.thalescpl-io.cadp</groupId>
 			<artifactId>CADP_for_JAVA</artifactId>
-			<version>8.13.1.000</version>
+			<version>8.16.0.000</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.12.0</version>
 		</dependency>
-
+				<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.10.0</version>
+		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -128,14 +135,6 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>3.0.1</version>
-				<executions>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
