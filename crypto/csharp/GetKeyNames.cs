@@ -69,10 +69,11 @@ namespace CADP.NetCoreNaeSamples
                 var highestPackage = Directory.GetDirectories(cadpPackage).Select(x => Path.GetFileName(x)).OrderByDescending(e => new Version(e)).First();
                 propertyFilePath = Path.Combine(cadpPackage, highestPackage, "content", "CADP.NETCore_Properties.xml");
 
-                /* Create a -+---new NAE Session using the username and password */
+               
                 session = new NaeSession(user, pass, propertyFilePath);
                 Console.WriteLine("NaeSession created successfully.");
-
+				
+				// Adding the custom attributes on the basis of which the keys would be fetched. 
                 NaeCustomAttr customAttribute1 = new NaeCustomAttr();
                 customAttribute1.attrKey = "KeyType";
                 customAttribute1.attrValue = "AES";
@@ -104,7 +105,6 @@ namespace CADP.NetCoreNaeSamples
                         Console.WriteLine(keyName);
                     }
                 }
-                else Console.WriteLine("No Objects Found");
 
                 Console.WriteLine();
 
