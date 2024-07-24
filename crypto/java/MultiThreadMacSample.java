@@ -120,7 +120,6 @@ public class MultiThreadMacSample extends Thread{
 		} catch (Exception e) {
 			System.out.println("Got exception: " + e);
 			e.printStackTrace();
-                        throw e;
 		}
 	}
 }

@@ -22,7 +22,7 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to encrypt/decrypt a file using RSA Algorithm.
- * 
+ * Use RSA key size greater than 1024 for this sample.
  * To encrypt the file: 
  *
  * 1) Generate a symmetric AES-256 key and IV which will be used to encrypt the input file.

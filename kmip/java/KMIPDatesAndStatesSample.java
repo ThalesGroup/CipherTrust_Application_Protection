@@ -122,8 +122,8 @@ public class KMIPDatesAndStatesSample
             System.out.println(defaultAttributes);
             gotState = key.getKMIPAttributes(getState);
             System.out.println("State = " + gotState.getState());
-            System.out.println("Dectivation Date  = " + ( ( gotState.getDate(KMIPAttribute.DeactivationDate) != null ) ? 
-                    sdf.format(gotState.getDate(KMIPAttribute.ActivationDate).getTime()) : "null"));
+            System.out.println("Deactivation Date  = " + ( ( gotState.getDate(KMIPAttribute.DeactivationDate) != null ) ? 
+                    sdf.format(gotState.getDate(KMIPAttribute.DeactivationDate).getTime()) : "null"));
   
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
