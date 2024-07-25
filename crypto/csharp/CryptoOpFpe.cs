@@ -29,6 +29,13 @@ namespace CADP.NetCoreNaeSamples
             string pass = string.Empty;
             ConsoleKeyInfo consoleKeyInfo;
 
+            // FPE Cardinality with Nae fpe Cardinality , Cardinality in integer value as key and the respective block size as value.
+            // NOTE: The Block size for Cardinality as Unicode needs to be calculated refer doc.
+            var FPECardinalityBlockSize = new Dictionary<NaeFpe.Cardinality, KeyValuePair<int, int>>();
+            FPECardinalityBlockSize.Add(NaeFpe.Cardinality.CARD10, new KeyValuePair<int, int>(10, 56));
+            FPECardinalityBlockSize.Add(NaeFpe.Cardinality.CARD26, new KeyValuePair<int, int>(26, 40));
+            FPECardinalityBlockSize.Add(NaeFpe.Cardinality.CARD62, new KeyValuePair<int, int>(62, 32));
+            
             do
             {
                 consoleKeyInfo = Console.ReadKey(true);
@@ -149,10 +156,17 @@ namespace CADP.NetCoreNaeSamples
                 /* For FPE set IV only when data size is greater than its block size eg CARD10: 56, CARD26: 40, CARD62:32.
                  * UNICODE, the block size is calculated based on Cardinality. */
 
-                /*Set IV only when data size is more than 56 Bytes */
-                if (inputBytes.Length > 56)
+                /*Set IV only when data size is more than block size of the cardinality. */
+                var fpeCardinalitydata = FPECardinalityBlockSize[NaeFpe.Cardinality.CARD10];
+                if (inputBytes.Length > fpeCardinalitydata.Value)
                 {
-                    byte[] iv = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5 };
+                    byte[] iv = new byte[fpeCardinalitydata.Value];
+                    Random random = new Random();
+                    for (int i = 0; i < fpeCardinalitydata.Value; i++)
+                    {
+                        iv[i] = (byte)random.Next(0, fpeCardinalitydata.Key);
+                    }
+
                     key.IV = iv;
                 }
 
