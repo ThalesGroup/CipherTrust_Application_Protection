@@ -12,40 +12,40 @@ spec:
         run: {{.Values.runlabel}}
     spec:
       containers:
-        - image: {{.Values.deployment.crdpimage}}
-          name: {{.Values.deployment.crdpimagename}}
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: KEY_MANAGER_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{.Values.configuration.configmapname}}
-                  key: KEY_MANAGER_HOST
-            - name: SERVER_MODE
-              valueFrom:
-                configMapKeyRef:
-                    name: {{.Values.configuration.configmapname}}
-                    key: SERVER_MODE
-            - name: REGISTRATION_TOKEN
-              valueFrom:
-                configMapKeyRef:
-                    name: {{.Values.configuration.configmapname}}
-                    key: REGISTRATION_TOKEN
-            - name: CERT_VALUE
-              valueFrom:
-                secretKeyRef:
-                    name: {{.Values.configuration.secretname}}
-                    key: server.crt
-            - name: KEY_VALUE
-              valueFrom:
-                secretKeyRef:
-                    name: {{.Values.configuration.secretname}}
-                    key: server.key
-            - name: TRUSTED_CA
-              valueFrom:
-                secretKeyRef:
-                    name: {{.Values.configuration.secretname}}
-                    key: ca.crt
+      - image: {{.Values.deployment.crdpimage}}
+        name: {{.Values.deployment.crdpimagename}}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KEY_MANAGER_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{.Values.configuration.configmapname}}
+              key: KEY_MANAGER_HOST
+        - name: SERVER_MODE
+          valueFrom:
+            configMapKeyRef:
+                name: {{.Values.configuration.configmapname}}
+                key: SERVER_MODE
+        - name: REGISTRATION_TOKEN
+          valueFrom:
+            configMapKeyRef:
+                name: {{.Values.configuration.configmapname}}
+                key: REGISTRATION_TOKEN
+        - name: CERT_VALUE
+          valueFrom:
+            secretKeyRef:
+                name: {{.Values.configuration.secretname}}
+                key: server.crt
+        - name: KEY_VALUE
+          valueFrom:
+            secretKeyRef:
+                name: {{.Values.configuration.secretname}}
+                key: server.key
+        - name: TRUSTED_CA
+          valueFrom:
+            secretKeyRef:
+                name: {{.Values.configuration.secretname}}
+                key: ca.crt
 
   replicas: {{.Values.replicaCount}}
   selector:
