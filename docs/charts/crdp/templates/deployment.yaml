@@ -11,28 +11,14 @@ spec:
         labels:
           run: {{.Values.runlabel}}
      spec:
-     {{- with .Values.imagePullSecrets }}
-        imagePullSecrets:
-          {{- toYaml . | nindent 8 }}
-     {{- end }}
+     # {{- with .Values.imagePullSecrets }}
+     #   imagePullSecrets:
+     #     {{- toYaml . | nindent 8 }}
+     # {{- end }}
         containers:
           - image: {{.Values.deployment.crdpimage}}
             name: {{.Values.deployment.crdpimagename}}
             imagePullPolicy: IfNotPresent
-            # readinessProbe:
-            #   httpGet:
-            #     path: /healthz
-            #     port: 8990
-            #     scheme: HTTP
-            #   initialDelaySeconds: 10
-            #   periodSeconds: 5
-            # livenessProbe:
-            #   httpGet:
-            #     path: /liveness
-            #     port: 8990
-            #     scheme: HTTP
-            #   initialDelaySeconds: 10
-            #   periodSeconds: 10
             env:
             - name: KEY_MANAGER_HOST
               valueFrom:
