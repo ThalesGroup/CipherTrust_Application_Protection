@@ -6,25 +6,21 @@ metadata:
   name: crdp-deployment
 spec:
   template:
-     metadata:
-        name: {{.Values.deployment.name}}
-        labels:
-          run: {{.Values.runlabel}}
-     spec:
-     # {{- with .Values.imagePullSecrets }}
-     #   imagePullSecrets:
-     #     {{- toYaml . | nindent 8 }}
-     # {{- end }}
-        containers:
-          - image: {{.Values.deployment.crdpimage}}
-            name: {{.Values.deployment.crdpimagename}}
-            imagePullPolicy: IfNotPresent
-            env:
+    metadata:
+      name: {{.Values.deployment.name}}
+      labels:
+        run: {{.Values.runlabel}}
+    spec:
+      containers:
+        - image: {{.Values.deployment.crdpimage}}
+          name: {{.Values.deployment.crdpimagename}}
+          imagePullPolicy: IfNotPresent
+          env:
             - name: KEY_MANAGER_HOST
               valueFrom:
                 configMapKeyRef:
-                    name: {{.Values.configuration.configmapname}}
-                    key: KEY_MANAGER_HOST
+                  name: {{.Values.configuration.configmapname}}
+                  key: KEY_MANAGER_HOST
             - name: SERVER_MODE
               valueFrom:
                 configMapKeyRef:

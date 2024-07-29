@@ -3,7 +3,7 @@ entries:
   banking-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-29T09:11:36.4949214-04:00"
+    created: "2024-07-29T09:45:31.4331843-04:00"
     description: A Helm chart for Kubernetes
     digest: 1dde9cb06e2071aa818ee84fcb8fd85e9633a398e2f0a03af2016eafb49e04ac
     name: banking-api
@@ -14,9 +14,9 @@ entries:
   crdp:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-29T09:11:36.4981524-04:00"
+    created: "2024-07-29T09:45:31.4366164-04:00"
     description: A Helm chart for CRDP Container in Kubernetes
-    digest: ba5171aebe48be76d17f86184b6dfd4d5ba5786744036e94b3f333dd0156939b
+    digest: e317620ca13784b0096bc5aad21894a278d3f2f1a7f7ba629723d1d927f6d938
     name: crdp
     type: application
     urls:
@@ -25,7 +25,7 @@ entries:
   demo-cte-dpg-secrets-api:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-29T09:11:36.5101945-04:00"
+    created: "2024-07-29T09:45:31.4491364-04:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo Backend
     digest: 3ee2ce98d8aa08ac52effb27a8ce30d26b3d79cc1e30a2c7f1548d0631670d70
     name: demo-cte-dpg-secrets-api
@@ -36,7 +36,7 @@ entries:
   demo-cte-dpg-secrets-ui:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2024-07-29T09:11:36.523625-04:00"
+    created: "2024-07-29T09:45:31.4610676-04:00"
     description: Helm Chart for Thales CTE, DPG, and Secrets Management Demo UI
     digest: ca853dd9ef73e010cd29dd6789bbd0cb0803a436bd6373afffee4586ed663d9e
     name: demo-cte-dpg-secrets-ui
@@ -47,7 +47,7 @@ entries:
   dpg-quick-start:
   - apiVersion: v2
     appVersion: 1.2.0
-    created: "2024-07-29T09:11:36.5393447-04:00"
+    created: "2024-07-29T09:45:31.4728085-04:00"
     description: A Helm chart for running quick demo for DPG on Kubernetes
     digest: 77609bade22d176b22471f60e6d83a5da085fda37f75ce08578f90ea1c9d32e7
     name: dpg-quick-start
@@ -55,4 +55,4 @@ entries:
     urls:
     - https://thalesgroup.github.io/CipherTrust_Application_Protection/dpg-quick-start-1.0.0.tgz
     version: 1.0.0
-generated: "2024-07-29T09:11:36.4825338-04:00"
+generated: "2024-07-29T09:45:31.4197417-04:00"
