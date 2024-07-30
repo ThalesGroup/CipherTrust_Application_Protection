@@ -103,7 +103,9 @@ namespace CADP.NetCoreNaeSamples
 
                 //The nonce sizes supported by this instance: 12 bytes (96 bits).
                 //which should be a unique value for every operation with the same key.
-                byte[] nonce = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31 };
+                byte[] nonce = new byte[12];
+                Random random = new Random();
+                random.NextBytes(nonce);
 
                 try
                 {
