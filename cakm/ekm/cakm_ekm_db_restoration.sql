@@ -54,9 +54,9 @@ BEGIN
 	SET @cakm_prop_change = @prop_path + N'\cakm_ekm_config_change.exe';
 END
 
-SET @exec_prop_bkp_cmd = 'EXEC xp_cmdshell ''cp "' + @prop_file + '" "' + @prop_file_bkp + '"''';
-SET @exec_prop_cmd = 'EXEC xp_cmdshell ''cp "' + @prop_file_bkp + '" "' + @prop_file + '"''';
-SET @exec_rm_prop_bkp_cmd = 'EXEC xp_cmdshell ''rm "' + @prop_file_bkp + '"''';
+SET @exec_prop_bkp_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file + '" "' + @prop_file_bkp + '"''';
+SET @exec_prop_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file_bkp + '" "' + @prop_file + '"''';
+SET @exec_rm_prop_bkp_cmd = 'EXEC xp_cmdshell ''del "' + @prop_file_bkp + '"''';
 
 SET @exec_exec_uuid_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" UUID'';';
 SET @exec_exec_fp_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" FP'';';
