@@ -57,7 +57,6 @@ END
 SET @exec_prop_bkp_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file + '" "' + @prop_file_bkp + '"''';
 SET @exec_prop_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file_bkp + '" "' + @prop_file + '"''';
 SET @exec_rm_prop_bkp_cmd = 'EXEC xp_cmdshell ''del "' + @prop_file_bkp + '"''';
-
 SET @exec_exec_uuid_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" UUID'';';
 SET @exec_exec_fp_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" FP'';';
 
@@ -115,35 +114,43 @@ EXEC sp_executesql @alter_login;
 SET @drop_sql = '
 drop ASYMMETRIC KEY ' + QUOTENAME(@keyname) + ';';
 
-BEGIN TRY
-	PRINT 'Restoring DB';
+PRINT 'Restoring DB';
 	RESTORE DATABASE @dbname FROM DISK = @backupp WITH REPLACE;
-    PRINT 'Restore successful.';
-END TRY
-BEGIN CATCH
-    PRINT 'Restore failed. Error: ' + CONVERT(VARCHAR(500), ERROR_MESSAGE());
-	PRINT "Dropping Asymmetric Key"
-	--PRINT @drop_sql;
-	EXEC sp_executesql @drop_sql;
-	--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
-	--EXEC xp_cmdshell 'whoami';
-	--EXEC xp_cmdshell 'C:\EKM\a.exe';
-	PRINT "Setting the VKM_mode to 'no' in Property file"
-	--PRINT @exec_exec_fp_cmd;
-	EXEC sp_executesql @exec_exec_fp_cmd;
-	PRINT "Getting Asymmetric Key from Key Manager"
-	--PRINT @sql;
-	EXEC sp_executesql @sql;
-	--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
-	BEGIN TRY
-		PRINT 'Restoring DB';
+
+IF @@ERROR <> 0
+    BEGIN
+		PRINT 'Restore Failure';
+		PRINT "Dropping Asymmetric Key"
+		--PRINT @drop_sql;
+		EXEC sp_executesql @drop_sql;
+		--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
+		--EXEC xp_cmdshell 'whoami';
+		--EXEC xp_cmdshell 'C:\EKM\a.exe';
+		
+		PRINT "Setting the VKM_mode to 'no' in Property file"
+		--PRINT @exec_exec_fp_cmd;
+		EXEC sp_executesql @exec_exec_fp_cmd;
+
+		PRINT "Getting Asymmetric Key from Key Manager"
+		--PRINT @sql;
+		EXEC sp_executesql @sql;
+		--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
+		
+		PRINT 'Restoring DB';		
 		RESTORE DATABASE @dbname FROM DISK = @backupp WITH REPLACE;
-		PRINT 'Restore successful.';
-	END TRY
-	BEGIN CATCH
-		PRINT 'Restore failed. Error: ' + CONVERT(VARCHAR(500), ERROR_MESSAGE());
-	END CATCH
-END CATCH;
+		IF @@ERROR <> 0
+    		BEGIN
+				PRINT 'Restore Failure';
+			END
+			ELSE
+			BEGIN
+				PRINT 'Restore successful.';
+			END
+    END
+    ELSE
+    BEGIN
+        PRINT 'Restore successful.';
+    END
 
 PRINT "Restoring the Backup of Property file";
 --PRINT @exec_prop_cmd;
