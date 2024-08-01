@@ -56,6 +56,6 @@ At the end of script execution,
 
 * If the encrypted database backup is successfully restored, a **"Restore successful"** message is displayed.
 
-* If the encrypted database backup restore fails, **"Restore failed. Error:`<Error Message>`"** is displayed.
+* If the encrypted database backup restore fails, **"Restore failed. Error:`<Detailed Error Message>`"** is displayed.
 
 Please refer to [Thalesdoc](https://thalesdocs.com/ctp/con/cakm/cakm-mssql-ekm/alpha-8.6.1/admin/cakm_mssql_ekm_advanced_topics/cakm_vkm_db_restore/index.html) for more information.
