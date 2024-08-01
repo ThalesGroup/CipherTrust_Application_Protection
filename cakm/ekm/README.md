@@ -44,8 +44,10 @@ Perform the following steps to run SQL script (`cakm_ekm_db_restoration.sql`):
 	* cm_passwd: CipherTrust login password
 	
 	* prop_path=""
-	<br>If an empty value is provided in `prop_path`, then script will use the default path to find the property file and executable file(`cakm_ekm_config_change.exe`).<br>Default path: `C:\Program Files\CipherTrust\CAKM For SQLServerEKM`
-  
+		* If you want to provide a path to this parameter, the path should be the location where the **CAKM for MSSQL EKM** is installed. For example, prop_path=`"C:\Program Files\CipherTrust\CAKM For SQLServerEKM\"`.
+		
+		* If an empty value is provided in `prop_path`, then script will use the default path to find the property file and executable file(`cakm_ekm_config_change.exe`).<br>Default path: `C:\Program Files\CipherTrust\CAKM For SQLServerEKM\`.
+		
 	!!! note
 		
 		In the above sample command, the SQL script (cakm_ekm_db_restoration.sql) is provided with `-i` option as an input to run  `sqlcmd` utility.
