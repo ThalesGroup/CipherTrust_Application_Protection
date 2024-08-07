@@ -513,6 +513,16 @@ parse_key_class(char *key, CK_OBJECT_CLASS  *pObjCls)
     }
 }
 
+CK_KEY_TYPE getKeyType(char *keyType)
+{
+        if (strncmp(keyType, "AES", 3) == 0) return CKK_AES;
+        else if (strncmp(keyType, "RSA", 3) == 0) return CKK_RSA;
+        else if (strncmp(keyType, "EC", 2) == 0) return CKK_EC;
+        else if (strncmp(keyType, "HMAC-SHA1", 9) == 0) return CKK_SHA_1_HMAC;
+        else if (strncmp(keyType, "HMAC-SHA256", 11) == 0) return CKK_SHA256_HMAC;
+        else if (strncmp(keyType, "HAMC-SHA384", 11) == 0) return CKK_SHA384_HMAC;
+        else if (strncmp(keyType, "HMAC-SHA512", 11) == 0) return CKK_SHA512_HMAC;
+}
 
 CK_RV findKey( char* keySearchId, int keyidType, CK_OBJECT_CLASS keyType, CK_OBJECT_HANDLE *phKey )
 {
@@ -606,6 +616,88 @@ CK_RV findKey( char* keySearchId, int keyidType, CK_OBJECT_CLASS keyType, CK_OBJ
 
         if ((numOfObjReturned == 0) || (numOfObjReturned == 1))
         {
+            break;
+        }
+    }
+
+    rc = FunctionListFuncPtr->C_FindObjectsFinal(hSession);
+
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: Call to C_FindObjectsFinal failed; rc=0x%08x.\n", (unsigned int)rc);
+    }
+
+    return rc;
+}
+
+/*
+ ************************************************************************
+ * Function: findKeysByCkaType
+ * Finds the keys present on the CM by key type.
+ ************************************************************************
+ * Parameters: keytype, max number of objects, buffer for key handles returned  
+ * 
+ * Returns: CK_RV
+ ************************************************************************
+ */
+
+CK_RV findKeysByCkaType(CK_KEY_TYPE *keytype, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys)
+{
+    CK_RV rc = CKR_OK;
+
+    /* find the key by CKA_ID. */
+    CK_ULONG  numOfObjReturned = 0;
+    CK_ATTRIBUTE_PTR findKeyTemplatePtr;
+    CK_ULONG  findKeyTemplateSize;
+
+    /* find the key by CKA_KEY_TYPE. */
+    CK_ATTRIBUTE findKeyTemplatePass[] =
+    {
+        {CKA_KEY_TYPE, &keytype, sizeof(keytype)}
+    };
+    
+	findKeyTemplatePtr = findKeyTemplatePass;
+    findKeyTemplateSize = sizeof(findKeyTemplatePass)/sizeof(CK_ATTRIBUTE);
+
+    /* call FindObjectsFinal just in case there's another search ongoing for this session. */
+    rc = FunctionListFuncPtr->C_FindObjectsFinal(hSession);
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: call to the first C_FindObjectsFinal() failed; rc=0x%08x\n", (unsigned int)rc);
+        *phKeys = CK_INVALID_HANDLE;
+        return rc;
+    }
+
+    rc = FunctionListFuncPtr->C_FindObjectsInit(hSession,
+            findKeyTemplatePtr,
+            findKeyTemplateSize
+                                               );
+    if (rc != CKR_OK)
+    {
+        fprintf (stderr, "FAIL: call to C_FindObjectsInit() failed: rc=0x%08x.\n", (unsigned int)rc);
+        *phKeys = CK_INVALID_HANDLE;
+        return rc;
+    }
+
+    /* loop thorugh C_FindObjcts until numOfObjReturned is 0 and we break out
+     * of the loop. we expect to find only 1  key that matches the name.
+     */
+
+    while (CK_TRUE)
+    {
+        rc = FunctionListFuncPtr->C_FindObjects( hSession,
+                phKeys,
+                *numObjects,
+                &numOfObjReturned);
+
+        if (rc != CKR_OK )
+        {
+            fprintf (stderr, "Error: call to C_FindObjects() returned %d objects with error; rc=0x%08x.\n", (int)numOfObjReturned, (unsigned int)rc);
+        }
+
+        if ((numOfObjReturned == 0) || (numOfObjReturned <= *numObjects))
+        {
+			*numObjects = numOfObjReturned;
             break;
         }
     }

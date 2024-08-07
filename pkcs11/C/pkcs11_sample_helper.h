@@ -72,6 +72,7 @@ extern CK_BBOOL             bNeverExtractable;
 
 
 #define kp  ((int)'k' << 8 | (int)'p')
+#define kt  ((int)'k' << 8 | (int)'t')
 #define ks  ((int)'k' << 8 | (int)'s')
 #define ka  ((int)'k' << 8 | (int)'a')
 

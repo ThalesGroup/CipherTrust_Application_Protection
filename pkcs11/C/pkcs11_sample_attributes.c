@@ -303,6 +303,7 @@ void usage()
     printf ("-ct cached_time cached time for key in minutes\n");
     printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.\n");
     printf ("-I Non-unique searchable ID (CKA_ID).");
+    printf ("-kt search on the basis of key type AES|HMAC-SHA256|RSA etc.");
     printf ("-z key_size key size for symmetric key in bytes.\n");
     printf ("-c curve oid: for ECC keys only.\n");
     printf ("-C ... clear alias\n");
@@ -350,6 +351,8 @@ int main(int argc, char *argv[])
     int         ksid_type = keyIdLabel;
     char        *keyAlias = NULL;
     char        *idattr = NULL;
+    char        *keyType = NULL;
+    CK_KEY_TYPE keytype = CKK_AES;
     CK_ULONG     modulusBufLen = 520;
     CK_ULONG     privExpoBufLen = 512;
     CK_ULONG     pubExpoBufLen = 32;
@@ -367,7 +370,7 @@ int main(int argc, char *argv[])
     CK_BYTE     modulusBuf[ASYMKEY_BUF_LEN];
     unsigned long lifespan = 1;
 
-    while ((c = newgetopt(argc, argv, "c:p:kp:m:s:i:a:I:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
+    while ((c = newgetopt(argc, argv, "c:p:kp:m:s:i:a:I:kt:z:d:g:v:1:2:3:4:5:ls:ct:CDZP")) != EOF)
     {
         switch (c)
         {
@@ -382,6 +385,9 @@ int main(int argc, char *argv[])
             break;
         case 'I':
 			idattr = optarg;
+            break;
+        case kt:
+		    keyType = optarg;// AES, RSA, EC, HMAC
             break;
         case 'k':
             keyLabel = optarg;
@@ -469,8 +475,9 @@ int main(int argc, char *argv[])
         pKsid = idattr;
         ksid_type = keyIdAttr;
 	}
+    else if (keyType) keytype = getKeyType(keyType);
 
-    if (NULL == pin || !pKsid) usage();
+    if (NULL == pin || (!pKsid && !keyType)) usage();
 
     printf("Begin Get/Set/Delete Attributes Sample: ...\n");
     do
@@ -525,6 +532,22 @@ int main(int argc, char *argv[])
 				getAttributesValue(phKeys[i]);
 			}
 		}
+        else if (keyType != NULL)
+        {
+            CK_ULONG numObjects = 1000;
+			CK_OBJECT_HANDLE phKeys[1000];
+			int i = 0;
+
+			rc = findKeysByCkaType(keytype, &numObjects, phKeys);
+			if (rc != CKR_OK) {
+				break;
+			}
+			for (i = 0; i < numObjects; i++) {
+				printf("\nAttributes for key number %d\n", i + 1);
+				getAttributesValue(phKeys[i], 0, NULL, NULL);
+			}
+
+        }
 		else if (symmetric == 0)
         {
             rc = findKey(pKsid, ksid_type, CKO_PRIVATE_KEY, &hPrivateKey);
@@ -554,7 +577,6 @@ int main(int argc, char *argv[])
             {
                 printf("Finding public key succeeded, about to retrieve its attributes.\n");
                 getAsymAttributesValue(hPublicKey, CKO_PUBLIC_KEY, modulusBuf, &modulusBufLen, pubExponentBuf, &pubExpoBufLen);
-
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
 
@@ -576,7 +598,6 @@ int main(int argc, char *argv[])
                 printf("Finding private key succeeded, about to retrieve its attributes.\n");
                 modulusBufLen = 520;
                 getAsymAttributesValue(hPrivateKey, CKO_PRIVATE_KEY, modulusBuf, &modulusBufLen, privExponentBuf, &privExpoBufLen);
-
                 if (bDeleteTwoAttributes) printf("About to delete custom attributes 4 and 5\n");
                 else if (bCustomAttr)     printf("About to set custom attributes 4 and 5 to '%s' and '%s', respectively.\n", custom4, custom5);
 
