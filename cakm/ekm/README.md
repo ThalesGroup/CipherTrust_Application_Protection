@@ -1,6 +1,7 @@
 README.md
 
 This SQL script (cakm_ekm_db_restoration.sql) and a C executable (cakm_ekm_config_change.exe) will be used to automatically restore the encrypted VKM/CAKM  databases to CAKM without any customer environment downtime.
+This is a sample script and you can update the same as per your requirement.
 
 Perform the following steps to run SQL script (`cakm_ekm_db_restoration.sql`):
 
