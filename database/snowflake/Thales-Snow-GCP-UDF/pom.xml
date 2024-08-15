@@ -4,8 +4,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>Thales</groupId>
-  <artifactId>CADP-SNOW-GCP-UDF</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <artifactId>Thales-Snow-GCP-UDF</artifactId>
+  <version>0.0.9-SNAPSHOT</version>
 	<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
@@ -20,7 +20,7 @@
 		<log4j-core.version>2.17.2</log4j-core.version>
 		<jar.version>.000</jar.version>
 	</properties>
-	<name>CADP-SNOW-GCP-UDF</name>
+	<name>Thales-Snow-GCP-UDF</name>
 	<dependencies>
 			<dependency>
 			<groupId>io.github.thalescpl-io.cadp</groupId>
@@ -102,11 +102,6 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j-core.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>IngrianNAE</groupId>
-			<artifactId>IngrianNAE</artifactId>
-			<version>8.12.6.000</version>
 		</dependency>
 
 	</dependencies>
