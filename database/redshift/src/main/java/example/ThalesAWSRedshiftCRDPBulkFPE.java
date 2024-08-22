@@ -1,3 +1,4 @@
+package example;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -41,61 +42,28 @@ import com.google.gson.JsonPrimitive;
  * 
  */
 
-public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler {
+public class ThalesAWSRedshiftCRDPBulkFPE implements RequestStreamHandler {
 
 	private static final Gson gson = new Gson();
 
+	private static final String BADDATATAG = new String("9999999999999999");
 	private static int BATCHLIMIT = 10000;
 
-	public static void main(String[] args) throws Exception {
-
-		ThalesAWSRedshiftCRDPCharBulkTester nw2 = new ThalesAWSRedshiftCRDPCharBulkTester();
-
-		String protectrequest = "{\r\n" + "  \"request_id\" : \"23FF1F97-F28A-44AA-AB67-266ED976BF40\",\r\n"
-				+ "  \"cluster\" : \"arn:aws:redshift:xxxx\",\r\n" + "  \"user\" : \"adminuser\",\r\n"
-				+ "  \"database\" : \"db1\",\r\n" + "  \"external_function\": \"public.foo\",\r\n"
-				+ "  \"query_id\" : 5678234,\r\n" + "  \"num_records\" : 5,\r\n" + "  \"arguments\" : [\r\n"
-				+ "     [ \"5678234\"],\r\n" + "     [ \"45345366345\"],\r\n" + "     [ \"2342342342424\"],\r\n"
-				+ "     [ \"2424\"],\r\n" + "     [ \"234234234255667777\"]\r\n" + "   ]\r\n" + " }";
-		
-		String protectrequestnull = "{\r\n" + "  \"request_id\" : \"23FF1F97-F28A-44AA-AB67-266ED976BF40\",\r\n"
-				+ "  \"cluster\" : \"arn:aws:redshift:xxxx\",\r\n" + "  \"user\" : \"adminuser\",\r\n"
-				+ "  \"database\" : \"db1\",\r\n" + "  \"external_function\": \"public.foo\",\r\n"
-				+ "  \"query_id\" : 5678234,\r\n" + "  \"num_records\" : 5,\r\n" + "  \"arguments\" : [\r\n"
-				+ "     [ \"5678234\"],\r\n" + "     [ \"45345366345\"],\r\n" + "     [ \"2342342342424\"],\r\n"
-				+ "     [ \"\"],\r\n" + "     [ \"null\"]\r\n" + "   ]\r\n" + " }";
-		
-
-		String revealrequest = "{\r\n" + "  \"request_id\" : \"23FF1F97-F28A-44AA-AB67-266ED976BF40\",\r\n"
-				+ "  \"cluster\" : \"arn:aws:redshift:xxxx\",\r\n" + "  \"user\" : \"admin\",\r\n"
-				+ "  \"database\" : \"db1\",\r\n" + "  \"external_function\": \"public.foo\",\r\n"
-				+ "  \"query_id\" : 5678234,\r\n" + "  \"num_records\" : 5,\r\n" + "  \"arguments\" : [\r\n"
-				+ "     [ \"1004001jKVC6JO\"],\r\n" + "     [ \"1004001DW9FaQxLPj3\"],\r\n"
-				+ "     [ \"1004001rJivEodgILZg8\"],\r\n" + "     [ \"1004001JvcC\"],\r\n"
-				+ "     [ \"1004001ly4A5IY1j7QRDti4A2\"]\r\n" + "   ]\r\n" + " }";
-
-		String revealrequest_ext = "{\r\n" + "  \"request_id\" : \"23FF1F97-F28A-44AA-AB67-266ED976BF40\",\r\n"
-				+ "  \"cluster\" : \"arn:aws:redshift:xxxx\",\r\n" + "  \"user\" : \"admin\",\r\n"
-				+ "  \"database\" : \"db1\",\r\n" + "  \"external_function\": \"public.foo\",\r\n"
-				+ "  \"query_id\" : 5678234,\r\n" + "  \"num_records\" : 5,\r\n" + "  \"arguments\" : [\r\n"
-				+ "     [ \"LmCJFjr\"],\r\n" + "     [ \"SsoB9Lalcga\"],\r\n" + "     [ \"p2TryIkXAjCLk\"],\r\n"
-				+ "     [ \"J5IX\"],\r\n" + "     [ \"cWENACcmC12zWDxNpq\"]\r\n" + "   ]\r\n" + " }";
-
-		nw2.handleRequest(revealrequest_ext, null, null);
-
-	}
+	private static final String REVEALRETURNTAG = new String("data");
+	private static final String PROTECTRETURNTAG = new String("protected_data");
 
 	/**
 	 * Returns an String that will be the encrypted value
 	 * <p>
 	 */
 
-	public void handleRequest(String inputStream, OutputStream outputStream, Context context) throws IOException {
+	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 
-		String input = inputStream;
+		String input = IOUtils.toString(inputStream, "UTF-8");
+
 		JsonParser parser = new JsonParser();
 		int statusCode = 200;
-		boolean status = true;
+
 		String redshiftreturnstring = null;
 		StringBuffer redshiftreturndata = new StringBuffer();
 
@@ -108,9 +76,10 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 		Map<Integer, String> reshift_ErrorMap = new HashMap<Integer, String>();
 		// https://www.baeldung.com/java-aws-lambda
 
-		StringBuffer redshiftreturndatasb = new StringBuffer();
-		StringBuffer redshiftreturndatasc = new StringBuffer();
 		StringBuffer protection_policy_buff = new StringBuffer();
+
+		JsonObject result = new JsonObject();
+		JsonArray replies = new JsonArray();
 
 		if (rootNode.isJsonObject()) {
 			redshiftinput = rootNode.getAsJsonObject();
@@ -133,17 +102,28 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 		String crdpip = System.getenv("CRDPIP");
 		String userName = System.getenv("CMUSER");
 		String password = System.getenv("CMPWD");
-
+		// returnciphertextforuserwithnokeyaccess = is a environment variable to express how data should be returned
+		// when the user above does not have access to the key and if doing a
+		// lookup in the userset and the user does not exist. If returnciphertextforuserwithnokeyaccess = no
+		// then an error will be returned to the query, else the results set will provide ciphertext.
 		String returnciphertextforuserwithnokeyaccess = System.getenv("returnciphertextforuserwithnokeyaccess");
+		// yes,no
 		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.equalsIgnoreCase("yes");
+		// usersetlookup = should a userset lookup be done on the user from Cloud DB
+		// yes,no
 		String usersetlookup = System.getenv("usersetlookup");
+		// usersetidincm = should be the usersetid in CM to query.
 		String usersetID = System.getenv("usersetidincm");
+		// usersetlookupip = this is the IP address to query the userset. Currently it is the userset in CM but could be
+		// a memcache or other in memory db.
 		String userSetLookupIP = System.getenv("usersetlookupip");
 		boolean usersetlookupbool = usersetlookup.equalsIgnoreCase("yes");
 		String keymetadatalocation = System.getenv("keymetadatalocation");
 		String external_version_from_ext_source = System.getenv("keymetadata");
 		String protection_profile = System.getenv("protection_profile");
 		String mode = System.getenv("mode");
+		String datatype = System.getenv("datatype");
+
 		String inputDataKey = null;
 		String outputDataKey = null;
 		String protectedData = null;
@@ -151,6 +131,7 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 		boolean bad_data = false;
 		String notvalid = "notvalid";
 		String jsonBody = null;
+		String jsonTagForProtectReveal = null;
 
 		int error_count = 0;
 
@@ -159,19 +140,28 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 
 		JsonObject crdp_payload = new JsonObject();
 
+		String showrevealkey = "yes";
+
 		if (mode.equals("protectbulk")) {
 			inputDataKey = "data_array";
 			outputDataKey = "protected_data_array";
+			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			inputDataKey = "protected_data_array";
 			outputDataKey = "data_array";
-
+			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
 
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
+
 		int totalNbrofRows = redshiftdata.size();
-		int totalRowsLeft = totalNbrofRows;
-		// int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
-		int batchsize = 5;
+		int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
+
 		if (batchsize > totalNbrofRows)
 			batchsize = totalNbrofRows;
 		if (batchsize >= BATCHLIMIT)
@@ -179,31 +169,10 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 
 		try {
 
-			System.setProperty("com.ingrian.security.nae.IngrianNAE_Properties_Conf_Filename",
-					"D:\\product\\Build\\IngrianNAE-134.properties");
-
-			/*
-			 * System.setProperty(
-			 * "com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
-			 * "CADP_for_JAVA.properties"); IngrianProvider builder = new
-			 * Builder().addConfigFileInputStream(
-			 * getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).
-			 * build();
-			 */
-
 			int row_number = 0;
 
-			// Serialization
-			redshiftreturndatasb.append("{ \"success\":");
-			redshiftreturndatasb.append(status);
-			redshiftreturndatasb.append(",");
-			redshiftreturndatasb.append(" \"num_records\":");
-			redshiftreturndatasb.append(nbr_of_rows_json_int);
-			redshiftreturndatasb.append(",");
-			redshiftreturndatasb.append(" \"results\": [");
-
 			if (usersetlookupbool) {
-			// make sure cmuser is in Application Data Protection Clients Group
+				// make sure cmuser is in Application Data Protection Clients Group
 
 				boolean founduserinuserset = findUserInUserSet(redshiftuserstr, userName, password, usersetID,
 						userSetLookupIP);
@@ -217,25 +186,20 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 
 			int i = 0;
 			int count = 0;
-			boolean newchunk = true;
 
 			JsonArray crdp_payload_array = new JsonArray();
 
-			while (i < redshiftdata.size()) {
+			OkHttpClient client = new OkHttpClient().newBuilder().build();
+			MediaType mediaType = MediaType.parse("application/json");
+			String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
 
-				if (newchunk) {
-					crdp_payload_array = new JsonArray();
-					protection_policy_buff = new StringBuffer();
-					newchunk = false;
-					count = 0;
-				}
+			while (i < totalNbrofRows) {
 
 				String sensitive = null;
 				JsonArray redshiftrow = redshiftdata.get(i).getAsJsonArray();
 
-				// insert new....
 				sensitive = checkValid(redshiftrow);
-				
+
 				protection_profile = protection_profile.trim();
 				// Format the output
 				String formattedElement = String.format("\"protection_policy_name\" : \"%s\"", protection_profile);
@@ -243,6 +207,23 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 				protection_policy_buff.append(",");
 
 				if (mode.equals("protectbulk")) {
+					if (sensitive.contains("notvalid") || sensitive.equalsIgnoreCase("null")) {
+						if (datatype.equalsIgnoreCase("charint") || datatype.equalsIgnoreCase("nbr")) {
+							if (sensitive.contains("notvalid")) {
+								sensitive = sensitive.replace("notvalid", "");
+								sensitive = BADDATATAG + sensitive;
+							} else
+								sensitive = BADDATATAG;
+
+						} else if (sensitive.equalsIgnoreCase("null") || sensitive.equalsIgnoreCase("notvalid")) {
+
+						} else if (sensitive.contains("notvalid")) {
+							// sensitive = sensitive.replace("notvalid", "");
+
+						}
+
+					}
+
 					crdp_payload_array.add(sensitive);
 				} else {
 					JsonObject protectedDataObject = new JsonObject();
@@ -251,7 +232,7 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 						protectedDataObject.addProperty("external_version", external_version_from_ext_source);
 					}
 					crdp_payload_array.add(protectedDataObject);
-					System.out.println(gson.toJson(crdp_payload_array));
+
 				}
 				if (count == batchsize - 1) {
 
@@ -272,101 +253,77 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 					}
 					jsonBody = "{" + jsonBody;
 
-					OkHttpClient client = new OkHttpClient().newBuilder().build();
-					MediaType mediaType = MediaType.parse("application/json");
-
-					System.out.println(jsonBody);
 					RequestBody body = RequestBody.create(mediaType, jsonBody);
-					String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
-					// String urlStr = "\"http://" + cmip + ":8090/v1/" + mode+ "\"";
-					System.out.println(urlStr);
-					Request crdp_request = new Request.Builder()
-							// .url("http://192.168.159.143:8090/v1/protect").method("POST", body)
-							.url(urlStr).method("POST", body).addHeader("Content-Type", "application/json").build();
+
+					Request crdp_request = new Request.Builder().url(urlStr).method("POST", body)
+							.addHeader("Content-Type", "application/json").build();
 					Response crdp_response = client.newCall(crdp_request).execute();
-					String crdpreturnstr = null;
+
 					if (crdp_response.isSuccessful()) {
 						// Parse JSON response
 						String responseBody = crdp_response.body().string();
 						JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
 						JsonArray protectedDataArray = jsonObject.getAsJsonArray(outputDataKey);
 
-						String status_res = jsonObject.get("status").getAsString();
+						String status = jsonObject.get("status").getAsString();
 						int success_count = jsonObject.get("success_count").getAsInt();
 						error_count = jsonObject.get("error_count").getAsInt();
-						System.out.println("errors " + error_count);
+						if (error_count > 0)
+							System.out.println("errors " + error_count);
+						for (JsonElement element : protectedDataArray) {
 
-						if (mode.equals("protectbulk")) {
+							JsonObject protectedDataObject = element.getAsJsonObject();
+							if (protectedDataObject.has(jsonTagForProtectReveal)) {
 
-							for (JsonElement element : protectedDataArray) {
-								JsonObject protectedDataObject = element.getAsJsonObject();
-								if (protectedDataObject.has("protected_data")) {
+								protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
 
-									protectedData = protectedDataObject.get("protected_data").getAsString();
-									System.out.println(protectedData);
-									protectedData = "\"" + protectedData + "\"";
-									// add to
-									redshiftreturndatasc.append(new String(protectedData));
-									redshiftreturndatasc.append(",");
-									if (keymetadatalocation.equalsIgnoreCase("external")) {
+								if (keymetadatalocation.equalsIgnoreCase("internal")
+										&& mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+									if (protectedData.length() > 7)
+										protectedData = protectedData.substring(7);
+								}
+
+								replies.add(new String(protectedData));
+
+								if (mode.equals("protectbulk")) {
+									if (keymetadatalocation.equalsIgnoreCase("external")
+											&& mode.equalsIgnoreCase("protectbulk")) {
 										externalkeymetadata = protectedDataObject.get("external_version").getAsString();
-										System.out.println("Protected Data ext key metadata need to store this: "
-												+ externalkeymetadata);
+										// System.out.println("Protected Data ext key metadata need to store this: "
+										// + externalkeymetadata);
 
 									}
-								} else if (protectedDataObject.has("error_message")) {
-									String errorMessage = protectedDataObject.get("error_message").getAsString();
-									System.out.println("error_message: " + errorMessage);
-									reshift_ErrorMap.put(i, errorMessage);
-									bad_data = true;
-								} else
-									System.out.println("unexpected json value from results: ");
+								}
+							} else if (protectedDataObject.has("error_message")) {
+								String errorMessage = protectedDataObject.get("error_message").getAsString();
+								System.out.println("error_message: " + errorMessage);
+								reshift_ErrorMap.put(i, errorMessage);
+								bad_data = true;
+							} else
+								System.out.println("unexpected json value from results: ");
 
-							}
-						} else {
-							// reveal logic
-
-							for (JsonElement element : protectedDataArray) {
-								JsonObject protectedDataObject = element.getAsJsonObject();
-								if (protectedDataObject.has("data")) {
-									protectedData = protectedDataObject.get("data").getAsString();
-									protectedData = "\"" + protectedData + "\"";
-									System.out.println(protectedData);
-									redshiftreturndatasc.append(new String(protectedData));
-									redshiftreturndatasc.append(",");
-								} else if (protectedDataObject.has("error_message")) {
-									String errorMessage = protectedDataObject.get("error_message").getAsString();
-									System.out.println("error_message: " + errorMessage);
-									reshift_ErrorMap.put(i, errorMessage);
-									bad_data = true;
-								} else
-									System.out.println("unexpected json value from results: ");
-
-							}
 						}
 
 						crdp_response.close();
-
+						crdp_payload_array = new JsonArray();
+						protection_policy_buff = new StringBuffer();
 						numberofchunks++;
-						newchunk = true;
+
 						count = 0;
 					} else {
 						System.err.println("Request failed with status code: " + crdp_response.code());
 					}
-
-				}
-				else
-				{
+				} else {
 					count++;
 				}
-				
-				totalRowsLeft--;
+
+				// totalRowsLeft--;
 				i++;
- 
+
 			}
 
 			if (count > 0) {
-				// if (count == batchsize - 1 || (totalRowsLeft <= totalcount)) {
+
 				crdp_payload.add(inputDataKey, crdp_payload_array);
 				String inputdataarray = null;
 				if (mode.equals("revealbulk")) {
@@ -384,17 +341,10 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 				}
 				jsonBody = "{" + jsonBody;
 
-				OkHttpClient client = new OkHttpClient().newBuilder().build();
-				MediaType mediaType = MediaType.parse("application/json");
-
-				System.out.println(jsonBody);
 				RequestBody body = RequestBody.create(mediaType, jsonBody);
-				String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
-				// String urlStr = "\"http://" + cmip + ":8090/v1/" + mode+ "\"";
-				System.out.println(urlStr);
-				Request crdp_request = new Request.Builder()
-						// .url("http://192.168.159.143:8090/v1/protect").method("POST", body)
-						.url(urlStr).method("POST", body).addHeader("Content-Type", "application/json").build();
+
+				Request crdp_request = new Request.Builder().url(urlStr).method("POST", body)
+						.addHeader("Content-Type", "application/json").build();
 				Response crdp_response = client.newCall(crdp_request).execute();
 				String crdpreturnstr = null;
 				if (crdp_response.isSuccessful()) {
@@ -403,77 +353,57 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 					JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
 					JsonArray protectedDataArray = jsonObject.getAsJsonArray(outputDataKey);
 
-					String status_res = jsonObject.get("status").getAsString();
+					String status = jsonObject.get("status").getAsString();
 					int success_count = jsonObject.get("success_count").getAsInt();
 					error_count = jsonObject.get("error_count").getAsInt();
-					System.out.println("errors " + error_count);
+					if (error_count > 0)
+						System.out.println("errors " + error_count);
+					for (JsonElement element : protectedDataArray) {
 
-					if (mode.equals("protectbulk")) {
+						JsonObject protectedDataObject = element.getAsJsonObject();
+						if (protectedDataObject.has(jsonTagForProtectReveal)) {
 
-						for (JsonElement element : protectedDataArray) {
-							JsonObject protectedDataObject = element.getAsJsonObject();
-							if (protectedDataObject.has("protected_data")) {
+							protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
+							if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk")
+									&& !showrevealkeybool) {
+								if (protectedData.length() > 7)
+									protectedData = protectedData.substring(7);
+							}
+							replies.add(new String(protectedData));
 
-								protectedData = protectedDataObject.get("protected_data").getAsString();
-								protectedData = "\"" + protectedData + "\"";
-								System.out.println(protectedData);
-								// add to
-								redshiftreturndatasc.append(new String(protectedData));
-								redshiftreturndatasc.append(",");
-								if (keymetadatalocation.equalsIgnoreCase("external")) {
+							if (mode.equals("protectbulk")) {
+								if (keymetadatalocation.equalsIgnoreCase("external")
+										&& mode.equalsIgnoreCase("protectbulk")) {
 									externalkeymetadata = protectedDataObject.get("external_version").getAsString();
-									System.out.println("Protected Data ext key metadata need to store this: "
-											+ externalkeymetadata);
+									// System.out.println("Protected Data ext key metadata need to store this: "
+									// + externalkeymetadata);
 
 								}
-							} else if (protectedDataObject.has("error_message")) {
-								String errorMessage = protectedDataObject.get("error_message").getAsString();
-								System.out.println("error_message: " + errorMessage);
-								reshift_ErrorMap.put(i, errorMessage);
-								bad_data = true;
-							} else
-								System.out.println("unexpected json value from results: ");
+							}
+						} else if (protectedDataObject.has("error_message")) {
+							String errorMessage = protectedDataObject.get("error_message").getAsString();
+							System.out.println("error_message: " + errorMessage);
+							reshift_ErrorMap.put(i, errorMessage);
+							bad_data = true;
+						} else
+							System.out.println("unexpected json value from results: ");
 
-						}
-					} else {
-						// reveal logic
-
-						for (JsonElement element : protectedDataArray) {
-							JsonObject protectedDataObject = element.getAsJsonObject();
-							if (protectedDataObject.has("data")) {
-								protectedData = protectedDataObject.get("data").getAsString();
-								protectedData = "\"" + protectedData + "\"";
-								System.out.println(protectedData);
-								redshiftreturndatasc.append(new String(protectedData));
-								redshiftreturndatasc.append(",");
-							} else if (protectedDataObject.has("error_message")) {
-								String errorMessage = protectedDataObject.get("error_message").getAsString();
-								System.out.println("error_message: " + errorMessage);
-								reshift_ErrorMap.put(i, errorMessage);
-								bad_data = true;
-							} else
-								System.out.println("unexpected json value from results: ");
-
-						}
 					}
 
 					crdp_response.close();
-
+					crdp_payload_array = new JsonArray();
+					protection_policy_buff = new StringBuffer();
 					numberofchunks++;
-					newchunk = true;
 					count = 0;
 				} else {
 					System.err.println("Request failed with status code: " + crdp_response.code());
 				}
-
-			 
 			}
 
-			redshiftreturndatasc.append("] ");
-			redshiftreturndatasb.append(redshiftreturndatasc);
-			redshiftreturndatasb.append("}");
-
-			redshiftreturnstring = new String(redshiftreturndatasb);
+			result.addProperty("success", true);
+			result.addProperty("num_records", totalNbrofRows);
+			result.add("results", replies);
+			redshiftreturnstring = result.toString();
 
 		} catch (
 
@@ -489,16 +419,14 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 						JsonPrimitive redshiftcolumn = redshiftrow.get(0).getAsJsonPrimitive();
 
 						String sensitive = redshiftcolumn.getAsJsonPrimitive().toString();
-
+						replies.add(sensitive);
 						redshiftreturndata.append(sensitive);
-						if (redshiftdata.size() == 1 || i == redshiftdata.size() - 1)
-							continue;
-						else
-							redshiftreturndata.append(",");
-					}
-					redshiftreturndata.append("]}");
 
-					redshiftreturnstring = new String(redshiftreturndata);
+					}
+					result.addProperty("success", true);
+					result.addProperty("num_records", totalNbrofRows);
+					result.add("results", replies);
+					redshiftreturnstring = result.toString();
 
 				} else {
 					statusCode = 400;
@@ -514,18 +442,8 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 		}
 
 		finally {
-			// if (session != null) {
-			// session.closeSession();
-			// }
+
 		}
-		int lastIndex = redshiftreturnstring.lastIndexOf(",");
-		// Replace the comma before the closing square bracket if it exists
-		if (lastIndex != -1) {
-			redshiftreturnstring = redshiftreturnstring.substring(0, lastIndex)
-					+ redshiftreturnstring.substring(lastIndex + 1);
-		}
-		System.out.println("string  = " + redshiftreturnstring);
-		System.out.println("numberofchunks  = " + numberofchunks);
 
 		if (bad_data) {
 			System.out.println("errors: ");
@@ -538,13 +456,9 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 
 		}
 
-		// outputStream.write(new Gson().toJson(redshiftreturnstring).getBytes());
-	}
+		System.out.println("numberofchunks  = " + numberofchunks);
 
-	@Override
-	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-		// TODO Auto-generated method stub
-
+		outputStream.write(new Gson().toJson(redshiftreturnstring).getBytes());
 	}
 
 	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
@@ -583,7 +497,7 @@ public class ThalesAWSRedshiftCRDPCharBulkTester implements RequestStreamHandler
 		return inputdata;
 
 	}
-	
+
 	public String formatReturnValue(int statusCode)
 
 	{

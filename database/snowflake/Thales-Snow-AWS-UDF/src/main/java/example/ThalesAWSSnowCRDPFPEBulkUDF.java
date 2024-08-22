@@ -10,10 +10,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -21,14 +17,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.ingrian.security.nae.AbstractNAECipher;
-import com.ingrian.security.nae.FPEParameterAndFormatSpec;
-import com.ingrian.security.nae.IngrianProvider;
-import com.ingrian.security.nae.NAECipher;
-import com.ingrian.security.nae.NAEKey;
-import com.ingrian.security.nae.NAESession;
-import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
-import com.ingrian.security.nae.IngrianProvider.Builder;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -60,8 +48,6 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 	private static final String REVEALRETURNTAG = new String("data");
 	private static final String PROTECTRETURNTAG = new String("protected_data");
 
-	// private static final Logger logger =
-	// Logger.getLogger(LambdaRequestStreamHandlerNbrEncyrptBulkFPE.class.getName());
 	private static final Gson gson = new Gson();
 
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
@@ -82,8 +68,6 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 		int numberofchunks = 0;
 
 		String callerStr = null;
-
-		// https://www.baeldung.com/java-aws-lambda
 
 		JsonObject snowflakeinput = null;
 
@@ -116,6 +100,7 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 		String mode = System.getenv("mode");
 		String datatype = System.getenv("datatype");
 		int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
+	
 
 		String inputDataKey = null;
 		String outputDataKey = null;
@@ -126,15 +111,24 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 		String jsonTagForProtectReveal = null;
 
 		boolean bad_data = false;
+		String showrevealkey = "yes";
+		
 		if (mode.equals("protectbulk")) {
 			inputDataKey = "data_array";
 			outputDataKey = "protected_data_array";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			inputDataKey = "protected_data_array";
 			outputDataKey = "data_array";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
+		
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		try {
 
@@ -196,16 +190,11 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 				batchsize = numberOfLines;
 			if (batchsize >= BATCHLIMIT)
 				batchsize = BATCHLIMIT;
-			// Serialization
-
-			String crdpjsonBody = null;
-			// String external_version_from_ext_source = "1004001";
-			// String external_version_from_ext_source = "1001001";
 
 			int i = 0;
 			int count = 0;
 			int totalcount = 0;
-			boolean newchunk = true;
+
 			int dataIndex = 0; // assumes index from snowflake will always be sequential.
 			JsonObject crdp_payload = new JsonObject();
 			String sensitive = null;
@@ -283,7 +272,7 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 						Request crdp_request = new Request.Builder().url(urlStr).method("POST", body)
 								.addHeader("Content-Type", "application/json").build();
 						Response crdp_response = client.newCall(crdp_request).execute();
-						String crdpreturnstr = null;
+
 						if (crdp_response.isSuccessful()) {
 							// Parse JSON response
 							String responseBody = crdp_response.body().string();
@@ -303,14 +292,18 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 
 									protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
 									// System.out.println(protectedData);
-
+									if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+										if (protectedData.length()>7) 
+											protectedData = protectedData.substring(7);							 
+									}
+									
 									innerDataArray.add(dataIndex);
 									innerDataArray.add(new String(protectedData));
 									dataArray.add(innerDataArray);
 									innerDataArray = new JsonArray();
 									if (mode.equals("protectbulk")) {
 										if (keymetadatalocation.equalsIgnoreCase("external")
-												&& mode.equalsIgnoreCase("protect")) {
+												&& mode.equalsIgnoreCase("protectbulk")) {
 											externalkeymetadata = protectedDataObject.get("external_version")
 													.getAsString();
 											// System.out.println("Protected Data ext key metadata need to store this: "
@@ -392,13 +385,18 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 
 								protectedData = protectedDataObject.get("protected_data").getAsString();
 
+								if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+									if (protectedData.length()>7) 
+										protectedData = protectedData.substring(7);							 
+								}
+								
 								innerDataArray.add(dataIndex);
 								innerDataArray.add(new String(protectedData));
 								dataArray.add(innerDataArray);
 								innerDataArray = new JsonArray();
 
 								if (keymetadatalocation.equalsIgnoreCase("external")
-										&& mode.equalsIgnoreCase("protect")) {
+										&& mode.equalsIgnoreCase("protectbulk")) {
 									externalkeymetadata = protectedDataObject.get("external_version").getAsString();
 									// System.out.println("Protected Data ext key metadata need to store this: "
 									// + externalkeymetadata);
@@ -443,7 +441,7 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 					crdp_response.close();
 
 					numberofchunks++;
-					newchunk = true;
+
 					totalcount = totalcount + count;
 					count = 0;
 
@@ -471,8 +469,8 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 					bodyObject = new JsonObject();
 					dataArray = new JsonArray();
 					innerDataArray = new JsonArray();
-
-					for (int i = 0; i < snowflakedata.size(); i++) {
+					int nbrofrows = snowflakedata.size();
+					for (int i = 0; i < nbrofrows; i++) {
 
 						JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 
@@ -593,82 +591,5 @@ public class ThalesAWSSnowCRDPFPEBulkUDF implements RequestStreamHandler {
 		return snowflakereturndatasb.toString();
 	}
 
-	public String formatReturnValue(int statusCode, JsonArray snowflakedata, boolean error, Cipher thalesCipher,
-			String datatype) throws IllegalBlockSizeException, BadPaddingException {
-		int row_number = 0;
-
-		String encdata = null;
-		String sensitive = null;
-
-		JsonObject bodyObject = new JsonObject();
-		JsonArray dataArray = new JsonArray();
-		JsonArray innerDataArray = new JsonArray();
-
-		for (int i = 0; i < snowflakedata.size(); i++) {
-			JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
-			for (int j = 0; j < snowflakerow.size(); j++) {
-				if (j == 1) {
-					sensitive = checkValid(snowflakerow);
-
-					if (sensitive.contains("notvalid") || sensitive.equalsIgnoreCase("null")) {
-						if (datatype.equalsIgnoreCase("charint") || datatype.equalsIgnoreCase("nbr")) {
-							innerDataArray.add(new BigInteger("9999999999999999"));
-
-							// System.out.println("datatype charint or nbr adding big int 9999999999999999");
-						} else if (sensitive.equalsIgnoreCase("null") || sensitive.equalsIgnoreCase("notvalid")) {
-							innerDataArray.add("");
-							// System.out.println("adding null not charint or nbr");
-						} else {
-							innerDataArray.add(sensitive);
-							// System.out.println("adding sensitve" + sensitive);
-						}
-
-						// System.out.println("not valid or null");
-					} else {
-						if (!error) {
-							byte[] outbuf = thalesCipher.doFinal(sensitive.getBytes());
-							encdata = new String(outbuf);
-							// System.out.println("normal vallid data ");
-							if (datatype.equalsIgnoreCase("charint") || datatype.equalsIgnoreCase("nbr")) {
-								// System.out.println("char int or nbr adding as bigint");
-								innerDataArray.add(new BigInteger(encdata));
-							} else {
-								innerDataArray.add(encdata);
-								// System.out.println("Sensitive data: " + encdata);
-							}
-						} else {
-							encdata = sensitive;
-							if (datatype.equalsIgnoreCase("charint") || datatype.equalsIgnoreCase("nbr")) {
-								// System.out.println("char int or nbr adding as bigint");
-								innerDataArray.add(new BigInteger(encdata));
-							} else {
-								innerDataArray.add(encdata);
-							}
-						}
-					}
-
-					// innerDataArray.add(encdata);
-					dataArray.add(innerDataArray);
-					innerDataArray = new JsonArray();
-
-				} else {
-					JsonPrimitive snowflakecolumn = snowflakerow.get(j).getAsJsonPrimitive();
-					row_number = snowflakecolumn.getAsInt();
-					innerDataArray.add(row_number);
-				}
-			}
-		}
-
-		bodyObject.add("data", dataArray);
-		JsonObject inputJsonObject = new JsonObject();
-		String bodyString = bodyObject.toString();
-		inputJsonObject.addProperty("statusCode", 200);
-		inputJsonObject.addProperty("body", bodyString);
-
-		String formattedStringnew = inputJsonObject.toString();
-
-		return formattedStringnew;
-
-	}
 
 }

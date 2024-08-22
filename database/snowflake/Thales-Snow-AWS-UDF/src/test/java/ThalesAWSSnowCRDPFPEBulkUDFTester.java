@@ -9,9 +9,6 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
@@ -20,14 +17,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import com.ingrian.security.nae.AbstractNAECipher;
-import com.ingrian.security.nae.FPEParameterAndFormatSpec;
-import com.ingrian.security.nae.IngrianProvider;
-import com.ingrian.security.nae.NAECipher;
-import com.ingrian.security.nae.NAEKey;
-import com.ingrian.security.nae.NAESession;
-import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
-import com.ingrian.security.nae.IngrianProvider.Builder;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -165,17 +154,14 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 		nw2.handleRequest2(request, null, null);
 	}
 
-	public void handleRequest2(String inputStream, OutputStream outputStream, Context context) throws IOException {
+	public void handleRequest2(String input, OutputStream outputStream, Context context) throws IOException {
 		// context.getLogger().log("Input: " + inputStream);
-		// String input = IOUtils.toString(inputStream, "UTF-8");
+		//String input = IOUtils.toString(inputStream, "UTF-8");
 
-		Map<Integer, String> bqErrorMap = new HashMap<Integer, String>();
+		Map<Integer, String> snowErrorMap = new HashMap<Integer, String>();
 		String encdata = "";
 		int error_count = 0;
 		int statusCode = 200;
-
-		String input = inputStream;
-		// Map<Integer, String> encryptedErrorMapTotal = new HashMap<Integer, String>();
 
 		JsonObject bodyObject = new JsonObject();
 		JsonArray dataArray = new JsonArray();
@@ -186,8 +172,6 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 		int numberofchunks = 0;
 
 		String callerStr = null;
-
-		// https://www.baeldung.com/java-aws-lambda
 
 		JsonObject snowflakeinput = null;
 
@@ -219,13 +203,17 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 		String protection_profile = System.getenv("protection_profile");
 		String mode = System.getenv("mode");
 		String datatype = System.getenv("datatype");
-		// int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
+		
+		String showrevealkey = "yes";
+		
+		int batchsize = Integer.parseInt(System.getenv("BATCHSIZE"));
 
 		String inputDataKey = null;
 		String outputDataKey = null;
 		String protectedData = null;
 		String externalkeymetadata = null;
 		String jsonBody = null;
+
 		String jsonTagForProtectReveal = null;
 
 		boolean bad_data = false;
@@ -233,12 +221,18 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 			inputDataKey = "data_array";
 			outputDataKey = "protected_data_array";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			inputDataKey = "protected_data_array";
 			outputDataKey = "data_array";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
-		Response crdp_response = null;
+		
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		try {
 
@@ -296,21 +290,15 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 			int numberOfLines = snowflakedata.size();
 			int totalRowsLeft = numberOfLines;
 
-			int batchsize = 3;
 			if (batchsize > numberOfLines)
 				batchsize = numberOfLines;
 			if (batchsize >= BATCHLIMIT)
 				batchsize = BATCHLIMIT;
-			// Serialization
-
-			String crdpjsonBody = null;
-			// String external_version_from_ext_source = "1004001";
-			// String external_version_from_ext_source = "1001001";
 
 			int i = 0;
 			int count = 0;
 			int totalcount = 0;
-			boolean newchunk = true;
+
 			int dataIndex = 0; // assumes index from snowflake will always be sequential.
 			JsonObject crdp_payload = new JsonObject();
 			String sensitive = null;
@@ -381,12 +369,13 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 						}
 						jsonBody = "{" + jsonBody;
 
-						System.out.println(jsonBody);
+						// System.out.println(jsonBody);
 						RequestBody body = RequestBody.create(mediaType, jsonBody);
 
+						// System.out.println(urlStr);
 						Request crdp_request = new Request.Builder().url(urlStr).method("POST", body)
 								.addHeader("Content-Type", "application/json").build();
-						crdp_response = client.newCall(crdp_request).execute();
+						Response crdp_response = client.newCall(crdp_request).execute();
 						String crdpreturnstr = null;
 						if (crdp_response.isSuccessful()) {
 							// Parse JSON response
@@ -406,26 +395,30 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 								if (protectedDataObject.has(jsonTagForProtectReveal)) {
 
 									protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
-									System.out.println(protectedData);
-
+									// System.out.println(protectedData);
+									if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+										if (protectedData.length()>7) 
+											protectedData = protectedData.substring(7);							 
+									}
+									
 									innerDataArray.add(dataIndex);
 									innerDataArray.add(new String(protectedData));
 									dataArray.add(innerDataArray);
 									innerDataArray = new JsonArray();
 									if (mode.equals("protectbulk")) {
 										if (keymetadatalocation.equalsIgnoreCase("external")
-												&& mode.equalsIgnoreCase("protect")) {
+												&& mode.equalsIgnoreCase("protectbulk")) {
 											externalkeymetadata = protectedDataObject.get("external_version")
 													.getAsString();
-											System.out.println("Protected Data ext key metadata need to store this: "
-													+ externalkeymetadata);
+											// System.out.println("Protected Data ext key metadata need to store this: "
+											// + externalkeymetadata);
 
 										}
 									}
 								} else if (protectedDataObject.has("error_message")) {
 									String errorMessage = protectedDataObject.get("error_message").getAsString();
 									System.out.println("error_message: " + errorMessage);
-									bqErrorMap.put(i, errorMessage);
+									snowErrorMap.put(i, errorMessage);
 									bad_data = true;
 								} else
 									System.out.println("unexpected json value from results: ");
@@ -438,7 +431,6 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 							numberofchunks++;
 							totalcount = totalcount + count;
 							count = 0;
-
 						} else {// throw error....
 							System.err.println("Request failed with status code: " + crdp_response.code());
 							throw new CustomException("1010, Unexpected Error ", 1010);
@@ -469,11 +461,13 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 				}
 				jsonBody = "{" + jsonBody;
 
+				// System.out.println(jsonBody);
 				RequestBody body = RequestBody.create(mediaType, jsonBody);
 
+				// System.out.println(urlStr);
 				Request crdp_request = new Request.Builder().url(urlStr).method("POST", body)
 						.addHeader("Content-Type", "application/json").build();
-				crdp_response = client.newCall(crdp_request).execute();
+				Response crdp_response = client.newCall(crdp_request).execute();
 				String crdpreturnstr = null;
 				if (crdp_response.isSuccessful()) {
 					// Parse JSON response
@@ -487,41 +481,72 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 					if (error_count > 0)
 						System.out.println("errors " + error_count);
 
-					for (JsonElement element : protectedDataArray) {
+					if (mode.equals("protectbulk")) {
 
-						JsonObject protectedDataObject = element.getAsJsonObject();
-						if (protectedDataObject.has(jsonTagForProtectReveal)) {
+						for (JsonElement element : protectedDataArray) {
+							JsonObject protectedDataObject = element.getAsJsonObject();
+							if (protectedDataObject.has("protected_data")) {
 
-							protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
-							// System.out.println(protectedData);
+								protectedData = protectedDataObject.get("protected_data").getAsString();
 
-							innerDataArray.add(dataIndex);
-							innerDataArray.add(new String(protectedData));
-							dataArray.add(innerDataArray);
-							innerDataArray = new JsonArray();
-							if (mode.equals("protectbulk")) {
+								innerDataArray.add(dataIndex);
+								innerDataArray.add(new String(protectedData));
+								dataArray.add(innerDataArray);
+								innerDataArray = new JsonArray();
+
 								if (keymetadatalocation.equalsIgnoreCase("external")
-										&& mode.equalsIgnoreCase("protect")) {
+										&& mode.equalsIgnoreCase("protectbulk")) {
 									externalkeymetadata = protectedDataObject.get("external_version").getAsString();
 									// System.out.println("Protected Data ext key metadata need to store this: "
 									// + externalkeymetadata);
 
 								}
+								
+								if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+									if (protectedData.length()>7) 
+										protectedData = protectedData.substring(7);							 
+								}
+								
+							} else if (protectedDataObject.has("error_message")) {
+								String errorMessage = protectedDataObject.get("error_message").getAsString();
+								System.out.println("error_message: " + errorMessage);
+								snowErrorMap.put(i, errorMessage);
+								bad_data = true;
+							} else {
+								System.out.println("unexpected json value from results: ");
+								throw new CustomException("1010, Unexpected Error ", 1010);
 							}
-						} else if (protectedDataObject.has("error_message")) {
-							String errorMessage = protectedDataObject.get("error_message").getAsString();
-							System.out.println("error_message: " + errorMessage);
-							bqErrorMap.put(i, errorMessage);
-							bad_data = true;
-						} else
-							System.out.println("unexpected json value from results: ");
-						dataIndex++;
+							dataIndex++;
+						}
+					} else {
+						// reveal logic
 
+						for (JsonElement element : protectedDataArray) {
+							JsonObject protectedDataObject = element.getAsJsonObject();
+							if (protectedDataObject.has("data")) {
+								protectedData = protectedDataObject.get("data").getAsString();
+								// System.out.println(protectedData);
+
+								innerDataArray.add(dataIndex);
+								innerDataArray.add(new String(protectedData));
+								dataArray.add(innerDataArray);
+								innerDataArray = new JsonArray();
+
+							} else if (protectedDataObject.has("error_message")) {
+								String errorMessage = protectedDataObject.get("error_message").getAsString();
+								System.out.println("error_message: " + errorMessage);
+								snowErrorMap.put(i, errorMessage);
+								bad_data = true;
+							} else
+								System.out.println("unexpected json value from results: ");
+							dataIndex++;
+						}
 					}
 
-					crdp_payload_array = new JsonArray();
-					protection_policy_buff = new StringBuffer();
+					crdp_response.close();
+
 					numberofchunks++;
+
 					totalcount = totalcount + count;
 					count = 0;
 
@@ -529,8 +554,6 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 					System.err.println("Request failed with status code: " + crdp_response.code());
 				}
 			}
-
-			crdp_response.close();
 			System.out.println("total chuncks " + numberofchunks);
 
 			bodyObject.add("data", dataArray);
@@ -551,8 +574,8 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 					bodyObject = new JsonObject();
 					dataArray = new JsonArray();
 					innerDataArray = new JsonArray();
-
-					for (int i = 0; i < snowflakedata.size(); i++) {
+					int nbrofrows = snowflakedata.size();
+					for (int i = 0; i < nbrofrows; i++) {
 
 						JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 
@@ -579,7 +602,7 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 									encdata = sensitive;
 
 								} else {
-									System.out.println("normal number data" + sensitive);
+									// System.out.println("normal number data" + sensitive);
 								}
 								innerDataArray.add(sensitive);
 								dataArray.add(innerDataArray);
@@ -600,7 +623,7 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 					inputJsonObject.addProperty("body", bodyString);
 
 					snowflakereturnstring = inputJsonObject.toString();
-					System.out.println(" new data " + snowflakereturnstring);
+					// System.out.println(" new data " + snowflakereturnstring);
 
 				} else {
 					statusCode = 400;
@@ -616,8 +639,8 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 		} finally {
 
 		}
-		System.out.println(snowflakereturnstring);
-		// response.getWriter().write(snowflakereturnstring);
+		 System.out.println(snowflakereturnstring);
+		//outputStream.write(snowflakereturnstring.getBytes());
 
 	}
 
@@ -676,7 +699,8 @@ public class ThalesAWSSnowCRDPFPEBulkUDFTester implements RequestStreamHandler {
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		// TODO Auto-generated method stub
-
+		
 	}
+
 
 }

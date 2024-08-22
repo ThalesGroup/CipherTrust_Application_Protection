@@ -132,6 +132,7 @@ public class ThalesAWSSnowCRDPFPEUDF implements RequestStreamHandler {
 		// mode of operation. valid values are protect/reveal
 		String mode = System.getenv("mode");
 		String datatype = System.getenv("datatype");
+
 		String dataKey = null;
 		JsonObject bodyObject = new JsonObject();
 		JsonArray dataArray = new JsonArray();
@@ -139,13 +140,22 @@ public class ThalesAWSSnowCRDPFPEUDF implements RequestStreamHandler {
 		String jsonTagForProtectReveal = null;
 
 		boolean bad_data = false;
+		String showrevealkey = "yes";
+
 		if (mode.equals("protect")) {
 			dataKey = "data";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			dataKey = "protected_data";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
+		
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		// This code is only to be used when input data contains user info.
 
@@ -217,8 +227,9 @@ public class ThalesAWSSnowCRDPFPEUDF implements RequestStreamHandler {
 			OkHttpClient client = new OkHttpClient().newBuilder().build();
 			MediaType mediaType = MediaType.parse("application/json");
 			String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
+			int nbrofrows = snowflakedata.size();
 			
-			for (int i = 0; i < snowflakedata.size(); i++) {
+			for (int i = 0; i < nbrofrows; i++) {
 				JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 
 				for (int j = 0; j < snowflakerow.size(); j++) {
@@ -278,6 +289,12 @@ public class ThalesAWSSnowCRDPFPEUDF implements RequestStreamHandler {
 										//	System.out.println("Protected Data ext key metadata need to store this: "
 											//		+ externalkeymetadata);
 										}
+										
+										if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protect") && !showrevealkeybool) {
+											if (protectedData.length()>7) 
+												protectedData = protectedData.substring(7);							 
+										}
+										
 									} else if (jsonObject.has("error_message")) {
 										String errorMessage = jsonObject.get("error_message").getAsString();
 										System.out.println("error_message: " + errorMessage);
@@ -341,8 +358,8 @@ public class ThalesAWSSnowCRDPFPEUDF implements RequestStreamHandler {
 					bodyObject = new JsonObject();
 					dataArray = new JsonArray();
 					innerDataArray = new JsonArray();
-
-					for (int i = 0; i < snowflakedata.size(); i++) {
+					int nbrofrows = snowflakedata.size();
+					for (int i = 0; i < nbrofrows; i++) {
 
 						JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 

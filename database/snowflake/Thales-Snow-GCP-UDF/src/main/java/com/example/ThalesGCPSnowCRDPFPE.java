@@ -79,18 +79,27 @@ public class ThalesGCPSnowCRDPFPE implements HttpFunction {
 		String protection_profile = System.getenv("protection_profile");
 		String mode = System.getenv("mode");
 		String datatype = System.getenv("datatype");
+
 		String dataKey = null;
 
 		boolean bad_data = false;
 		String jsonTagForProtectReveal = null;
 
+		String showrevealkey = "yes";
+
 		if (mode.equals("protect")) {
 			dataKey = "data";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			dataKey = "protected_data";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		String snowflakeuser = "snowflakeuser";
 		JsonArray snowflakedata = null;
@@ -142,7 +151,7 @@ public class ThalesGCPSnowCRDPFPE implements HttpFunction {
 			OkHttpClient client = new OkHttpClient().newBuilder().build();
 			MediaType mediaType = MediaType.parse("application/json");
 			String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
-			
+
 			// encrypt data
 			for (int i = 0; i < snowflakedata.size(); i++) {
 				JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
@@ -194,11 +203,19 @@ public class ThalesGCPSnowCRDPFPE implements HttpFunction {
 
 								if (jsonObject.has(jsonTagForProtectReveal)) {
 									protectedData = jsonObject.get(jsonTagForProtectReveal).getAsString();
-									if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("protect")) {
+									if (keymetadatalocation.equalsIgnoreCase("external")
+											&& mode.equalsIgnoreCase("protect")) {
 										externalkeymetadata = jsonObject.get("external_version").getAsString();
-									//	System.out.println("Protected Data ext key metadata need to store this: "
-									//			+ externalkeymetadata);
+										// System.out.println("Protected Data ext key metadata need to store this: "
+										// + externalkeymetadata);
 									}
+
+									if (keymetadatalocation.equalsIgnoreCase("internal")
+											&& mode.equalsIgnoreCase("protect") && !showrevealkeybool) {
+										if (protectedData.length() > 7)
+											protectedData = protectedData.substring(7);
+									}
+
 								} else if (jsonObject.has("error_message")) {
 									String errorMessage = jsonObject.get("error_message").getAsString();
 									System.out.println("error_message: " + errorMessage);

@@ -21,16 +21,13 @@ import java.util.Map;
 public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 //  @Override
 	/*
-	 * This test app to test the logic for a BigQuery Database User Defined
-	 * Function(UDF). It is an example of how to use Thales Cipher REST Data
-	 * Protection (CRDP) to protect sensitive data in a column. This example uses
-	 * Format Preserve Encryption (FPE) to maintain the original format of the data
-	 * so applications or business intelligence tools do not have to change in order
-	 * to use these columns. There is no need to deploy a function to run it.
+	 * This test app to test the logic for a BigQuery Database User Defined Function(UDF). It is an example of how to
+	 * use Thales Cipher REST Data Protection (CRDP) to protect sensitive data in a column. This example uses Format
+	 * Preserve Encryption (FPE) to maintain the original format of the data so applications or business intelligence
+	 * tools do not have to change in order to use these columns. There is no need to deploy a function to run it.
 	 * 
-	 * Note: This source code is only to be used for testing and proof of concepts.
-	 * Not production ready code. Was tested with CM 2.14 & CRDP 1.0 For more
-	 * information on CRDP see link below.
+	 * Note: This source code is only to be used for testing and proof of concepts. Not production ready code. Was
+	 * tested with CM 2.14 & CRDP 1.0 For more information on CRDP see link below.
 	 * https://thalesdocs.com/ctp/con/crdp/latest/admin/index.html
 	 * 
 	 * @author mwarner
@@ -38,24 +35,51 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 	 */
 
 	private static final Gson gson = new Gson();
+	private static final String BADDATATAG = new String("9999999999999999");
+
+	private static final String REVEALRETURNTAG = new String("data");
+	private static final String PROTECTRETURNTAG = new String("protected_data");
 
 	public static void main(String[] args) throws Exception
 
 	{
 		TestThalesGCPBigQueryCRDP nw2 = new TestThalesGCPBigQueryCRDP();
 
+		String requestprotectnbrinternal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
+				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
+				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
+				+ "    \"datatype\": \"charint\",\r\n" + "    \"mode\": \"protect\",\r\n"
+				+ "    \"protection_profile\": \"plain-nbr-internal\",\r\n"
+				+ "    \"keymetadatalocation\": \"internal\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
+				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"5678234\"\r\n" + "    ],\r\n" + "    [\r\n"
+				+ "      \"24\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"5\"\r\n" + "    ]\r\n" + "  ]\r\n" + "}";
+
+		String requestprotectnbrinternal_reveal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
+				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
+				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
+				+ "    \"datatype\": \"charint\",\r\n" + "    \"mode\": \"reveal\",\r\n"
+				+ "    \"protection_profile\": \"plain-nbr-internal\",\r\n"
+				+ "    \"keymetadatalocation\": \"internal\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
+				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"10010012159021\"\r\n" + "    ],\r\n" + "    [\r\n"
+				+ "      \"100100102\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"5\"\r\n" + "    ]\r\n" + "  ]\r\n"
+				+ "}";
+
 		String requestprotectinternal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
 				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
 				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
-				+ "    \"mode\": \"protect\",\r\n" + "    \"protection_profile\": \"plain-alpha-internal\"\r\n"
-				+ "  },\r\n" + "  \"calls\": [\r\n" + "    [\r\n" + "      \"Mark Warner\"\r\n" + "    ],\r\n"
-				+ "    [\r\n" + "      \"Bill Krott\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"David Cullen\"\r\n"
-				+ "    ]\r\n" + "  ]\r\n" + "}";
+				+ "    \"datatype\": \"char\",\r\n" + "    \"mode\": \"protect\",\r\n"
+				+ "    \"protection_profile\": \"plain-alpha-internal\",\r\n"
+				+ "    \"keymetadatalocation\": \"internal\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
+				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"Mark Warner\"\r\n" + "    ],\r\n" + "    [\r\n"
+				+ "      \"Bill Krott\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"David Cullen\"\r\n" + "    ]\r\n"
+				+ "  ]\r\n" + "}";
 
 		String requestprotectexternal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
 				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
 				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
-				+ "    \"mode\": \"protect\",\r\n" + "    \"protection_profile\": \"alpha-external\"\r\n" + "  },\r\n"
+				+ "    \"datatype\": \"char\",\r\n" + "    \"mode\": \"protect\",\r\n"
+				+ "    \"protection_profile\": \"alpha-external\",\r\n"
+				+ "    \"keymetadatalocation\": \"external\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
 				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"Mark Warner\"\r\n" + "    ],\r\n" + "    [\r\n"
 				+ "      \"Bill Krott\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"null\"\r\n" + "    ]\r\n"
 				+ "  ]\r\n" + "}";
@@ -63,21 +87,25 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 		String revealinternal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
 				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
 				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
-				+ "    \"mode\": \"reveal\",\r\n" + "    \"protection_profile\": \"plain-alpha-internal\"\r\n"
-				+ "  },\r\n" + "  \"calls\": [\r\n" + "    [\r\n" + "      \"100400120ep 3rbGWH\"\r\n" + "    ],\r\n"
-				+ "    [\r\n" + "      \"1004001xeBv udb4N\"\r\n" + "    ],\r\n" + "    [\r\n"
-				+ "      \"1004001r2ZQh UPd3Am\"\r\n" + "    ]\r\n" + "  ]\r\n" + "}";
+				+ "    \"datatype\": \"char\",\r\n" + "    \"mode\": \"reveal\",\r\n"
+				+ "    \"protection_profile\": \"plain-alpha-internal\",\r\n"
+				+ "    \"keymetadatalocation\": \"internal\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
+				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"100400120ep 3rbGWH\"\r\n" + "    ],\r\n" + "    [\r\n"
+				+ "      \"1004001xeBv udb4N\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"1004001r2ZQh UPd3Am\"\r\n"
+				+ "    ]\r\n" + "  ]\r\n" + "}";
 
 		String revealexternal = "{\r\n" + "  \"requestId\": \"124ab1c\",\r\n"
 				+ "  \"caller\": \"//bigquery.googleapis.com/projects/myproject/jobs/myproject:US.bquxjob_5b4c112c_17961fafeaf\",\r\n"
 				+ "  \"sessionUser\": \"test-user@test-company.com\",\r\n" + "  \"userDefinedContext\": {\r\n"
-				+ "    \"mode\": \"reveal\",\r\n" + "    \"protection_profile\": \"alpha-external\"\r\n" + "  },\r\n"
+				+ "    \"datatype\": \"char\",\r\n" + "    \"mode\": \"reveal\",\r\n"
+				+ "    \"protection_profile\": \"alpha-external\",\r\n"
+				+ "    \"keymetadatalocation\": \"external\",\r\n" + "    \"keymetadata\": \"1001001\"\r\n" + "  },\r\n"
 				+ "  \"calls\": [\r\n" + "    [\r\n" + "      \"BSTCa CrcLKT\"\r\n" + "    ],\r\n" + "    [\r\n"
 				+ "      \"3bvF qWMiyk\"\r\n" + "    ],\r\n" + "    [\r\n" + "      \"AFud mVfPi\"\r\n" + "    ]\r\n"
 				+ "  ]\r\n" + "}";
 
 		String response = null;
-		nw2.service(requestprotectexternal, response);
+		nw2.service(requestprotectnbrinternal_reveal, response);
 
 	}
 
@@ -91,28 +119,26 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 		String crdpip = System.getenv("CRDPIP");
 		String userName = System.getenv("CMUSER");
 		String password = System.getenv("CMPWD");
-		// returnciphertextforuserwithnokeyaccess = is a environment variable to express
-		// how data should be returned when the user above does not have access to the key and if doing a
-		// lookup in the userset
-		// and the user does not exist. If returnciphertextforuserwithnokeyaccess = null
+		// returnciphertextforuserwithnokeyaccess = is a environment variable to express how data should be returned
+		// when the user above does not have access to the key and if doing a
+		// lookup in the userset and the user does not exist. If returnciphertextforuserwithnokeyaccess = no
 		// then an error will be returned to the query, else the results set will provide ciphertext.
 		String returnciphertextforuserwithnokeyaccess = System.getenv("returnciphertextforuserwithnokeyaccess");
 		// yes,no
 		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.equalsIgnoreCase("yes");
-		// usersetlookup = should a userset lookup be done on the user from Big Query?  
+		// usersetlookup = should a userset lookup be done on the user from Cloud DB
 		// yes,no
 		String usersetlookup = System.getenv("usersetlookup");
-		// usersetID = should be the usersetid in CM to query.
+		// usersetidincm = should be the usersetid in CM to query.
 		String usersetID = System.getenv("usersetidincm");
-		// usersetlookupip = this is the IP address to query the userset. Currently it
-		// is
-		// the userset in CM but could be a memcache or other in memory db.
+		// usersetlookupip = this is the IP address to query the userset. Currently it is the userset in CM but could be
+		// a memcache or other in memory db.
 		String userSetLookupIP = System.getenv("usersetlookupip");
 		boolean usersetlookupbool = usersetlookup.equalsIgnoreCase("yes");
-		String keymetadatalocation = System.getenv("keymetadatalocation");
-		String external_version_from_ext_source = System.getenv("keymetadata");
-		String bigqueryreturnstring = null;
-		StringBuffer bigqueryreturndata = new StringBuffer();
+
+		String keymetadatalocation = null;
+		String external_version_from_ext_source = null;
+		String datatype = null;
 		String bigquerysessionUser = "";
 		JsonElement bigqueryuserDefinedContext = null;
 		String mode = null;
@@ -121,11 +147,16 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 		String formattedString = null;
 		JsonArray bigquerydata = null;
 		boolean bad_data = false;
+		JsonObject result = new JsonObject();
+		JsonArray replies = new JsonArray();
+		int nbrofrows = 0;
 
 		try {
 
 			// Parse JSON request and check for "name" field
 			JsonObject requestJson = null;
+			String jsonTagForProtectReveal = null;
+
 			try {
 				JsonElement requestParsed = gson.fromJson(request, JsonElement.class);
 
@@ -143,10 +174,11 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 					JsonObject location = requestJson.getAsJsonObject("userDefinedContext");
 					mode = location.get("mode").getAsString();
 					protection_profile = location.get("protection_profile").getAsString();
-					if (mode.equals("protect"))
-						dataKey = "data";
-					else
-						dataKey = "protected_data";
+					datatype = location.get("datatype").getAsString();
+					keymetadatalocation = location.get("keymetadatalocation").getAsString();
+					if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("reveal")) {
+						external_version_from_ext_source = location.get("keymetadata").getAsString();
+					}
 				}
 
 			} catch (JsonParseException e) {
@@ -155,8 +187,24 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 			}
 			bigquerydata = requestJson.getAsJsonArray("calls");
 
+			String showrevealkey = "yes";
+
+			if (mode.equals("protect")) {
+				dataKey = "data";
+				jsonTagForProtectReveal = PROTECTRETURNTAG;
+				if (keymetadatalocation.equalsIgnoreCase("internal")) {
+					showrevealkey = System.getenv("showrevealinternalkey");
+					if (showrevealkey == null)
+						showrevealkey = "yes";
+				}
+			} else {
+				dataKey = "protected_data";
+				jsonTagForProtectReveal = REVEALRETURNTAG;
+			}
+			boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
+
 			if (usersetlookupbool) {
-			// make sure cmuser is in Application Data Protection Clients Group
+				// make sure cmuser is in Application Data Protection Clients Group
 
 				boolean founduserinuserset = findUserInUserSet(bigquerysessionUser, userName, password, usersetID,
 						userSetLookupIP);
@@ -167,10 +215,6 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 			} else {
 				usersetlookupbool = false;
 			}
-
-			// Serialization
-
-			bigqueryreturndata.append("{ \"replies\": [");
 
 			String protectedData = null;
 			String externalkeymetadata = null;
@@ -183,18 +227,32 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 			crdp_payload.addProperty("protection_policy_name", protection_profile);
 
 			String sensitive = null;
-			for (int i = 0; i < bigquerydata.size(); i++) {
+			OkHttpClient client = new OkHttpClient().newBuilder().build();
+			MediaType mediaType = MediaType.parse("application/json");
+			String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
+
+			for (int i = 0; i < nbrofrows; i++) {
 
 				JsonArray bigquerytrow = bigquerydata.get(i).getAsJsonArray();
 
 				sensitive = checkValid(bigquerytrow);
 
 				if (sensitive.contains("notvalid") || sensitive.equalsIgnoreCase("null")) {
-					System.out.println("not valid or null");
+					if (datatype.equalsIgnoreCase("charint") || datatype.equalsIgnoreCase("nbr")) {
+						if (sensitive.contains("notvalid")) {
+							sensitive = sensitive.replace("notvalid", "");
+						} else
+							sensitive = BADDATATAG;
+
+					} else if (sensitive.equalsIgnoreCase("null") || sensitive.equalsIgnoreCase("notvalid")) {
+
+					} else if (sensitive.contains("notvalid")) {
+						sensitive = sensitive.replace("notvalid", "");
+
+					}
 					encdata = sensitive;
 				} else {
-					OkHttpClient client = new OkHttpClient().newBuilder().build();
-					MediaType mediaType = MediaType.parse("application/json");
+
 					crdp_payload.addProperty(dataKey, sensitive);
 					if (mode.equals("reveal")) {
 						crdp_payload.addProperty("username", bigquerysessionUser);
@@ -205,7 +263,7 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 					crdpjsonBody = crdp_payload.toString();
 					System.out.println(crdpjsonBody);
 					RequestBody body = RequestBody.create(mediaType, crdpjsonBody);
-					String urlStr = "http://" + crdpip + ":8090/v1/" + mode;
+
 					// String urlStr = "\"http://" + cmip + ":8090/v1/" + mode+ "\"";
 					System.out.println(urlStr);
 					Request crdp_request = new Request.Builder()
@@ -220,27 +278,20 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 						Gson gson = new Gson();
 						JsonObject jsonObject = gson.fromJson(responseBody, JsonObject.class);
 
-						if (mode.equals("protect")) {
-							if (jsonObject.has("protected_data")) {
-								protectedData = jsonObject.get("protected_data").getAsString();
-								if (keymetadatalocation.equalsIgnoreCase("external")) {
-									externalkeymetadata = jsonObject.get("external_version").getAsString();
-									System.out.println("Protected Data ext key metadata need to store this: "
-											+ externalkeymetadata);
-								}
-							} else if (jsonObject.has("error_message")) {
-								String errorMessage = jsonObject.get("error_message").getAsString();
-								System.out.println("error_message: " + errorMessage);
-								bqErrorMap.put(i, errorMessage);
-								bad_data = true;
-							} else
-								System.out.println("unexpected json value from results: ");
+						if (jsonObject.has(jsonTagForProtectReveal)) {
+							protectedData = jsonObject.get(jsonTagForProtectReveal).getAsString();
+							if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("protect")) {
+								externalkeymetadata = jsonObject.get("external_version").getAsString();
+								System.out.println(
+										"Protected Data ext key metadata need to store this: " + externalkeymetadata);
+							}
 
-						}
+							if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protect")
+									&& !showrevealkeybool) {
+								if (protectedData.length() > 7)
+									protectedData = protectedData.substring(7);
+							}
 
-						else if (jsonObject.has("data")) {
-							protectedData = jsonObject.get("data").getAsString();
-							System.out.println("Protected Data: " + protectedData);
 						} else if (jsonObject.has("error_message")) {
 							String errorMessage = jsonObject.get("error_message").getAsString();
 							System.out.println("error_message: " + errorMessage);
@@ -248,27 +299,24 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 							bad_data = true;
 						} else
 							System.out.println("unexpected json value from results: ");
+
+						System.out.println("Protected Data: " + protectedData);
+
 					} else {
 						System.err.println("Request failed with status code: " + crdp_response.code());
 					}
 
 					crdp_response.close();
+//		String showrevealkey = System.getenv("showrevealinternalkey");
 
 					encdata = protectedData;
 
 				}
-				bigqueryreturndata.append(encdata);
-				if (bigquerydata.size() == 1 || i == bigquerydata.size() - 1)
-					continue;
-				else
-					bigqueryreturndata.append(",");
-
+				replies.add(encdata);
 			} // end for loop
 
-			bigqueryreturndata.append("]}");
-
-			bigqueryreturnstring = new String(bigqueryreturndata);
-			formattedString = formatString(bigqueryreturnstring);
+			result.add("replies", replies);
+			formattedString = result.toString();
 
 		} catch (Exception e) {
 
@@ -276,8 +324,8 @@ public class TestThalesGCPBigQueryCRDP implements HttpFunction {
 			if (returnciphertextbool) {
 				if (e.getMessage().contains("1401")
 						|| (e.getMessage().contains("1001") || (e.getMessage().contains("1002")))) {
-					JsonObject result = new JsonObject();
-					JsonArray replies = new JsonArray();
+					result = new JsonObject();
+					replies = new JsonArray();
 					if (bigquerydata != null) {
 						for (int i = 0; i < bigquerydata.size(); i++) {
 							JsonArray innerArray = bigquerydata.get(i).getAsJsonArray();

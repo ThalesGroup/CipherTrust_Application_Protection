@@ -1,6 +1,5 @@
 package example;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -238,8 +237,9 @@ public class ThalesAWSSnowCADPFPEUDF implements RequestStreamHandler {
 		JsonObject bodyObject = new JsonObject();
 		JsonArray dataArray = new JsonArray();
 		JsonArray innerDataArray = new JsonArray();
-
-		for (int i = 0; i < snowflakedata.size(); i++) {
+		int nbrofrows = snowflakedata.size();
+		
+		for (int i = 0; i < nbrofrows; i++) {
 			JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 			for (int j = 0; j < snowflakerow.size(); j++) {
 				if (j == 1) {

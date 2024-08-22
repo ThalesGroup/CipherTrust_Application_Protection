@@ -63,7 +63,7 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 		String protect_nbr = "{ \"data\":\r\n" + "  [\r\n" + "    [ 0,  \"234242344\" ],\r\n"
 				+ "		[1,  \"6578-5545-7567\" ],\r\n" + "		[2,  \"3434\" ],\r\n" + "    [ 3,  \"333\" ]\r\n"
 				+ "  ]\r\n" + "}";
-		
+
 		String reveal_ext_nbr = "{ \"data\":\r\n" + "  [\r\n" + "    [ 0,  \"652425219\" ],\r\n"
 				+ "		[1,  \"6684-5327-7937\" ],\r\n" + "		[2,  \"5295\" ],\r\n" + "    [ 3,  \"856\" ]\r\n"
 				+ "  ]\r\n" + "}";
@@ -78,9 +78,9 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 				+ "		[1,  \"7nGV82KYDX001F\" ],\r\n" + "		[2,  \"GsrAUKzfje\" ],\r\n"
 				+ "    [ 3,  \"Qqce, QBv d7ErVAPM, teq ZD6sjHPecT\" ]\r\n" + "  ]\r\n" + "}";
 
-	//	String reveal_ext_nbr = "{ \"data\":\r\n" + "  [\r\n" + "    [ 0,  \"073675208\" ],\r\n"
-	//			+ "		[1,  \"5336-6160-6623\" ],\r\n" + "		[2,  \"1348\" ],\r\n" + "    [ 3,  \"054\" ]\r\n"
-	//			+ "  ]\r\n" + "}";
+		// String reveal_ext_nbr = "{ \"data\":\r\n" + " [\r\n" + " [ 0, \"073675208\" ],\r\n"
+		// + " [1, \"5336-6160-6623\" ],\r\n" + " [2, \"1348\" ],\r\n" + " [ 3, \"054\" ]\r\n"
+		// + " ]\r\n" + "}";
 
 //temp{"data":[[0,"073675208"],[1,"5336-6160-6623"],[2,"1348"],[3,"054"]]}
 
@@ -134,15 +134,25 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 		String jsonTagForProtectReveal = null;
 
 		boolean bad_data = false;
+
+		String showrevealkey = "yes";
+
 		if (mode.equals("protectbulk")) {
 			inputDataKey = "data_array";
 			outputDataKey = "protected_data_array";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			inputDataKey = "protected_data_array";
 			outputDataKey = "data_array";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
+
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		String snowflakeuser = "snowflakeuser";
 		JsonArray snowflakedata = null;
@@ -220,8 +230,7 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 					JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 
 					sensitive = checkValid(snowflakerow);
-			
-				
+
 					protection_profile = protection_profile.trim();
 					// Format the output
 					String formattedElement = String.format("\"protection_policy_name\" : \"%s\"", protection_profile);
@@ -258,7 +267,6 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 
 					}
 
-
 					if (count == batchsize - 1) {
 						crdp_payload.add(inputDataKey, crdp_payload_array);
 						String inputdataarray = null;
@@ -293,7 +301,7 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 							int success_count = jsonObject.get("success_count").getAsInt();
 							error_count = jsonObject.get("error_count").getAsInt();
 							if (error_count > 0)
-							System.out.println("errors " + error_count);
+								System.out.println("errors " + error_count);
 
 							for (JsonElement element : protectedDataArray) {
 
@@ -301,14 +309,20 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 								if (protectedDataObject.has(jsonTagForProtectReveal)) {
 
 									protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
-									System.out.println(protectedData);
 
+									if (keymetadatalocation.equalsIgnoreCase("internal")
+											&& mode.equalsIgnoreCase("protectbulk") && !showrevealkeybool) {
+										if (protectedData.length() > 7)
+											protectedData = protectedData.substring(7);
+									}
+									System.out.println(protectedData);
 									rownbranddata.add(dataIndex);
 									rownbranddata.add(new String(protectedData));
 									replies.add(rownbranddata);
 									rownbranddata = new JsonArray();
 									if (mode.equals("protectbulk")) {
-										if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("protect")) {
+										if (keymetadatalocation.equalsIgnoreCase("external")
+												&& mode.equalsIgnoreCase("protectbulk")) {
 											externalkeymetadata = protectedDataObject.get("external_version")
 													.getAsString();
 											System.out.println("Protected Data ext key metadata need to store this: "
@@ -378,7 +392,7 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 					int success_count = jsonObject.get("success_count").getAsInt();
 					error_count = jsonObject.get("error_count").getAsInt();
 					if (error_count > 0)
-					System.out.println("errors " + error_count);
+						System.out.println("errors " + error_count);
 
 					for (JsonElement element : protectedDataArray) {
 
@@ -386,14 +400,20 @@ public class ThalesGCPSnowCRDPBulkFPETester implements HttpFunction {
 						if (protectedDataObject.has(jsonTagForProtectReveal)) {
 
 							protectedData = protectedDataObject.get(jsonTagForProtectReveal).getAsString();
-							System.out.println(protectedData);
 
+							if (keymetadatalocation.equalsIgnoreCase("internal") && mode.equalsIgnoreCase("protectbulk")
+									&& !showrevealkeybool) {
+								if (protectedData.length() > 7)
+									protectedData = protectedData.substring(7);
+							}
+							System.out.println(protectedData);
 							rownbranddata.add(dataIndex);
 							rownbranddata.add(new String(protectedData));
 							replies.add(rownbranddata);
 							rownbranddata = new JsonArray();
 							if (mode.equals("protectbulk")) {
-								if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("protect")) {
+								if (keymetadatalocation.equalsIgnoreCase("external")
+										&& mode.equalsIgnoreCase("protectbulk")) {
 									externalkeymetadata = protectedDataObject.get("external_version").getAsString();
 									System.out.println("Protected Data ext key metadata need to store this: "
 											+ externalkeymetadata);
