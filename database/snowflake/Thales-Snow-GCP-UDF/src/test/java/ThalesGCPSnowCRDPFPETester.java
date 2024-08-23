@@ -115,13 +115,22 @@ public class ThalesGCPSnowCRDPFPETester implements HttpFunction {
 		String jsonTagForProtectReveal = null;
 
 		boolean bad_data = false;
+
+		String showrevealkey = "yes";
+
 		if (mode.equals("protect")) {
 			dataKey = "data";
 			jsonTagForProtectReveal = PROTECTRETURNTAG;
+			if (keymetadatalocation.equalsIgnoreCase("internal")) {
+				showrevealkey = System.getenv("showrevealinternalkey");
+				if (showrevealkey == null)
+					showrevealkey = "yes";
+			}
 		} else {
 			dataKey = "protected_data";
 			jsonTagForProtectReveal = REVEALRETURNTAG;
 		}
+		boolean showrevealkeybool = showrevealkey.equalsIgnoreCase("yes");
 
 		String snowflakeuser = "snowflakeuser";
 
@@ -230,11 +239,19 @@ public class ThalesGCPSnowCRDPFPETester implements HttpFunction {
 
 								if (jsonObject.has(jsonTagForProtectReveal)) {
 									protectedData = jsonObject.get(jsonTagForProtectReveal).getAsString();
-									if (keymetadatalocation.equalsIgnoreCase("external") && mode.equalsIgnoreCase("protect")) {
+									if (keymetadatalocation.equalsIgnoreCase("external")
+											&& mode.equalsIgnoreCase("protect")) {
 										externalkeymetadata = jsonObject.get("external_version").getAsString();
 										System.out.println("Protected Data ext key metadata need to store this: "
 												+ externalkeymetadata);
 									}
+
+									if (keymetadatalocation.equalsIgnoreCase("internal")
+											&& mode.equalsIgnoreCase("protect") && !showrevealkeybool) {
+										if (protectedData.length() > 7)
+											protectedData = protectedData.substring(7);
+									}
+
 								} else if (jsonObject.has("error_message")) {
 									String errorMessage = jsonObject.get("error_message").getAsString();
 									System.out.println("error_message: " + errorMessage);

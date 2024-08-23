@@ -465,26 +465,7 @@ public class ThalesAWSSnowCADPFPEBulkUDFTester implements RequestStreamHandler {
 		}
 		System.out.println("number of chunks = " + numberofchunks);
 		System.out.println("snowflakereturnstring = " + snowflakereturnstring);
-		/*
-		 * JsonObject inputObj = gson.fromJson(snowflakereturnstring, JsonObject.class);
-		 * 
-		 * // Create the desired format JsonObject formattedObj = new JsonObject();
-		 * formattedObj.addProperty("statusCode",
-		 * inputObj.get("statusCode").getAsInt());
-		 * 
-		 * JsonObject bodyObj = new JsonObject(); JsonArray dataArray =
-		 * inputObj.getAsJsonObject("body").getAsJsonArray("data"); bodyObj.add("data",
-		 * dataArray);
-		 * 
-		 * formattedObj.addProperty("body", bodyObj.toString());
-		 * 
-		 * // Convert to formatted JSON string String formattedJson =
-		 * gson.toJson(formattedObj);
-		 * 
-		 * System.out.println("results" + formattedJson);
-		 */
 
-		// outputStream.write(formattedJson.getBytes());
 
 	}
 
@@ -551,8 +532,8 @@ public class ThalesAWSSnowCADPFPEBulkUDFTester implements RequestStreamHandler {
 		JsonObject bodyObject = new JsonObject();
 		JsonArray dataArray = new JsonArray();
 		JsonArray innerDataArray = new JsonArray();
-
-		for (int i = 0; i < snowflakedata.size(); i++) {
+		int nbrofrows = snowflakedata.size();
+		for (int i = 0; i < nbrofrows; i++) {
 			JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 			for (int j = 0; j < snowflakerow.size(); j++) {
 				if (j == 1) {
