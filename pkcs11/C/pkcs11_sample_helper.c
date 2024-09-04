@@ -1295,7 +1295,7 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
 CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATTRIBUTE_TYPE attrTypes[], char *pKeyLabelOut)
 {
     CK_RV		rc = CKR_OK;
-    CK_DATE     createDate, endDate;
+    CK_DATE     createDate = {0}, endDate = {0};
     CK_BYTE     keyIdBuf[256];
     char        keyLabel[256];
     char        keyUuid[128];
@@ -1311,10 +1311,10 @@ CK_RV getSymAttributesValue(CK_OBJECT_HANDLE hKey, CK_ULONG keyDateCount, CK_ATT
     char        ch_mday[3];
 
     char        serialno[256]= {0};
-    char        custom[5][1024];
+    char        custom[5][1024] = { 0 };
 
     CK_BBOOL    bCacheOnHost, bVersioned, blaSensitive, blnExtractable;
-    int         custom1Index = 17;
+    int         custom1Index = 19;
 
     CK_ULONG    ulCreationTime, ulDeactivateTime = 0;
     CK_ATTRIBUTE_PTR pKeyTemplate = NULL;

@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
 			}
 			for (i = 0; i < numObjects; i++) {
 				printf("\nAttributes for key number %d\n", i + 1);
-				getAttributesValue(phKeys[i], 0, NULL, NULL);
+				getAttributesValue(phKeys[i]);
 			}
 
         }
