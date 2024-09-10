@@ -45,20 +45,8 @@ namespace CADP.Pkcs11Sample
                         case "EC":
                             cka_keyType = CKK.CKK_EC;
                             break;
-                        case "SHA1-HMAC":
-                            cka_keyType = CKK.CKK_SHA_1_HMAC;
-                            break;
-                        case "SHA224-HMAC":
-                            cka_keyType = CKK.CKK_SHA224_HMAC;
-                            break;
                         case "SHA256-HMAC":
                             cka_keyType = CKK.CKK_SHA256_HMAC;
-                            break;
-                        case "SHA384-HMAC":
-                            cka_keyType = CKK.CKK_SHA384_HMAC;
-                            break;
-                        case "SHA512-HMAC":
-                            cka_keyType = CKK.CKK_SHA512_HMAC;
                             break;
                         default:
                             Console.WriteLine("Invalid key type provided...");

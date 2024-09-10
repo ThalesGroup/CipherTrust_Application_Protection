@@ -116,11 +116,7 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      AES ... AES KeyType
      RSA ... RSA KeyType
      EC ... EC KeyType
-     SHA1-HMAC ... SHA1-HMAC KeyType
-     SHA224-HMAC ... SHA224-HMAC KeyType
      SHA256-HMAC ... SHA256-HMAC KeyType
-     SHA384-HMAC ... SHA384-HMAC KeyType
-     SHA512-HMAC ... SHA512-HMAC KeyType
     
 
 ### Choices for the -U utf mode option:
