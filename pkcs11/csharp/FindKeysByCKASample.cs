@@ -48,9 +48,6 @@ namespace CADP.Pkcs11Sample
                         case "SHA1-HMAC":
                             cka_keyType = CKK.CKK_SHA_1_HMAC;
                             break;
-                        case "SHA224-HMAC":
-                            cka_keyType = CKK.CKK_SHA224_HMAC;
-                            break;
                         case "SHA256-HMAC":
                             cka_keyType = CKK.CKK_SHA256_HMAC;
                             break;
