@@ -96,7 +96,10 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t AES ... AES KeyType");
             Console.WriteLine("\t RSA ... RSA KeyType");
             Console.WriteLine("\t EC ... EC KeyType");
+            Console.WriteLine("\t SHA1-HMAC ... SHA1-HMAC KeyType");
             Console.WriteLine("\t SHA256-HMAC ... SHA256-HMAC KeyType");
+            Console.WriteLine("\t SHA384-HMAC ... SHA384-HMAC KeyType");
+            Console.WriteLine("\t SHA512-HMAC ... SHA512-HMAC KeyType");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -U utf mode option:");
             Console.WriteLine("\t ASCII ........ASCII");
