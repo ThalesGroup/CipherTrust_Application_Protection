@@ -303,7 +303,7 @@ void usage()
     printf ("-ct cached_time cached time for key in minutes\n");
     printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.\n");
     printf ("-I Non-unique searchable ID (CKA_ID).\n");
-    printf ("-kt search on the basis of key type AES|HMAC-SHA256|RSA etc.\n");
+    printf ("-kt search on the basis of key type AES|HMAC-SHA1, HMAC-SHA256, HMAC-SHA384, HMAC-SHA512|RSA|EC .\n");
     printf ("-z key_size key size for symmetric key in bytes.\n");
     printf ("-c curve oid: for ECC keys only.\n");
     printf ("-C ... clear alias\n");
