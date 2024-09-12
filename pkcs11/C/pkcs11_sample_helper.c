@@ -520,7 +520,7 @@ CK_KEY_TYPE getKeyType(char *keyType)
         else if (strncmp(keyType, "EC", 2) == 0) return CKK_EC;
         else if (strncmp(keyType, "HMAC-SHA1", 9) == 0) return CKK_SHA_1_HMAC;
         else if (strncmp(keyType, "HMAC-SHA256", 11) == 0) return CKK_SHA256_HMAC;
-        else if (strncmp(keyType, "HAMC-SHA384", 11) == 0) return CKK_SHA384_HMAC;
+        else if (strncmp(keyType, "HMAC-SHA384", 11) == 0) return CKK_SHA384_HMAC;
         else if (strncmp(keyType, "HMAC-SHA512", 11) == 0) return CKK_SHA512_HMAC;
 }
 
@@ -641,7 +641,7 @@ CK_RV findKey( char* keySearchId, int keyidType, CK_OBJECT_CLASS keyType, CK_OBJ
  ************************************************************************
  */
 
-CK_RV findKeysByCkaType(CK_KEY_TYPE *keytype, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys)
+CK_RV findKeysByCkaType(CK_KEY_TYPE keytype, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys)
 {
     CK_RV rc = CKR_OK;
 

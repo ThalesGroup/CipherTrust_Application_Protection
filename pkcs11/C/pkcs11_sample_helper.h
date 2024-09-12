@@ -489,4 +489,9 @@ CK_RV readObjectBytes( FILE * fp, CK_BYTE_PTR pObjBuf, CK_ULONG * pulObjLen, int
 CK_RV findKeysByIdAttr(char* keySearchId, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys);
 
 CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey);
+
+CK_KEY_TYPE getKeyType(char *keyType);
+
+CK_RV findKeysByCkaType(CK_KEY_TYPE keytype, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys);
+
 #endif /* __pkcs11_sample_helper_h__ */
