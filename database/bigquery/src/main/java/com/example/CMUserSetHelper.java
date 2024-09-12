@@ -1,6 +1,5 @@
 package com.example;
 
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -61,9 +60,6 @@ public class CMUserSetHelper {
 		this.usersetid = usersetid;
 		this.cmIP = cmIP;
 		this.apiUrlGetUsers = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users?name=";
-		// this.apiUrlGetUsers = "https://" + cmIP +
-		// "/api/v1/data-protection/user-sets/" + usersetid + "/users?limit=" +
-		// this.usersetlimit + "&name=";
 		this.addusertouserset = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users";
 		this.authUrl = "https://" + cmIP + "/api/v1/auth/tokens";
 	}
@@ -75,12 +71,9 @@ public class CMUserSetHelper {
 		String cmip = args[2];
 		String usersetid = args[3];
 		String filePath = args[4];
-
-		// CMUserSetHelper("32d89a8d-efac-4c50-9b53-f51d0c03413e",
 		CMUserSetHelper cmusersetHelper = new CMUserSetHelper(usersetid, cmip);
 		int totalrecords = 0;
 
-		// String apiUrl = apiUrlGetUsers;
 		String jwthtoken = geAuthToken(cmusersetHelper.authUrl, username, password);
 
 		String newtoken = "Bearer " + removeQuotes(jwthtoken);
@@ -94,6 +87,7 @@ public class CMUserSetHelper {
 		if (cmusersetHelper.chunksize > totoalnbrofrecords) {
 			cmusersetHelper.chunksize = totoalnbrofrecords / 2;
 		}
+		//totalrecords = cmusersetHelper.addAUserToUserSet(cmusersetHelper.addusertouserset, newtoken);
 		totalrecords = cmusersetHelper.addAUserToUserSetFromFile(cmusersetHelper.addusertouserset, newtoken, filePath);
 		System.out.println("Totalrecords inserted into Userset  " + cmusersetHelper.usersetid + " = " + totalrecords);
 
@@ -188,7 +182,6 @@ public class CMUserSetHelper {
 
 			while ((line = br.readLine()) != null) {
 				totalnbrofrecords++;
-				// Append the email address to the payload
 				payloadBuilder.append("\"").append(line).append("\",");
 				count++;
 
@@ -373,7 +366,7 @@ public class CMUserSetHelper {
 		String jStr = "{\"username\":\"" + usernb + "\",\"password\":\"" + pwd + "\"}";
 		disableCertValidation();
 
-		String totalstr = null;
+		String jwtstr = null;
 		try {
 			URL url = new URL(apiUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -394,22 +387,22 @@ public class CMUserSetHelper {
 			reader.close();
 
 			JsonObject input = null;
-			JsonElement total = null;
+			JsonElement jwt = null;
 			JsonElement rootNode = JsonParser.parseString(response.toString()).getAsJsonObject();
 			if (rootNode.isJsonObject()) {
 				input = rootNode.getAsJsonObject();
 				if (input.isJsonObject()) {
-					total = input.get("jwt");
+					jwt = input.get("jwt");
 				}
 			}
-			JsonPrimitive column = total.getAsJsonPrimitive();
-			totalstr = column.getAsJsonPrimitive().toString();
+			JsonPrimitive column = jwt.getAsJsonPrimitive();
+			jwtstr = column.getAsJsonPrimitive().toString();
 			connection.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return totalstr;
+		return jwtstr;
 
 	}
 
@@ -433,7 +426,7 @@ public class CMUserSetHelper {
 
 		disableCertValidation();
 
-		String totalstr = null;
+		String jwtstr = null;
 		try {
 			URL url = new URL(apiUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -455,22 +448,22 @@ public class CMUserSetHelper {
 			if (debug)
 				System.out.println("response " + response);
 			JsonObject input = null;
-			JsonElement total = null;
+			JsonElement jwt = null;
 			JsonElement rootNode = JsonParser.parseString(response.toString()).getAsJsonObject();
 			if (rootNode.isJsonObject()) {
 				input = rootNode.getAsJsonObject();
 				if (input.isJsonObject()) {
-					total = input.get("jwt");
+					jwt = input.get("jwt");
 				}
 			}
-			JsonPrimitive column = total.getAsJsonPrimitive();
-			totalstr = column.getAsJsonPrimitive().toString();
+			JsonPrimitive column = jwt.getAsJsonPrimitive();
+			jwtstr = column.getAsJsonPrimitive().toString();
 			connection.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return totalstr;
+		return jwtstr;
 
 	}
 
