@@ -296,14 +296,14 @@ static CK_RV setKeyLabel(CK_OBJECT_HANDLE hKey, char *newlabel)
 
 void usage()
 {
-    printf ("Usage: pkcs11_sample_attributes -p pin -s slotID [-k keyName] [-kp keyPairName] [-i {k|m|u}:identifier] [-g gen_key_action] [-a alias] [-c curve_oid] [-z key_size] [-ct cached_time] [-ls lifespan] [-1 customAttribute1] [-2 customAttribute2] [-3 customAttribute3] [-4 customAttribute4] [-5 customAttribute5] [-C] [-D] [-Z] [-m module]\n");
+    printf ("Usage: pkcs11_sample_attributes -p pin -s slotID [-k keyName] [-kp keyPairName] [-i {k|m|u}:identifier] [-g gen_key_action] [-a alias] [-c curve_oid] [-z key_size] [-ct cached_time] [-ls lifespan] [-1 customAttribute1] [-2 customAttribute2] [-3 customAttribute3] [-4 customAttribute4] [-5 customAttribute5] [-C] [-D] [-Z] [-kt keytype] [-m module]\n");
     printf ("-g gen_key_action: 0, 1, 2, or 3.  versionCreate: 0, versionRotate: 1, versionMigrate: 2, nonVersionCreate: 3\n");
     printf ("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     printf ("-a alias: key alias, an alias can be used as part of template during key creation. Looking up an existing key by means of an alias is not supported in this sample program.\n");
     printf ("-ct cached_time cached time for key in minutes\n");
     printf ("-ls lifespan: how many days until next version will be automatically rotated(created); template with lifespan will be versioned key automatically.\n");
-    printf ("-I Non-unique searchable ID (CKA_ID).");
-    printf ("-kt search on the basis of key type AES|HMAC-SHA256|RSA etc.");
+    printf ("-I Non-unique searchable ID (CKA_ID).\n");
+    printf ("-kt search on the basis of key type AES|HMAC-SHA256|RSA etc.\n");
     printf ("-z key_size key size for symmetric key in bytes.\n");
     printf ("-c curve oid: for ECC keys only.\n");
     printf ("-C ... clear alias\n");
