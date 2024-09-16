@@ -334,6 +334,7 @@ namespace CADP.Pkcs11Sample
                 ckmMechanism = CKM.CKM_ECDSA_KEY_PAIR_GEN;
             }
             else {
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
                 publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
                 publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
 
