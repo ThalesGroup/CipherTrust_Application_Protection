@@ -149,10 +149,18 @@ namespace CADP.NetCoreNaeSamples
                 /* For FPE set IV only when data size is greater than its block size eg CARD10: 56, CARD26: 40, CARD62:32.
                  * UNICODE, the block size is calculated based on Cardinality. */
 
-                /*Set IV only when data size is more than 56 Bytes */
-                if (inputBytes.Length > 56)
+                /*Set IV only when data size is more than block size of the cardinality. */
+                // The block size for CARD 10.
+                var blockSizeForCard10 = new KeyValuePair<int, int>(10, 56);
+                if (inputBytes.Length > blockSizeForCard10.Value)
                 {
-                    byte[] iv = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5 };
+                    byte[] iv = new byte[blockSizeForCard10.Value];
+                    Random random = new Random();
+                    for (int i = 0; i < blockSizeForCard10.Value; i++)
+                    {
+                        iv[i] = (byte)random.Next(0, blockSizeForCard10.Key);
+                    }
+
                     key.IV = iv;
                 }
 
