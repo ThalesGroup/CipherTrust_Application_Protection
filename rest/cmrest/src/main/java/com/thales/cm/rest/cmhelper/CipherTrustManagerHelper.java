@@ -64,6 +64,7 @@ public class CipherTrustManagerHelper {
 	public String username;
 	public String password;
 	public String dataformat;
+	public String iv ;
 
 	public static final String endbracket = "}";
 	public static final int digitblocklen = 56;
@@ -80,7 +81,6 @@ public class CipherTrustManagerHelper {
 	public static final String versiontag = "\"version\":";
 	public static final String plaintexttag = "{\"plaintext\":";
 	public static final String tag = "kBr5A0fbPjPg7lS1bB6wfw==";
-	public static final String iv = "VCC3VwxWu6Z6jfQw";
 	public static final String aadtag = "\"aad\":";
 	public static final String padtag = "\"pad\":";
 	public static final String rsapad = "\"oaep\"";
@@ -132,6 +132,10 @@ public class CipherTrustManagerHelper {
 				cmdebug = env.get(envName);
 				if (cmdebug.equalsIgnoreCase("1"))
 					System.out.println("cmdebug=" + cmdebug);
+			} else if (envName.equalsIgnoreCase("iv")) {
+				iv = env.get(envName);
+				if (cmdebug.equalsIgnoreCase("1"))
+					System.out.println("iv=" + iv);
 			}
 			if (cmdebug.equalsIgnoreCase("1"))
 				System.out.format("%s=%s%n", envName, env.get(envName));
@@ -788,7 +792,7 @@ public class CipherTrustManagerHelper {
 		String body = null;
 
 		body = ciphertexttag + quote + sensitive + quote + comma + tagtag + quote + enctag + quote + comma + modetag
-				+ quote + encmode + quote + comma + idtag + quote + this.key + quote + comma + ivtag + quote + iv
+				+ quote + encmode + quote + comma + idtag + quote + this.key + quote + comma + ivtag + quote + this.iv
 				+ quote + comma + aadtag + quote + aad + quote + endbracket;
 
 		return body;
@@ -810,7 +814,7 @@ public class CipherTrustManagerHelper {
 				byte[] dataBytes = sensitive.getBytes();
 				String plaintextbase64 = Base64.getEncoder().encodeToString(dataBytes);
 				body = plaintexttag + quote + plaintextbase64 + quote + comma + modetag + quote + encmode + quote
-						+ comma + idtag + quote + this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag
+						+ comma + idtag + quote + this.key + quote + comma + ivtag + quote + this.iv + quote + comma + aadtag
 						+ quote + aad + quote + endbracket;
 			}
 
@@ -832,7 +836,7 @@ public class CipherTrustManagerHelper {
 			} else {
 
 				body = ciphertexttag + quote + sensitive + quote + comma + modetag + quote + encmode + quote + comma
-						+ idtag + quote + this.key + quote + comma + ivtag + quote + iv + quote + comma + aadtag + quote
+						+ idtag + quote + this.key + quote + comma + ivtag + quote + this.iv + quote + comma + aadtag + quote
 						+ aad + quote + endbracket;
 
 			}
