@@ -36,7 +36,6 @@ import java.security.NoSuchProviderException;
 public class ThalesProtectAppDecryptFPE extends ScalarFunctionFactory {
 
 	String username = "admin";
-	String password = "YoursuperSecret!";
 	String keyName = "MyAESEncryptionKey26";
 	NAESession session = null;
 	NAEKey key = null;
@@ -71,7 +70,7 @@ public class ThalesProtectAppDecryptFPE extends ScalarFunctionFactory {
 		public void setup(ServerInterface srvInterface, SizedColumnTypes argTypes) {
 
 			srvInterface.log("In setup");
-			session = NAESession.getSession(username, password.toCharArray(), "hello".toCharArray());
+			session = NAESession.getSession(username, "Yoursuper!".toCharArray(), "hello".toCharArray());
 			 key = NAEKey.getSecretKey(keyName, session);
 			 param = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
 					.build();
