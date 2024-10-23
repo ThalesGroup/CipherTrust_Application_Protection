@@ -8,3 +8,4 @@ Integrations or Sample Code for databases using CipherTrust Database Protection 
 [Snowflake](snowflake)
 [BigQuery](bigquery)
 [Redshift](redshift)
+[Databricks](databricks)
