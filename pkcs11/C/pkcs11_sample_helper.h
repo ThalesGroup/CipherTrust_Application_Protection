@@ -180,6 +180,7 @@ extern CK_BBOOL             bNeverExtractable;
 #define CKA_THALES_OBJECT_UUID           ( CKA_THALES_DEFINED | 0x87 )
 #define CKA_THALES_OBJECT_MUID           ( CKA_THALES_DEFINED | 0x88 )
 #define CKA_THALES_OBJECT_IKID           ( CKA_THALES_DEFINED | 0x89 )
+#define CKA_THALES_KEY_ACTION_DELETE     ( CKA_THALES_DEFINED | 0x0104 )
 
 #define CKA_THALES_BASE_LABEL            ( CKA_THALES_DEFINED | 0x71 )
 #define CKA_THALES_BASE_ALIAS            ( CKA_THALES_DEFINED | 0x72 )
