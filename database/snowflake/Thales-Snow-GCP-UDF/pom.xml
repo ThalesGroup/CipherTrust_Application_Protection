@@ -1,0 +1,136 @@
+
+
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Thales</groupId>
+  <artifactId>Thales-Snow-GCP-UDF</artifactId>
+  <version>0.0.9-SNAPSHOT</version>
+	<properties>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<commons-collections4.version>4.4</commons-collections4.version>
+		<bouncycastle.version>1.70</bouncycastle.version>
+		<org.apache.commons.codec.version>1.10
+		</org.apache.commons.codec.version>
+		<guava.version>31.1-jre</guava.version>
+		<gson.version>2.9.0</gson.version>
+		<log4j-api.version>2.17.2</log4j-api.version>
+		<log4j-core.version>2.17.2</log4j-core.version>
+		<jar.version>.000</jar.version>
+	</properties>
+	<name>Thales-Snow-GCP-UDF</name>
+	<dependencies>
+			<dependency>
+			<groupId>io.github.thalescpl-io.cadp</groupId>
+			<artifactId>CADP_for_JAVA</artifactId>
+			<version>8.16.0.000</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.12.0</version>
+		</dependency>
+				<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${org.apache.commons.codec.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.code.findbugs</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId>jsr305</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.errorprone</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId>error_prone_annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId>listenablefuture</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.j2objc</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId> j2objc-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.checkerframework</groupId> <!-- Exclude Project-D from Project-B -->
+					<artifactId>checker-qual</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+		<dependency>
+
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>4.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud.functions</groupId>
+			<artifactId>functions-framework-api</artifactId>
+			<version>1.0.4</version>
+			<scope>provided</scope>
+		</dependency>
+			<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j-core.version}</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.cloud.functions</groupId>
+				<artifactId>function-maven-plugin</artifactId>
+				<version>0.10.1</version>
+				<configuration>
+					<functionTarget>com.example.HelloWorld</functionTarget>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

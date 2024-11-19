@@ -12,12 +12,20 @@ The following samples show how to perform crypto operations with various ciphers
 * CryptoOpRSAEncDec.cs
   * This sample shows how to perform *crypto operations* (Encrypt and Decrypt) using a **RSA** key.
 * CryptoOpRsaSignVerify.cs
-  * This sample shows how to CMS *sign data and verify signed data* using **RSA** key.
+  * This sample shows how to *sign data and verify signed data* using **RSA** key.
 * CryptoMultiThreadedHmac.cs
   * This sample shows how to use multiple threads that share the same session and perform mac operations.*
 * CryptoOpFpe.cs
   * This sample shows how to perform *crypto operations* (Encrypt and Decrypt) using **FPE**.
-
+* CryptoOpECSignVerify.cs
+  * This sample shows how to perform *sign data and verify signed data* using **EC** key.
+* CryptoOpFpeWithEncoding.cs
+  * This sample shows how to encrypt and decrypt data using FPE Unicode with different Encodings
+* PersistentCachingSample.cs
+  * This sample shows how to perform *crypto operations* using persistent cache.
+* CryptoOpFileEncryptionDecryption.cs
+  * This sample shows how to perform Encrypt and Decrypt a file.
+  
 ## Prerequisites: 
 In order to run C# samples, 
 1. .NET 6.0 or higher must be installed.
@@ -33,4 +41,4 @@ In order to run C# samples,
     * [Windows Only] `SampleApp.exe` at location `\bin\release\net6.0` using terminal. Example: `SampleApp.exe`  
 
 ## More Information
-For more information on CADP for .NET Core, refer to the [CADP for .NET Core user guide](https://thalesdocs.com/ctp/con/cadp/cadp-netcore/latest/index.html).
+For more information on CADP for .NET Core, refer to the [CADP for .NET Core user guide](https://thalesdocs.com/ctp/con/cadp/cadp-netcore/alpha-8.14.0/index.html).

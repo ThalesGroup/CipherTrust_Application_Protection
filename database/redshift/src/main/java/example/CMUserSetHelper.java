@@ -1,5 +1,4 @@
-package example;
-
+package com.example;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -57,11 +56,10 @@ public class CMUserSetHelper {
 	static int CHUNKSIZEMAX = 100;
 
 	public CMUserSetHelper(String usersetid, String cmIP) {
-		
+
 		this.usersetid = usersetid;
 		this.cmIP = cmIP;
-				this.apiUrlGetUsers = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users?name=";
-		//this.apiUrlGetUsers = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users?limit=" + this.usersetlimit + "&name=";
+		this.apiUrlGetUsers = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users?name=";
 		this.addusertouserset = "https://" + cmIP + "/api/v1/data-protection/user-sets/" + usersetid + "/users";
 		this.authUrl = "https://" + cmIP + "/api/v1/auth/tokens";
 	}
@@ -73,19 +71,15 @@ public class CMUserSetHelper {
 		String cmip = args[2];
 		String usersetid = args[3];
 		String filePath = args[4];
-		// CMUserSetHelper("716f01a6-5cab-4799-925a-6dc2d8712fc1","20.241.70.238");
-		//CMUserSetHelper("32d89a8d-efac-4c50-9b53-f51d0c03413e",
-		CMUserSetHelper cmusersetHelper = new CMUserSetHelper(usersetid,
-				cmip);
+		CMUserSetHelper cmusersetHelper = new CMUserSetHelper(usersetid, cmip);
 		int totalrecords = 0;
 
-		// String apiUrl = apiUrlGetUsers;
-		String jwthtoken = geAuthToken(cmusersetHelper.authUrl,username, password);
+		String jwthtoken = geAuthToken(cmusersetHelper.authUrl, username, password);
 
 		String newtoken = "Bearer " + removeQuotes(jwthtoken);
-	 
 
-	//	String filePath = "C:\\Users\\t0185905\\workspace\\CT-VL-GCP\\src\\main\\java\\com\\example\\emailAddresses.txt";
+		// String filePath =
+		// "C:\\Users\\t0185905\\workspace\\CT-VL-GCP\\src\\main\\java\\com\\example\\emailAddresses.txt";
 		RandomAccessFile file = new RandomAccessFile(filePath, "r");
 		if (cmusersetHelper.chunksize > CHUNKSIZEMAX)
 			cmusersetHelper.chunksize = CHUNKSIZEMAX;
@@ -93,6 +87,7 @@ public class CMUserSetHelper {
 		if (cmusersetHelper.chunksize > totoalnbrofrecords) {
 			cmusersetHelper.chunksize = totoalnbrofrecords / 2;
 		}
+		//totalrecords = cmusersetHelper.addAUserToUserSet(cmusersetHelper.addusertouserset, newtoken);
 		totalrecords = cmusersetHelper.addAUserToUserSetFromFile(cmusersetHelper.addusertouserset, newtoken, filePath);
 		System.out.println("Totalrecords inserted into Userset  " + cmusersetHelper.usersetid + " = " + totalrecords);
 
@@ -102,12 +97,10 @@ public class CMUserSetHelper {
 	 * Returns an boolean if user found
 	 * <p>
 	 * 
-	 * @param user
-	 *            user to find
-	 * @param newtoken
-	 *            jwt token to use
+	 * @param user     user to find
+	 * @param newtoken jwt token to use
 	 * @return boolean true if found in userset
-	 * @throws CustomException 
+	 * @throws CustomException
 	 */
 	public boolean findUserInUserSet(String user, String newtoken) throws CustomException {
 		boolean found = false;
@@ -115,7 +108,7 @@ public class CMUserSetHelper {
 		String apiUrl = this.apiUrlGetUsers + user;
 
 		apiUrl = removeQuotes(apiUrl);
-		
+
 		try {
 			URL url = new URL(apiUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -152,8 +145,8 @@ public class CMUserSetHelper {
 
 			if (i > 0) {
 				found = true;
-		
-			} 
+
+			}
 			connection.disconnect();
 		} catch (Exception e) {
 			if (e.getMessage().contains("403")) {
@@ -165,18 +158,16 @@ public class CMUserSetHelper {
 		return found;
 
 	}
-	
+
 	/**
-	 * Loads users from a file to the userset.  Returns an int of number of users added. 
+	 * Loads users from a file to the userset. Returns an int of number of users
+	 * added.
 	 * <p>
 	 * 
-	 * @param url
-	 *            url to userset api
-	 * @param newtoken
-	 *            jwt token to use
-	 * @param filePath
-	 *            file to load          
-	 * @return int  totalnumberofrecords added to userset
+	 * @param url      url to userset api
+	 * @param newtoken jwt token to use
+	 * @param filePath file to load
+	 * @return int totalnumberofrecords added to userset
 	 */
 
 	public int addAUserToUserSetFromFile(String url, String newtoken, String filePath) throws IOException {
@@ -191,7 +182,6 @@ public class CMUserSetHelper {
 
 			while ((line = br.readLine()) != null) {
 				totalnbrofrecords++;
-				// Append the email address to the payload
 				payloadBuilder.append("\"").append(line).append("\",");
 				count++;
 
@@ -221,20 +211,17 @@ public class CMUserSetHelper {
 	}
 
 	/**
-	 * Loads users from a file to the userset.  Returns an int of number of users added. 
+	 * Loads users from a file to the userset. Returns an int of number of users
+	 * added.
 	 * <p>
 	 * 
-	 * @param payloadBuilder
-	 *            payload for CM call that contains users to add
-	 * @param newtoken
-	 *            jwt token to use
-	 * @param url
-	 *            url to peform inserts       
-	 * @return int  response code
+	 * @param payloadBuilder payload for CM call that contains users to add
+	 * @param newtoken       jwt token to use
+	 * @param url            url to peform inserts
+	 * @return int response code
 	 */
-	
-	public static int makeCMCall(StringBuilder payloadBuilder, String newtoken, String url)
-			throws IOException {
+
+	public static int makeCMCall(StringBuilder payloadBuilder, String newtoken, String url) throws IOException {
 
 		payloadBuilder.deleteCharAt(payloadBuilder.length() - 1); // Remove the trailing comma
 		payloadBuilder.append("]}");
@@ -288,15 +275,14 @@ public class CMUserSetHelper {
 	}
 
 	/**
-	 * Simple sample of showing how to load a couple of users to the userset. Returns an int of number of users added. 
+	 * Simple sample of showing how to load a couple of users to the userset.
+	 * Returns an int of number of users added.
 	 * <p>
 	 * 
-	 * @param url
-	 *            url to userset api
-	 * @param newtoken
-	 *            jwt token to use
-     *
-	 * @return int  response code
+	 * @param url      url to userset api
+	 * @param newtoken jwt token to use
+	 *
+	 * @return int response code
 	 */
 	public static int addAUserToUserSet(String url, String newtoken) throws IOException {
 		boolean found = false;
@@ -367,15 +353,12 @@ public class CMUserSetHelper {
 	 * Get JWT from CM
 	 * <p>
 	 * 
-	 * @param apiUrl
-	 *            url to CM auth
-	 * @param username
-	 *            username on CM
-	 * @param pwd
-	 *            password on CM
-	 * @return String  jwt
+	 * @param apiUrl   url to CM auth
+	 * @param username username on CM
+	 * @param pwd      password on CM
+	 * @return String jwt
 	 */
-	
+
 	public static String geAuthToken(String apiUrl, String usernb, String pwd) throws Exception
 
 	{
@@ -383,7 +366,7 @@ public class CMUserSetHelper {
 		String jStr = "{\"username\":\"" + usernb + "\",\"password\":\"" + pwd + "\"}";
 		disableCertValidation();
 
-		String totalstr = null;
+		String jwtstr = null;
 		try {
 			URL url = new URL(apiUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -403,38 +386,34 @@ public class CMUserSetHelper {
 			}
 			reader.close();
 
-		 
 			JsonObject input = null;
-			JsonElement total = null;
+			JsonElement jwt = null;
 			JsonElement rootNode = JsonParser.parseString(response.toString()).getAsJsonObject();
 			if (rootNode.isJsonObject()) {
 				input = rootNode.getAsJsonObject();
 				if (input.isJsonObject()) {
-					total = input.get("jwt");
+					jwt = input.get("jwt");
 				}
 			}
-			JsonPrimitive column = total.getAsJsonPrimitive();
-			totalstr = column.getAsJsonPrimitive().toString();
+			JsonPrimitive column = jwt.getAsJsonPrimitive();
+			jwtstr = column.getAsJsonPrimitive().toString();
 			connection.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return totalstr;
+		return jwtstr;
 
 	}
-	
+
 	/**
 	 * Get JWT from CM
 	 * <p>
 	 * 
-	 * @param apiUrl
-	 *            url to CM auth
-	 * @param username
-	 *            username on CM
-	 * @param pwd
-	 *            password on CM
-	 * @return String  jwt
+	 * @param apiUrl   url to CM auth
+	 * @param username username on CM
+	 * @param pwd      password on CM
+	 * @return String jwt
 	 */
 
 	public static String geAuthToken(String apiUrl) throws Exception
@@ -447,7 +426,7 @@ public class CMUserSetHelper {
 
 		disableCertValidation();
 
-		String totalstr = null;
+		String jwtstr = null;
 		try {
 			URL url = new URL(apiUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -469,22 +448,22 @@ public class CMUserSetHelper {
 			if (debug)
 				System.out.println("response " + response);
 			JsonObject input = null;
-			JsonElement total = null;
+			JsonElement jwt = null;
 			JsonElement rootNode = JsonParser.parseString(response.toString()).getAsJsonObject();
 			if (rootNode.isJsonObject()) {
 				input = rootNode.getAsJsonObject();
 				if (input.isJsonObject()) {
-					total = input.get("jwt");
+					jwt = input.get("jwt");
 				}
 			}
-			JsonPrimitive column = total.getAsJsonPrimitive();
-			totalstr = column.getAsJsonPrimitive().toString();
+			JsonPrimitive column = jwt.getAsJsonPrimitive();
+			jwtstr = column.getAsJsonPrimitive().toString();
 			connection.disconnect();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return totalstr;
+		return jwtstr;
 
 	}
 

@@ -118,7 +118,7 @@ public class FPEEncryptionDecryptionSample
 		format.setNumberOfElementsFromStart(6);
 		
 		// Initializes spec with IV, tweak parameters and format
-		paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).setFpeFormat(format).build();
+		paramSpec = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_spec(ivSpec).setFpeFormat(format).build();
 
 		// initialize cipher to encrypt.
 		encryptCipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
@@ -147,4 +147,3 @@ public class FPEEncryptionDecryptionSample
 	}
     }
 }
-    

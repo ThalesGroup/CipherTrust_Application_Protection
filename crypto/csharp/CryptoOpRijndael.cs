@@ -101,10 +101,17 @@ namespace CADP.NetCoreNaeSamples
 
 
                 /*Set IV , Padding and Mode*/
-                byte[] iv = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35 };
-                key.IV = iv;
                 key.Padding = PaddingMode.PKCS7;
                 key.Mode = CipherMode.CBC;
+
+                // Set IV if Mode is CBC
+                if (key.Mode == CipherMode.CBC)
+                {
+                    byte[] ivBytes = new byte[16];
+                    Random random = new Random();
+                    random.NextBytes(ivBytes);
+                    key.IV = ivBytes;
+                }
 
                 try
                 {
