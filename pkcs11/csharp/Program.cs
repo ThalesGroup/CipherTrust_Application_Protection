@@ -44,6 +44,7 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t SHA384-ECDSA  ... SHA384-ECDSA mode");
             Console.WriteLine("\t SHA512-ECDSA  ... SHA512-ECDSA mode");
             Console.WriteLine("\t FF3-1  ... FF3-1 mode");
+            Console.WriteLine("\t FF1v2  ... FF1v2 mode");
             Console.WriteLine("");
             Console.WriteLine("\t Choices for the -O option: ");
             Console.WriteLine("\t true    ... Opaque object");
@@ -72,10 +73,11 @@ namespace CADP.Pkcs11Sample
             Console.WriteLine("\t v2.1 ... use version 2.1 header");
             Console.WriteLine("\t v2.7 ... use version 2.7 header");
             Console.WriteLine("");
-            Console.WriteLine("\tChoices for the -Ta tweak algo FF3-1 option:");
+            Console.WriteLine("\tChoices for the -Ta tweak algo FF3-1/FF1v2 option:");
             Console.WriteLine("\t SHA1 ... SHA1");
             Console.WriteLine("\t SHA256 ... SHA256");
             Console.WriteLine("\t NONE ... NONE");
+            Console.WriteLine("Note: For FF3-1, tweak data is mandatory.If tweak algorithm is NONE, the tweak data must be of 7 bytes (14 characters HEX encoded string)");
             Console.WriteLine("");
             Console.WriteLine("\tChoices for the -CurveOid option:");
             Console.WriteLine("\t 06052b81040020, 06052b81040021, 06052b8104000a, " +

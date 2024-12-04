@@ -231,10 +231,10 @@ namespace CADP.Pkcs11Sample
                         }
                     }
 
-                    if (opName.Equals("FPE") || opName.Equals("FF1") || opName.Equals("FF3-1"))
+                    if (opName.Equals("FPE") || opName.Equals("FF1") || opName.Equals("FF3-1") || opName.Equals("FF1v2"))
                     {
                         // Do not set charset in case Algo is FF3-1 and Cardinality is CARD10, Card26, CARD62
-                        if (opName.Equals("FF3-1") && (umode == 6 || umode == 7 || umode == 8))
+                        if ((opName.Equals("FF3-1") || opName.Equals("FF1v2")) && (umode == 6 || umode == 7 || umode == 8))
                         {
                             // Ignore the charset.
                             charSet = string.Empty;
@@ -246,9 +246,9 @@ namespace CADP.Pkcs11Sample
                                 //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
                                 encoding = getUTFEncoding(utfmode, out umode);
                                 charSetArray = encoding.GetBytes(charSet);
-                                
+
                                 // In Case of FF3-1 and mode is UTF-8/16LE/16/32LE/32 setting the radix
-                                if (opName == "FF3-1" && (umode >= 1 && umode <= 5))
+                                if ((opName.Equals("FF3-1") || opName.Equals("FF1v2")) && (umode >= 1 && umode <= 5))
                                 {
                                     radix = (ushort)charSet.Length;
                                 }
@@ -420,14 +420,19 @@ namespace CADP.Pkcs11Sample
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                     }
-                    else if (opName.Equals("FF3-1"))
+                    else if (opName.Equals("FF3-1") || opName.Equals("FF1v2"))
                     {
                         byte[] tweakAlgoBytes = Encoding.UTF8.GetBytes(tweakAlgo);
                         byte[] tweak = Encoding.UTF8.GetBytes(tweakStr);
                         var mode = getUTFEncoding(utfmode, out umode);
                         mechanismFPEParams = session.Factories.MechanismParamsFactory.CreateCkFPEParams(tweakAlgoBytes, tweak, umode, radix, charSetArray);
-                        encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF3_1, mechanismFPEParams);
-                        decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF3_1, mechanismFPEParams);
+                        var fpeopName = CKM.CKM_THALES_FF3_1;
+                        if (opName.Equals("FF1v2"))
+                        {
+                            fpeopName = CKM.CKM_THALES_FF1v2;
+                        }
+                        encmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
+                        decmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
                     }
 
                     // Specify encryption mechanism with initialization vector as parameter
