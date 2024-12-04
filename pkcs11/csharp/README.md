@@ -72,7 +72,6 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      SHA384-ECDSA  ... SHA384-ECDSA mode
      SHA512-ECDSA  ... SHA512-ECDSA mode
      FF3-1 ... FF3-1
-     FF1v2 ... FF1v2
 ### Choices for the -O option:
     true    ... Opaque object
     false   ... Non Opaque object
