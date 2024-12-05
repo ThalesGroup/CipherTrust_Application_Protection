@@ -6,6 +6,33 @@ import static sun.security.pkcs11.wrapper.PKCS11Constants.CKM_AES_CBC_PAD;
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+
+/* IMPORTANT
+ *
+ * With Java Version JDK 8u241 and onwards, there are changes done (SunPKCS11
+ * Provider Upgraded with Support for PKCS#11 v2.40
+ * http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8080462) in the
+ * prototype of C_Encrypt and C_Decrypt API's. The number of parameters in
+ * these API's has been increased to 9 instead of 7 with earlier JDK versions.
+ * So if Java Version JDK 8u241 and higher installed on machine, then API's
+ * parameters will be increased to 9 and 0 will be passed.
+ *
+ * For example:
+ * C_Encrypt Call with 7 Arguments:
+ * session.p11.C_Encrypt(session.sessionHandle, plainBytes, 0, plainBytesLen, outText, 0, 0);
+ * C_Encrypt Call with 9 Arguments:
+ * session.p11.C_Encrypt(session.sessionHandle, <Newly added argument> 0, plainBytes, 0, plainBytesLen, <Newly added argument> 0, outText, 0, 0);
+ *
+ * C_Decrypt Call with 7 Arguments:
+ * session.p11.C_Decrypt(session.sessionHandle, encryptedBytes, 0, encryptedDataLen, outText, 0, 0);
+ * C_Decrypt Call with 9 Arguments:
+ * session.p11.C_Decrypt(session.sessionHandle, <Newly added argument> 0, encryptedBytes, 0, encryptedDataLen, <Newly added argument> 0, outText, 0, 0);
+ *
+ * Note:
+ * These newly added 2 arguments will not impact any existing functionality in C_Encrypt and C_Decrypt API's.
+ *
+ */
+
 /*
 ***************************************************************************
 * File: EncryptDecryptMetaData.java
