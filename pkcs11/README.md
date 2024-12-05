@@ -1,6 +1,6 @@
 # PKCS11 Integrations/Sample Code
 
- Integrations or Sample Code for CipherTrust Application Data Protection  products
+Integrations or Sample Code for CipherTrust Application Data Protection  products
 
 ## Sample Code
 
