@@ -49,8 +49,8 @@ public class ProtectRevealSample {
 			
 			/**
 			 * For External Version
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText()));-- This will return ciphertext
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getVersion()));-- This will have version header information
+			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText()));// This will return ciphertext
+			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getVersion()));// This will have version header information
 			 */
 			byte[] decryptedData = CryptoManager.reveal(encryptedDataObject, protectionPolicyName,userName);
 			System.out.println("Decrypted Data: " + new String(decryptedData));
