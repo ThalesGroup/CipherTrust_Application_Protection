@@ -21,6 +21,8 @@
 #define FPE_AES_UNICODE_LEN 15
 #define FPE_FF3_UNICODE_ALG "FPE/FF3/UNICODE"
 #define FPE_FF3_UNICODE_LEN 15
+#define FPE_FF31_UNICODE_ALG "FPE/FF3-1/UNICODE"
+#define FPE_FF31_UNICODE_LEN 17
 #define FPE_FF1_UNICODE_ALG "FPE/FF1/UNICODE"
 #define FPE_FF1_UNICODE_LEN 15
 #define FPE_FF1v2_UNICODE_ALG "FPE/FF1v2/UNICODE"
@@ -464,7 +466,8 @@ int main(int argc, char **argv)
     //calculate output byte for FF3 Unicode
     if((strncmp(algo, FPE_FF3_UNICODE_ALG, FPE_FF3_UNICODE_LEN) == 0) ||
        (strncmp(algo, FPE_FF1_UNICODE_ALG, FPE_FF1_UNICODE_LEN) == 0) ||
-       (strncmp(algo, FPE_FF1v2_UNICODE_ALG, FPE_FF1v2_UNICODE_LEN) == 0))
+       (strncmp(algo, FPE_FF1v2_UNICODE_ALG, FPE_FF1v2_UNICODE_LEN) == 0) ||
+       (strncmp(algo, FPE_FF31_UNICODE_ALG, FPE_FF31_UNICODE_LEN) == 0))
     {
         if(charsetType){
             if(!strncmp(charsetType, UTF8, UTF8_LEN) || !strncmp(charsetType, UTF_8, UTF_8_LEN))
@@ -546,7 +549,8 @@ int main(int argc, char **argv)
         //calculate output byte for FF3 Unicode
         if((strncmp(algo, FPE_FF3_UNICODE_ALG, FPE_FF3_UNICODE_LEN) == 0) ||
            (strncmp(algo, FPE_FF1_UNICODE_ALG, FPE_FF1_UNICODE_LEN) == 0) ||
-           (strncmp(algo, FPE_FF1v2_UNICODE_ALG, FPE_FF1v2_UNICODE_LEN) == 0))
+           (strncmp(algo, FPE_FF1v2_UNICODE_ALG, FPE_FF1v2_UNICODE_LEN) == 0) ||
+           (strncmp(algo, FPE_FF31_UNICODE_ALG, FPE_FF31_UNICODE_LEN) == 0))
         {
             if(!strncmp(charsetType, UTF8, UTF8_LEN) || !strncmp(charsetType, UTF_8, UTF_8_LEN))
                 cryptooutlen2 *= 4; 

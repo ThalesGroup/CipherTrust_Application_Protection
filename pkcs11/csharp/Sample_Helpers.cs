@@ -104,7 +104,7 @@ namespace CADP.Pkcs11Sample
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, (uint)CKO.CKO_SECRET_KEY));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, keyLabel));
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_CACHE_CLEAR, true));
-
+ 
             // Initialize searching
             session.FindObjectsInit(objectAttributes);
             // Get search results
@@ -227,7 +227,7 @@ namespace CADP.Pkcs11Sample
         /// </summary>
         /// <param name='session'>Read-write session with user logged in</param>
         /// <returns>Object handle</returns>
-        public static IObjectHandle GenerateKey(ISession session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false)
+        public static IObjectHandle GenerateKey(ISession session, string keyLabel, uint keySize, uint genAction = 0, bool preActive = false, bool bAlwSen = false, bool bNevExtr = false, string cka_idInput = null)
         {
             // genAction: 0, 1, 2, or 3.  versionCreate...0, versionRotate...1, versionMigrate...2, nonVersionCreate...3 (default)
 
@@ -261,7 +261,11 @@ namespace CADP.Pkcs11Sample
 
             objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_OBJECT_ALIAS, keyLabel));
 
-
+	        // Add the CKA_ID attribute if the cka id input has value.
+            if (!string.IsNullOrEmpty(cka_idInput))
+            {
+                objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+            } 
             if (preActive == true)
                 objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_THALES_KEY_ACTIVATION_DATE, activateTime));
 
@@ -282,8 +286,10 @@ namespace CADP.Pkcs11Sample
         /// <param name='session'>Read-write session with user logged in</param>
         /// <param name='publicKeyHandle'>Output parameter for public key object handle</param>
         /// <param name='privateKeyHandle'>Output parameter for private key object handle</param>
-        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, string keyPairLabel)
+        public static void GenerateKeyPair(ISession session, out IObjectHandle publicKeyHandle, out IObjectHandle privateKeyHandle, string keyPairLabel, string cka_idInput = null, string curveOid = null)
         {
+
+            var ckmMechanism =  CKM.CKM_RSA_PKCS_KEY_PAIR_GEN;
             // The CKA_ID attribute is intended as a means of distinguishing multiple key pairs held by the same subject
             // byte[] ckaId = session.GenerateRandom(20);
 
@@ -299,9 +305,7 @@ namespace CADP.Pkcs11Sample
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY, true));
             //publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_VERIFY_RECOVER, true));
             publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_WRAP, true));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
-            publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
-            
+
             // Prepare attribute template of new private key
             List<IObjectAttribute> privateKeyAttributes = new List<IObjectAttribute>();
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true));
@@ -318,8 +322,33 @@ namespace CADP.Pkcs11Sample
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EXTRACTABLE, true));
             privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
 
+            //Add attributes for ECC keys if Curve OId is present
+            if (!string.IsNullOrEmpty(curveOid))
+            {
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, CKK.CKK_EC));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EC_PARAMS, curveOid));
+
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_KEY_TYPE, CKK.CKK_EC));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_EC_PARAMS, curveOid));
+                
+                ckmMechanism = CKM.CKM_ECDSA_KEY_PAIR_GEN;
+            }
+            else {
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODULUS_BITS, 2048));
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_PUBLIC_EXPONENT, new byte[] { 0x01, 0x00, 0x01, 0x00 }));
+
+            }
+
+            // Add the CKA_ID input in case the value is not null or empty.
+            if (!string.IsNullOrEmpty(cka_idInput))
+            {
+                publicKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                privateKeyAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+            }
+
             // Specify key generation mechanism
-            IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS_KEY_PAIR_GEN);
+            IMechanism mechanism = session.Factories.MechanismFactory.Create(ckmMechanism);
 
             // Generate key pair
             session.GenerateKeyPair(mechanism, publicKeyAttributes, privateKeyAttributes, out publicKeyHandle, out privateKeyHandle);
@@ -340,28 +369,47 @@ namespace CADP.Pkcs11Sample
 
                     switch (attr.Type)
                     {
-
                         case (uint)CKA.CKA_APPLICATION:
                             Console.WriteLine("CKA_APPLICATION" + " : " + attr.GetValueAsString());
                             break;
-                        case (uint)CKA.CKA_CLASS: // converting its value to an uint fails for inexplicable reasons
+                        case (uint)CKA.CKA_CLASS:
+                            switch (attr.GetValueAsUlong())
+                            {
+                                case 2: Console.WriteLine(name + " : Public Key"); break;
+                                case 3: Console.WriteLine(name + " : Private Key"); break;
+                                case 4: Console.WriteLine(name + " : Secret Key"); break;
+                                case 1073741833: Console.WriteLine(name + " : Opaque"); break;
+
+                                default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
+                            }
                             break;
                         case (uint)CKA.CKA_KEY_TYPE:
                             switch (attr.GetValueAsUlong())
                             {
                                 case 0: Console.WriteLine(name + " : RSA"); break;
+                                case 3: Console.WriteLine(name + " : EC"); break;
                                 case 31: Console.WriteLine(name + " : AES"); break;
                                 case 19: Console.WriteLine(name + " : Opaque"); break;
+				case 40: Console.WriteLine(name + " : SHA1-HMAC"); break;
+				case 46: Console.WriteLine(name + " : SHA224-HMAC"); break;
+				case 43: Console.WriteLine(name + " : SHA256-HMAC"); break;
+				case 44: Console.WriteLine(name + " : SHA384-HMAC"); break;
+				case 45: Console.WriteLine(name + " : SHA512-HMAC"); break;
+
                                 default: Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
                             }
                             break;
                         case (uint)CKA.CKA_MODULUS_BITS:
+                            Console.WriteLine(name + " : " + attr.GetValueAsUlong()); break;
+                        case (uint)CKA.CKA_EC_PARAMS:
                         case (uint)CKA.CKA_ID:
-                            Console.WriteLine(name + " : " + attr.GetValueAsUlong());
-                            break;
                         case (uint)CKA.CKA_LABEL:
-                            Console.WriteLine(name + " : " + attr.GetValueAsString());
-                            break;
+                        case (uint)CKA.CKA_THALES_CUSTOM_1:
+                        case (uint)CKA.CKA_THALES_CUSTOM_2:
+                        case (uint)CKA.CKA_THALES_CUSTOM_3:
+                        case (uint)CKA.CKA_THALES_CUSTOM_4:
+                        case (uint)CKA.CKA_THALES_CUSTOM_5:
+                            Console.WriteLine(name + " : " + attr.GetValueAsString()); break;
                         case (uint)CKA.CKA_END_DATE:
                             date = attr.GetValueAsDateTime();
                             Console.WriteLine(name + " : " + date.ToString());
@@ -380,18 +428,9 @@ namespace CADP.Pkcs11Sample
                             else
                                 Console.WriteLine(name + " : " + attr.GetValueAsBool().ToString());
                             break;
-
-                        case (uint)CKA.CKA_THALES_CUSTOM_1:
-                        case (uint)CKA.CKA_THALES_CUSTOM_2:
-                        case (uint)CKA.CKA_THALES_CUSTOM_3:
-                        case (uint)CKA.CKA_THALES_CUSTOM_4:
-                        case (uint)CKA.CKA_THALES_CUSTOM_5:
-                            Console.WriteLine(name + " : " + attr.GetValueAsString());
-                            break;
-
                         default:
                             valArray = attr.GetValueAsByteArray();
-			    if (valArray.Length == 0)
+                            if (valArray.Length == 0)
                             {
                                 Console.WriteLine(name + " : " + valArray.Length);
                             }

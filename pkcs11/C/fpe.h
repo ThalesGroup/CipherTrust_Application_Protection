@@ -13,6 +13,9 @@
 #define CS_UTF16BE 3
 #define CS_UTF32LE 4
 #define CS_UTF32BE 5
+#define CS_CARD10 6
+#define CS_CARD26 7
+#define CS_CARD62 8
 
 #define MAX_CHARSET_LEN_UTF 65535
 #define MAX_CHARSET_LEN_ASCII 255
@@ -52,7 +55,16 @@ typedef struct FF1_PARAMETER_UTF {
   CK_BYTE        charset[4*65536]; /* this is an open array with a minimum length of 2 bytes and a theoretical maximum length of 65535*4 bytes */
   /* tweak data is optional - if present, it immediately follows the charset data (within the charset array) */
 } CK_FF1_PARAMETER_UTF;
-
+typedef struct FPE_GEN_PARAMETER {
+  CK_BYTE        tweakAlgo[8];
+  unsigned       tweakAlgolen;
+  CK_BYTE        tweak[256];
+  unsigned       tweaklen;
+  unsigned short mode;       /* 0...ASCII, 1...UTF8, 2...UTF16LE, 3...UTF16BE, 4...UTF32LE, 5...UTF32BE, 6...CS_CARD10, 7...CS_CARD26, 8...CS_CARD62 */
+  unsigned short radix;      /* radix in network byte order, 2..65535 */
+  unsigned       charsetlen; /* length of character set data in bytes, in network byte order */
+  CK_BYTE        charset[4*65535];
+} CK_FPE_GENERIC_PARAMETER;
 
 
 #if defined(_AIX) || defined(__hpux) || defined(__sun) || defined(__s390x__)

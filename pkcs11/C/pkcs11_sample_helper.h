@@ -72,6 +72,7 @@ extern CK_BBOOL             bNeverExtractable;
 
 
 #define kp  ((int)'k' << 8 | (int)'p')
+#define kt  ((int)'k' << 8 | (int)'t')
 #define ks  ((int)'k' << 8 | (int)'s')
 #define ka  ((int)'k' << 8 | (int)'a')
 
@@ -90,6 +91,7 @@ extern CK_BBOOL             bNeverExtractable;
 #define op  ((int)'o' << 8 | (int)'p')
 #define np  ((int)'n' << 8 | (int)'p')
 #define iv  ((int)'i' << 8 | (int)'v')
+#define ta  ((int)'t' << 8 | (int)'a')
 
 #define ne  ((int)'n' << 8 | (int)'e')
 #define as  ((int)'a' << 8 | (int)'s')
@@ -178,6 +180,7 @@ extern CK_BBOOL             bNeverExtractable;
 #define CKA_THALES_OBJECT_UUID           ( CKA_THALES_DEFINED | 0x87 )
 #define CKA_THALES_OBJECT_MUID           ( CKA_THALES_DEFINED | 0x88 )
 #define CKA_THALES_OBJECT_IKID           ( CKA_THALES_DEFINED | 0x89 )
+#define CKA_THALES_KEY_ACTION_DELETE     ( CKA_THALES_DEFINED | 0x0104 )
 
 #define CKA_THALES_BASE_LABEL            ( CKA_THALES_DEFINED | 0x71 )
 #define CKA_THALES_BASE_ALIAS            ( CKA_THALES_DEFINED | 0x72 )
@@ -237,6 +240,7 @@ extern unsigned long ulCachedTime;
 #define 	keyIdMuid   0x0011
 #define 	keyIdImport 0x0100
 #define     keyIdAlias  0x0101
+#define	    keyIdAttr   0x0111
 
 
 int newgetopt(int argc, char* const *argv, const char *optstr);
@@ -482,4 +486,13 @@ void put_BOM_mode(CK_BYTE bom_mode, FILE* stream);
 
 
 CK_RV readObjectBytes( FILE * fp, CK_BYTE_PTR pObjBuf, CK_ULONG * pulObjLen, int format_type );
+
+CK_RV findKeysByIdAttr(char* keySearchId, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys);
+
+CK_RV getAttributesValue(CK_OBJECT_HANDLE hKey);
+
+CK_KEY_TYPE getKeyType(char *keyType);
+
+CK_RV findKeysByCkaType(CK_KEY_TYPE keytype, CK_ULONG *numObjects, CK_OBJECT_HANDLE *phKeys);
+
 #endif /* __pkcs11_sample_helper_h__ */
