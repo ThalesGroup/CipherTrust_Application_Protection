@@ -64,7 +64,11 @@ public class KeyNameSample {
 				CustomAttributes attr = new CustomAttributes();
 				if(attributeValue != null){
 				attr.addAttributeForKeyName(attributeName, attributeValue);
-				attr.addAttributeForKeyName(attributeName + "-1", attributeValue);
+				/*
+				* Not supported before CM 2.17
+				* attr.addAttributeForKeyName(attributeName + "-1", attributeValue);
+				*/
+
 				}	
 				UserKeysDetail keyNames = NAEKey.getKeyNames(attr, fingerprint, offset, max, session, ConjunctiveOperator.OR);
 				System.out.println("Key count: " + keyNames.getKeyCount());

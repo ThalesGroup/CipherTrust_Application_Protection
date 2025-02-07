@@ -17,7 +17,7 @@ import com.ingrian.internal.cache.NAECachedKey;
 import com.ingrian.internal.cache.PersistentCache;
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.LocalKey;
-//CADP for JAVA-specific classes.
+//CADP for JAVA specific classes.
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEKeyCachePassphrase;
 import com.ingrian.security.nae.NAESession;
@@ -26,22 +26,23 @@ import com.ingrian.security.nae.NAESessionInterface;
 
 /**
  * This sample shows how to encrypt and decrypt data using CADP for JAVA in local mode.
- * Note: 1.) Persistent and symmetric cache should be enabled in the IngrainNAE.properties file.
- * 	 2.) This sample can be used for version and non-version keys passed in the argument.
+ * Note: 1.) Persistent and symmetric cache should be enabled in the CADP_for_JAVA.properties file.
+ * 	  2.) This sample can be used for version and non-version keys passed in the argument.
  */
 
 public class CachingSample 
 {
     public static void main( String[] args ) throws Exception
     {
-	if (args.length != 3)
+	if (args.length != 4)
         {
-            System.err.println("Usage: java CachingSample user password keyname");
+            System.err.println("Usage: java CachingSample username password keyname persistentCachePassword");
             System.exit(-1);
 	} 
         String username  = args[0];
         String password  = args[1];
         String keyName   = args[2];
+        String persistentCachePassword = args[3];
         CachingSample sample = new CachingSample();
 
 	// add Ingrian provider to the list of JCE providers
@@ -57,7 +58,7 @@ public class CachingSample
 	System.out.println("Data to encrypt \"" + dataToEncrypt + "\"");
 	 // create NAE Session: pass in Key Manager user name and password
     
-    MyNAEKeyCachePassphrase m = sample.new MyNAEKeyCachePassphrase();
+    MyNAEKeyCachePassphrase m = sample.new MyNAEKeyCachePassphrase(persistentCachePassword);
     
     NAESession session  = null;
 	try {
@@ -107,7 +108,7 @@ public class CachingSample
        String keyname,
        String algorithm,
        String plainText,
-       String ivStr) 
+       String ivStr) throws Exception
     {
        Cipher encryptCipher = null;
        Cipher decryptCipher = null;
@@ -135,27 +136,23 @@ public class CachingSample
            }
        } catch (Exception e) {
            e.printStackTrace();
-            System.out.println("The Cause is " + e.getMessage() + ".");
-	    throw e;
+           System.out.println("The Cause is " + e.getMessage() + ".");
+   	       throw e;
        }
 
     }
 
     class MyNAEKeyCachePassphrase implements NAEKeyCachePassphrase {
+    	
+    	private String persistentCachePassword;
+    	
+    	MyNAEKeyCachePassphrase(String persistentCachePassword) {
+    		this.persistentCachePassword=persistentCachePassword;
+    	}
 
         @Override
 		public char[] getPassphrase(NAESessionInterface session) {
-            char[] passPhrase = new char[8];
-
-            passPhrase[0] = 'a';
-            passPhrase[1] = 'b';
-            passPhrase[2] = 'b';
-            passPhrase[3] = '1';
-            passPhrase[4] = '2';
-            passPhrase[5] = '4';
-            passPhrase[6] = '7';
-            passPhrase[7] = 'z';
-            return passPhrase;
+            return persistentCachePassword.toCharArray();
         }
     }
 }       

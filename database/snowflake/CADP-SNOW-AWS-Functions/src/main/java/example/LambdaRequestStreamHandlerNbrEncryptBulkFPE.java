@@ -8,7 +8,11 @@ import java.io.OutputStream;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -25,13 +29,16 @@ import com.ingrian.security.nae.NAESession;
 import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.IngrianProvider.Builder;
 
-/* This sample AWS Lambda Function is used to implement a Snowflake Database User Defined Function(UDF).  It is an example of how to use Thales Cipher Trust Manager Protect Application
- * to protect sensitive data in a column.  This example uses Format Preserve Encryption (FPE) to maintain the original format of the 
- * data so applications or business intelligence tools do not have to change in order to use these columns.
+/* This sample AWS Lambda Function is used to implement a Snowflake Database User Defined Function(UDF).  	/*
+     * It is an example of how to use Thales Cipher Trust Application Data Protection (CADP)
+	 * to protect sensitive data in a column. This example uses
+	 * Format Preserve Encryption (FPE) to maintain the original format of the data
+	 * so applications or business intelligence tools do not have to change in order
+	 * to use these columns. 
 *  
 *  Note: This source code is only to be used for testing and proof of concepts. Not production ready code.  Was not tested
 *  for all possible data sizes and combinations of encryption algorithms and IV, etc.  
-*  Was tested with CM 2.8 & CADP 8.13
+*  Was tested with CM 2.14 & CADP 8.15.0.001
 *  For more information on CADP see link below. 
 https://thalesdocs.com/ctp/con/cadp/cadp-java/latest/admin/index.html
 *  For more information on Snowflake External Functions see link below. 
@@ -56,11 +63,10 @@ public class LambdaRequestStreamHandlerNbrEncryptBulkFPE implements RequestStrea
 
 	private static int BATCHLIMIT = 10000;
 
-	//private static final Logger logger = Logger.getLogger(LambdaRequestStreamHandlerNbrEncyrptBulkFPE.class.getName());
 	private static final Gson gson = new Gson();
 
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
-		context.getLogger().log("Input: " + inputStream);
+
 		String input = IOUtils.toString(inputStream, "UTF-8");
 
 		Map<Integer, String> encryptedErrorMapTotal = new HashMap<Integer, String>();
@@ -70,6 +76,10 @@ public class LambdaRequestStreamHandlerNbrEncryptBulkFPE implements RequestStrea
 		String snowflakereturnstring = null;
 		JsonObject body = null;
 		int statusCode = 200;
+		int numberOfLines = 0;
+		int numberofchunks = 0;
+
+		String callerStr = null;
 
 		// https://www.baeldung.com/java-aws-lambda
 
@@ -78,15 +88,39 @@ public class LambdaRequestStreamHandlerNbrEncryptBulkFPE implements RequestStrea
 		JsonArray snowflakedata = null;
 		StringBuffer snowflakereturndatasb = new StringBuffer();
 		StringBuffer snowflakereturndatasc = new StringBuffer();
+		NAESession session = null;
+		String keyName = "testfaas";
+		// String keyName = System.getenv("CMKEYNAME");
+		String userName = System.getenv("CMUSER");
+		String password = System.getenv("CMPWD");
+		int batchsize = Integer.parseInt(System.getenv("BATCHSIZE")); 
+		// returnciphertextforuserwithnokeyaccess = is a environment variable to express
+		// how data should be
+		// returned when the user above does not have access to the key and if doing a
+		// lookup in the userset
+		// and the user does not exist. If returnciphertextforuserwithnokeyaccess = null
+		// then an error will be
+		// returned to the query, else the results set will provide ciphertext.
+		// validvalues are 1 or null
+		// 1 will return cipher text
+		// null will return error.
+		String returnciphertextforuserwithnokeyaccess = System.getenv("returnciphertextforuserwithnokeyaccess");
+		boolean returnciphertextbool = returnciphertextforuserwithnokeyaccess.matches("-?\\d+"); // Using regular
 
+		// usersetlookup = should a userset lookup be done on the user from Big Query? 1
+		// = true 0 = false.
+		String usersetlookup = System.getenv("usersetlookup");
+		// usersetID = should be the usersetid in CM to query.
+		String usersetID = System.getenv("usersetidincm");
+		// usersetlookupip = this is the IP address to query the userset. Currently it
+		// is
+		// the userset in CM but could be a memcache or other in memory db.
+		String userSetLookupIP = System.getenv("usersetlookupip");
+		boolean usersetlookupbool = usersetlookup.matches("-?\\d+");
+		boolean founduserinuserset = false;
+		boolean exceptionflag = false;
 		try {
 
-			String keyName = "testfaas";
-			// String keyName = System.getenv("CMKEYNAME");
-			String userName = System.getenv("CMUSER");
-			String password = System.getenv("CMPWD");
-			int batchsize = 1000;
-			// int batchsize = System.getenv("BATCHSIZE");
 			if (batchsize >= BATCHLIMIT)
 				batchsize = BATCHLIMIT;
 			spec = new FPEParameterAndFormatSpec[batchsize];
@@ -104,20 +138,56 @@ public class LambdaRequestStreamHandlerNbrEncryptBulkFPE implements RequestStrea
 					JsonElement bodyele = snowflakeinput.get("body");
 					String bodystr = bodyele.getAsString().replaceAll(System.lineSeparator(), "");
 					bodystr = bodystr.replaceAll("\\\\", "");
-					//System.out.println("bodystr after replace" + bodystr);
+					// System.out.println("bodystr after replace" + bodystr);
 					body = gson.fromJson(bodystr, JsonObject.class);
 					snowflakedata = body.getAsJsonArray("data");
+
+					JsonObject requestContext = snowflakeinput.getAsJsonObject("requestContext");
+
+					if (requestContext != null) {
+						JsonObject identity = requestContext.getAsJsonObject("identity");
+
+						if (identity != null) {
+							callerStr = identity.get("user").getAsString();
+							System.out.println("user: " + callerStr);
+						} else {
+							System.out.println("Identity not found.");
+						}
+					} else {
+						System.out.println("Request context not found.");
+					}
+
+					if (usersetlookupbool) {
+						// Convert the string to an integer
+						int num = Integer.parseInt(usersetlookup);
+						// make sure cmuser is in Application Data Protection Clients Group
+						if (num >= 1) {
+							 founduserinuserset = findUserInUserSet(callerStr, userName, password, usersetID,
+									userSetLookupIP);
+							// System.out.println("Found User " + founduserinuserset);
+							if (!founduserinuserset)
+								throw new CustomException("1001, User Not in User Set", 1001);
+
+						}
+
+						else
+							usersetlookupbool = false;
+					} else {
+						usersetlookupbool = false;
+					}
+
 				} else {
 					System.out.println("eerror");
 
 				}
 			}
+
 			System.setProperty("com.ingrian.security.nae.CADP_for_JAVA_Properties_Conf_Filename",
 					"CADP_for_JAVA.properties");
 			IngrianProvider builder = new Builder().addConfigFileInputStream(
 					getClass().getClassLoader().getResourceAsStream("CADP_for_JAVA.properties")).build();
 
-			NAESession session = NAESession.getSession(userName, password.toCharArray());
+			session = NAESession.getSession(userName, password.toCharArray());
 			NAEKey key = NAEKey.getSecretKey(keyName, session);
 
 			int row_number = 0;
@@ -136,146 +206,278 @@ public class LambdaRequestStreamHandlerNbrEncryptBulkFPE implements RequestStrea
 			///
 
 			AbstractNAECipher encryptCipher = NAECipher.getInstanceForBulkData(algorithm, "IngrianProvider");
-			int i = 0;
 
+			encryptCipher.init(Cipher.ENCRYPT_MODE, key, spec[0]);
 
 			int totalRowsLeft = snowflakedata.size();
+			numberOfLines = totalRowsLeft;
 
-			while (i < snowflakedata.size()) {
-				int index = 0;
-				int dataIndex = 0;
-				int specIndex = 0;
-				int snowRowIndex = 0;
-				//System.out.println("totalRowsLeft begining =" + totalRowsLeft);
-				if (totalRowsLeft < batchsize) {
-					spec = new FPEParameterAndFormatSpec[totalRowsLeft];
-					data = new byte[totalRowsLeft][];
-					snowrownbrs = new Integer[totalRowsLeft];
-				} else {
-					spec = new FPEParameterAndFormatSpec[batchsize];
-					data = new byte[batchsize][];
-					snowrownbrs = new Integer[batchsize];
+			int i = 0;
+			int count = 0;
+			boolean newchunk = true;
+			int dataIndex = 0;
+			int specIndex = 0;
+			int snowRowIndex = 0;
+
+			while (i < numberOfLines) {
+
+				if (newchunk) {
+
+					if (totalRowsLeft < batchsize) {
+						spec = new FPEParameterAndFormatSpec[totalRowsLeft];
+						data = new byte[totalRowsLeft][];
+						snowrownbrs = new Integer[totalRowsLeft];
+					} else {
+						spec = new FPEParameterAndFormatSpec[batchsize];
+						data = new byte[batchsize][];
+						snowrownbrs = new Integer[batchsize];
+					}
+					newchunk = false;
 				}
 
-				for (int b = 0; b < batchsize && b < totalRowsLeft; b++) {
+				JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
 
-					JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
+				for (int j = 0; j < snowflakerow.size(); j++) {
 
-					for (int j = 0; j < snowflakerow.size(); j++) {
+					JsonPrimitive snowflakecolumn = snowflakerow.get(j).getAsJsonPrimitive();
+					// System.out.print(snowflakecolumn + " ");
+					String sensitive = snowflakecolumn.getAsJsonPrimitive().toString();
+					// get a cipher
+					if (j == 1) {
 
-						JsonPrimitive snowflakecolumn = snowflakerow.get(j).getAsJsonPrimitive();
-						System.out.print(snowflakecolumn + " ");
-						String sensitive = snowflakecolumn.getAsJsonPrimitive().toString();
-						// get a cipher
-						if (j == 1) {
+						// FPE example
+						data[dataIndex++] = sensitive.getBytes();
+						spec[specIndex++] = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo)
+								.build();
+					} else {
 
-							// FPE example
-							data[dataIndex++] = sensitive.getBytes();
-							spec[specIndex++] = new FPEParameterAndFormatBuilder(tweakData)
-									.set_tweakAlgorithm(tweakAlgo).build();
-						} else {
-
-							row_number = snowflakecolumn.getAsInt();
-							snowrownbrs[snowRowIndex++] = row_number;
-
-						}
+						row_number = snowflakecolumn.getAsInt();
+						snowrownbrs[snowRowIndex++] = row_number;
 
 					}
 
-					i++;
 				}
-				// make bulk call....
-				// initializing the cipher for encrypt operation
-				encryptCipher.init(Cipher.ENCRYPT_MODE, key, spec[0]);
 
-				// Map to store exceptions while encryption
+				if (count == batchsize - 1) {
+
+					// Map to store exceptions while encryption
+					Map<Integer, String> encryptedErrorMap = new HashMap<Integer, String>();
+
+					// performing bulk operation
+
+					byte[][] encryptedData = encryptCipher.doFinalBulk(data, spec, encryptedErrorMap);
+
+					for (Map.Entry<Integer, String> entry : encryptedErrorMap.entrySet()) {
+						Integer mkey = entry.getKey();
+						String mvalue = entry.getValue();
+						encryptedErrorMapTotal.put(mkey, mvalue);
+					}
+
+					for (int enc = 0; enc < encryptedData.length; enc++) {
+
+						snowflakereturndatasc.append("[");
+						snowflakereturndatasc.append(snowrownbrs[enc]);
+						snowflakereturndatasc.append(",");
+						snowflakereturndatasc.append(new String(encryptedData[enc]));
+						snowflakereturndatasc.append("],");
+
+					}
+
+					numberofchunks++;
+					newchunk = true;
+					count = 0;
+					dataIndex = 0;
+					specIndex = 0;
+					snowRowIndex = 0;
+				} else
+					count++;
+
+				totalRowsLeft--;
+				i++;
+			}
+
+			if (count > 0) {
+				numberofchunks++;
+				int index = 0;
 				Map<Integer, String> encryptedErrorMap = new HashMap<Integer, String>();
-
-				// performing bulk operation
 				byte[][] encryptedData = encryptCipher.doFinalBulk(data, spec, encryptedErrorMap);
-
-				for (Map.Entry<Integer, String> entry : encryptedErrorMap.entrySet()) {
-					Integer mkey = entry.getKey();
-					String mvalue = entry.getValue();
-					encryptedErrorMapTotal.put(mkey, mvalue);
-				}
-
 				for (int enc = 0; enc < encryptedData.length; enc++) {
 
 					snowflakereturndatasc.append("[");
 					snowflakereturndatasc.append(snowrownbrs[enc]);
 					snowflakereturndatasc.append(",");
 					snowflakereturndatasc.append(new String(encryptedData[enc]));
-
-					if (index <= batchsize - 1 || index < totalRowsLeft - 1)
-					// if (index < batchsize -1 && index < totalRowsLeft -1 )
-					{
-						if (totalRowsLeft -1 > 0)
-							snowflakereturndatasc.append("],");
-						else
-							snowflakereturndatasc.append("]");
-					} else {
-			 
-						snowflakereturndatasc.append("]");
-					}
-
+					snowflakereturndatasc.append("],");
 					index++;
-					totalRowsLeft--;
 
 				}
-
-				// totalRowsLeft = snowflakedata.size() - i;
-
 			}
 
 			snowflakereturndatasc.append("] }");
-			// snowflakereturndatasb.append(new Gson().toJson(snowflakereturndatasc));
 			snowflakereturndatasb.append(snowflakereturndatasc);
 			snowflakereturndatasb.append("}");
 
 			snowflakereturnstring = new String(snowflakereturndatasb);
 
-			//System.out.println("string  = " + snowflakereturnstring);
+			int lastIndex = snowflakereturnstring.lastIndexOf(",");
+			// Replace the comma before the closing square bracket if it exists
+			if (lastIndex != -1) {
+				snowflakereturnstring = snowflakereturnstring.substring(0, lastIndex)
+						+ snowflakereturnstring.substring(lastIndex + 1);
+			}
 
 		} catch (
 
 		Exception e) {
-			statusCode = 400;
-			for (Map.Entry<Integer, String> entry : encryptedErrorMapTotal.entrySet()) {
-				Integer mkey = entry.getKey();
-				String mvalue = entry.getValue();
-				System.out.println("Error records ");
-				System.out.println("Key=" + mkey + ", Value=" + mvalue);
+			
+			exceptionflag = true;
+			
+			System.out.println("in exception with " + e.getMessage());
+			if (returnciphertextbool) {
+				if (e.getMessage().contains("1401") || (e.getMessage().contains("1001") || (e.getMessage().contains("1002"))) ) {
+					
+
+					try {
+						statusCode = 200;
+						snowflakereturnstring = formatReturnValue(statusCode, snowflakedata, true, null);
+					} catch (IllegalBlockSizeException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (BadPaddingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				} else {
+					statusCode = 400;
+					snowflakereturnstring = formatReturnValue(statusCode);
+					e.printStackTrace(System.out);
+				}
+			} else {
+				statusCode = 400;
+				snowflakereturnstring = formatReturnValue(statusCode);
+				e.printStackTrace(System.out);
 			}
-
-			String errormsg = "\"something went wrong\"";
-			snowflakereturndatasb.append("{ \"statusCode\":");
-			snowflakereturndatasb.append(statusCode);
-			snowflakereturndatasb.append(",");
-			snowflakereturndatasb.append(" \"body\": { ");
-			snowflakereturndatasb.append(" \"data\": [");
-			snowflakereturndatasb.append("] }}");
-
-			System.out.println("in exception with ");
-			e.printStackTrace(System.out);
+		} finally {
+			if (session != null) {
+				session.closeSession();
+			}
 		}
 
-		JsonObject inputObj = gson.fromJson(snowflakereturnstring, JsonObject.class);
+		if (!exceptionflag) {
+		
+		 
+			JsonObject inputObj = gson.fromJson(snowflakereturnstring, JsonObject.class);
 
-		// Create the desired format
-		JsonObject formattedObj = new JsonObject();
-		formattedObj.addProperty("statusCode", inputObj.get("statusCode").getAsInt());
+			// Create the desired format
+			JsonObject formattedObj = new JsonObject();
+			formattedObj.addProperty("statusCode", inputObj.get("statusCode").getAsInt());
 
-		JsonObject bodyObj = new JsonObject();
-		JsonArray dataArray = inputObj.getAsJsonObject("body").getAsJsonArray("data");
-		bodyObj.add("data", dataArray);
+			JsonObject bodyObj = new JsonObject();
+			JsonArray dataArray = inputObj.getAsJsonObject("body").getAsJsonArray("data");
+			bodyObj.add("data", dataArray);
 
-		formattedObj.addProperty("body", bodyObj.toString());
+			formattedObj.addProperty("body", bodyObj.toString());
 
-		// Convert to formatted JSON string
-		String formattedJson = gson.toJson(formattedObj);
+			// Convert to formatted JSON string
+			String formattedJson = gson.toJson(formattedObj);
 
-		outputStream.write(formattedJson.getBytes());
+			outputStream.write(formattedJson.getBytes());
+		} else
+		{
+			outputStream.write(snowflakereturnstring.getBytes());
+
+		}
+	}
+
+	public boolean findUserInUserSet(String userName, String cmuserid, String cmpwd, String userSetID,
+			String userSetLookupIP) throws Exception {
+
+		CMUserSetHelper cmuserset = new CMUserSetHelper(userSetID, userSetLookupIP);
+
+		String jwthtoken = CMUserSetHelper.geAuthToken(cmuserset.authUrl, cmuserid, cmpwd);
+		String newtoken = "Bearer " + CMUserSetHelper.removeQuotes(jwthtoken);
+
+		boolean founduserinuserset = cmuserset.findUserInUserSet(userName, newtoken);
+
+		return founduserinuserset;
 
 	}
+
+	public String formatReturnValue(int statusCode)
+
+	{
+		StringBuffer snowflakereturndatasb = new StringBuffer();
+
+		snowflakereturndatasb.append("{ \"statusCode\":");
+		snowflakereturndatasb.append(statusCode);
+		snowflakereturndatasb.append(",");
+		snowflakereturndatasb.append(" \"body\": {");
+		snowflakereturndatasb.append(" \"data\": [");
+		snowflakereturndatasb.append("] }}");
+		System.out.println("in exception with ");
+		return snowflakereturndatasb.toString();
+	}
+
+	public String formatReturnValue(int statusCode, JsonArray snowflakedata, boolean error, Cipher encryptCipher)
+			throws IllegalBlockSizeException, BadPaddingException {
+		int row_number = 0;
+		String snowflakereturnstring = null;
+		StringBuffer snowflakereturndatasc = new StringBuffer();
+		StringBuffer snowflakereturndatasb = new StringBuffer();
+		// Serialization
+		snowflakereturndatasb.append("{ \"statusCode\":");
+		snowflakereturndatasb.append(statusCode);
+		snowflakereturndatasb.append(",");
+		snowflakereturndatasb.append(" \"body\":  ");
+		snowflakereturndatasc.append("{ \"data\": [");
+		String encdata = null;
+
+		for (int i = 0; i < snowflakedata.size(); i++) {
+			JsonArray snowflakerow = snowflakedata.get(i).getAsJsonArray();
+			snowflakereturndatasc.append("[");
+			for (int j = 0; j < snowflakerow.size(); j++) {
+
+				JsonPrimitive snowflakecolumn = snowflakerow.get(j).getAsJsonPrimitive();
+				String sensitive = snowflakecolumn.getAsJsonPrimitive().toString();
+
+				// boolean isNumber = StringUtils.isNumeric(sensitive);
+				// get a cipher
+				if (j == 1) {
+					if (error)
+						snowflakereturndatasc.append(sensitive);
+					else {
+						// FPE example
+						// initialize cipher to encrypt.
+						// encryptCipher.init(Cipher.ENCRYPT_MODE, key, param);
+						// encrypt data
+						byte[] outbuf = encryptCipher.doFinal(sensitive.getBytes());
+						encdata = new String(outbuf);
+
+						snowflakereturndatasc.append(encdata);
+
+					}
+
+				} else {
+					row_number = snowflakecolumn.getAsInt();
+					snowflakereturndatasc.append(row_number);
+					snowflakereturndatasc.append(",");
+				}
+
+			}
+			if (snowflakedata.size() == 1 || i == snowflakedata.size() - 1)
+				snowflakereturndatasc.append("]");
+			else
+				snowflakereturndatasc.append("],");
+
+		}
+		snowflakereturndatasc.append("] }");
+		snowflakereturndatasb.append(new Gson().toJson(snowflakereturndatasc));
+		snowflakereturndatasb.append("}");
+		snowflakereturnstring = new String(snowflakereturndatasb);
+
+		return snowflakereturnstring;
+
+	}
+
 }
