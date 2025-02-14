@@ -34,13 +34,13 @@ namespace CADP.NetCoreNaeSamples
             //CryptoFactory cryptoFactory = new CryptoFactory(<PathToPropertiesFile>);
 
             string plaintext = "this is the data to encrypt";
-			string algo = "AES/CBC/PKCS7PADDING";
-			IEncryptionHandler handler;
+            string algo = "AES/CBC/PKCS7PADDING";
+            IEncryptionHandler handler;
 
             switch (choice)
             {
                 case 1: // Encryption and Decryption
-					handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
+                    handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
                     byte[] toEncrypt = Encoding.UTF8.GetBytes(plaintext);
                     byte[] ciphertextWithHeaderInfo = handler.Encrypt(toEncrypt, keyName);
                     Console.WriteLine($"Ciphertext: {Encoding.UTF8.GetString(ciphertextWithHeaderInfo)}");
@@ -50,7 +50,7 @@ namespace CADP.NetCoreNaeSamples
                     break;
 
                 case 2: // Legay Encryption and Decryption
-					handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
+                    handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
                     byte[] toLegayEncrypt = Encoding.UTF8.GetBytes(plaintext);
                     byte[] ciphertextWithoutHeaderInfo = handler.EncryptLegacyData(toLegayEncrypt);
                     Console.WriteLine($"Ciphertext: {Encoding.UTF8.GetString(ciphertextWithoutHeaderInfo)}");
