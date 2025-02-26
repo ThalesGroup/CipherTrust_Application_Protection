@@ -40,17 +40,23 @@ kubectl apply -f deploy/deployment.yaml
 <kbd>![image](https://github.com/user-attachments/assets/525bad33-e557-4939-9018-c7636b2523e4)</kbd>
 
 ### REVEAL Using CRDP
-Plaintext
+#### Plaintext
 <kbd>![image](https://github.com/user-attachments/assets/a6b68629-a646-47df-b78d-bdad62197908)</kbd>
 
-Masked
+#### Masked
 <kbd>![image](https://github.com/user-attachments/assets/274d565b-bba1-45fe-9e2c-da1e1728e45c)</kbd>
 
-CipherText
+#### CipherText
 <kbd>![image](https://github.com/user-attachments/assets/f1474c30-b09a-4802-ab05-c1493537d16e)</kbd>
 
-## Creating access and protection policy on CipherTrust Manager 
+## Creating access and protection policy on CipherTrust Manager
+### Access Policy
+<kbd>![image](https://github.com/user-attachments/assets/6b26bf83-3aaf-4879-8474-33e9fbbe2d66)</kbd>
+
+### Protection Policy
+<kbd>![image](https://github.com/user-attachments/assets/3ec48691-6727-40da-9539-018e6ecebc34)</kbd>
 
 ## Crypto Agility with Central Management
-
+If NIST obsoletes an algorithm, change that as part of policy update and the same is picked by connectors such as CRDP 
+<kbd>![image](https://github.com/user-attachments/assets/56af55a3-e970-445d-af31-0d22576ba026)</kbd>
 
