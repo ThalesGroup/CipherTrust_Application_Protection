@@ -379,6 +379,87 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
     else return CKR_OK;
 }
 
+int setDefaultForFF3_1(CK_FPE_GENERIC_PARAMETER *ff31params, char *tweakfilename, char *tweak_algo){
+    int tweak_file_size = 0;
+    if(tweak_algo){
+        ff31params->tweakAlgolen = strlen(tweak_algo);
+        memcpy(ff31params->tweakAlgo, tweak_algo, ff31params->tweakAlgolen);
+    }
+    switch(ff31params->mode){
+        case CS_ASCII:
+                strcpy((char *)defPlainText, "0123456789");
+                plaintextlen=10;
+                ff31params->charsetlen = strlen("0123456789ABCDEabcde");
+                memcpy(ff31params->charset, "0123456789ABCDEabcde", ff31params->charsetlen);
+                break;
+        case CS_CARD10:
+                strcpy((char *)defPlainText, "0123456789");
+                plaintextlen=10;
+                break;
+        case CS_CARD26:
+                strcpy((char *)defPlainText, "0123456789abcde");
+                plaintextlen=15;
+                break;
+        case CS_CARD62:
+                strcpy((char *)defPlainText, "0123456789ABCDEabcde");
+                plaintextlen=20;
+                break;
+        case CS_UTF8:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(30);
+                memcpy(ff31params->charset, "\xE2\x82\x80\xE2\x82\x81\xE2\x82\x82\xE2\x82\x83\xE2\x82\x84\xE2\x82\x85\xE2\x82\x86\xE2\x82\x87\xE2\x82\x88\xE2\x82\x89", 30); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\xE2\x82\x88\xE2\x82\x89\xE2\x82\x80\xE2\x82\x81\xE2\x82\x82\xE2\x82\x81\xE2\x82\x82\xE2\x82\x83\xE2\x82\x84\xE2\x82\x85\xE2\x82\x86\xE2\x82\x87\xE2\x82\x88\xE2\x82\x89\xE2\x82\x80\xE2\x82\x80\xE2\x82\x80\xE2\x82\x80");
+                plaintextlen=18*3;
+                break;
+        case CS_UTF16LE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(20);
+                memcpy(ff31params->charset, "\x80\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20", 20); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\x88\x20\x89\x20\x80\x20\x81\x20\x82\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20\x80\x20\x80\x20\x80\x20\x80\x20");
+                plaintextlen=18*2;
+                break;
+        case CS_UTF16BE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(20);
+                memcpy(ff31params->charset, "\x20\x80\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89", 20); /* subscript 0-9 */
+                strcpy((char *)defPlainText, "\x20\x88\x20\x89\x20\x80\x20\x81\x20\x82\x20\x81\x20\x82\x20\x83\x20\x84\x20\x85\x20\x86\x20\x87\x20\x88\x20\x89\x20\x80\x20\x80\x20\x80\x20\x80");
+                plaintextlen=18*2;
+                break;
+        case CS_UTF32LE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(40);
+                memcpy(ff31params->charset, "\x80\x20\0\0\x81\x20\0\0\x82\x20\0\0\x83\x20\0\0\x84\x20\0\0\x85\x20\0\0\x86\x20\0\0\x87\x20\0\0\x88\x20\0\0\x89\x20\0\0", 40); /* subscript 0-9 */
+                memcpy(defPlainText, "\x88\x20\0\0\x89\x20\0\0\x80\x20\0\0\x81\x20\0\0\x82\x20\0\0\x81\x20\0\0\x82\x20\0\0\x83\x20\0\0\x84\x20\0\0\x85\x20\0\0\x86\x20\0\0\x87\x20\0\0\x88\x20\0\0\x89\x20\0\0\x80\x20\0\0\x80\x20\0\0\x80\x20\0\0\x80\x20\0\0", 4*18);
+                plaintextlen=18*4;
+                break;
+        case CS_UTF32BE:
+                ff31params->radix = myhtons(10);
+                ff31params->charsetlen = myhtonl(40);
+                memcpy(ff31params->charset, "\0\0\x20\x80\0\0\x20\x81\0\0\x20\x82\0\0\x20\x83\0\0\x20\x84\0\0\x20\x85\0\0\x20\x86\0\0\x20\x87\0\0\x20\x88\0\0\x20\x89", 40); /* subscript 0-9 */
+                memcpy(defPlainText, "\0\0\x20\x88\0\0\x20\x89\0\0\x20\x80\0\0\x20\x81\0\0\x20\x82\0\0\x20\x81\0\0\x20\x82\0\0\x20\x83\0\0\x20\x84\0\0\x20\x85\0\0\x20\x86\0\0\x20\x87\0\0\x20\x88\0\0\x20\x89\0\0\x20\x80\0\0\x20\x80\0\0\x20\x80\0\0\x20\x80", 4*18);
+                plaintextlen=18*4;
+                break;
+        default: printf("provided charset type is invalid \n");
+    }
+    if (tweakfilename)
+    {
+        FILE* pf;
+        if ((pf = fopen(tweakfilename, "r")) != NULL ) {
+            tweak_file_size = fread(ff31params->tweak, 1, 256, pf);
+        }
+        if (pf && tweak_file_size);
+        if (pf) fclose(pf);
+        ff31params->tweak[tweak_file_size] = '\0';
+        ff31params->tweaklen = tweak_file_size;
+    }
+    else{
+        memcpy(ff31params->tweak, "D8E7920AFA33A0", 14);
+        ff31params->tweak[14] = '\0';
+        ff31params->tweaklen = 14;
+    }
+}
+
+
 /*
  ************************************************************************
  * Function: encryptAndDecrypt
@@ -392,7 +473,7 @@ static CK_RV encryptDecryptBuf(CK_SESSION_HANDLE hSess, CK_MECHANISM *pMechEnc, 
  * Returns: CK_RV
  ************************************************************************
  */
-static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char cset_choc, char *charset, char *decrypted_file, char *encrypted_file, char *charsettype, char *header_version, int bOmitEncryption, char *tweakfilename)
+static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char cset_choc, char *charset, char *decrypted_file, char *encrypted_file, char *charsettype, char *header_version, int bOmitEncryption, char *tweakfilename, char *tweak_algo)
 {
     CK_BYTE		  def_iv[] = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F";
     CK_BYTE	      *pBuf = NULL;
@@ -453,6 +534,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_FPE_PARAMETER     fpeparams;
         CK_FPE_PARAMETER_UTF fpeparamsutf;
         CK_FF1_PARAMETER_UTF ff1paramsutf;
+        CK_FPE_GENERIC_PARAMETER ff31params;
         CK_MECHANISM	mechEncryptionPad =    { encheader|CKM_AES_CBC_PAD,   def_iv, 16 };
         CK_MECHANISM	mechEncryptionCtr =    { encheader|CKM_AES_CTR,       def_iv, 16 };
         CK_MECHANISM    mechEncryptionGCM =    { CKM_AES_GCM, &gcmParams, sizeof (CK_GCM_PARAMS) };
@@ -460,8 +542,8 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_MECHANISM    mechEncryptionRSA =    { encheader|CKM_RSA_PKCS, NULL, 0 };
         CK_MECHANISM	mechEncryptionFPE =    { encheader|CKM_THALES_FPE, &fpeparams, sizeof(fpeparams) };
         CK_MECHANISM	mechEncryptionFPEUTF = { encheader|CKM_THALES_FPE, &fpeparamsutf, sizeof(fpeparamsutf) };
-
         CK_MECHANISM	mechEncryptionFF1UTF = { encheader|CKM_THALES_FF1, &ff1paramsutf, sizeof(ff1paramsutf) };
+        CK_MECHANISM	mechEncryptionFF31 =   { encheader|CKM_THALES_FF3_1, &ff31params, sizeof(ff31params) };
         CK_MECHANISM    *pmechEncryption = NULL;
         CK_MECHANISM	mechDecryptionPad =    { decheader|CKM_AES_CBC_PAD,   def_iv, 16 };
         CK_MECHANISM	mechDecryptionCtr =    { decheader|CKM_AES_CTR,       def_iv, 16 };
@@ -471,6 +553,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         CK_MECHANISM	mechDecryptionFPE =    { decheader|CKM_THALES_FPE, &fpeparams, sizeof(fpeparams) };
         CK_MECHANISM	mechDecryptionFPEUTF = { decheader|CKM_THALES_FPE, &fpeparamsutf, sizeof(fpeparamsutf) };
         CK_MECHANISM	mechDecryptionFF1UTF = { decheader|CKM_THALES_FF1, &ff1paramsutf, sizeof(ff1paramsutf) };
+        CK_MECHANISM	mechDecryptionFF31 = { decheader|CKM_THALES_FF3_1, &ff31params, sizeof(ff31params) };
         CK_MECHANISM    *pmechDecryption = NULL;
         CK_BYTE enc_mode = get_enc_mode(charsettype);
 
@@ -619,6 +702,12 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
                 }
                 else ff1paramsutf.tweaklen = myhtonl(0);
             }
+            else if (!strcmp(operation, "FF3-1") ){
+                
+                ff31params.mode = enc_mode;
+                
+                setDefaultForFF3_1(&ff31params, tweakfilename, tweak_algo);
+            }
             else
             {
                 plaintextlen=16;
@@ -637,22 +726,33 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
             if(enc_mode != CS_ASCII)
             {
                 fpeparamsutf.mode = 1;
+            }else if (!strcmp(operation, "FF3-1")) {
+
+                ff31params.mode = enc_mode;
             }
 
             if(cset_choc == 'c')
             {
-                strncpy((char *) fpeparams.charset, charset, sizeof(fpeparams.charset)-1);
-                fpeparams.charset[sizeof(fpeparams.charset)-1] = '\0';
-                fpeparams.radix = (CK_BYTE) strlen(charset);
+                if (strcmp(operation, "FF3-1") ){
+                    strncpy((char *) fpeparams.charset, charset, sizeof(fpeparams.charset)-1);
+                    fpeparams.charset[sizeof(fpeparams.charset)-1] = '\0';
+                    fpeparams.radix = (CK_BYTE) strlen(charset);
 
-                strncpy((char *) ff1paramsutf.charset, charset, sizeof(ff1paramsutf.charset)-1);
-                ff1paramsutf.charset[sizeof(ff1paramsutf.charset)-1] = '\0';
-                ff1paramsutf.charsetlen = (unsigned) myhtonl(strlen(charset));
-                ff1paramsutf.radix = (unsigned short) myhtons(strlen(charset));
-                ff1paramsutf.tweaklen = myhtonl(0);
-                ff1paramsutf.utfmode  = 0; /* ASCII */
+                    strncpy((char *) ff1paramsutf.charset, charset, sizeof(ff1paramsutf.charset)-1);
+                    ff1paramsutf.charset[sizeof(ff1paramsutf.charset)-1] = '\0';
+                    ff1paramsutf.charsetlen = (unsigned) myhtonl(strlen(charset));
+                    ff1paramsutf.radix = (unsigned short) myhtons(strlen(charset));
+                    ff1paramsutf.tweaklen = myhtonl(0);
+                    ff1paramsutf.utfmode  = 0; /* ASCII */
+                }else{
+                    if(ff31params.mode == CS_ASCII){
+                        setDefaultForFF3_1(&ff31params, tweakfilename, tweak_algo);
+                        ff31params.charsetlen = strlen(charset);
+                        memcpy(ff31params.charset, charset, ff31params.charsetlen);
+                    }
+                }
                 /* Adding this if user needs to hit tweakdata scenario */
-                if (tweakfilename)
+                if (tweakfilename  && strcmp(operation, "FF3-1"))
                 {
                     FILE *pf=fopen(tweakfilename, "r");
                     if (pf && fread(ff1paramsutf.charset+myhtonl(ff1paramsutf.charsetlen), 1, 8, pf)==8) ;
@@ -1044,6 +1144,12 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
             }
             bFpeMode = CK_TRUE;
         }
+        else if (!strcmp(operation, "FF3-1"))
+        {
+            pmechEncryption = &mechEncryptionFF31;
+            pmechDecryption = &mechDecryptionFF31;
+            bFpeMode = CK_TRUE;
+        }
         else if (!strcmp(operation, "FF1"))
         {
             pmechEncryption = &mechEncryptionFF1UTF;
@@ -1104,7 +1210,7 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
         {
             if(blk_mode)
                 fp_read = fopen(in_filename, "rb+");
-            else if(enc_mode != CS_ASCII)
+            else if(enc_mode == CS_UTF8 || enc_mode == CS_UTF16LE || enc_mode == CS_UTF16BE || enc_mode == CS_UTF32LE || enc_mode == CS_UTF32BE)
             {
                 strcpy( fopen_mode, "r,ccs=" );
                 strcat( fopen_mode, charsettype );
@@ -1152,12 +1258,12 @@ static CK_RV encryptDecrypt(char *operation, char *in_filename, char *piv, char 
                     bf_len = READ_BLK_LEN;
                     pBuf = NULL;
 
-                    if(enc_mode == CS_ASCII)
-                        readlen = fgetline((char**)&pBuf, &bf_len, fp_read);
-                    else
+            	    if(enc_mode == CS_UTF8 || enc_mode == CS_UTF16LE || enc_mode == CS_UTF16BE || enc_mode == CS_UTF32LE || enc_mode == CS_UTF32BE)
                     {
                         readlen = fgetline_w((char**)&pBuf, &bf_len, fp_read, enc_mode);
                     }
+		    else
+                        readlen = fgetline((char**)&pBuf, &bf_len, fp_read);
 
                     if(readlen < 0)
                     {
@@ -1298,7 +1404,7 @@ FREE_RESOURCES:
         if(fp_write)
             fclose(fp_write);
 
-        if(bFpeMode)
+        if(bFpeMode && strcmp(operation, "FF3-1"))
             fprintf(stdout, "FPE/FF1 Tokenization: Encrypt/Decrypt matched error count = %d.\n", errorCount);
 
         return rc;
@@ -1310,16 +1416,18 @@ void usageEncryptDecrypt()
     printf ("Usage: pkcs11_sample_encrypt_decrypt -p pin [-s slotID] -k keyName [-i {k|m|u}:identifier] [-m module_path] [-o operation] [-f input_file_name] [-iv iv_in_hex] [-a AAD_in_hex] [-t tag_bits] ([-c charset_for_fpe_mode]|[-l literal_charset_filename_for_fpe_mode]|[-r ranged_charset_filename_for_fpe_mode]) [-d decrypted_file_name] [-e encrypted_file_name] [-u charsettype] [-h header_version] [-n] [-T tweakfile]\n");
     printf ("-i identifier: one of 'imported key id' as 'k', MUID as 'm', or UUID as 'u'.\n");
     printf ("-z key_size key size for symmetric key in bytes.\n");
-    printf ("-o operation...CBC_PAD (default) or CTR or ECB or FPE or FF1\n");
+    printf ("-o operation...CBC_PAD (default) or CTR or ECB or GCM or FPE or FF1 or FF3-1\n");
     printf ("-c charset character set commandline typed input\n");
     printf ("-d optionally included decrypted file name.\n");
     printf ("-e optionally included encrypted file name.\n");
-    printf ("-u charsettype...ASCII or UTF8 or UTF16LE or UTF16BE or UTF32LE or UTF32BE (for FPE or FF1 only)\n");
+    printf ("-u charsettype...ASCII or UTF8 or UTF16LE or UTF16BE or UTF32LE or UTF32BE (for FPE or FF1 or FF3-1 only)\n");
+    printf ("Note* CARD10, CARD26 and CARD62 is only supported for FF3-1\n");
     printf ("-l literal charset file name for the FPE, or FF1 mode.\n");
     printf ("-r range charset file name for the FPE, or FF1 mode.\n");
     printf ("-h header_version...v1.5 or v1.5base64 or v2.1 or v.2.7\n");
     printf ("-n... noencryption - decrypt only. Useful for decrypting a file\n");
     printf ("-T tweakfile ... read an 8-byte FPE/FF1 Tweak from a file\n");
+    printf ("-ta tweak algo ... NONE, SHA1, SHA256\n");
     exit(2);
 }
 
@@ -1361,6 +1469,7 @@ int main(int argc, char *argv[])
     char *charset = NULL;
     char *pAad = NULL;
 
+    char *tweak_algo = NULL;
     char *charsettype = "ASCII";
     char *header_version = NULL; /* NULL, v1.5, v1.5base64, v2.1, v2.7 allowed */
     int noencryption = 0; /* 0...encrypt&decrypt, 1...decrypt only */
@@ -1368,7 +1477,7 @@ int main(int argc, char *argv[])
 
     optind = 1;
 
-    while ((c = newgetopt(argc, argv, "p:k:m:o:f:l:iv:s:c:u:r:d:e:h:b:z:a:t:T:n;")) != EOF)
+    while ((c = newgetopt(argc, argv, "p:k:m:o:f:l:iv:s:c:u:r:d:e:h:b:ta:z:a:t:T:n;")) != EOF)
         switch (c)
         {
         case 'u':
@@ -1396,6 +1505,9 @@ int main(int argc, char *argv[])
             break;
         case 'f':
             filename = optarg;
+            break;
+        case ta:
+            tweak_algo = optarg;
             break;
         case 'T':
             tweakfilename = optarg;
@@ -1564,7 +1676,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        rc = encryptDecrypt(operation, filename, ivt, cset_choc, charset, decrypted_file, encrypted_file, charsettype, header_version, noencryption, tweakfilename);
+        rc = encryptDecrypt(operation, filename, ivt, cset_choc, charset, decrypted_file, encrypted_file, charsettype, header_version, noencryption, tweakfilename, tweak_algo);
         if (rc != CKR_OK)
         {
             break;

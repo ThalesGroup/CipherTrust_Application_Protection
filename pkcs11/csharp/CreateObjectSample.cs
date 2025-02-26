@@ -20,11 +20,11 @@ namespace CADP.Pkcs11Sample
                     string pin = Convert.ToString(inputParams[0]);
                     string keyValue = new string((char[])inputParams[1]);
                     string keyLabel = Convert.ToString(inputParams[2]);
-                    bool isOpaqueObj = inputParams.Length > 2 ? Convert.ToBoolean(inputParams[3]) : false;
-                    int version = inputParams.Length > 3 ? Convert.ToInt32(inputParams[4]) : 0;
+                    bool isOpaqueObj = inputParams.Length > 3 ? Convert.ToBoolean(inputParams[3]) : false;
+                    int version = inputParams.Length > 4 ? Convert.ToInt32(inputParams[4]) : 0;
                     uint keySize = (uint)keyValue.Length;
                     DateTime endTime = DateTime.UtcNow.AddDays(31);
-
+                    string cka_idInput = inputParams.Length >5 ? Convert.ToString(inputParams[5]) : null;
                     // Login as normal user
                     session.Login(CKU.CKU_USER, pin);
 
@@ -61,7 +61,11 @@ namespace CADP.Pkcs11Sample
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_END_DATE, endTime));
 
                     objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_MODIFIABLE, true));
-
+                    // To add the CKA_ID attribute if the input is passed
+                    if (!string.IsNullOrEmpty(cka_idInput))
+                    {
+                        objectAttributes.Add(session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, cka_idInput));
+                    }
 
                     // Generate symetric key
                     IObjectHandle createdKey = session.CreateObject(objectAttributes);

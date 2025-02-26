@@ -16,16 +16,28 @@ namespace CADP.Pkcs11Sample
             string keyPairLabel = Convert.ToString(inputParams[1]);
 
             string opName = "RSA";
+            string curveoid = null;
             string headermode = null;
             bool nodelete = false;
             if (inputParams.Length >= 3)
                 opName = Convert.ToString(inputParams[2]);
 
             if (inputParams.Length >= 4)
-                headermode = Convert.ToString(inputParams[3]);
+            {
+                if (opName.ToUpper().Contains("EC"))
+                {
+                    curveoid = Convert.ToString(inputParams[3]);
+                }
+                else
+                {
+                    headermode = Convert.ToString(inputParams[3]);
+                }
+            }
 
             if (inputParams.Length >= 5)
                 nodelete = Convert.ToBoolean(inputParams[4]);
+            
+
 
             using (IPkcs11Library pkcs11Library = Settings.Factories.Pkcs11LibraryFactory.LoadPkcs11Library(Settings.Factories, Settings.Pkcs11LibraryPath, Settings.AppType))
             {
@@ -59,9 +71,14 @@ namespace CADP.Pkcs11Sample
                     else if (opName.Equals("SHA256-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA256_RSA_PKCS);
                     else if (opName.Equals("SHA384-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA384_RSA_PKCS);
                     else if (opName.Equals("SHA512-RSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_SHA512_RSA_PKCS);
+                    else if (opName.Equals("SHA1-ECDSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_ECDSA_SHA1) ;
+                    else if (opName.Equals("SHA256-ECDSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_ECDSA_SHA256);
+                    else if (opName.Equals("SHA384-ECDSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_ECDSA_SHA384);
+                    else if (opName.Equals("SHA512-ECDSA")) mechanismSgn = mechanismVfy = session.Factories.MechanismFactory.Create(CKM.CKM_ECDSA_SHA512);
                     else
                     {
-                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, RSA, SHA1-RSA, SHA256-RSA, SHA384-RSA and SHA512-RSA are supported");
+                        Console.WriteLine("Only SHA512-HMAC, SHA384-HMAC, SHA256-HMAC, SHA224-HMAC, SHA1-HMAC, RSA, SHA1-RSA, SHA256-RSA, SHA384-RSA, SHA512-RSA" +
+                            "SHA1-ECDSA, SHA256-ECDSA, SHA384-ECDSA and SHA512-ECDSA are supported");
                         return false;
                     }
 
@@ -69,7 +86,8 @@ namespace CADP.Pkcs11Sample
 
                     try
                     {
-                        if (opName.Equals("RSA") || opName.Equals("SHA1-RSA") || opName.Equals("SHA256-RSA") || opName.Equals("SHA384-RSA") || opName.Equals("SHA512-RSA"))
+                        if (opName.Equals("RSA") || opName.Equals("SHA1-RSA") || opName.Equals("SHA256-RSA") || opName.Equals("SHA384-RSA") || opName.Equals("SHA512-RSA")
+                            || opName.ToUpper().Contains("EC"))
                         {
                             if (!string.IsNullOrEmpty(headermode))
                                 return false;
@@ -83,8 +101,12 @@ namespace CADP.Pkcs11Sample
                             }
                             else
                             {
+                                if (opName.ToUpper().Contains("EC") && string.IsNullOrEmpty(curveoid))
+                                {
+                                    curveoid = "06052b81040020";
+                                }
                                 // Generate key pair
-                                Helpers.GenerateKeyPair(session, out publicKeyHandle, out privateKeyHandle, keyPairLabel); // password has been removed
+                                Helpers.GenerateKeyPair(session, out publicKeyHandle, out privateKeyHandle, keyPairLabel, curveOid: curveoid); // password has been removed
                                 Console.WriteLine("Asymmetric key " + keyPairLabel + " generated!");
                             }
                         }

@@ -24,9 +24,10 @@ namespace CADP.Pkcs11Sample
         {
             Console.WriteLine("Usage: pin keyname [encryption_mode] [header_mode] [inputFile] ([c char_set] ");
             Console.WriteLine("|[r range_charset_file]|[l literal_charset_file]) [utf_mode] [tweak]");
-            Console.WriteLine("encryption_mode: ECB, CTR, CBC, CBC_PAD, FPE/FF1, RSA, GCM");
+            Console.WriteLine("encryption_mode: ECB, CTR, CBC, CBC_PAD, FPE/FF1,FF3-1 RSA, GCM");
             Console.WriteLine("header_mode: none, v1.5, v1.5base64, v2.1, v2.7");
-            Console.WriteLine("utf_mode: UTF-8 UTF-16LE/BE UTF-32LE/BE");
+            Console.WriteLine("utf_mode: ASCII,UTF-8 UTF-16LE, UTF-16, UTF-32LE, UTF-32, CARD10, CARD26, CARD62");
+            Console.WriteLine("tweak algo: SHA1, SHA256, NONE");
         }
 
         public bool Run(object[] inputParams)
@@ -53,6 +54,7 @@ namespace CADP.Pkcs11Sample
                     byte[] charSetArray = null;
                     string charsetFileName = null;
                     string tweakStr = null;
+                    string tweakAlgo = null;
                     Encoding encoding = null;
                     string utfmode = "ASCII";
                     byte umode = 0;
@@ -66,9 +68,10 @@ namespace CADP.Pkcs11Sample
                     uint tagBits = 12;
 
                     ICkGcmParams mechanismParams = null;
+                    ICkFPEParams mechanismFPEParams = null;
                     byte[] gcm_iv = { 0xae, 0xc6, 0x12, 0xbe, 0x7c, 0x1d, 0xdb, 0x65, 0x9a, 0x4b, 0x31, 0x5c };
                     byte[] def_aad = { 0x38, 0x59, 0xb3, 0xc9, 0xd0, 0xb4, 0x2d, 0x45, 0xc4, 0x3e, 0x8e, 0xbd, 0x4c, 0x8c, 0xbd, 0xe1 };// 0xb6, 0xeb, 0x21, 0x06 };
-
+                    
 
                     if (inputParams.Length >= 2)
                     {
@@ -79,6 +82,22 @@ namespace CADP.Pkcs11Sample
                     {
                         Usage();
                         return false;
+                    }
+                    if (inputParams.Length >= 10)
+                    {
+                        var algo = Convert.ToString(inputParams[9]);
+                        if (algo == "SHA1")
+                        {
+                            tweakAlgo = "SHA1";
+                        }
+                        else if (algo == "SHA256")
+                        {
+                            tweakAlgo = "SHA256";
+                        }
+                        else
+                        {
+                            tweakAlgo = "NONE";
+                        }
                     }
 
                     if (inputParams.Length >= 9) tweakStr = Convert.ToString(inputParams[8]);
@@ -212,104 +231,121 @@ namespace CADP.Pkcs11Sample
                         }
                     }
 
-                    if (opName.Equals("FPE") || opName.Equals("FF1"))
+                    if (opName.Equals("FPE") || opName.Equals("FF1") || opName.Equals("FF3-1"))
                     {
-                        if (charSet != null)
+                        // Do not set charset in case Algo is FF3-1 and Cardinality is CARD10, Card26, CARD62
+                        if (opName.Equals("FF3-1") && (umode == 6 || umode == 7 || umode == 8))
                         {
-                            //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
-                            encoding = getUTFEncoding(utfmode, out umode);
-                            charSetArray = encoding.GetBytes(charSet);
-                            if (umode == 0) radix = (ushort)charSet.Length;
-                            else Console.WriteLine("Please only specify an ASCII character set on the command line.");
-                        }
-                        else if (charsetFileName == null)
-                        {
-                            Console.WriteLine("No character set or charset input file specified.");
-                            Usage();
-                            return false;
+                            // Ignore the charset.
+                            charSet = string.Empty;
                         }
                         else
                         {
-                            FileStream csfs = new System.IO.FileStream(charsetFileName, FileMode.Open, FileAccess.Read);
-                            String content;
-                            StreamReader sr;
-
-                            if (csRangeInput == true)
+                            if (charSet != null)
                             {
-                                sr = new StreamReader(csfs, Encoding.ASCII);
+                                //  String orderCharset = new string(charSet.OrderBy(c => c).Distinct().ToArray());
+                                encoding = getUTFEncoding(utfmode, out umode);
+                                charSetArray = encoding.GetBytes(charSet);
+
+                                // In Case of FF3-1 and mode is UTF-8/16LE/16/32LE/32 setting the radix
+                                if (opName.Equals("FF3-1") && (umode >= 1 && umode <= 5))
+                                {
+                                    radix = (ushort)charSet.Length;
+                                }
+
+
+                                if (umode == 0) radix = (ushort)charSet.Length;
+                                else Console.WriteLine("Please only specify an ASCII character set on the command line.");
+                            }
+                            else if (charsetFileName == null)
+                            {
+                                Console.WriteLine("No character set or charset input file specified.");
+                                Usage();
+                                return false;
                             }
                             else
                             {
-                                sr = new StreamReader(csfs, true);
-                            }
+                                FileStream csfs = new System.IO.FileStream(charsetFileName, FileMode.Open, FileAccess.Read);
+                                String content;
+                                StreamReader sr;
 
-                            content = sr.ReadToEnd();
-                            encoding = getUTFEncoding(utfmode, out umode);
-
-                            // if (content.Any(x => delimiters.Contains(x)))
-                            if (csRangeInput == true)
-                            {
-                                String[] ranges = content.Split(',');
-                                ArrayList charSetList = new ArrayList();
-                                Int32 cp, cp_end, i;
-
-                                string s;
-                                try
+                                if (csRangeInput == true)
                                 {
-                                    foreach (String r in ranges)
+                                    sr = new StreamReader(csfs, Encoding.ASCII);
+                                }
+                                else
+                                {
+                                    sr = new StreamReader(csfs, true);
+                                }
+
+                                content = sr.ReadToEnd();
+                                encoding = getUTFEncoding(utfmode, out umode);
+
+                                // if (content.Any(x => delimiters.Contains(x)))
+                                if (csRangeInput == true)
+                                {
+                                    String[] ranges = content.Split(',');
+                                    ArrayList charSetList = new ArrayList();
+                                    Int32 cp, cp_end, i;
+
+                                    string s;
+                                    try
                                     {
-                                        String pattern = @"([\dA-F]{1,4})(\s)*\-(\s)*([\dA-F]{1,4})";
-
-                                        if (Regex.IsMatch(r, pattern))
+                                        foreach (String r in ranges)
                                         {
-                                            Match m = Regex.Match(r, pattern);
+                                            String pattern = @"([\dA-F]{1,4})(\s)*\-(\s)*([\dA-F]{1,4})";
+
+                                            if (Regex.IsMatch(r, pattern))
                                             {
-                                                cp = Int32.Parse(m.Groups[1].Value, System.Globalization.NumberStyles.HexNumber);
-
-                                                cp_end = Int32.Parse(m.Groups[4].Value, System.Globalization.NumberStyles.HexNumber);
-
-                                                for (i = cp; i <= cp_end; i++)
+                                                Match m = Regex.Match(r, pattern);
                                                 {
-                                                    try
+                                                    cp = Int32.Parse(m.Groups[1].Value, System.Globalization.NumberStyles.HexNumber);
+
+                                                    cp_end = Int32.Parse(m.Groups[4].Value, System.Globalization.NumberStyles.HexNumber);
+
+                                                    for (i = cp; i <= cp_end; i++)
                                                     {
-                                                        s = Char.ConvertFromUtf32(i);
-                                                        charSetList.AddRange(encoding.GetBytes(s));
-                                                        radix++;
-                                                    }
-                                                    catch
-                                                    {
+                                                        try
+                                                        {
+                                                            s = Char.ConvertFromUtf32(i);
+                                                            charSetList.AddRange(encoding.GetBytes(s));
+                                                            radix++;
+                                                        }
+                                                        catch
+                                                        {
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                        else
-                                        {
-                                            try
+                                            else
                                             {
-                                                i = Int32.Parse(r.Trim(), System.Globalization.NumberStyles.HexNumber);
-                                                s = Char.ConvertFromUtf32(i);
-                                                charSetList.AddRange(encoding.GetBytes(s));
-                                                radix++;
+                                                try
+                                                {
+                                                    i = Int32.Parse(r.Trim(), System.Globalization.NumberStyles.HexNumber);
+                                                    s = Char.ConvertFromUtf32(i);
+                                                    charSetList.AddRange(encoding.GetBytes(s));
+                                                    radix++;
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    Console.WriteLine(ex.Message);
+                                                }
                                             }
-                                            catch (Exception ex)
-                                            {
-                                                Console.WriteLine(ex.Message);
-                                            }
-                                        }
 
+                                        }
+                                        charSetArray = charSetList.OfType<byte>().ToArray();
                                     }
-                                    charSetArray = charSetList.OfType<byte>().ToArray();
+                                    catch (Exception aex)
+                                    {
+                                        Console.WriteLine(aex.StackTrace);
+                                    }
                                 }
-                                catch (Exception aex)
+                                else
                                 {
-                                    Console.WriteLine(aex.StackTrace);
+                                    charSet = content.Trim(new char[] { '\n', '\r' });
+                                    radix = (ushort)charSet.Length;
+                                    charSetArray = encoding.GetBytes(charSet);
                                 }
-                            }
-                            else
-                            {
-                                charSet = content.Trim(new char[] { '\n', '\r' });
-                                radix = (ushort)charSet.Length;
-                                charSetArray = encoding.GetBytes(charSet);
                             }
                         }
                     }
@@ -383,6 +419,18 @@ namespace CADP.Pkcs11Sample
                         //Console.WriteLine("FF1 control structure has been set up: " + BitConverter.ToString(niv));
                         encmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
                         decmechanism = session.Factories.MechanismFactory.Create(CKM.CKM_THALES_FF1, niv);
+                    }
+                    else if (opName.Equals("FF3-1"))
+                    {
+
+                        byte[] tweakAlgoBytes = Encoding.UTF8.GetBytes(tweakAlgo);
+                        byte[] tweak = Encoding.UTF8.GetBytes(tweakStr);
+                        var mode = getUTFEncoding(utfmode, out umode);
+                        mechanismFPEParams = session.Factories.MechanismParamsFactory.CreateCkFPEParams(tweakAlgoBytes, tweak, umode, radix, charSetArray);
+
+                        var fpeopName = CKM.CKM_THALES_FF3_1;
+                        encmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
+                        decmechanism = session.Factories.MechanismFactory.Create(fpeopName, mechanismFPEParams);
                     }
 
                     // Specify encryption mechanism with initialization vector as parameter
@@ -599,6 +647,21 @@ namespace CADP.Pkcs11Sample
             {
                 umode = 5;
                 return new UTF32Encoding(true /*bigEndian*/, true /*byteOrderMark*/);
+            }
+            else if (utfmode.Equals("CARD10"))
+            {
+                umode = 6;
+                return Encoding.ASCII;
+            }
+            else if (utfmode.Equals("CARD26"))
+            {
+                umode = 7;
+                return Encoding.ASCII;
+            }
+            else if (utfmode.Equals("CARD62"))
+            {
+                umode = 8;
+                return Encoding.ASCII;
             }
             else if (string.IsNullOrEmpty(utfmode))
             {

@@ -6,7 +6,7 @@ CADP_PKCS11_Samples.exe or CADP_PKCS11_Samples.dll is a command-line interface t
 
 ## Prerequisites: 
 In order to run CADP_PKCS11_Samples :
-> - .NET 6.0 or higher must be installed.<br>
+> - .NET 6.0 or .NET 8.0 must be installed.<br>
 > - CADP for C must be installed.
 
 
@@ -21,8 +21,9 @@ You can build the sample either from Visual Studio or dotnet cli through the com
 
 ## Usage: 
 ### Run sample from executable(only on windows):
-CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])
+CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-Ta Tweak algo] [-TagLen length of Tag in AES/GCM] [-f input File]
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID]
+[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used] [-kt cka_keyType, useful with '-t j' sample option only])
 
 #### Example
      CADP_PKCS11_Samples.exe -p username:password -k testkey1 -t 1
@@ -30,8 +31,9 @@ CADP_PKCS11_Samples.exe -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b
 
 
 ### Run sample from dotnet cli:
-dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode] [-TagLen length of Tag in AES/GCM] [-f input File]
-[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-u utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false])
+dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d] [-k|-kp <keyname>] [-o encryption mode][-Ta Tweak algo] [-TagLen length of Tag in AES/GCM] [-f input File]
+[-c char set]|[-r charset file with range input]|[-l charset file with literal input] [-U utf mode] [-h headermode] [-w tweak] [-W wrappingkeyname] [-n false|true] [-m true|false] [-I Non-unique searchable ID CKA_ID]
+[-CurveOid curve Oid, for ECC keys only] [-Aa Asymmetric algorithm name - RSA/EC, useful with '-t a' sample option when -Kp is used] [-kt cka_keyType, useful with '-t j' sample option only])
 
 #### Example
      dotnet CADP_PKCS11_Samples.dll -p username:password -k testkey1 -t 1
@@ -52,6 +54,8 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
     b. Compute message digest for the default test string.
     c. Compute message digest for a given input file.
     d. Encrypt and decrypt with GCM mode sample.
+    e. Create a ECC key pair and sign the message sample.
+    j. Find keys using CKA_KeyType or CKA_ID and print attributes sample.
 ### Choices for the -o option:
      ECB ... ECB mode
      CBC ... CBC mode
@@ -63,6 +67,11 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      sha256-HMAC  ... SHA256-HMAC mode
      sha384-HMAC  ... SHA384-HMAC mode
      sha512-HMAC  ... SHA512-HMAC mode
+     SHA1-ECDSA   ... SHA1-ECDSA mode
+     SHA256-ECDSA  ... SHA256-ECDSA mode
+     SHA384-ECDSA  ... SHA384-ECDSA mode
+     SHA512-ECDSA  ... SHA512-ECDSA mode
+     FF3-1 ... FF3-1
 ### Choices for the -O option:
     true    ... Opaque object
     false   ... Non Opaque object
@@ -84,7 +93,44 @@ dotnet CADP_PKCS11_Samples.dll -p pin -t [0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
      v1.5base64 ... use version 1.5 header, then encode everything in the BASE64 code
      v2.1 ... use version 2.1 header
      v2.7 ... use version 2.7 header
+### Choices for the -CurveOid option:
+     06052b81040020, 06052b81040021, 06052b8104000a
+     06052b81040022, 06052b81040023, 06082a8648ce3d030107
+     06092b2403030208010105, 06092b2403030208010106
+     06092b2403030208010107, 06092b2403030208010108
+     06092b240303020801010b, 06092b240303020801010c
+     06092b240303020801010d, 06092b240303020801010e
+### Choices for the -Aa option:
+     RSA ... RSA Keypair
+     EC  ... ECC keypair
      
+### Choices for the -Ta tweak algo FF3-1 option:
+      SHA1 ... SHA1";
+      SHA256 ... SHA256"
+      NONE ... NONE"
+        
+      NOTE: For FF3-1, tweak data is mandatory. If tweak algorithm is NONE, the tweak data must be of 7 bytes (14 characters HEX encoded string).
+
+### Choices for the -kt option::
+     AES ... AES KeyType
+     RSA ... RSA KeyType
+     EC ... EC KeyType
+     SHA1-HMAC ... SHA1-HMAC KeyType
+     SHA256-HMAC ... SHA256-HMAC KeyType
+     SHA384-HMAC ... SHA384-HMAC KeyType
+     SHA512-HMAC ... SHA512-HMAC KeyType
+    
+
+### Choices for the -U utf mode option:
+    ASCII ... ASCII
+    UTF-8 ... UTF-8
+    UTF-16LE ... UTF 16 LittleEndian
+    UTF-16 ... UTF 16 BigEndian
+    UTF-32LE ... UTF 16 LittleEndian
+    UTF-32 ... UTF 32 BigEndian
+    CARD10 ... Cardinality as 10
+    CARD26 ... Cardinality as 26
+    CARD62 ... Cardinality as 62
 
 The program CADP_PKCS11_Samples consists of the main program whose source code can be found in Program.cs and ten other source code files, 
 each of which contains a sample class for a particular functionality, e.g. encryption or signing. 

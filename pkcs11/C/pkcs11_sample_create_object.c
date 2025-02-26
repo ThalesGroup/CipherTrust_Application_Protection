@@ -297,7 +297,7 @@ END:
 
 static CK_RV createObjectBVersion(char *keyLabel, CK_BBOOL bVersionedKey, int version,
                                   char *pBaseKsid, int bksidType, CK_BBOOL bCreationDate,
-                                  CK_BBOOL bOpaque, CK_ULONG opaqueSize, FILE *pf, char *KEYID, char *UUID, char *MUID, char *ALIAS)
+                                  CK_BBOOL bOpaque, CK_ULONG opaqueSize, FILE *pf, char *KEYID, char *UUID, char *MUID, char *ALIAS, char *idattr)
 {
     CK_RV       rc = CKR_OK;
     CK_UTF8CHAR	app[] = { "CADP_PKCS11_SAMPLE" };
@@ -316,8 +316,10 @@ static CK_RV createObjectBVersion(char *keyLabel, CK_BBOOL bVersionedKey, int ve
     CK_BBOOL			bTrue = CK_TRUE;
     CK_OBJECT_HANDLE	hObject = 0x0;
 
+    CK_UTF8CHAR         *id_label = (CK_UTF8CHAR *) idattr ? idattr : keyLabel;
     CK_UTF8CHAR         *label = (CK_UTF8CHAR *) keyLabel;
     CK_ULONG            len = (CK_ULONG) strlen(keyLabel);
+    CK_ULONG            id_len = (CK_ULONG) strlen(id_label);
 
     CK_LONG             lVersion = (CK_LONG)version;
     CK_UTF8CHAR         *baseKsid = (CK_UTF8CHAR *) pBaseKsid;
@@ -351,7 +353,7 @@ static CK_RV createObjectBVersion(char *keyLabel, CK_BBOOL bVersionedKey, int ve
     CK_ATTRIBUTE aesKeyTemplate[26] =
     {
         /* type,            	pValue, 	ulValueLen     */
-        {CKA_ID,				label,		len 			},
+        {CKA_ID,				id_label,	id_len 			},
         {CKA_LABEL,				label,		len 			},
         {CKA_APPLICATION,		&app,		sizeof(app)		},
         {CKA_CLASS,				&keyClass,	sizeof(keyClass)},
@@ -596,7 +598,7 @@ void usageCreateObject()
 {
     printf("Usage: pkcs11_sample_create_object -p pin -s slotID {-k keyName | -kp keypair_name | -o opaqueObjectName} [-v keyVersion] [-dc creationDate] [-B basekey_identifier] [-m module] [-f binarykeyfile]\n");
     printf("-b opaque object byte size or keypair bits size.\n");
-    printf("[-K imported keyID] [-U imported UUID] [-M imported MUID] [-A imported alias for key(gloabl unique identifier)]\n");
+    printf("[-K imported keyID] [-U imported UUID] [-M imported MUID] [-I imported CKA_ID][-A imported alias for key(gloabl unique identifier)]\n");
     printf("-v keyVersion, version of the key being imported, leave empty will use creation date as default for sorting version\n");
     printf("-c creationDate, date of the key being created, used to sort the versions for versioned key, e.g., 2017/10/10 \n");
     printf("Note: If -K, -U, -M, and/or -A are specified along with -k or -o, this simulates a 'key import' scenario where the key must have a specific key ID, UUID, MUID, and/or Alias\n");
@@ -662,12 +664,13 @@ int main(int argc, char *argv[])
     char        *UUID=NULL;
     char        *MUID=NULL;
     char        *ALIAS = NULL;
+    char        *idattr = NULL;
     char        *newAlias=NULL;
 
     unsigned int modBits = MODULUS_BITS;
     unsigned int opaqueSize = 257;
 
-    while ((c = newgetopt(argc, argv, "p:kp:m:s:b:dc:o:f:K:U:M:B:A:v:na:Sa")) != EOF)
+    while ((c = newgetopt(argc, argv, "p:kp:m:s:b:dc:o:f:K:U:I:M:B:A:v:na:Sa")) != EOF)
     {
         switch (c)
         {
@@ -707,6 +710,9 @@ int main(int argc, char *argv[])
             break;
         case 'M':
             MUID = optarg;
+            break;
+        case 'I':
+            idattr = optarg;
             break;
         case 'A':
             ALIAS = optarg;
@@ -854,7 +860,7 @@ int main(int argc, char *argv[])
                    goto END; //If object already exists do nothing.
             }
 
-            rc = createObjectBVersion(objLabel, bVersionedKey, key_version, pBaseKsid, bk_sid_type, bCreationDate, bOpaque, opaqueSize, pf, KEYID, UUID, MUID, ALIAS);
+            rc = createObjectBVersion(objLabel, bVersionedKey, key_version, pBaseKsid, bk_sid_type, bCreationDate, bOpaque, opaqueSize, pf, KEYID, UUID, MUID, ALIAS, idattr);
 
             if (rc != CKR_OK)
             {
