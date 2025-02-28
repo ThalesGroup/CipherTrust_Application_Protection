@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-deployment
+  namespace: devadv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-home
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  namespace: devadv
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30000  # Expose Jenkins on port 30000
+  selector:
+    app: jenkins
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-deployment
+  namespace: devadv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git
+  template:
+    metadata:
+      labels:
+        app: git
+    spec:
+      containers:
+      - name: git
+        image: alpine/git
+        command: ["sleep", "infinity"]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-repo-deployment
+  namespace: devadv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docker-repo
+  template:
+    metadata:
+      labels:
+        app: docker-repo
+    spec:
+      containers:
+      - name: docker-repo
+        image: registry:2
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: docker-repo-storage
+          mountPath: /var/lib/registry
+      volumes:
+      - name: docker-repo-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker-repo-service
+  namespace: devadv
+spec:
+  type: NodePort
+  ports:
+  - port: 5000
+    targetPort: 5000
+    nodePort: 30001
+  selector:
+    app: docker-repo
