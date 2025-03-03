@@ -34,6 +34,8 @@ public class User {
     private String zip;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPayment> paymentCards;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SmartMeter> smartMeters; // Smart meters associated with this user
 
     public Long getId() {
         return id;
@@ -113,4 +115,10 @@ public class User {
     public void setPaymentCards(List<UserPayment> paymentCards) {
         this.paymentCards = paymentCards;
     }
+    public List<SmartMeter> getSmartMeters() {
+        return smartMeters;
+    }
+    public void setSmartMeters(List<SmartMeter> smartMeters) {
+        this.smartMeters = smartMeters;
+    }  
 }
