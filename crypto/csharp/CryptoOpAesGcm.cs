@@ -110,7 +110,8 @@ namespace CADP.NetCoreNaeSamples
                 try
                 {
                     byte[] tag = null;
-                    byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD),);
+                    
+                    byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD));
                     Console.WriteLine($"Tag data: {BitConverter.ToString(tag).Replace("-", string.Empty)}");
                     byte[] decData = gcm.Decrypt(nonce, encData, tag, Encoding.ASCII.GetBytes(Default_AAD));
 
