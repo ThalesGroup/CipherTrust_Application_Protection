@@ -1,4 +1,4 @@
-﻿using CADP.NetCore.Crypto;
+using CADP.NetCore.Crypto;
 using CADP.NetCore.KeyManagement;
 using CADP.NetCore.Sessions;
 using System;
@@ -89,7 +89,7 @@ namespace CADP.NetCoreNaeSamples
                 {
                     return;
                 }
-                
+
 
                 /*Read the input data form console*/
                 Console.WriteLine("Please enter the input text");
@@ -110,12 +110,21 @@ namespace CADP.NetCoreNaeSamples
                 try
                 {
                     byte[] tag = null;
-
-                    byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD));
+                    byte[] encData = gcm.Encrypt(nonce, inputBytes, out tag, Encoding.ASCII.GetBytes(Default_AAD),);
                     Console.WriteLine($"Tag data: {BitConverter.ToString(tag).Replace("-", string.Empty)}");
                     byte[] decData = gcm.Decrypt(nonce, encData, tag, Encoding.ASCII.GetBytes(Default_AAD));
 
                     Console.WriteLine($"Decrypted data: {Encoding.Default.GetString(decData)}");
+
+                    // Incase of below scenarios, please set the InteOp default parameter as true.
+                    // 1. For versioned key, Encrypt the data in Remote Mode and you want to Decrypt ciphertext using Local Mode or vice versa, set this as true.
+                    // 2. For versioned key, Encrypt the data in Local Mode and you want to Decrypt using any other connector or vice versa, set this as true.
+
+                    //byte[] tagVersionedKey = null;
+                    //byte[] encDataVersionedKey = gcm.Encrypt(nonce, inputBytes, out tagVersionedKey, Encoding.ASCII.GetBytes(Default_AAD), true);
+                    //Console.WriteLine($"Tag data: {BitConverter.ToString(tagVersionedKey).Replace("-", string.Empty)}");
+                    //byte[] decDataVersionedKey = gcm.Decrypt(nonce, encDataVersionedKey, tagVersionedKey, Encoding.ASCII.GetBytes(Default_AAD), true);
+                    //Console.WriteLine($"Decrypted data: {Encoding.Default.GetString(decDataVersionedKey)}");
                 }
                 catch (Exception e)
                 {
