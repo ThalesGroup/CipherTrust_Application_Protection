@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,14 +19,14 @@ import io.ciphertrust.cryptoagility.entity.SmartMeterData;
 import io.ciphertrust.cryptoagility.service.SmartMeterDataService;
 
 @RestController
-@RequestMapping("/api/smart-meter-data")
+@RequestMapping("/api/v1/smart-meter-data")
 public class SmartMeterDataController {
 
     @Autowired
     private SmartMeterDataService smartMeterDataService;
 
     // Save telemetry data
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SmartMeterData> saveSmartMeterData(@RequestBody SmartMeterData data) {
         SmartMeterData savedData = smartMeterDataService.saveSmartMeterData(data);
         return ResponseEntity.ok(savedData);

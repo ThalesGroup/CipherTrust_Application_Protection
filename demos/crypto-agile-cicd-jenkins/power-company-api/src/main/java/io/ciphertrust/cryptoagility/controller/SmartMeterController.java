@@ -3,6 +3,7 @@ package io.ciphertrust.cryptoagility.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +17,13 @@ import io.ciphertrust.cryptoagility.entity.SmartMeter;
 import io.ciphertrust.cryptoagility.service.SmartMeterService;
 
 @RestController
-@RequestMapping("/api/smart-meters")
+@RequestMapping("/api/v1/smart-meters")
 public class SmartMeterController {
 
     @Autowired
     private SmartMeterService smartMeterService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SmartMeter> addSmartMeter(@RequestBody SmartMeter smartMeter) {
         SmartMeter savedSmartMeter = smartMeterService.addSmartMeter(smartMeter);
         return ResponseEntity.ok(savedSmartMeter);

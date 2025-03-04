@@ -3,15 +3,16 @@ package io.ciphertrust.cryptoagility.entity;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -22,8 +23,7 @@ public class SmartMeter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "meter_id", unique = true, nullable = false)
-    private String meterId; // Unique identifier for the smart meter
+    private String meterId;
 
     @Column(name = "manufacturer")
     private String manufacturer; // Manufacturer of the smart meter
@@ -31,11 +31,12 @@ public class SmartMeter {
     @Column(name = "installation_date")
     private LocalDate installationDate; // Date when the meter was installed
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Associated user
+    @OneToOne(mappedBy = "smartMeter")
+    @JsonBackReference("user-smartmeter")
+    private User user;
 
     @OneToMany(mappedBy = "smartMeter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<SmartMeterData> telemetryData; // Telemetry data for this smart meter
 
     public Long getId() {
@@ -44,14 +45,6 @@ public class SmartMeter {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getMeterId() {
-        return meterId;
-    }
-
-    public void setMeterId(String meterId) {
-        this.meterId = meterId;
     }
 
     public String getManufacturer() {
@@ -84,5 +77,16 @@ public class SmartMeter {
 
     public void setTelemetryData(List<SmartMeterData> telemetryData) {
         this.telemetryData = telemetryData;
+    }
+
+    public String getMeterId() {
+        return meterId;
+    }
+
+    public void setMeterId(String meterId) {
+        this.meterId = meterId;
+    }
+
+    public SmartMeter() {
     }
 }

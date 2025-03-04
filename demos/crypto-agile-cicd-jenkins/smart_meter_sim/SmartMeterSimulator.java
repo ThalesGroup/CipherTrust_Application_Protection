@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SmartMeterSimulator {
 
-    private static final String API_URL = "http://localhost:8080/api/smart-meter-data"; // Replace with your API URL
+    private static final String API_URL = "http://localhost:9090/api/v1/smart-meter-data"; // Replace with your API URL
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private static final Random RANDOM = new Random();
 
@@ -24,7 +24,7 @@ public class SmartMeterSimulator {
 
     public void start() {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        scheduler.scheduleAtFixedRate(this::sendTelemetryData, 0, 15, TimeUnit.MINUTES); // Send data every 15 minutes
+        scheduler.scheduleAtFixedRate(this::sendTelemetryData, 0, 1, TimeUnit.MINUTES); // Send data every 15 minutes
     }
 
     private void sendTelemetryData() {

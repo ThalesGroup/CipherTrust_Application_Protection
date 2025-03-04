@@ -2,6 +2,8 @@ package io.ciphertrust.cryptoagility.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -51,6 +53,7 @@ public class SmartMeterData {
 
     @ManyToOne
     @JoinColumn(name = "smart_meter_id", nullable = false)
+    @JsonBackReference
     private SmartMeter smartMeter; // Associated smart meter
 
     public Long getId() {
@@ -147,5 +150,8 @@ public class SmartMeterData {
 
     public void setSmartMeter(SmartMeter smartMeter) {
         this.smartMeter = smartMeter;
+    }
+
+    public SmartMeterData() {
     }
 }

@@ -1,6 +1,7 @@
 package io.ciphertrust.cryptoagility.entity;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -8,7 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -32,10 +34,14 @@ public class User {
     private String state;
     private String country;
     private String zip;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserPayment> paymentCards;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SmartMeter> smartMeters; // Smart meters associated with this user
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "smart_meter_id", referencedColumnName = "id")
+    @JsonManagedReference("user-smartmeter")
+    private SmartMeter smartMeter;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "payment_info_id", referencedColumnName = "id")
+    @JsonManagedReference("user-paymentinfo")
+    private UserPayment paymentInfo;
 
     public Long getId() {
         return id;
@@ -109,16 +115,19 @@ public class User {
     public void setZip(String zip) {
         this.zip = zip;
     }
-    public List<UserPayment> getPaymentCards() {
-        return paymentCards;
+    public SmartMeter getSmartMeter() {
+        return smartMeter;
     }
-    public void setPaymentCards(List<UserPayment> paymentCards) {
-        this.paymentCards = paymentCards;
+    public void setSmartMeter(SmartMeter smartMeter) {
+        this.smartMeter = smartMeter;
     }
-    public List<SmartMeter> getSmartMeters() {
-        return smartMeters;
+    public UserPayment getPaymentInfo() {
+        return paymentInfo;
     }
-    public void setSmartMeters(List<SmartMeter> smartMeters) {
-        this.smartMeters = smartMeters;
-    }  
+    public void setPaymentInfo(UserPayment paymentInfo) {
+        this.paymentInfo = paymentInfo;
+    }
+
+    public User() {
+    }   
 }
