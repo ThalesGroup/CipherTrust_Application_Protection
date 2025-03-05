@@ -53,7 +53,7 @@ public class SmartMeterData {
 
     @ManyToOne
     @JoinColumn(name = "smart_meter_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("smartmeter-telemetry")
     private SmartMeter smartMeter; // Associated smart meter
 
     public Long getId() {

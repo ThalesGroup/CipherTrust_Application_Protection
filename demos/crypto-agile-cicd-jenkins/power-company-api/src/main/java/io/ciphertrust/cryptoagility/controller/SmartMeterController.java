@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.ciphertrust.cryptoagility.dto.SmartMeterResponse;
 import io.ciphertrust.cryptoagility.entity.SmartMeter;
 import io.ciphertrust.cryptoagility.service.SmartMeterService;
 
@@ -30,9 +31,14 @@ public class SmartMeterController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SmartMeter> getSmartMeterById(@PathVariable Long id) {
+    public ResponseEntity<SmartMeterResponse> getSmartMeterById(@PathVariable Long id) {
         SmartMeter smartMeter = smartMeterService.getSmartMeterById(id);
-        return ResponseEntity.ok(smartMeter);
+        SmartMeterResponse response = new SmartMeterResponse(
+                smartMeter.getId(),
+                smartMeter.getMeterId(),
+                smartMeter.getLocation(),
+                smartMeter.getAggregator());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}")

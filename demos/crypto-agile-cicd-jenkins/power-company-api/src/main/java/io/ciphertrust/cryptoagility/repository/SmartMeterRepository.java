@@ -8,4 +8,5 @@ import io.ciphertrust.cryptoagility.entity.SmartMeter;
 
 public interface SmartMeterRepository extends JpaRepository<SmartMeter, Long> {
     List<SmartMeter> findByUserId(Long userId);
+    List<SmartMeter> findByAggregatorId(Long aggregatorId);
 }

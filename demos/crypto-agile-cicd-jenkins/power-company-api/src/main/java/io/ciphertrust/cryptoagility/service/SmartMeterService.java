@@ -9,4 +9,6 @@ public interface SmartMeterService {
     SmartMeter getSmartMeterById(Long id);
     List<SmartMeter> getSmartMetersByUserId(Long userId);
     void deleteSmartMeter(Long id);
+    public SmartMeter saveSmartMeter(SmartMeter smartMeter);
+    public List<SmartMeter> getSmartMetersByAggregatorId(Long aggregatorId);
 }

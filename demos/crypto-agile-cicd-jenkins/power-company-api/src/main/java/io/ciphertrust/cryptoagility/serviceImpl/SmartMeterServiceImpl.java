@@ -36,4 +36,14 @@ public class SmartMeterServiceImpl implements SmartMeterService {
     public void deleteSmartMeter(Long id) {
         smartMeterRepository.deleteById(id);
     }
+
+    @Override
+    public SmartMeter saveSmartMeter(SmartMeter smartMeter) {
+        return smartMeterRepository.save(smartMeter);
+    }
+
+    @Override
+    public List<SmartMeter> getSmartMetersByAggregatorId(Long aggregatorId) {
+        return smartMeterRepository.findByAggregatorId(aggregatorId);
+    }
 }
