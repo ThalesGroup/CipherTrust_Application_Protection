@@ -57,9 +57,9 @@ public class HMACSample
 	    // For HmacSHA256 key length is 256 bits
 	    // For HmacSHA384 key length is 384 bits
 	    // For HmacSHA512 key length is 512 bits
-	    NAEParameterSpec spec = new NAEParameterSpec( keyName, true, true, 160, session);
+	    NAEParameterSpec spec = new NAEParameterSpec( keyName, true, true, 256, session);
 
-	    KeyGenerator kg = KeyGenerator.getInstance("HmacSHA1", "IngrianProvider");
+	    KeyGenerator kg = KeyGenerator.getInstance("HmacSHA256", "IngrianProvider");
 	    kg.init(spec); 
             SecretKey secret_key = kg.generateKey();
 
@@ -67,17 +67,17 @@ public class HMACSample
 	    NAEKey key = NAEKey.getSecretKey(keyName, session);
 
 	    // create MAC instance to get the message authentication code
-	    Mac mac = Mac.getInstance("HmacSHA1", "IngrianProvider");
+	    Mac mac = Mac.getInstance("HmacSHA256", "IngrianProvider");
 	    mac.init(key);
 	    byte[] macValue = mac.doFinal(dataToMac.getBytes());
 
 	    // create MAC instance to verify the message authentication code
-	    Mac macV = Mac.getInstance("HmacSHA1Verify", "IngrianProvider");
+	    Mac macV = Mac.getInstance("HmacSHA256Verify", "IngrianProvider");
 	    macV.init(key, new MACValue(macValue));
 	    byte[] result = macV.doFinal(dataToMac.getBytes());
         
 	    // check verification result 
-	    if (result.length != 1 || result[0] != 1) {
+	    if (result[0] != 1) {
 		System.out.println("Invalid MAC.");
 	    } else {
 		System.out.println("MAC Verified OK.");
