@@ -1,6 +1,5 @@
 package io.ciphertrust.cryptoagility.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +21,7 @@ public class Aggregator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
     private String currentStatus;
     private LocalDateTime statusUpdateTime;
     private String location;
@@ -83,5 +83,13 @@ public class Aggregator {
     public void removeSmartMeter(SmartMeter smartMeter) {
         smartMeters.remove(smartMeter);
         smartMeter.setAggregator(null);
-    }    
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

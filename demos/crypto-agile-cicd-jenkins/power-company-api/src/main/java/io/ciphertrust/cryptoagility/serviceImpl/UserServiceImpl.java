@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 
 import io.ciphertrust.cryptoagility.entity.SmartMeter;
 import io.ciphertrust.cryptoagility.entity.User;
+import io.ciphertrust.cryptoagility.entity.UserBill;
 import io.ciphertrust.cryptoagility.entity.UserPayment;
 import io.ciphertrust.cryptoagility.repository.SmartMeterRepository;
+import io.ciphertrust.cryptoagility.repository.UserBillRepository;
 import io.ciphertrust.cryptoagility.repository.UserPaymentRepository;
 import io.ciphertrust.cryptoagility.repository.UserRepository;
 import io.ciphertrust.cryptoagility.service.UserService;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -26,7 +30,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SmartMeterRepository meterRepository;
 
+    @Autowired
+    private UserBillRepository userBillRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
     @Override
+    @Transactional
     public User createUser(User user) {
         return userRepository.save(user);
     }
@@ -84,8 +95,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public SmartMeter addSmartMeter(Long userId, SmartMeter meter) {
         User user = getUserById(userId);
+        user = entityManager.merge(user);
+        meter = entityManager.merge(meter);
+
         meter.setUser(user);
         user.setSmartMeter(meter);
         return meterRepository.save(meter);
@@ -102,4 +117,18 @@ public class UserServiceImpl implements UserService {
         meterRepository.deleteById(meterId);
     }
 
+    @Override
+    public UserBill addBillToUser(Long userId, UserBill bill) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        bill.setUser(user);
+        return userBillRepository.save(bill);
+    }
+
+    @Override
+    public List<UserBill> getBillsForUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getBills();
+    }
 }

@@ -21,12 +21,12 @@ function DashboardAdmin() {
 
         {/* Card 2: Aggregated Usage */}
         <Link
-          to="/aggregated-usage"
+          to="/aggregators"
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
         >
           <div className="flex items-center mb-4">
             <FaChartBar className="text-green-500 text-2xl mr-2" />
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Aggregated Usage</h2>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Aggregators</h2>
           </div>
           <p className="text-gray-600 dark:text-gray-400">View aggregated usage data.</p>
         </Link>

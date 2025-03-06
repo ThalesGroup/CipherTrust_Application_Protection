@@ -1,7 +1,8 @@
 package io.ciphertrust.cryptoagility.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -42,6 +44,9 @@ public class User {
     @JoinColumn(name = "payment_info_id", referencedColumnName = "id")
     @JsonManagedReference("user-paymentinfo")
     private UserPayment paymentInfo;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("user-bills")
+    private List<UserBill> bills;
 
     public Long getId() {
         return id;
@@ -129,5 +134,23 @@ public class User {
     }
 
     public User() {
-    }   
+    }
+    public List<UserBill> getBills() {
+        return bills;
+    }
+    public void setBills(List<UserBill> bills) {
+        this.bills = bills;
+    }
+
+    // Helper method to add a payment
+    public void addBill(UserBill bill) {
+        bills.add(bill);
+        bill.setUser(this);
+    }
+
+    // Helper method to remove a payment
+    public void removeBill(UserBill bill) {
+        bills.remove(bill);
+        bill.setUser(null);
+    }
 }

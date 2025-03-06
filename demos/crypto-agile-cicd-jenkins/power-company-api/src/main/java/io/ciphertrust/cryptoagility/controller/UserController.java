@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.ciphertrust.cryptoagility.entity.SmartMeter;
 import io.ciphertrust.cryptoagility.entity.User;
+import io.ciphertrust.cryptoagility.entity.UserBill;
 import io.ciphertrust.cryptoagility.entity.UserPayment;
 import io.ciphertrust.cryptoagility.service.UserService;
 
@@ -101,5 +102,19 @@ public class UserController {
     public ResponseEntity<Void> deleteSmartMeter(@PathVariable Long smartMeterId) {
         userService.deleteSmartMeter(smartMeterId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/bills")
+    public ResponseEntity<UserBill> addBillToUser(
+            @PathVariable Long userId,
+            @RequestBody UserBill bill) {
+        UserBill savedBill = userService.addBillToUser(userId, bill);
+        return ResponseEntity.ok(savedBill);
+    }
+
+    @GetMapping("/{userId}/bills")
+    public ResponseEntity<List<UserBill>> getBillsForUser(@PathVariable Long userId) {
+        List<UserBill> bills = userService.getBillsForUser(userId);
+        return ResponseEntity.ok(bills);
     }
 }

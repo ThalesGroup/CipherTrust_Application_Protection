@@ -22,9 +22,6 @@ function NavbarAdmin({ onLogout, onToggleDarkMode, isDarkMode }) {
           <Link to="/subscribed-users" className="text-gray-800 dark:text-white hover:text-blue-500">
             Subscribed Users
           </Link>
-          <Link to="/aggregated-usage" className="text-gray-800 dark:text-white hover:text-blue-500">
-            Aggregated Usage
-          </Link>
         </div>
         <div className="flex items-center space-x-4">
           <button

@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.ciphertrust.cryptoagility.entity.SmartMeter;
 import io.ciphertrust.cryptoagility.entity.User;
+import io.ciphertrust.cryptoagility.entity.UserBill;
 import io.ciphertrust.cryptoagility.entity.UserPayment;
 
 public interface UserService {
@@ -18,4 +19,6 @@ public interface UserService {
     SmartMeter addSmartMeter(Long userId, SmartMeter meter);
     SmartMeter getSmartMetersByUserId(Long userId);
     void deleteSmartMeter(Long meterId);
+    UserBill addBillToUser(Long userId, UserBill bill);
+    List<UserBill> getBillsForUser(Long userId);
 }
