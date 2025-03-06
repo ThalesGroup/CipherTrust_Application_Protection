@@ -3,10 +3,10 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
-import com.clientmanagement.CipherTextData;
-import com.clientmanagement.ClientManagementProvider;
-import com.clientmanagement.RegisterClientParameters;
-import com.clientmanagement.policy.CryptoManager;
+import com.centralmanagement.CipherTextData;
+import com.centralmanagement.CentralManagementProvider;
+import com.centralmanagement.RegisterClientParameters;
+import com.centralmanagement.policy.CryptoManager;
 
 
 /**
@@ -42,8 +42,8 @@ public class ReprotectSample {
 			RegisterClientParameters registerClientParams = new RegisterClientParameters.Builder(keyManagerHost,
 					registrationToken.toCharArray()).build();
 
-			ClientManagementProvider clientManagementProvider = new ClientManagementProvider(registerClientParams);
-			clientManagementProvider.addProvider();
+			CentralManagementProvider centralManagementProvider = new CentralManagementProvider(registerClientParams);
+			centralManagementProvider.addProvider();
 
 			// To perform reprotect operation first we should have protected data array
 			// which we want to reprotect
