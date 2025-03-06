@@ -5,10 +5,10 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 
-import com.clientmanagement.CipherTextData;
-import com.clientmanagement.ClientManagementProvider;
-import com.clientmanagement.RegisterClientParameters;
-import com.clientmanagement.policy.CryptoManager;
+import com.centralmanagement.CipherTextData;
+import com.centralmanagement.CentralManagementProvider;
+import com.centralmanagement.RegisterClientParameters;
+import com.centralmanagement.policy.CryptoManager;
 
 /**
  * This sample shows how to encrypt/decrypt data using protect/reveal API's in
@@ -36,8 +36,8 @@ public class ProtectRevealSample {
 					registrationToken.toCharArray()).build();
 
 			//creates provider object.
-			ClientManagementProvider clientManagementProvider = new ClientManagementProvider(registerClientParams);
-			clientManagementProvider.addProvider();
+			CentralManagementProvider centralManagementProvider = new CentralManagementProvider(registerClientParams);
+			centralManagementProvider.addProvider();
 		
 			CipherTextData encryptedDataObject = CryptoManager.protect(plainText.getBytes(), protectionPolicyName);
 			
@@ -49,8 +49,8 @@ public class ProtectRevealSample {
 			
 			/**
 			 * For External Version
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText()));// This will return ciphertext
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getVersion()));// This will have version header information
+			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText()));-- This will return ciphertext
+			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getVersion()));-- This will have version header information
 			 */
 			byte[] decryptedData = CryptoManager.reveal(encryptedDataObject, protectionPolicyName,userName);
 			System.out.println("Decrypted Data: " + new String(decryptedData));
