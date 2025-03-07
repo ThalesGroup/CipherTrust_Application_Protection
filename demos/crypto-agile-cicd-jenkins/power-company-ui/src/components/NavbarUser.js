@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaUser, FaCog, FaSignOutAlt, FaCreditCard, FaChartLine, FaFileInvoice } from 'react-icons/fa';
+import { FaUser, FaCog, FaSignOutAlt, FaCreditCard } from 'react-icons/fa';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
-function NavbarUser({ onLogout, onToggleDarkMode, isDarkMode }) {
+function NavbarUser({ username, onLogout, onToggleDarkMode, isDarkMode }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (

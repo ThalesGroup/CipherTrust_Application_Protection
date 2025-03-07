@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaBolt, FaChartLine, FaUser, FaCreditCard, FaFileInvoice } from 'react-icons/fa';
+import { FaBolt, FaCreditCard, FaFileInvoice } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 function DashboardUser() {

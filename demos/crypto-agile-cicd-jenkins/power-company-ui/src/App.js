@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import NavbarUser from './components/NavbarUser';
 import NavbarAdmin from './components/NavbarAdmin';
 import DashboardUser from './views/DashboardUser';
@@ -16,18 +16,20 @@ import UsageTrend from './views/UsageTrend';
 import SubscribedUsers from './views/SubscribedUsers';
 import AggregatedUsage from './views/AggregatedUsage';
 
-function App() {
+function App({ navigate }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [username, setUsername] = useState('');
 
   // Check if the user is authenticated on initial load
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const storedUsername = localStorage.getItem('username');
     const role = localStorage.getItem('userRole');
-    if (token && role) {
+    if (storedUsername && role) {
       setIsAuthenticated(true);
       setUserRole(role);
+      setUsername(storedUsername);
     }
 
     // Check for saved dark mode preference
@@ -39,19 +41,33 @@ function App() {
   }, []);
 
   // Handle login
-  const handleLogin = (role) => {
+  const handleLogin = (username, role) => {
+    setIsAuthenticated(true);
+    setUsername(username);
+    setUserRole(role);
     localStorage.setItem('authToken', 'dummy-token'); // Simulate a token
     localStorage.setItem('userRole', role); // Store user role
-    setIsAuthenticated(true);
-    setUserRole(role);
+    localStorage.setItem('username', username);
   };
 
   // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userRole');
+    const role = localStorage.getItem('userRole'); // Get the role before clearing localStorage
+
     setIsAuthenticated(false);
     setUserRole('');
+    setUsername('');
+
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username');
+
+    // Redirect based on role
+    if (role === 'admin') {
+      navigate('/login-admin'); // Redirect to admin login
+    } else {
+      navigate('/login-user'); // Redirect to user login
+    }
   };
 
   // Toggle dark mode
@@ -63,12 +79,12 @@ function App() {
   };
 
   return (
-    <Router>
+    <>
       {isAuthenticated &&
         (userRole === 'admin' ? (
-          <NavbarAdmin onLogout={handleLogout} onToggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
+          <NavbarAdmin username={username} onLogout={handleLogout} onToggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
         ) : (
-          <NavbarUser onLogout={handleLogout} onToggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
+          <NavbarUser username={username} onLogout={handleLogout} onToggleDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
         ))}
       <Routes>
         <Route
@@ -121,7 +137,7 @@ function App() {
             isAuthenticated ? (
               <Navigate to="/" />
             ) : (
-              <LoginUser onLogin={() => handleLogin('user')} />
+              <LoginUser onLogin={(username) => handleLogin(username, 'user')} />
             )
           }
         />
@@ -131,7 +147,7 @@ function App() {
             isAuthenticated ? (
               <Navigate to="/" />
             ) : (
-              <LoginAdmin onLogin={() => handleLogin('admin')} />
+              <LoginAdmin onLogin={(username) => handleLogin(username, 'admin')} />
             )
           }
         />
@@ -196,7 +212,7 @@ function App() {
           }
         />
       </Routes>
-    </Router>
+    </>
   );
 }
 

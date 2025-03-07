@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaChartBar, FaCogs, FaUsers, FaFileAlt } from 'react-icons/fa';
+import { FaChartBar, FaUsers } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 function DashboardAdmin() {
@@ -32,13 +32,13 @@ function DashboardAdmin() {
         </Link>
 
         {/* Card 3: Reports */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+        {/* <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center mb-4">
             <FaFileAlt className="text-purple-500 text-2xl mr-2" />
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Reports</h2>
           </div>
           <p className="text-gray-600 dark:text-gray-400">Generate and view reports.</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
