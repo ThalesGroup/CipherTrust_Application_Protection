@@ -117,9 +117,9 @@ namespace CADP.NetCoreNaeSamples
 
                     Console.WriteLine($"Decrypted data: {Encoding.Default.GetString(decData)}");
 
-                    // Incase of below scenarios, please set the InteOp default parameter as true.
-                    // 1. For versioned key, Encrypt the data in Remote Mode and you want to Decrypt ciphertext using Local Mode or vice versa, set this as true.
-                    // 2. For versioned key, Encrypt the data in Local Mode and you want to Decrypt using any other connector or vice versa, set this as true.
+                    // Please check the below scenarios, before setting the interOp parameter.
+                    // For every encrypt please set the interOp parameter as true else encrypted text will not be compatible with other connectors(in any mode) and in remote mode for CADP for .Net Core AES/GCM.
+                    // The value of interOp parameter should be same for both encryption & decryption operation i.e. it should be set to true during decryption if it was set to true in encryption.
 
                     //byte[] tagVersionedKey = null;
                     //byte[] encDataVersionedKey = gcm.Encrypt(nonce, inputBytes, out tagVersionedKey, Encoding.ASCII.GetBytes(Default_AAD), true);
