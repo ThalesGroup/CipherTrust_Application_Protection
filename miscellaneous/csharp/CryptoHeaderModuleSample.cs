@@ -52,10 +52,10 @@ namespace CADP.NetCoreNaeSamples
                 case 2: // Legay Encryption and Decryption
                     handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
                     byte[] toLegayEncrypt = Encoding.UTF8.GetBytes(plaintext);
-                    byte[] ciphertextWithoutHeaderInfo = handler.EncryptLegacyData(toLegayEncrypt);
+                    byte[] ciphertextWithoutHeaderInfo = handler.EncryptWithoutHeader(toLegayEncrypt);
                     Console.WriteLine($"Ciphertext: {Encoding.UTF8.GetString(ciphertextWithoutHeaderInfo)}");
 
-                    var leagacyDecrypted = handler.DecryptLegacyData(ciphertextWithoutHeaderInfo);
+                    var leagacyDecrypted = handler.DecryptWithoutHeader(ciphertextWithoutHeaderInfo);
                     Console.WriteLine($"Decrypted: {Encoding.UTF8.GetString(leagacyDecrypted)}");
                     break;
 
