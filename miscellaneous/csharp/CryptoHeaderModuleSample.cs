@@ -51,12 +51,12 @@ namespace CADP.NetCoreNaeSamples
 
                 case 2: // Encryption and Decryption Without Header
                     handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
-                    byte[] toLegayEncrypt = Encoding.UTF8.GetBytes(plaintext);
-                    byte[] ciphertextWithoutHeaderInfo = handler.EncryptWithoutHeader(toLegayEncrypt);
+                    byte[] toEncryptWithoutHeader = Encoding.UTF8.GetBytes(plaintext);
+                    byte[] ciphertextWithoutHeaderInfo = handler.EncryptWithoutHeader(toEncryptWithoutHeader);
                     Console.WriteLine($"Ciphertext: {Encoding.UTF8.GetString(ciphertextWithoutHeaderInfo)}");
 
-                    var leagacyDecrypted = handler.DecryptWithoutHeader(ciphertextWithoutHeaderInfo);
-                    Console.WriteLine($"Decrypted: {Encoding.UTF8.GetString(leagacyDecrypted)}");
+                    var decryptedWithoutHeader = handler.DecryptWithoutHeader(ciphertextWithoutHeaderInfo);
+                    Console.WriteLine($"Decrypted: {Encoding.UTF8.GetString(decryptedWithoutHeader)}");
                     break;
 
                 case 3: //HMAC Generation & Verification
@@ -72,4 +72,3 @@ namespace CADP.NetCoreNaeSamples
         }
     }
 }
-
