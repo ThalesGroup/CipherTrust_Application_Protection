@@ -13,7 +13,7 @@ namespace CADP.NetCoreNaeSamples
             string[] operations = new string[]
             {
             "1: Encryption and Decryption",
-            "2: Legacy Encryption and Decryption",
+            "2: Encryption and Decryption Without Header",
             "3: HMAC Generation and Verification"
             };
 
@@ -49,7 +49,7 @@ namespace CADP.NetCoreNaeSamples
                     Console.WriteLine($"Decrypted: {Encoding.UTF8.GetString(decrypted)}");
                     break;
 
-                case 2: // Legay Encryption and Decryption
+                case 2: // Encryption and Decryption Without Header
                     handler = cryptoFactory.GetEncryptionHandler(algo, keyName);
                     byte[] toLegayEncrypt = Encoding.UTF8.GetBytes(plaintext);
                     byte[] ciphertextWithoutHeaderInfo = handler.EncryptWithoutHeader(toLegayEncrypt);
