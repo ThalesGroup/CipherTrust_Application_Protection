@@ -1,3 +1,4 @@
 .DS_Store
 .vscode/
 /demos/cadp-crdp-bouncycastle-pr/target
+*.class
