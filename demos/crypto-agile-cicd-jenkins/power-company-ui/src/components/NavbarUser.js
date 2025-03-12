@@ -35,7 +35,7 @@ function NavbarUser({ username, onLogout, onToggleDarkMode, isDarkMode }) {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center text-gray-800 dark:text-white hover:text-blue-500"
             >
-              <FaUser size={20} />
+              <FaUser size={20} />&nbsp;Welcome, {username}
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg">

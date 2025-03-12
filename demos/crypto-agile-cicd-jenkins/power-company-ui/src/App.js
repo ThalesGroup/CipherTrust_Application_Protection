@@ -21,15 +21,18 @@ function App({ navigate }) {
   const [userRole, setUserRole] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [username, setUsername] = useState('');
+  const [userId, setUserId] = useState('');
 
   // Check if the user is authenticated on initial load
   useEffect(() => {
     const storedUsername = localStorage.getItem('username');
     const role = localStorage.getItem('userRole');
-    if (storedUsername && role) {
+    const userId = localStorage.getItem('userId');
+    if (storedUsername && role && userId) {
       setIsAuthenticated(true);
       setUserRole(role);
       setUsername(storedUsername);
+      setUserId(userId);
     }
 
     // Check for saved dark mode preference
@@ -41,13 +44,15 @@ function App({ navigate }) {
   }, []);
 
   // Handle login
-  const handleLogin = (username, role) => {
+  const handleLogin = (username, userId, role) => {
     setIsAuthenticated(true);
     setUsername(username);
+    setUserId(userId);
     setUserRole(role);
     localStorage.setItem('authToken', 'dummy-token'); // Simulate a token
     localStorage.setItem('userRole', role); // Store user role
     localStorage.setItem('username', username);
+    localStorage.setItem('userId', userId);
   };
 
   // Handle logout
@@ -57,10 +62,12 @@ function App({ navigate }) {
     setIsAuthenticated(false);
     setUserRole('');
     setUsername('');
+    setUserId('');
 
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
 
     // Redirect based on role
     if (role === 'admin') {
@@ -137,7 +144,7 @@ function App({ navigate }) {
             isAuthenticated ? (
               <Navigate to="/" />
             ) : (
-              <LoginUser onLogin={(username) => handleLogin(username, 'user')} />
+              <LoginUser onLogin={(username, userId) => handleLogin(username, userId, 'user')} />
             )
           }
         />
@@ -147,7 +154,7 @@ function App({ navigate }) {
             isAuthenticated ? (
               <Navigate to="/" />
             ) : (
-              <LoginAdmin onLogin={(username) => handleLogin(username, 'admin')} />
+              <LoginAdmin onLogin={(username, userId) => handleLogin(username, userId, 'admin')} />
             )
           }
         />

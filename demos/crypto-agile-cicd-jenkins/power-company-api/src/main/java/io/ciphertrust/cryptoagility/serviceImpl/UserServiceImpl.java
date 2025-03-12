@@ -49,6 +49,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByUsernameAndPassword(String username, String password) {
+        return userRepository.findByUsernameAndPassword(username, password)
+                .orElseThrow(() -> new EntityNotFoundException("Invalid username or password or both"));
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -80,7 +86,7 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(userId);
         paymentInfo.setUser(user);
         user.setPaymentInfo(paymentInfo);
-        return userPaymentRepository.save(paymentInfo);
+        return userPaymentRepository.saveAndFlush(paymentInfo);
     }
 
     @Override

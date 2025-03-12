@@ -11,7 +11,7 @@ function LoginAdmin({ onLogin }) {
     console.log('Logging in as admin:', { username, password });
 
     // Call the onLogin function to set the role to 'admin'
-    onLogin(username, 'admin');
+    onLogin(username, 0, 'admin');
   };
 
   return (

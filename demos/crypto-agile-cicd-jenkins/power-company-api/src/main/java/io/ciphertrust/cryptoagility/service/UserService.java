@@ -10,6 +10,7 @@ import io.ciphertrust.cryptoagility.entity.UserPayment;
 public interface UserService {
     User createUser(User user);
     User getUserById(Long id);
+    User getUserByUsernameAndPassword(String username, String password);
     List<User> getAllUsers();
     User updateUser(Long id, User user);
     void deleteUser(Long id);

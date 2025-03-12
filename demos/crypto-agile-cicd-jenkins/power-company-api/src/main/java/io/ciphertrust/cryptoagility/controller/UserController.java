@@ -27,6 +27,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+     // Authenticate a user
+     @GetMapping("/{username}/{password}")
+     public ResponseEntity<Long> authenticate(@PathVariable String username, @PathVariable String password) {
+         User user = userService.getUserByUsernameAndPassword(username, password);
+         return ResponseEntity.ok(user.getId());
+     }
+
     // Create a new user
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> createUser(@RequestBody User user) {

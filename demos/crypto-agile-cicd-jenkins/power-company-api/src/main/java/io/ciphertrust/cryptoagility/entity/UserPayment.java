@@ -1,10 +1,11 @@
 package io.ciphertrust.cryptoagility.entity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,7 +34,7 @@ public class UserPayment {
     @Column(name = "cvv", nullable = false)
     private String cvv;
 
-    @OneToOne(mappedBy = "paymentInfo")
+    @OneToOne(mappedBy = "paymentInfo", cascade = CascadeType.ALL)
     @JsonBackReference("user-paymentinfo")
     private User user;
 
@@ -86,5 +87,18 @@ public class UserPayment {
     }
 
     public UserPayment() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserPayment that = (UserPayment) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

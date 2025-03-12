@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function LoginUser({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const handleSubmit = (e) => {
+  const [userId, setUserId] = useState('');
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Perform authentication logic here (e.g., API call)
     console.log('Logging in as user:', { username, password });
-
-    onLogin(username, 'user');
+    try {
+      const response = await axios.get(`http://localhost:9090/api/v1/users/${username}/${password}`);
+      console.log('API Response:', response);
+      onLogin(username, response.data, 'user');
+      setUserId(response.data);
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   return (
