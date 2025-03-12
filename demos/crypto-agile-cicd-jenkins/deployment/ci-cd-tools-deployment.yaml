@@ -1,106 +1,142 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-tools
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: git-data-pv
+  labels:
+    type: local
+spec:
+  storageClassName: hostpath
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: C:\k8s-data\git-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-data-pvc
+  namespace: dev-tools
+spec:
+  storageClassName: hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jenkins-deployment
-  namespace: devadv
+  name: git-server
+  namespace: dev-tools
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: jenkins
+      app: git-server
   template:
     metadata:
       labels:
-        app: jenkins
+        app: git-server
     spec:
       containers:
-      - name: jenkins
-        image: jenkins/jenkins:lts
+      - name: git-server
+        image: gogs/gogs:latest
         ports:
-        - containerPort: 8080
-        - containerPort: 50000
+        - containerPort: 3000
         volumeMounts:
-        - name: jenkins-home
-          mountPath: /var/jenkins_home
+        - name: git-data
+          mountPath: /data
       volumes:
-      - name: jenkins-home
-        emptyDir: {}
-
+      - name: git-data
+        persistentVolumeClaim:
+          claimName: git-data-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: jenkins-service
-  namespace: devadv
+  name: git-server
+  namespace: dev-tools
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-  - port: 8080
-    targetPort: 8080
-    nodePort: 30000  # Expose Jenkins on port 30000
+  - port: 3000
+    targetPort: 3000
   selector:
-    app: jenkins
-
+    app: git-server
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry-data-pv
+  labels:
+    type: local
+spec:
+  storageClassName: hostpath
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: C:\k8s-data\registry-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: registry-data-pvc
+  namespace: dev-tools
+spec:
+  storageClassName: hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: git-deployment
-  namespace: devadv
+  name: docker-registry
+  namespace: dev-tools
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: git
+      app: docker-registry
   template:
     metadata:
       labels:
-        app: git
+        app: docker-registry
     spec:
       containers:
-      - name: git
-        image: alpine/git
-        command: ["sleep", "infinity"]
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: docker-repo-deployment
-  namespace: devadv
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: docker-repo
-  template:
-    metadata:
-      labels:
-        app: docker-repo
-    spec:
-      containers:
-      - name: docker-repo
+      - name: docker-registry
         image: registry:2
         ports:
         - containerPort: 5000
         volumeMounts:
-        - name: docker-repo-storage
+        - name: registry-data
           mountPath: /var/lib/registry
       volumes:
-      - name: docker-repo-storage
-        emptyDir: {}
-
+      - name: registry-data
+        persistentVolumeClaim:
+          claimName: registry-data-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: docker-repo-service
-  namespace: devadv
+  name: docker-registry
+  namespace: dev-tools
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 5000
     targetPort: 5000
-    nodePort: 30001
   selector:
-    app: docker-repo
+    app: docker-registry

@@ -1,35 +1,139 @@
+# Kubernetes Deployment and Service for React and Spring Boot Apps
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: react-app-deployment
-  namespace: devadv
+  name: crestline-ui
+  namespace: dev-tools
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: react-app
+      app: crestline-ui
   template:
     metadata:
       labels:
-        app: react-app
+        app: crestline-ui
     spec:
       containers:
-      - name: react-app
-        image: localhost:30001/react-app:latest
-        ports:
-        - containerPort: 80
+        - name: crestline-ui
+          image: localhost:5000/crestline-ui:latest
+          ports:
+            - containerPort: 80
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: react-app-service
-  namespace: devadv
+  name: crestline-ui-service
+  namespace: dev-tools
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 80
-    nodePort: 30002  # Expose React app on port 30002
   selector:
-    app: react-app
+    app: crestline-ui
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crestline-api
+  namespace: dev-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crestline-api
+  template:
+    metadata:
+      labels:
+        app: crestline-api
+    spec:
+      containers:
+        - name: crestline-api
+          image: localhost:5000/crestline-api:latest
+          ports:
+            - containerPort: 9090
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crestline-api-service
+  namespace: dev-tools
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 9090
+    targetPort: 9090
+  selector:
+    app: crestline-api
+
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: dev-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "cdsp"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "ChangeIt01!"
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+
+---
+# PostgreSQL PersistentVolumeClaim (PVC)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: dev-tools
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: dev-tools
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: LoadBalancer
