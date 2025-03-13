@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function Aggregators() {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [aggregators, setAggregators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,7 +11,7 @@ function Aggregators() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:9090/api/v1/aggregators/summary?threshold=1000');
+        const response = await axios.get(`http://${apiUrl}:9090/api/v1/aggregators/summary?threshold=1000`);
         console.log('API Response:', response.data); // Log the response
         setAggregators(response.data);
         setLoading(false);
@@ -26,7 +27,7 @@ function Aggregators() {
   // Handle restart aggregator
   const handleRestart = async (aggregatorId) => {
     try {
-      const response = await axios.post(`https://api.example.com/aggregators/${aggregatorId}/restart`);
+      const response = await axios.post(`http://${apiUrl}:9090/api/v1/aggregators/${aggregatorId}/restart`);
       console.log('Restart Response:', response.data); // Log the restart response
 
       // Update the aggregator status in the UI

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function LoginUser({ onLogin }) {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [userId, setUserId] = useState('');
@@ -10,7 +11,7 @@ function LoginUser({ onLogin }) {
     // Perform authentication logic here (e.g., API call)
     console.log('Logging in as user:', { username, password });
     try {
-      const response = await axios.get(`http://localhost:9090/api/v1/users/${username}/${password}`);
+      const response = await axios.get(`http://${apiUrl}:9090/api/v1/users/${username}/${password}`);
       console.log('API Response:', response);
       onLogin(username, response.data, 'user');
       setUserId(response.data);

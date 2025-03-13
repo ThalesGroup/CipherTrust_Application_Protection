@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 function UpdatePayment() {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     cardType: '', // New field for card type
     cardNumber: '',
@@ -14,7 +15,7 @@ function UpdatePayment() {
     const fetchDefaultValues = async () => {
       try {
         // Simulate an API call to fetch user data
-        const response = await fetch('http://localhost:9090/api/v1/users/'+localStorage.getItem('userId')); // Replace with your API endpoint
+        const response = await fetch(`http://${apiUrl}:9090/api/v1/users/${localStorage.getItem('userId')}`); // Replace with your API endpoint
         const data = await response.json();
 
         // Extract payment information from the JSON response
@@ -49,7 +50,7 @@ function UpdatePayment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9090/api/v1/users/'+localStorage.getItem('userId')+'/payment-info', {
+      const response = await fetch(`http://${apiUrl}:9090/api/v1/users/${localStorage.getItem('userId')}/payment-info`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

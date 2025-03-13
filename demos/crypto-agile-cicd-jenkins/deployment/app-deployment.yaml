@@ -1,10 +1,15 @@
 # Kubernetes Deployment and Service for React and Spring Boot Apps
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app-stack
 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: crestline-ui
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   replicas: 1
   selector:
@@ -17,16 +22,19 @@ spec:
     spec:
       containers:
         - name: crestline-ui
-          image: localhost:5000/crestline-ui:latest
+          image: "${DOCKER_REPO}:5000/crestline-ui:latest"
           ports:
             - containerPort: 80
+          env:
+            - name: REACT_APP_API_URL  # Environment variable name
+              value: "${API_SERVER_IP}"  # Placeholder for backend server IP
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: crestline-ui-service
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   type: LoadBalancer
   ports:
@@ -40,7 +48,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: crestline-api
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   replicas: 1
   selector:
@@ -53,16 +61,23 @@ spec:
     spec:
       containers:
         - name: crestline-api
-          image: localhost:5000/crestline-api:latest
+          image: "${DOCKER_REPO}:5000/crestline-api:latest"
           ports:
             - containerPort: 9090
+          env:
+          - name: DATASOURCE_URL
+            value: "${DATASOURCE_URL}"
+          - name: DATASOURCE_USERNAME
+            value: "${DATASOURCE_USERNAME}"
+          - name: DATASOURCE_PASSWORD
+            value: "${DATASOURCE_PASSWORD}"
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: crestline-api-service
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   type: LoadBalancer
   ports:
@@ -77,7 +92,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   replicas: 1
   selector:
@@ -114,7 +129,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   accessModes:
     - ReadWriteOnce
@@ -128,7 +143,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
-  namespace: dev-tools
+  namespace: app-stack
 spec:
   selector:
     app: postgres

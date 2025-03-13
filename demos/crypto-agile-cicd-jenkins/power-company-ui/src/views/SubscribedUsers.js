@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function SubscribedUsers() {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +31,7 @@ function SubscribedUsers() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:9090/api/v1/users');
+        const response = await axios.get(`http://${apiUrl}:9090/api/v1/users`);
         console.log('API Response:', response.data); // Log the response
         setUsers(response.data);
         setLoading(false);
@@ -67,7 +68,7 @@ function SubscribedUsers() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('https://api.example.com/subscribed-users', newUser);
+      const response = await axios.post(`http://${apiUrl}:9090/api/v1/users`, newUser);
       console.log('New User Added:', response.data);
       setUsers([...users, response.data]); // Add the new user to the list
       setShowAddUserForm(false); // Close the form

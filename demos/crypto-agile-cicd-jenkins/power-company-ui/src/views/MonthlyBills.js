@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 function MonthlyBills() {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [bills, setBills] = useState([]);
 
   // Fetch bills data on component mount
@@ -8,7 +9,7 @@ function MonthlyBills() {
     const fetchBills = async () => {
       try {
         // Simulate an API call to fetch user data
-        const response = await fetch('http://localhost:9090/api/v1/users/'+localStorage.getItem('userId'));
+        const response = await fetch(`http://${apiUrl}:9090/api/v1/users/${localStorage.getItem('userId')}`);
         const data = await response.json();
 
         // Extract and transform the bills data
