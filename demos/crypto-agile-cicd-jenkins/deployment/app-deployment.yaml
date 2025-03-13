@@ -22,12 +22,12 @@ spec:
     spec:
       containers:
         - name: crestline-ui
-          image: "${DOCKER_REGISTRY}/crestline-ui:latest"
+          image: "DOCKER_REGISTRY/crestline-ui:latest"
           ports:
             - containerPort: 80
           env:
             - name: REACT_APP_API_URL  # Environment variable name
-              value: "${API_SERVER_IP}"  # Placeholder for backend server IP
+              value: "API_SERVER_IP"  # Placeholder for backend server IP
 
 ---
 apiVersion: v1
@@ -61,16 +61,16 @@ spec:
     spec:
       containers:
         - name: crestline-api
-          image: "${DOCKER_REGISTRY}/crestline-api:latest"
+          image: "DOCKER_REGISTRY/crestline-api:latest"
           ports:
             - containerPort: 9090
           env:
           - name: DATASOURCE_URL
-            value: "${DATASOURCE_URL}"
+            value: "DATASOURCE_URL"
           - name: DATASOURCE_USERNAME
-            value: "${DATASOURCE_USERNAME}"
+            value: "DATASOURCE_USERNAME"
           - name: DATASOURCE_PASSWORD
-            value: "${DATASOURCE_PASSWORD}"
+            value: "DATASOURCE_PASSWORD"
 
 ---
 apiVersion: v1
