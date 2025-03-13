@@ -66,11 +66,11 @@ spec:
             - containerPort: 9090
           env:
           - name: DATASOURCE_URL
-            value: "DATASOURCE_URL"
+            value: "DATASOURCE_URL_VAR"
           - name: DATASOURCE_USERNAME
-            value: "DATASOURCE_USERNAME"
+            value: "DATASOURCE_USERNAME_VAR"
           - name: DATASOURCE_PASSWORD
-            value: "DATASOURCE_PASSWORD"
+            value: "DATASOURCE_PASSWORD_VAR"
 
 ---
 apiVersion: v1
