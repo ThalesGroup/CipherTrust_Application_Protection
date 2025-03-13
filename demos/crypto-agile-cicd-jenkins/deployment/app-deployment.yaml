@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: crestline-ui
-          image: "${DOCKER_REPO}:5000/crestline-ui:latest"
+          image: "${DOCKER_REGISTRY}/crestline-ui:latest"
           ports:
             - containerPort: 80
           env:
@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: crestline-api
-          image: "${DOCKER_REPO}:5000/crestline-api:latest"
+          image: "${DOCKER_REGISTRY}/crestline-api:latest"
           ports:
             - containerPort: 9090
           env:
