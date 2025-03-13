@@ -24,7 +24,7 @@ spec:
         - name: crestline-ui
           image: "DOCKER_REGISTRY/crestline-ui:latest"
           ports:
-            - containerPort: 3050
+            - containerPort: 3000
           env:
             - name: REACT_APP_API_URL  # Environment variable name
               value: "API_SERVER_IP"  # Placeholder for backend server IP
@@ -38,8 +38,8 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 3050
+  - port: 3050
+    targetPort: 3000
   selector:
     app: crestline-ui
 
