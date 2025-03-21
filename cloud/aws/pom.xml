@@ -32,11 +32,11 @@
   		<version>2.4.0</version>
   	</dependency>
   	<dependency>
-  		<groupId>mysql</groupId>
-  		<artifactId>mysql-connector-java</artifactId>
-  		<version>8.0.20</version>
-  	</dependency>
-  	    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>9.2.0</version>
+    </dependency>
+  	<dependency>
     	<groupId>com.thales.cm.rest</groupId>
     	<artifactId>cmhelper</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
