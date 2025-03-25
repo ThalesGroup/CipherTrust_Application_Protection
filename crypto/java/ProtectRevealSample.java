@@ -20,6 +20,14 @@ public class ProtectRevealSample {
 		if (args.length != 4) {
 			System.err.println(
 					"Usage: java ProtectRevealSample keyManagerHost registrationToken protectionPolicyName userName");
+					/*
+					* Usage: keyManagerHost : keyManager IP
+					* Usage: registrationToken : registrationtoken from the keyManager
+					* Usage: protectionPolicyName : policy name to perform reprotect operation
+					* Usage: userName : Username for reveal operation
+					*
+					* Note: Refer to Thales documentation for more information.
+					*/
 			System.exit(-1);
 		}
 		String keyManagerHost = args[0];
@@ -39,21 +47,21 @@ public class ProtectRevealSample {
 			CentralManagementProvider centralManagementProvider = new CentralManagementProvider(registerClientParams);
 			centralManagementProvider.addProvider();
 		
-			CipherTextData encryptedDataObject = CryptoManager.protect(plainText.getBytes(), protectionPolicyName);
+			CipherTextData cipherTextDataObject = CryptoManager.protect(plainText.getBytes(), protectionPolicyName);
 			
 			/**
 			 * For Internal Version
-			 * This will return version header appended to the ciphertext. Thus encryptedDataObject.getVersion() will return null.
+			 * This will return version header prepended to the ciphertext. Thus cipherTextDataObject.getVersion() will return null.
 			 */
-			System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText())); 
+			System.out.println("Protected Data: " + new String(cipherTextDataObject.getCipherText()));
 			
 			/**
 			 * For External Version
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getCipherText()));//This will return ciphertext
-			 * System.out.println("Encrypted Data: " + new String(encryptedDataObject.getVersion()));//This will have version header information
+			 * System.out.println("Protected Data: " + new String(cipherTextDataObject.getCipherText()));-- This will return ciphertext
+			 * System.out.println("Protected Data: " + new String(cipherTextDataObject.getVersion()));-- This will have version header information
 			 */
-			byte[] decryptedData = CryptoManager.reveal(encryptedDataObject, protectionPolicyName,userName);
-			System.out.println("Decrypted Data: " + new String(decryptedData));
+			byte[] revealedData = CryptoManager.reveal(cipherTextDataObject, protectionPolicyName,userName);
+			System.out.println("Revealed Data: " + new String(revealedData));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
