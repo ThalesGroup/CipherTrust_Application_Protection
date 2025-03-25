@@ -77,7 +77,7 @@ public class HMACSample
 	    byte[] result = macV.doFinal(dataToMac.getBytes());
         
 	    // check verification result 
-	    if (result[0] != 1) {
+	    if (result.length != 1 || result[0] != 1) {
 		System.out.println("Invalid MAC.");
 	    } else {
 		System.out.println("MAC Verified OK.");

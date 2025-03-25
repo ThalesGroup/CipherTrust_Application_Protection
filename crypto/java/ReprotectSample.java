@@ -22,10 +22,10 @@ public class ReprotectSample {
 			System.err.println(
 					"Usage: java ReprotectSample keyManagerHost registrationToken protectionPolicyName plainTextArray");
 			/*
-			 * Usage: keyManagerHost keyManager IP 
-			 * Usage: registrationToken registrationtoken from the keyManager 
-			 * Usage: protectionPolicyName policy name to perform reprotect operation
-			 * Usage: plainTextArray array of data to reprotect eg. 123456789,123456789999,12345678999
+			 * Usage: keyManagerHost : keyManager IP 
+			 * Usage: registrationToken : registrationtoken from the keyManager 
+			 * Usage: protectionPolicyName : policy name to perform reprotect operation
+			 * Usage: plainTextArray : array of data to reprotect eg. 123456789,123456789999,12345678999
 			 *
 			 * Note: Refer to Thales documentation for more information.
 			 */
