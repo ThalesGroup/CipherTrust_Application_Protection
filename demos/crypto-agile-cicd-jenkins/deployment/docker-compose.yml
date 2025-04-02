@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: gitlab
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:22"
+    volumes:
+      - ./gitlab/config:/etc/gitlab
+      - ./gitlab/data:/var/opt/gitlab
+    environment:
+      GITLAB_ROOT_PASSWORD: "ChangeIt01!"
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    shm_size: '2g'
+    networks:
+      - ci-cd-network
+
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    container_name: custom_jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins/data:/var/jenkins_home
+    environment:
+      - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml  # Point to new location
+      - JAVA_OPTS=-Xmx1024m -Djenkins.install.runSetupWizard=false
+    depends_on:
+      - gitlab
+    networks:
+      - ci-cd-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+networks:
+  ci-cd-network:
+    driver: bridge

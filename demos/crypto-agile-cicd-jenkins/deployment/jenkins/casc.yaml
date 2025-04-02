@@ -1,0 +1,41 @@
+jenkins:
+  systemMessage: "Automated Jenkins Setup"
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "ChangeIt01!"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+jobs:
+  - script: >
+      pipelineJob('First-Pipeline') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('http://gitlab:80/root/your-repo.git')
+                  credentials('gitlab-credentials')
+                }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+          }
+        }
+      }
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: gitlab-credentials
+              username: root
+              password: "ChangeIt01!"

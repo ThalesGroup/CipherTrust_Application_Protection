@@ -2,3 +2,7 @@
 .vscode/
 /demos/cadp-crdp-bouncycastle-pr/target
 *.class
+/demos/crypto-agile-cicd-jenkins/deployment/gitlab/config
+/demos/crypto-agile-cicd-jenkins/deployment/gitlab/data
+/demos/crypto-agile-cicd-jenkins/deployment/jenkins/data
+*.class
