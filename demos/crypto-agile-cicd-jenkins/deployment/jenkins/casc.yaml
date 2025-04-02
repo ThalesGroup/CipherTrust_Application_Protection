@@ -19,13 +19,14 @@ jobs:
             scm {
               git {
                 remote {
-                  url('http://gitlab:80/root/your-repo.git')
+                  url('http://gitlab/root/your-repo.git')
                   credentials('gitlab-credentials')
                 }
-                branch('*/main')
+                branch('main')
               }
             }
             scriptPath('Jenkinsfile')
+            lightweight(true)
           }
         }
       }

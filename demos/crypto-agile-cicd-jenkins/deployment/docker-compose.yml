@@ -19,6 +19,11 @@ services:
     shm_size: '2g'
     networks:
       - ci-cd-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/users/sign_in"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
 
   jenkins:
     build:
@@ -31,10 +36,11 @@ services:
     volumes:
       - ./jenkins/data:/var/jenkins_home
     environment:
-      - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml  # Point to new location
+      - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml
       - JAVA_OPTS=-Xmx1024m -Djenkins.install.runSetupWizard=false
     depends_on:
-      - gitlab
+      gitlab:
+        condition: service_healthy
     networks:
       - ci-cd-network
     healthcheck:
