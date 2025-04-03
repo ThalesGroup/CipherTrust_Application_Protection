@@ -3,11 +3,11 @@ pipeline {
 
     // Define parameters
     parameters {
-        string(name: 'GIT_REPO_UI', defaultValue: 'http://192.168.2.216:3000/ciphertrust/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
-        string(name: 'GIT_REPO_API', defaultValue: 'http://192.168.2.216:3000/ciphertrust/crestline-api.git', description: 'URL of the Crestline API Git repository')
-        string(name: 'GIT_REPO_DEP', defaultValue: 'http://192.168.2.216:3000/ciphertrust/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
-        string(name: 'DOCKER_REGISTRY', defaultValue: '192.168.2.216:5000', description: 'URL of the Docker registry')
-        string(name: 'API_SERVER_IP', defaultValue: '192.168.2.216', description: 'URL of the API Server')
+        string(name: 'GIT_REPO_UI', defaultValue: 'http://gitlab:80/ciphertrust/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
+        string(name: 'GIT_REPO_API', defaultValue: 'http://gitlab:80/ciphertrust/crestline-api.git', description: 'URL of the Crestline API Git repository')
+        string(name: 'GIT_REPO_DEP', defaultValue: 'http://gitlab:80/ciphertrust/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
+        string(name: 'DOCKER_REGISTRY', defaultValue: 'registry:5000', description: 'URL of the Docker registry')
+        string(name: 'API_SERVER_IP', defaultValue: '192.168.2.221', description: 'URL of the API Server')
         string(name: 'DATASOURCE_URL', defaultValue: 'jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp', description: 'Connection string for DB')
         string(name: 'DATASOURCE_USERNAME', defaultValue: 'postgres', description: 'Username for the DB')
         string(name: 'DATASOURCE_PASSWORD', defaultValue: 'ChangeIt01!', description: 'Password for the DB')
@@ -23,8 +23,8 @@ pipeline {
         DATASOURCE_URL = "${params.DATASOURCE_URL}"
         DATASOURCE_USERNAME = "${params.DATASOURCE_USERNAME}"
         DATASOURCE_PASSWORD = "${params.DATASOURCE_PASSWORD}"
-        KUBE_CONFIG_TEST = 'path/to/kubeconfig-test'
-        KUBE_CONFIG_PROD = 'path/to/kubeconfig-prod'
+        KUBE_CONFIG_TEST = '/var/jenkins_home/kubeconfig-test'
+        KUBE_CONFIG_PROD = '/var/jenkins_home/kubeconfig-prod'
     }
 
     stages {
@@ -76,8 +76,7 @@ pipeline {
         stage('Deploy to Test Kubernetes Environment') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'docker-desktop-kubeconf', variable: 'KUBECONFIG')]) {
-                        // Replace placeholders in the YAML file
+                    withKubeConfig([credentialsId: 'docker-desktop-kubeconf', kubeconfigFile: "${KUBE_CONFIG_TEST}"]) {
                         sh """
                             sed -i 's|DOCKER_REGISTRY|'"${DOCKER_REGISTRY}"'|g' crestline-deployment/app-deployment.yaml
                             sed -i 's|API_SERVER_IP|'"${API_SERVER_IP}"'|g' crestline-deployment/app-deployment.yaml
@@ -93,16 +92,14 @@ pipeline {
 
         stage('Manual Verification') {
             steps {
-                script {
-                    input message: 'Verify the deployment in the test environment. Proceed to deploy to production?', ok: 'Deploy to Production'
-                }
+                input message: 'Verify the deployment in the test environment. Proceed to production?', ok: 'Deploy to Production'
             }
         }
 
         stage('Deploy to Production Kubernetes Environment') {
             steps {
                 script {
-                    withKubeConfig([credentialsId: 'kubeconfig-prod', serverUrl: '']) {
+                    withKubeConfig([credentialsId: 'kubeconfig-prod', kubeconfigFile: "${KUBE_CONFIG_PROD}"]) {
                         sh 'kubectl apply -f crestline-deployment/app-deployment.yaml'
                     }
                 }

@@ -13,6 +13,11 @@ RUN jenkins-plugin-cli --verbose --plugins \
     gitlab-plugin \
     configuration-as-code \
     workflow-aggregator \
-    job-dsl:1.87
+    job-dsl:1.87 \
+    kubernetes \
+    kubernetes-client-api \
+    credentials \
+    workflow-step-api \
+    structs
 
 ENV JAVA_OPTS="-Xmx1024m -Djenkins.install.runSetupWizard=false"

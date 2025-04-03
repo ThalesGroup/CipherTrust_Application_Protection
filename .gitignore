@@ -6,3 +6,5 @@
 /demos/crypto-agile-cicd-jenkins/deployment/gitlab/data
 /demos/crypto-agile-cicd-jenkins/deployment/jenkins/data
 *.class
+/demos/crypto-agile-cicd-jenkins/deployment/github-repo
+/demos/crypto-agile-cicd-jenkins/deployment/scripts/github-repo
