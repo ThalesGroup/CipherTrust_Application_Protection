@@ -24,7 +24,7 @@ docker-compose up -d --build
 
 # Wait longer for GitLab to initialize
 Write-Host "Waiting for GitLab to start (initial delay)..."
-Start-Sleep -Seconds 120  # Increased from 60 to 120 seconds
+#Start-Sleep -Seconds 120  # Increased from 60 to 120 seconds
 
 # Check GitLab readiness with detailed error handling
 Write-Host "Checking if GitLab is ready at $GITLAB_URL/users/sign_in..."
@@ -369,12 +369,41 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: Failed to configure Jenkins. Check the configure-jenkins.sh script or Jenkins logs."
     #exit 1
 }
+
 # Create GitLab personal access token
-Write-Host "Creating GitLab personal access token for root..."
-$tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); token.set_token('gitlab-jenkins-token'); token.save!; end; puts token.token"
+# Write-Host "Creating GitLab personal access token for root..."
+# $tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); token.set_token('gitlab-jenkins-token'); token.save!; end; puts token.token"
+# $token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
+# if (-not $token) {
+#     Write-Host "Error: Failed to create GitLab access token."
+#     exit 1
+# }
+# Create or retrieve GitLab personal access token for root
+Write-Host "Creating or retrieving GitLab personal access token for root..."
+$tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
 $token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
 if (-not $token) {
-    Write-Host "Error: Failed to create GitLab access token."
+    Write-Host "Error: Failed to create or retrieve GitLab access token."
+    exit 1
+}
+Write-Host "GitLab token: $token"
+
+# Fetch the project ID for crestline-deployment
+Write-Host "Fetching project ID for root/crestline-deployment..."
+$headers = @{
+    "PRIVATE-TOKEN" = $token
+    "Content-Type" = "application/json"
+}
+try {
+    $projects = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects?search=crestline-deployment" -Method Get -Headers $headers -ErrorAction Stop
+    $projectId = ($projects | Where-Object { $_.path_with_namespace -eq "root/crestline-deployment" }).id
+    if (-not $projectId) {
+        Write-Host "Error: Could not find project root/crestline-deployment."
+        exit 1
+    }
+    Write-Host "Found project ID: $projectId"
+} catch {
+    Write-Host "Error fetching project ID: $($_.Exception.Message)"
     exit 1
 }
 
@@ -391,7 +420,7 @@ $body = @{
     merge_requests_events = $false
 } | ConvertTo-Json
 try {
-    $projectId = 3  # Adjust based on order of creation (crestline-deployment is third)
+    #$projectId = 3  # Adjust based on order of creation (crestline-deployment is third)
     $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/hooks" -Method Post -Headers $headers -Body $body -ErrorAction Stop
     Write-Host "Webhook configured successfully!"
 } catch {

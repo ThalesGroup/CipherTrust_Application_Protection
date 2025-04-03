@@ -3,9 +3,9 @@ pipeline {
 
     // Define parameters
     parameters {
-        string(name: 'GIT_REPO_UI', defaultValue: 'http://gitlab:80/ciphertrust/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
-        string(name: 'GIT_REPO_API', defaultValue: 'http://gitlab:80/ciphertrust/crestline-api.git', description: 'URL of the Crestline API Git repository')
-        string(name: 'GIT_REPO_DEP', defaultValue: 'http://gitlab:80/ciphertrust/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
+        string(name: 'GIT_REPO_UI', defaultValue: 'http://gitlab:80/root/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
+        string(name: 'GIT_REPO_API', defaultValue: 'http://gitlab:80/root/crestline-api.git', description: 'URL of the Crestline API Git repository')
+        string(name: 'GIT_REPO_DEP', defaultValue: 'http://gitlab:80/root/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
         string(name: 'DOCKER_REGISTRY', defaultValue: 'registry:5000', description: 'URL of the Docker registry')
         string(name: 'API_SERVER_IP', defaultValue: '192.168.2.221', description: 'URL of the API Server')
         string(name: 'DATASOURCE_URL', defaultValue: 'jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp', description: 'Connection string for DB')
