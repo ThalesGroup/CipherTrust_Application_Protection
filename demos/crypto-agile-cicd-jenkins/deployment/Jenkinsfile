@@ -43,13 +43,13 @@ pipeline {
                 script {
                     // Pull code from Git repositories into separate directories
                     dir('crestline-ui') {
-                        git branch: 'master', url: "${env.GIT_REPO_UI}"
+                        git branch: 'main', url: "${env.GIT_REPO_UI}"
                     }
                     dir('crestline-api') {
-                        git branch: 'master', url: "${env.GIT_REPO_API}"
+                        git branch: 'main', url: "${env.GIT_REPO_API}"
                     }
                     dir('crestline-deployment') {
-                        git branch: 'master', url: "${env.GIT_REPO_DEP}"
+                        git branch: 'main', url: "${env.GIT_REPO_DEP}"
                     }
                 }
             }

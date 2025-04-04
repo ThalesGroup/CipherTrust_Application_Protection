@@ -1,13 +1,16 @@
 FROM jenkins/jenkins:lts-jdk21
 
 USER root
-RUN apt-get update && apt-get install -y docker.io && apt-get clean
+# Install Docker and configure insecure registry
+RUN apt-get update && \
+    apt-get install -y docker.io curl && \
+    apt-get clean && \
+    mkdir -p /etc/docker && \
+    echo '{"insecure-registries":["registry:5000"]}' > /etc/docker/daemon.json && \
+    # Verify Docker can restart (but Jenkins will control the final service start)
+    service docker start && docker ps >/dev/null
 
-USER jenkins
-COPY casc.yaml /usr/share/jenkins/casc.yaml
-COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
-
-# Install required plugins, including job-dsl
+# Install Jenkins plugins
 RUN jenkins-plugin-cli --verbose --plugins \
     matrix-auth \
     git \
@@ -21,4 +24,9 @@ RUN jenkins-plugin-cli --verbose --plugins \
     workflow-step-api \
     structs
 
+USER jenkins
+COPY casc.yaml /usr/share/jenkins/casc.yaml
+COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
+
 ENV JAVA_OPTS="-Xmx1024m -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
+ENV DOCKER_HOST="unix:///var/run/docker.sock"
