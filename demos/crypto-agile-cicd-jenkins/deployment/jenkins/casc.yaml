@@ -8,8 +8,22 @@ jenkins:
         - id: "admin"
           password: "ChangeIt01!"
   authorizationStrategy:
-    loggedInUsersCanDoAnything:
-      allowAnonymousRead: false
+    globalMatrix:
+      permissions:
+        - "Overall/Administer:authenticated"
+        - "Overall/Read:anonymous"
+        - "Job/Read:anonymous"
+        - "Job/Build:anonymous"
+unclassified:
+  gitLabConnectionConfig:
+    connections:
+      - name: "GitLab"
+        url: "http://gitlab"
+        apiTokenId: "gitlab-api-token"
+        clientBuilderId: "autodetect"
+        ignoreCertificateErrors: true
+        connectionTimeout: 10
+        readTimeout: 10
 
 jobs:
   - script: >
@@ -19,7 +33,7 @@ jobs:
           stringParam("GIT_REPO_API", "http://gitlab:80/root/crestline-api.git", "URL of the Crestline API Git repository")
           stringParam("GIT_REPO_DEP", "http://gitlab:80/root/crestline-deployment.git", "URL of the Crestline Deployment Git repository")
           stringParam("DOCKER_REGISTRY", "registry:5000", "URL of the Docker registry")
-          stringParam("API_SERVER_IP", "192.168.2.221", "URL of the API Server")
+          stringParam("API_SERVER_IP", "${API_SERVER_IP}", "URL of the API Server")
           stringParam("DATASOURCE_URL", "jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp", "Connection string for DB")
           stringParam("DATASOURCE_USERNAME", "postgres", "Username for the DB")
           stringParam("DATASOURCE_PASSWORD", "ChangeIt01!", "Password for the DB")
@@ -58,3 +72,7 @@ credentials:
               id: gitlab-credentials
               username: root
               password: "ChangeIt01!"
+          - string:
+              scope: GLOBAL
+              id: "gitlab-api-token"
+              secret: "${GITLAB_PERSONAL_ACCESS_TOKEN}"

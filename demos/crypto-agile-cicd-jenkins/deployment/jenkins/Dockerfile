@@ -9,6 +9,7 @@ COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
 
 # Install required plugins, including job-dsl
 RUN jenkins-plugin-cli --verbose --plugins \
+    matrix-auth \
     git \
     gitlab-plugin \
     configuration-as-code \
@@ -20,4 +21,4 @@ RUN jenkins-plugin-cli --verbose --plugins \
     workflow-step-api \
     structs
 
-ENV JAVA_OPTS="-Xmx1024m -Djenkins.install.runSetupWizard=false"
+ENV JAVA_OPTS="-Xmx1024m -Djenkins.install.runSetupWizard=false -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"

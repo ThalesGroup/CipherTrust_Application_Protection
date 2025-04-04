@@ -38,6 +38,9 @@ services:
     environment:
       - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml
       - JAVA_OPTS=-Xmx1024m -Djenkins.install.runSetupWizard=false
+      - GITLAB_ROOT_PASSWORD=ChangeIt01!
+      - GITLAB_PERSONAL_ACCESS_TOKEN=${GITLAB_PERSONAL_ACCESS_TOKEN}
+      - API_SERVER_IP=${API_SERVER_IP}
     depends_on:
       gitlab:
         condition: service_healthy

@@ -12,25 +12,64 @@ $KUBE_CONFIG_TEST_PATH = "kubeconfig"  # Replace with actual path on host
 $KUBE_CONFIG_PROD_PATH = "kubeconfig"  # Replace with actual path on host
 $JENKINS_URL = "http://localhost:8080"
 
+$env:API_SERVER_IP = "192.168.2.221"
+
 # Ensure Docker Compose is installed
 if (-not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
     Write-Host "Docker Compose is not installed. Please install it first."
     exit 1
 }
 
-# Start Docker Compose
+# Create or retrieve GitLab personal access token for root (before starting services)
+Write-Host "Creating or retrieving GitLab personal access token for root..."
+docker-compose up -d gitlab  # Start GitLab first
+$gitlabReady = $false
+$timeout = 600
+$elapsed = 0
+$interval = 10
+while (-not $gitlabReady -and $elapsed -lt $timeout) {
+    try {
+        $response = Invoke-WebRequest -Uri "$GITLAB_URL/users/sign_in" -UseBasicParsing -ErrorAction Stop
+        if ($response.StatusCode -eq 200) {
+            $gitlabReady = $true
+            Write-Progress -Activity "Waiting for GitLab" -Status "GitLab is ready!" -PercentComplete 100 -Completed
+            Write-Host "GitLab is ready for token creation!"
+        }
+    } catch {
+        $percentComplete = [math]::Min(($elapsed / $timeout) * 100, 99)  # Cap at 99% until success
+        $secondsRemaining = $timeout - $elapsed        
+        Write-Progress -Activity "Waiting for GitLab" -Status "Checking availability... ($elapsed of $timeout seconds elapsed)" -PercentComplete $percentComplete -SecondsRemaining $secondsRemaining
+        Start-Sleep -Seconds $interval
+        $elapsed += $interval
+    }
+}
+if (-not $gitlabReady) {
+    Write-Progress -Activity "Waiting for GitLab" -Status "Error: GitLab failed to start within 10 minutes." -PercentComplete 100 -Completed
+    Write-Host "Error: GitLab failed to start within 10 minutes."
+    exit 1
+}
+$tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Integration'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Integration', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
+$token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
+if (-not $token) {
+    Write-Host "Error: Failed to create or retrieve GitLab access token."
+    exit 1
+}
+Write-Host "GitLab token: $token"
+$env:GITLAB_PERSONAL_ACCESS_TOKEN = $token  # Set env var before starting all services
+
+
+
+
+# Start all services
 Write-Host "Starting Jenkins, GitLab, and Registry..."
 docker-compose up -d --build
-
-# Wait longer for GitLab to initialize
-Write-Host "Waiting for GitLab to start (initial delay)..."
-#Start-Sleep -Seconds 120  # Increased from 60 to 120 seconds
 
 # Check GitLab readiness with detailed error handling
 Write-Host "Checking if GitLab is ready at $GITLAB_URL/users/sign_in..."
 $gitlabReady = $false
-$timeout = 300  # 5 minutes timeout
+$timeout = 600  # 5 minutes timeout
 $elapsed = 0
+$interval = 10
 while (-not $gitlabReady -and $elapsed -lt $timeout) {
     try {
         $response = Invoke-WebRequest -Uri "$GITLAB_URL/users/sign_in" -UseBasicParsing -ErrorAction Stop
@@ -53,6 +92,16 @@ if (-not $gitlabReady) {
 # Ensure GitLab root password is set correctly
 Write-Host "Ensuring GitLab root password is set to $GITLAB_ROOT_PASSWORD..."
 docker exec gitlab gitlab-rails runner "user = User.find_by_username('root'); if user.password != '$GITLAB_ROOT_PASSWORD'; user.password = '$GITLAB_ROOT_PASSWORD'; user.password_confirmation = '$GITLAB_ROOT_PASSWORD'; user.save!; end"
+
+Write-Host "Allowing local requests from web hooks and services..."
+$allowLocalScript = "ApplicationSetting.current.update!(allow_local_requests_from_web_hooks_and_services: true)"
+
+docker exec gitlab gitlab-rails runner "$allowLocalScript"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to perform GitLab local request configuration"
+    exit 1
+}
 
 # Create GitLab project
 Write-Host "Creating GitLab project '$REPO_NAME_UI'..."
@@ -243,14 +292,6 @@ if (-not (Test-Path $SOURCE_FULL_PATH_UI)) {
     exit 1
 }
 
-#$TEMP_DIR_UI = "$env:TEMP\gitlab-push-ui"
-#Get-ChildItem -Path $TEMP_DIR_UI -Recurse | Remove-Item -force -recurse
-#Remove-Item $TEMP_DIR_UI -Force
-#New-Item -ItemType Directory -Path $TEMP_DIR_UI -Force | Out-Null
-
-# Copy only the desired folder content
-#Copy-Item -Path $SOURCE_FULL_PATH_UI\* -Destination $TEMP_DIR_UI -Recurse -Force
-
 # Initialize new git repo with just the filtered content
 Set-Location $SOURCE_FULL_PATH_UI
 git init --initial-branch=main
@@ -275,14 +316,6 @@ if (-not (Test-Path $SOURCE_FULL_PATH_API)) {
     Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_API"
     exit 1
 }
-
-#$TEMP_DIR_API = "$env:TEMP\gitlab-push-api"
-#Get-ChildItem -Path $TEMP_DIR_API -Recurse | Remove-Item -force -recurse
-#Remove-Item $TEMP_DIR_API -Force
-#New-Item -ItemType Directory -Path $TEMP_DIR_API -Force | Out-Null
-
-# Copy only the desired folder content
-#Copy-Item -Path $SOURCE_FULL_PATH_API\* -Destination $TEMP_DIR_API -Recurse -Force
 
 # Initialize new git repo with just the filtered content
 Set-Location $SOURCE_FULL_PATH_API
@@ -309,14 +342,6 @@ if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
     exit 1
 }
 
-#$TEMP_DIR_DEP = "$env:TEMP\gitlab-push-dep"
-#Get-ChildItem -Path $TEMP_DIR_DEP -Recurse | Remove-Item -force -recurse
-#Remove-Item $TEMP_DIR_DEP -Force
-#New-Item -ItemType Directory -Path $TEMP_DIR_DEP -Force | Out-Null
-
-# Copy only the desired folder content
-#Copy-Item -Path $SOURCE_FULL_PATH_DEP\* -Destination $TEMP_DIR_DEP -Recurse -Force
-
 # Initialize new git repo with just the filtered content
 Set-Location $SOURCE_FULL_PATH_DEP
 git init --initial-branch=main
@@ -333,24 +358,29 @@ if ($LASTEXITCODE -ne 0) {
 # Wait for Jenkins to be fully ready
 Write-Host "Waiting for Jenkins to start..."
 $jenkinsReady = $false
-$timeout = 600  # 10 minutes timeout
+$timeout = 600
 $elapsed = 0
+$interval = 10
 while (-not $jenkinsReady -and $elapsed -lt $timeout) {
     try {
         $response = Invoke-WebRequest -Uri "$JENKINS_URL/login" -UseBasicParsing -ErrorAction Stop
         if ($response.StatusCode -eq 200) {
             $jenkinsReady = $true
+            Write-Progress -Activity "Waiting for Jenkins" -Status "Jenkins is ready!" -PercentComplete 100 -Completed
             Write-Host "Jenkins is ready!"
         }
     } catch {
-        Write-Host "Jenkins not ready yet. Error: $($_.Exception.Message)"
-        Start-Sleep -Seconds 10
-        $elapsed += 10
+        $percentComplete = [math]::Min(($elapsed / $timeout) * 100, 99)
+        $secondsRemaining = $timeout - $elapsed
+        Write-Progress -Activity "Waiting for Jenkins" -Status "Checking availability... ($elapsed of $timeout seconds elapsed)" -PercentComplete $percentComplete -SecondsRemaining $secondsRemaining
+        Start-Sleep -Seconds $interval
+        $elapsed += $interval
     }
 }
 if (-not $jenkinsReady) {
-    Write-Host "Error: Jenkins failed to start within 10 minutes. Check logs with 'docker logs jenkins'."
-    docker logs jenkins
+    Write-Progress -Activity "Waiting for Jenkins" -Status "Error: Jenkins failed to start within 10 minutes." -PercentComplete 100 -Completed
+    Write-Host "Error: Jenkins failed to start within 10 minutes."
+    #docker logs jenkins
     exit 1
 }
 
@@ -370,23 +400,42 @@ if ($LASTEXITCODE -ne 0) {
     #exit 1
 }
 
-# Create GitLab personal access token
-# Write-Host "Creating GitLab personal access token for root..."
-# $tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); token.set_token('gitlab-jenkins-token'); token.save!; end; puts token.token"
+# Create or retrieve GitLab personal access token for root
+# Write-Host "Creating or retrieving GitLab personal access token for root..."
+# $tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
 # $token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
 # if (-not $token) {
-#     Write-Host "Error: Failed to create GitLab access token."
+#     Write-Host "Error: Failed to create or retrieve GitLab access token."
 #     exit 1
 # }
-# Create or retrieve GitLab personal access token for root
-Write-Host "Creating or retrieving GitLab personal access token for root..."
-$tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
-$token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
-if (-not $token) {
-    Write-Host "Error: Failed to create or retrieve GitLab access token."
-    exit 1
-}
-Write-Host "GitLab token: $token"
+# Write-Host "GitLab token: $token"
+
+# Set the token as an environment variable for Jenkins
+# Write-Host "Setting GitLab token as environment variable for Jenkins..."
+# $env:GITLAB_PERSONAL_ACCESS_TOKEN = $token
+# docker-compose restart jenkins
+
+# Wait for Jenkins to restart
+# Start-Sleep -Seconds 30
+# $jenkinsReady = $false
+# $elapsed = 0
+# while (-not $jenkinsReady -and $elapsed -lt $timeout) {
+#     try {
+#         $response = Invoke-WebRequest -Uri "$JENKINS_URL/login" -UseBasicParsing -ErrorAction Stop
+#         if ($response.StatusCode -eq 200) {
+#             $jenkinsReady = $true
+#             Write-Host "Jenkins restarted successfully!"
+#         }
+#     } catch {
+#         Write-Host "Jenkins not ready yet after restart. Error: $($_.Exception.Message)"
+#         Start-Sleep -Seconds 10
+#         $elapsed += 10
+#     }
+# }
+# if (-not $jenkinsReady) {
+#     Write-Host "Error: Jenkins failed to restart within 10 minutes."
+#     exit 1
+# }
 
 # Fetch the project ID for crestline-deployment
 Write-Host "Fetching project ID for root/crestline-deployment..."
@@ -408,23 +457,50 @@ try {
 }
 
 # Configure GitLab webhook for crestline-deployment
-Write-Host "Configuring GitLab webhook to trigger Jenkins..."
-$webhookUrl = "http://localhost:8080/gitlab-webhook/post"
-$headers = @{
-    "PRIVATE-TOKEN" = $token
-    "Content-Type" = "application/json"
-}
+# Write-Host "Configuring GitLab webhook to trigger Jenkins..."
+# $webhookUrl = "http://custom_jenkins:8080/gitlab-webhook/post"
+# $headers = @{
+#     "PRIVATE-TOKEN" = $token
+#     "Content-Type" = "application/json"
+# }
+# $body = @{
+#     url = $webhookUrl
+#     push_events = $true
+#     merge_requests_events = $false
+# } | ConvertTo-Json
+# try {
+#     #$projectId = 3  # Adjust based on order of creation (crestline-deployment is third)
+#     $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/hooks" -Method Post -Headers $headers -Body $body -ErrorAction Stop
+#     Write-Host "Webhook configured successfully!"
+# } catch {
+#     Write-Host "Error: Failed to configure webhook. Error: $($_.Exception.Message)"
+#     exit 1
+# }
+
+# Configure GitLab Jenkins integration
+Write-Host "Configuring GitLab Jenkins integration..."
+$jenkinsUrl = "http://host.docker.internal:8080"
 $body = @{
-    url = $webhookUrl
+    active = $true
     push_events = $true
     merge_requests_events = $false
+    jenkins_url = $jenkinsUrl
+    project_name = "Deploy_Sample_App_ADP"
+    username = "admin"
+    password = $JENKINS_ADMIN_PASSWORD
+    enable_ssl_verification = $false
 } | ConvertTo-Json
 try {
-    #$projectId = 3  # Adjust based on order of creation (crestline-deployment is third)
-    $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/hooks" -Method Post -Headers $headers -Body $body -ErrorAction Stop
-    Write-Host "Webhook configured successfully!"
+    $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/integrations/jenkins" -Method Put -Headers $headers -Body $body -ErrorAction Stop
+    Write-Host "Jenkins integration configured successfully!"
 } catch {
-    Write-Host "Error: Failed to configure webhook. Error: $($_.Exception.Message)"
+    Write-Host "Error: Failed to configure Jenkins integration."
+    Write-Host "Status Code: $($_.Exception.Response.StatusCode)"
+    Write-Host "Status Description: $($_.Exception.Response.StatusDescription)"
+    $responseStream = $_.Exception.Response.GetResponseStream()
+    $reader = New-Object System.IO.StreamReader($responseStream)
+    $errorDetails = $reader.ReadToEnd()
+    Write-Host "Error Details: $errorDetails"
     exit 1
 }
 
