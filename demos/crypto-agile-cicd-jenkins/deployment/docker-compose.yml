@@ -25,25 +25,48 @@ services:
       timeout: 5s
       retries: 60
 
+  docker-dind:
+    image: docker:dind
+    container_name: docker-dind
+    privileged: true
+    volumes:
+      - dind-storage:/var/lib/docker
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    networks:
+      - ci-cd-network
+    restart: unless-stopped
+
   jenkins:
     build:
       context: ./jenkins
       dockerfile: Dockerfile
     container_name: custom_jenkins
+    user: root
     ports:
       - "8080:8080"
       - "50000:50000"
     volumes:
       - ./jenkins/data:/var/jenkins_home
+      #- /var/run/docker.sock:/var/run/docker.sock
+      #- //var/run/docker.sock:/var/run/docker.sock
     environment:
+      - DOCKER_HOST=tcp://docker-dind:2375
       - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml
       - JAVA_OPTS=-Xmx1024m -Djenkins.install.runSetupWizard=false
       - GITLAB_ROOT_PASSWORD=ChangeIt01!
       - GITLAB_PERSONAL_ACCESS_TOKEN=${GITLAB_PERSONAL_ACCESS_TOKEN}
       - API_SERVER_IP=${API_SERVER_IP}
+    command: >
+      bash -c "
+        chown -R jenkins:jenkins /var/jenkins_home &&
+        gosu jenkins /usr/local/bin/jenkins.sh
+      "
     depends_on:
       gitlab:
         condition: service_healthy
+      docker-dind:
+        condition: service_started
     networks:
       - ci-cd-network
     healthcheck:
@@ -61,6 +84,9 @@ services:
     networks:
       - ci-cd-network
 
+volumes:
+  dind-storage:
+  
 networks:
   ci-cd-network:
     driver: bridge
