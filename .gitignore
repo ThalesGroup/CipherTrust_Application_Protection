@@ -2,11 +2,12 @@
 .vscode/
 /demos/cadp-crdp-bouncycastle-pr/target
 *.class
-/demos/crypto-agile-cicd-jenkins/deployment/gitlab/config
-/demos/crypto-agile-cicd-jenkins/deployment/gitlab/data
 /demos/crypto-agile-cicd-jenkins/deployment/jenkins/data
 *.class
-/demos/crypto-agile-cicd-jenkins/deployment/github-repo
 /demos/crypto-agile-cicd-jenkins/deployment/scripts/github-repo
 /demos/crypto-agile-cicd-jenkins/deployment/gitlab
 /demos/crypto-agile-cicd-jenkins/deployment/registry/data
+demos/crypto-agile-cicd-jenkins/deployment/jenkins/kube_config/kubeconfig
+demos/crypto-agile-cicd-jenkins/deployment/scripts/kubeconfig
+demos/crypto-agile-cicd-jenkins/deployment/scripts/setupMin.ps1
+demos/crypto-agile-cicd-jenkins/smart_meter_sim/SmartMeterSimulator.class
