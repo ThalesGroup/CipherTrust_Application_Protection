@@ -33,7 +33,6 @@ services:
     volumes:
       - docker-data:/var/lib/docker
       - ./certs:/certs
-      - ./certs/registry_5000:/certs/registry_5000
       - dind-storage:/var/lib/docker
     environment:
       - DOCKER_TLS_CERTDIR=
@@ -68,6 +67,8 @@ services:
       - GITLAB_ROOT_PASSWORD=ChangeIt01!
       - GITLAB_PERSONAL_ACCESS_TOKEN=${GITLAB_PERSONAL_ACCESS_TOKEN}
       - API_SERVER_IP=${API_SERVER_IP}
+      - KUBE_CONFIG_TEST=/var/jenkins_home/kubeconfig-test
+      - KUBE_CONFIG_PROD=/var/jenkins_home/kubeconfig-prod
     command: >
       bash -c "
         chown -R jenkins:jenkins /var/jenkins_home &&

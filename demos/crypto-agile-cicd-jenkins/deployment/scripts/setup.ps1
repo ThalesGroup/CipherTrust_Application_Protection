@@ -458,8 +458,8 @@ docker cp $KUBE_CONFIG_PROD_PATH custom_jenkins:/var/jenkins_home/kubeconfig-pro
 # Configure Jenkins
 Write-Host "Configuring Jenkins..."
 Set-Location $SCRIPTS_DIR
-docker cp configure-jenkins.sh jenkins:/tmp/configure-jenkins.sh
-docker exec jenkins bash /tmp/configure-jenkins.sh
+docker cp configure-jenkins.sh custom_jenkins:/tmp/configure-jenkins.sh
+docker exec custom_jenkins bash /tmp/configure-jenkins.sh
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: Failed to configure Jenkins. Check the configure-jenkins.sh script or Jenkins logs."
     #exit 1
