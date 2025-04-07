@@ -14,6 +14,71 @@ $JENKINS_URL = "http://localhost:8080"
 
 $env:API_SERVER_IP = "192.168.2.221"
 
+# Create directories
+$certAndKeyDir = Split-Path -Parent $SCRIPTS_Dir
+$certsDir = "$certAndKeyDir/certs"
+$configDir = "$certAndKeyDir/compose/config"
+
+# Only generate certificates if they don't exist or are invalid
+$certFile = "$certsDir\domain.crt"
+$keyFile = "$certsDir\domain.key"
+
+Write-Host "Creating directories..."
+New-Item -ItemType Directory -Force -Path $certsDir
+New-Item -ItemType Directory -Force -Path $configDir
+
+if (-not (Test-Path $certFile) -or -not (Test-Path $keyFile)) {
+    # Create certificate
+    $cert = New-SelfSignedCertificate `
+        -Subject "CN=localhost" `
+        -KeyAlgorithm RSA `
+        -KeyLength 4096 `
+        -NotBefore (Get-Date) `
+        -NotAfter (Get-Date).AddYears(1) `
+        -CertStoreLocation "Cert:\CurrentUser\My" `
+        -KeyExportPolicy Exportable `
+        -KeySpec Signature `
+        -HashAlgorithm SHA256
+
+    # Export certificate in PEM format
+    $certBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+    $certPem = "-----BEGIN CERTIFICATE-----`n"
+    $certPem += [Convert]::ToBase64String($certBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
+    $certPem += "`n-----END CERTIFICATE-----"
+    [System.IO.File]::WriteAllText("$certsDir\domain.crt", $certPem)
+
+    # Export private key in PEM format
+    $password = ConvertTo-SecureString -String "YourPassword123!" -Force -AsPlainText
+    $pfxBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $password)
+    $pfx = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+
+    if ($PSVersionTable.PSVersion.Major -ge 7) {
+        # PowerShell 7+ method
+        $keyBytes = $pfx.GetRSAPrivateKey().ExportPkcs8PrivateKey()
+        $keyPem = "-----BEGIN PRIVATE KEY-----`n"
+        $keyPem += [Convert]::ToBase64String($keyBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
+        $keyPem += "`n-----END PRIVATE KEY-----"
+    } else {
+        # Windows PowerShell fallback
+        $rsa = $pfx.PrivateKey -as [System.Security.Cryptography.RSACryptoServiceProvider]
+        $keyPem = "-----BEGIN RSA PRIVATE KEY-----`n"
+        $keyPem += [Convert]::ToBase64String($rsa.ExportCspBlob($true), [System.Base64FormattingOptions]::InsertLineBreaks)
+        $keyPem += "`n-----END RSA PRIVATE KEY-----"
+    }
+
+    [System.IO.File]::WriteAllText("$certsDir\domain.key", $keyPem)
+    
+    Write-Host "PEM-format certificates generated successfully:"
+    Write-Host "Certificate: $certsDir\domain.crt"
+    Write-Host "Private key: $certsDir\domain.key"
+}
+else 
+{
+    Write-Host "Certificates already exist, skipping generation:"
+    Write-Host "Certificate: $certFile"
+    Write-Host "Private key: $keyFile"
+}
+
 # Ensure Docker Compose is installed
 if (-not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
     Write-Host "Docker Compose is not installed. Please install it first."

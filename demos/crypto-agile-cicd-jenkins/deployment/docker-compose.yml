@@ -30,6 +30,8 @@ services:
     container_name: docker-dind
     privileged: true
     volumes:
+      - docker-data:/var/lib/docker
+      - ../certs:/certs
       - dind-storage:/var/lib/docker
     environment:
       - DOCKER_TLS_CERTDIR=
@@ -48,6 +50,7 @@ services:
       - "50000:50000"
     volumes:
       - ./jenkins/data:/var/jenkins_home
+      - ../certs:/certs
       #- /var/run/docker.sock:/var/run/docker.sock
       #- //var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -67,6 +70,8 @@ services:
         condition: service_healthy
       docker-dind:
         condition: service_started
+      registry:
+        condition: service_started
     networks:
       - ci-cd-network
     healthcheck:
@@ -79,14 +84,18 @@ services:
     container_name: registry
     ports:
       - "5000:5000"
+    environment:
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/domain.key
     volumes:
+      - ../certs:/certs
       - ./registry/data:/var/lib/registry
     networks:
       - ci-cd-network
 
 volumes:
   dind-storage:
-  
+
 networks:
   ci-cd-network:
     driver: bridge
