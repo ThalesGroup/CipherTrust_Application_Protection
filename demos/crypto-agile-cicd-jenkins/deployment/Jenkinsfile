@@ -58,8 +58,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    sh 'docker build -t crestline-ui:latest -f crestline-ui/Dockerfile ./crestline-ui'
-                    sh 'docker build -t crestline-api:latest -f crestline-api/Dockerfile ./crestline-api'
+                    sh 'docker build -t registry:5000/crestline-ui:latest -f crestline-ui/Dockerfile ./crestline-ui'
+                    sh 'docker build -t registry:5000/crestline-api:latest -f crestline-api/Dockerfile ./crestline-api'
                 }
             }
         }
@@ -67,10 +67,17 @@ pipeline {
         stage('Push') {
             steps {
                 script {
-                    docker.withRegistry('registry:5000') {
-                        docker.image('crestline-ui').push('latest')
-                        docker.image('crestline-api').push('latest')
-                    }
+                    sh '''
+                        set -ex
+                        echo "==> Checking Registry Reachability"
+                        curl -k https://registry:5000/v2/
+
+                        echo "==> Pushing crestline-ui"
+                        docker push registry:5000/crestline-ui:latest
+
+                        echo "==> Pushing crestline-api"
+                        docker push registry:5000/crestline-api:latest
+                    '''
                 }
             }
         }

@@ -10,6 +10,7 @@ services:
       - "2222:22"
     volumes:
       - ./gitlab/config:/etc/gitlab
+      - ./gitlab/logs:/var/log/gitlab
       - ./gitlab/data:/var/opt/gitlab
     environment:
       GITLAB_ROOT_PASSWORD: "ChangeIt01!"
@@ -31,7 +32,8 @@ services:
     privileged: true
     volumes:
       - docker-data:/var/lib/docker
-      - ../certs:/certs
+      - ./certs:/certs
+      - ./certs/caCert:/etc/docker/certs.d/registry:5000
       - dind-storage:/var/lib/docker
     environment:
       - DOCKER_TLS_CERTDIR=
@@ -50,7 +52,7 @@ services:
       - "50000:50000"
     volumes:
       - ./jenkins/data:/var/jenkins_home
-      - ../certs:/certs
+      - ./certs:/certs
       #- /var/run/docker.sock:/var/run/docker.sock
       #- //var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -88,7 +90,7 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
       REGISTRY_HTTP_TLS_KEY: /certs/domain.key
     volumes:
-      - ../certs:/certs
+      - ./certs:/certs
       - ./registry/data:/var/lib/registry
     networks:
       - ci-cd-network

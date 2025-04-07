@@ -8,3 +8,4 @@
 *.class
 /demos/crypto-agile-cicd-jenkins/deployment/github-repo
 /demos/crypto-agile-cicd-jenkins/deployment/scripts/github-repo
+/demos/crypto-agile-cicd-jenkins/deployment/gitlab
