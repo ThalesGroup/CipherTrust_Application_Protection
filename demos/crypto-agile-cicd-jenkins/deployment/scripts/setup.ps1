@@ -452,8 +452,8 @@ if (-not $jenkinsReady) {
 Set-Location $SCRIPTS_DIR
 # Copy kubeconfig files to Jenkins
 Write-Host "Copying kubeconfig files to Jenkins..."
-docker cp $KUBE_CONFIG_TEST_PATH jenkins:/var/jenkins_home/kubeconfig-test
-docker cp $KUBE_CONFIG_PROD_PATH jenkins:/var/jenkins_home/kubeconfig-prod
+docker cp $KUBE_CONFIG_TEST_PATH custom_jenkins:/var/jenkins_home/kubeconfig-test
+docker cp $KUBE_CONFIG_PROD_PATH custom_jenkins:/var/jenkins_home/kubeconfig-prod
 
 # Configure Jenkins
 Write-Host "Configuring Jenkins..."

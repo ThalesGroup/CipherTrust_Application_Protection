@@ -33,13 +33,19 @@ services:
     volumes:
       - docker-data:/var/lib/docker
       - ./certs:/certs
-      - ./certs/caCert:/etc/docker/certs.d/registry:5000
+      - ./certs/registry_5000:/certs/registry_5000
       - dind-storage:/var/lib/docker
     environment:
       - DOCKER_TLS_CERTDIR=
     networks:
       - ci-cd-network
     restart: unless-stopped
+    entrypoint: >
+      sh -c "
+        mkdir -p /etc/docker/certs.d/registry:5000 &&
+        cp /certs/registry_5000/ca.crt /etc/docker/certs.d/registry:5000/ca.crt &&
+        dockerd-entrypoint.sh
+      "
 
   jenkins:
     build:

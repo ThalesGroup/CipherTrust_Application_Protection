@@ -82,18 +82,30 @@ pipeline {
             }
         }
 
+        stage('Test KubeConfig') {
+            steps {
+                script {
+                    withKubeConfig([credentialsId: 'docker-desktop-kubeconf', kubeconfigFile: "${KUBE_CONFIG_TEST}"]) {
+                        sh 'kubectl config current-context'
+                        sh 'kubectl get nodes'
+                    }
+                }
+            }
+        }
+
         stage('Deploy to Test Kubernetes Environment') {
             steps {
                 script {
                     withKubeConfig([credentialsId: 'docker-desktop-kubeconf', kubeconfigFile: "${KUBE_CONFIG_TEST}"]) {
                         sh """
+                            set -ex
                             sed -i 's|DOCKER_REGISTRY|'"${DOCKER_REGISTRY}"'|g' crestline-deployment/app-deployment.yaml
                             sed -i 's|API_SERVER_IP|'"${API_SERVER_IP}"'|g' crestline-deployment/app-deployment.yaml
                             sed -i 's|DATASOURCE_URL_VAR|'"${DATASOURCE_URL}"'|g' crestline-deployment/app-deployment.yaml
                             sed -i 's|DATASOURCE_USERNAME_VAR|'"${DATASOURCE_USERNAME}"'|g' crestline-deployment/app-deployment.yaml
                             sed -i 's|DATASOURCE_PASSWORD_VAR|'"${DATASOURCE_PASSWORD}"'|g' crestline-deployment/app-deployment.yaml
-                        """
-                        sh 'kubectl apply -f crestline-deployment/app-deployment.yaml --validate=false'
+                            sh 'kubectl apply -f crestline-deployment/app-deployment.yaml --validate=false'
+                        """                        
                     }
                 }
             }
