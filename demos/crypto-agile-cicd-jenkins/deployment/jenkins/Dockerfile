@@ -2,29 +2,24 @@ FROM jenkins/jenkins:lts-jdk21
 
 USER root
 
-# Install Docker CLI and tools (no need for daemon configuration)
-RUN apt-get update && \
+# Install dependencies and fix issues
+RUN apt-get update -y && \
     apt-get install -y \
-        ca-certificates \
-        curl \
-        gnupg \
-        sudo \
-        gosu && \
+    ca-certificates \
+    curl \
+    gnupg \
+    sudo \
+    gosu \
+    lsb-release && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
-    echo \
-      "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-      "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y \
-        docker-ce-cli \
-        docker-compose-plugin && \
-    # Add this 👇
-    curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
-    chmod +x kubectl && \
-    mv kubectl /usr/local/bin/ && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bookworm stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update -y && \
+    apt-get install -y docker-ce-cli docker-compose-plugin && \
+    # Get stable release version of kubectl
+    curl -fsSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x /usr/local/bin/kubectl && \
     apt-get clean
 
 # Configure insecure registry for Docker CLI (when needed)
