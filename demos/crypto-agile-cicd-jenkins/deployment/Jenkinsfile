@@ -81,23 +81,6 @@ pipeline {
             }
         }
 
-        stage('Test KubeConfig') {
-            steps {
-                script {
-                    withCredentials([file(credentialsId: 'jenkins-serviceaccount-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
-                        withKubeConfig([kubeconfig: KUBECONFIG_FILE]) {
-                            sh """
-                            set -ex
-                            kubectl config current-context
-                            export KUBECONFIG=/var/jenkins_home/jenkins-sa-kubeconfig.yaml
-                            kubectl get nodes
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
         stage('Deploy to Test Kubernetes Environment') {
             steps {
                 script {
