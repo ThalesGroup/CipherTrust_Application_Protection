@@ -131,8 +131,10 @@ if (-Not (Test-Path $KUBE_CONFIG_TEST_PATH)) {
     exit 1
 }
 
+
+$KUBE_CONFIG_FILE = Join-Path -Path ($SCRIPTS_Dir) -ChildPath $KUBE_CONFIG_TEST_PATH
 # Read and encode
-$base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KUBE_CONFIG_TEST_PATH))
+$base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KUBE_CONFIG_FILE))
 
 # Set environment variable
 $env:KUBECONFIG_BASE64 = $base64
