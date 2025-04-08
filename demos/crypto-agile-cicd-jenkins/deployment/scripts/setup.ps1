@@ -142,7 +142,10 @@ Write-Host "`n✅ KUBECONFIG_BASE64 environment variable set successfully."
 
 # Start all services
 Write-Host "Starting Jenkins, GitLab, and Registry..."
-docker-compose up -d --build --no-cache
+docker compose build --no-cache
+if ($LASTEXITCODE -eq 0) {
+    docker compose up -d
+}
 
 # Check GitLab readiness with detailed error handling
 Write-Host "Checking if GitLab is ready at $GITLAB_URL/users/sign_in..."
