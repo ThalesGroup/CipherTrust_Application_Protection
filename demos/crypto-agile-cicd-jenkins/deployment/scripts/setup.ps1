@@ -411,6 +411,7 @@ if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
 Set-Location $SOURCE_FULL_PATH_DEP
 git init --initial-branch=main
 git add Jenkinsfile
+git add app-deployment.yaml
 git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_DEP"
 
 git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_DEP.git -f

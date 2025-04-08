@@ -46,6 +46,7 @@ RUN jenkins-plugin-cli --verbose --plugins \
 
 USER jenkins
 COPY casc.yaml /usr/share/jenkins/casc.yaml
+COPY kube_config/kubeconfig /usr/share/jenkins/ref/kubeconfig
 COPY init.groovy.d /usr/share/jenkins/ref/init.groovy.d
 
 # Updated environment variables
