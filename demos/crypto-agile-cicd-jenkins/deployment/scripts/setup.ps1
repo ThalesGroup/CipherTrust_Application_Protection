@@ -14,6 +14,7 @@ $SCRIPTS_Dir = Get-Location
 $GITLAB_API_URL = "$GITLAB_URL/api/v4"
 $KUBE_CONFIG_TEST_PATH = "kubeconfig"  # Replace with actual path on host
 $KUBE_CONFIG_PROD_PATH = "kubeconfig"  # Replace with actual path on host
+$KUBE_CONFIG_SA_PATH = "jenkins-sa-kubeconfig.yaml"
 $JENKINS_URL = "http://localhost:8080"
 
 $env:API_SERVER_IP = "192.168.2.221"
@@ -139,6 +140,14 @@ $base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KUBE_CONFIG_FILE))
 # Set environment variable
 $env:KUBECONFIG_BASE64 = $base64
 Write-Host "`n✅ KUBECONFIG_BASE64 environment variable set successfully."
+
+$KUBE_CONFIG_SA_FILE = Join-Path -Path ($SCRIPTS_Dir) -ChildPath $KUBE_CONFIG_SA_PATH
+# Read and encode
+$base64_sa = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KUBE_CONFIG_SA_FILE))
+
+# Set environment variable
+$env:KUBECONFIG_SA_BASE64 = $base64_sa
+Write-Host "`n✅ KUBECONFIG_SA_BASE64 environment variable set successfully."
 
 # Start all services
 Write-Host "Starting Jenkins, GitLab, and Registry..."
@@ -479,6 +488,7 @@ Set-Location $SCRIPTS_DIR
 Write-Host "Copying kubeconfig files to Jenkins..."
 docker cp $KUBE_CONFIG_TEST_PATH custom_jenkins:/var/jenkins_home/kubeconfig-test
 docker cp $KUBE_CONFIG_PROD_PATH custom_jenkins:/var/jenkins_home/kubeconfig-prod
+docker cp $KUBE_CONFIG_SA_PATH custom_jenkins:/var/jenkins_home/jenkins-sa-kubeconfig.yaml
 
 # Configure Jenkins
 Write-Host "Configuring Jenkins..."

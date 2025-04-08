@@ -82,3 +82,9 @@ credentials:
               description: "Kube config for Docker Desktop"
               fileName: "kubeconfig"
               secretBytes: "${KUBECONFIG_BASE64}"
+          - file:
+              scope: GLOBAL
+              id: "jenkins-serviceaccount-kubeconfig"
+              description: "Kube config for Docker Desktop"
+              fileName: "jenkins-sa-kubeconfig.yaml"
+              secretBytes: "${KUBECONFIG_SA_BASE64}"

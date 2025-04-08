@@ -85,9 +85,14 @@ pipeline {
         stage('Test KubeConfig') {
             steps {
                 script {
-                    withKubeConfig([credentialsId: 'docker-desktop-kubeconf', kubeconfigFile: "${KUBE_CONFIG_TEST}"]) {
-                        sh 'kubectl config current-context'
-                        sh 'kubectl get nodes'
+                    withCredentials([file(credentialsId: 'jenkins-serviceaccount-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        withKubeConfig([kubeconfig: KUBECONFIG_FILE]) {
+                            sh """
+                            set -ex
+                            kubectl config current-context
+                            kubectl get nodes
+                            """
+                        }
                     }
                 }
             }

@@ -72,6 +72,7 @@ services:
       - API_SERVER_IP=${API_SERVER_IP}
       - KUBE_CONFIG_TEST=/var/jenkins_home/kubeconfig-test
       - KUBE_CONFIG_PROD=/var/jenkins_home/kubeconfig-prod
+      - KUBE_CONFIG_SA=/var/jenkins_home/jenkins-sa-kubeconfig.yaml
     command: >
       bash -c "
         chown -R jenkins:jenkins /var/jenkins_home &&
