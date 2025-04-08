@@ -18,6 +18,7 @@ $KUBE_CONFIG_SA_PATH = "jenkins-sa-kubeconfig.yaml"
 $JENKINS_URL = "http://localhost:8080"
 
 $env:API_SERVER_IP = "192.168.2.221"
+$env:REGISTRY_ADDRESS_K8S = "192.168.2.221:5000"
 
 # Create directories
 $certAndKeyDir = Split-Path -Parent $SCRIPTS_Dir

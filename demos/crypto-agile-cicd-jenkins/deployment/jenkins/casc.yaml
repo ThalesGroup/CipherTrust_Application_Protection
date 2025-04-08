@@ -32,7 +32,7 @@ jobs:
           stringParam("GIT_REPO_UI", "http://gitlab:80/root/crestline-ui.git", "URL of the Crestline UI Git repository")
           stringParam("GIT_REPO_API", "http://gitlab:80/root/crestline-api.git", "URL of the Crestline API Git repository")
           stringParam("GIT_REPO_DEP", "http://gitlab:80/root/crestline-deployment.git", "URL of the Crestline Deployment Git repository")
-          stringParam("DOCKER_REGISTRY", "registry:5000", "URL of the Docker registry")
+          stringParam("DOCKER_REGISTRY", "${REGISTRY_ADDRESS}", "URL of the Docker registry")
           stringParam("API_SERVER_IP", "${API_SERVER_IP}", "URL of the API Server")
           stringParam("DATASOURCE_URL", "jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp", "Connection string for DB")
           stringParam("DATASOURCE_USERNAME", "postgres", "Username for the DB")

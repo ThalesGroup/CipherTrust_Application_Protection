@@ -70,6 +70,7 @@ services:
       - GITLAB_ROOT_PASSWORD=ChangeIt01!
       - GITLAB_PERSONAL_ACCESS_TOKEN=${GITLAB_PERSONAL_ACCESS_TOKEN}
       - API_SERVER_IP=${API_SERVER_IP}
+      - REGISTRY_ADDRESS=${REGISTRY_ADDRESS_K8S}
       - KUBE_CONFIG_TEST=/var/jenkins_home/kubeconfig-test
       - KUBE_CONFIG_PROD=/var/jenkins_home/kubeconfig-prod
       - KUBE_CONFIG_SA=/var/jenkins_home/jenkins-sa-kubeconfig.yaml

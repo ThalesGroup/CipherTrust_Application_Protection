@@ -2,17 +2,16 @@ pipeline {
     agent any
 
     // Define parameters
-    parameters {
-        string(name: 'GIT_REPO_UI', defaultValue: 'http://gitlab:80/root/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
-        string(name: 'GIT_REPO_API', defaultValue: 'http://gitlab:80/root/crestline-api.git', description: 'URL of the Crestline API Git repository')
-        string(name: 'GIT_REPO_DEP', defaultValue: 'http://gitlab:80/root/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
-        string(name: 'DOCKER_REGISTRY', defaultValue: 'registry:5000', description: 'URL of the Docker registry')
-        string(name: 'API_SERVER_IP', defaultValue: '192.168.2.221', description: 'URL of the API Server')
-        string(name: 'DATASOURCE_URL', defaultValue: 'jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp', description: 'Connection string for DB')
-        string(name: 'DATASOURCE_USERNAME', defaultValue: 'postgres', description: 'Username for the DB')
-        string(name: 'DATASOURCE_PASSWORD', defaultValue: 'ChangeIt01!', description: 'Password for the DB')
-    }
-
+    // parameters {
+    //     string(name: 'GIT_REPO_UI', defaultValue: 'http://gitlab:80/root/crestline-ui.git', description: 'URL of the Crestline UI Git repository')
+    //     string(name: 'GIT_REPO_API', defaultValue: 'http://gitlab:80/root/crestline-api.git', description: 'URL of the Crestline API Git repository')
+    //     string(name: 'GIT_REPO_DEP', defaultValue: 'http://gitlab:80/root/crestline-deployment.git', description: 'URL of the Crestline Deployment Git repository')
+    //     string(name: 'DOCKER_REGISTRY', defaultValue: 'registry:5000', description: 'URL of the Docker registry')
+    //     string(name: 'API_SERVER_IP', defaultValue: '192.168.2.221', description: 'URL of the API Server')
+    //     string(name: 'DATASOURCE_URL', defaultValue: 'jdbc:postgresql://postgres-service.app-stack.svc.cluster.local:5432/cdsp', description: 'Connection string for DB')
+    //     string(name: 'DATASOURCE_USERNAME', defaultValue: 'postgres', description: 'Username for the DB')
+    //     string(name: 'DATASOURCE_PASSWORD', defaultValue: 'ChangeIt01!', description: 'Password for the DB')
+    // }
     environment {
         // Use the parameters in the environment
         GIT_REPO_UI = "${params.GIT_REPO_UI}"
@@ -90,6 +89,7 @@ pipeline {
                             sh """
                             set -ex
                             kubectl config current-context
+                            export KUBECONFIG=/var/jenkins_home/jenkins-sa-kubeconfig.yaml
                             kubectl get nodes
                             """
                         }
@@ -101,16 +101,19 @@ pipeline {
         stage('Deploy to Test Kubernetes Environment') {
             steps {
                 script {
-                    withKubeConfig([credentialsId: 'docker-desktop-kubeconf', kubeconfigFile: "${KUBE_CONFIG_TEST}"]) {
-                        sh """
-                            set -ex
-                            sed -i 's|DOCKER_REGISTRY|'"${DOCKER_REGISTRY}"'|g' crestline-deployment/app-deployment.yaml
-                            sed -i 's|API_SERVER_IP|'"${API_SERVER_IP}"'|g' crestline-deployment/app-deployment.yaml
-                            sed -i 's|DATASOURCE_URL_VAR|'"${DATASOURCE_URL}"'|g' crestline-deployment/app-deployment.yaml
-                            sed -i 's|DATASOURCE_USERNAME_VAR|'"${DATASOURCE_USERNAME}"'|g' crestline-deployment/app-deployment.yaml
-                            sed -i 's|DATASOURCE_PASSWORD_VAR|'"${DATASOURCE_PASSWORD}"'|g' crestline-deployment/app-deployment.yaml
-                            sh 'kubectl apply -f crestline-deployment/app-deployment.yaml --validate=false'
-                        """                        
+                    withCredentials([file(credentialsId: 'jenkins-serviceaccount-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        withKubeConfig([kubeconfig: KUBECONFIG_FILE]) {
+                            sh """
+                                set -ex
+                                sed -i 's|DOCKER_REGISTRY|'"${DOCKER_REGISTRY}"'|g' /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml
+                                sed -i 's|API_SERVER_IP|'"${API_SERVER_IP}"'|g' /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml
+                                sed -i 's|DATASOURCE_URL_VAR|'"${DATASOURCE_URL}"'|g' /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml
+                                sed -i 's|DATASOURCE_USERNAME_VAR|'"${DATASOURCE_USERNAME}"'|g' /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml
+                                sed -i 's|DATASOURCE_PASSWORD_VAR|'"${DATASOURCE_PASSWORD}"'|g' /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml
+                                export KUBECONFIG=/var/jenkins_home/jenkins-sa-kubeconfig.yaml
+                                kubectl apply -f /var/jenkins_home/jobs/Deploy_Sample_App_ADP/workspace/crestline-deployment/app-deployment.yaml --insecure-skip-tls-verify --validate=false
+                            """ 
+                        }                      
                     }
                 }
             }

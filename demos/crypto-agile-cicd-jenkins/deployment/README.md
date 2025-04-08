@@ -26,7 +26,7 @@ EOF
 
 ```bash
 SECRET_NAME=$(kubectl get sa jenkins-sa -n jenkins -o jsonpath="{.secrets[0].name}")
-
+SECRET_NAME=jenkins-sa-token
 TOKEN=$(kubectl get secret $SECRET_NAME -n jenkins -o jsonpath="{.data.token}" | base64 -d)
 CA_CRT=$(kubectl get secret $SECRET_NAME -n jenkins -o jsonpath="{.data['ca\.crt']}" | base64 -d)
 ```
@@ -55,4 +55,10 @@ users:
   user:
     token: $TOKEN
 EOF
+```
+
+```bash
+kubectl port-forward -n kube-system \
+  $(kubectl get pods -n kube-system -l component=kube-apiserver -o name) \
+  8443:8443 --address 0.0.0.0 &
 ```
