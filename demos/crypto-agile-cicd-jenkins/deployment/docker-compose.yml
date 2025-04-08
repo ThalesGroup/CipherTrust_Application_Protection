@@ -50,6 +50,8 @@ services:
     build:
       context: ./jenkins
       dockerfile: Dockerfile
+      args:
+        KUBECONFIG_BASE64: ${KUBECONFIG_BASE64}
     container_name: custom_jenkins
     user: root
     ports:
@@ -61,6 +63,7 @@ services:
       #- /var/run/docker.sock:/var/run/docker.sock
       #- //var/run/docker.sock:/var/run/docker.sock
     environment:
+      - KUBECONFIG_BASE64=${KUBECONFIG_BASE64}
       - DOCKER_HOST=tcp://docker-dind:2375
       - CASC_JENKINS_CONFIG=/usr/share/jenkins/casc.yaml
       - JAVA_OPTS=-Xmx1024m -Djenkins.install.runSetupWizard=false

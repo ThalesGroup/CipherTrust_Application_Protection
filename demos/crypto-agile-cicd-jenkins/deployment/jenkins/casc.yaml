@@ -76,3 +76,9 @@ credentials:
               scope: GLOBAL
               id: "gitlab-api-token"
               secret: "${GITLAB_PERSONAL_ACCESS_TOKEN}"
+          - file:
+              scope: GLOBAL
+              id: "docker-desktop-kubeconf"
+              description: "Kube config for Docker Desktop"
+              fileName: "kubeconfig"
+              secretBytes: "${KUBECONFIG_BASE64}"

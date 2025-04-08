@@ -1,3 +1,7 @@
+param(
+    [string]$configGitlab = "no"
+)
+
 # Variables
 $GITHUB_REPO = "https://github.com/ThalesGroup/CipherTrust_Application_Protection"  # Replace with your GitHub repo URL
 $GITLAB_URL = "http://localhost"
@@ -122,8 +126,17 @@ if (-not $token) {
 Write-Host "GitLab token: $token"
 $env:GITLAB_PERSONAL_ACCESS_TOKEN = $token  # Set env var before starting all services
 
+if (-Not (Test-Path $KUBE_CONFIG_TEST_PATH)) {
+    Write-Error "kubeconfig file not found at path: $KUBE_CONFIG_TEST_PATH"
+    exit 1
+}
 
+# Read and encode
+$base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($KUBE_CONFIG_TEST_PATH))
 
+# Set environment variable
+$env:KUBECONFIG_BASE64 = $base64
+Write-Host "`n✅ KUBECONFIG_BASE64 environment variable set successfully."
 
 # Start all services
 Write-Host "Starting Jenkins, GitLab, and Registry..."
@@ -154,25 +167,26 @@ if (-not $gitlabReady) {
     exit 1
 }
 
-# Ensure GitLab root password is set correctly
-Write-Host "Ensuring GitLab root password is set to $GITLAB_ROOT_PASSWORD..."
-docker exec gitlab gitlab-rails runner "user = User.find_by_username('root'); if user.password != '$GITLAB_ROOT_PASSWORD'; user.password = '$GITLAB_ROOT_PASSWORD'; user.password_confirmation = '$GITLAB_ROOT_PASSWORD'; user.save!; end"
+if ($configGitlab -eq "yes") {
+    # Ensure GitLab root password is set correctly
+    Write-Host "Ensuring GitLab root password is set to $GITLAB_ROOT_PASSWORD..."
+    docker exec gitlab gitlab-rails runner "user = User.find_by_username('root'); if user.password != '$GITLAB_ROOT_PASSWORD'; user.password = '$GITLAB_ROOT_PASSWORD'; user.password_confirmation = '$GITLAB_ROOT_PASSWORD'; user.save!; end"
 
-Write-Host "Allowing local requests from web hooks and services..."
-$allowLocalScript = "ApplicationSetting.current.update!(allow_local_requests_from_web_hooks_and_services: true)"
+    Write-Host "Allowing local requests from web hooks and services..."
+    $allowLocalScript = "ApplicationSetting.current.update!(allow_local_requests_from_web_hooks_and_services: true)"
 
-docker exec gitlab gitlab-rails runner "$allowLocalScript"
+    docker exec gitlab gitlab-rails runner "$allowLocalScript"
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to perform GitLab local request configuration"
-    exit 1
-}
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to perform GitLab local request configuration"
+        exit 1
+    }
 
-# Create GitLab project
-Write-Host "Creating GitLab project '$REPO_NAME_UI'..."
-#docker exec gitlab gitlab-rails runner "project = Project.find_by_full_path('root/$REPO_NAME'); unless project; project = Project.create!(namespace_id: 1, name: '$REPO_NAME', path: '$REPO_NAME', visibility_level: 20); project.add_owner(User.find_by_username('root')); end"
+    # Create GitLab project
+    Write-Host "Creating GitLab project '$REPO_NAME_UI'..."
+    #docker exec gitlab gitlab-rails runner "project = Project.find_by_full_path('root/$REPO_NAME'); unless project; project = Project.create!(namespace_id: 1, name: '$REPO_NAME', path: '$REPO_NAME', visibility_level: 20); project.add_owner(User.find_by_username('root')); end"
 
-$rubyScriptUI = @"
+    $rubyScriptUI = @"
 begin
   # Find root user and namespace
   user = User.find_by_username('root')
@@ -214,9 +228,9 @@ rescue => e
 end
 "@
 
-Write-Host "Creating GitLab project '$REPO_NAME_API'..."
+    Write-Host "Creating GitLab project '$REPO_NAME_API'..."
 
-$rubyScriptAPI = @"
+    $rubyScriptAPI = @"
 begin
   # Find root user and namespace
   user = User.find_by_username('root')
@@ -258,9 +272,9 @@ rescue => e
 end
 "@
 
-Write-Host "Creating GitLab project '$REPO_NAME_DEP'..."
+    Write-Host "Creating GitLab project '$REPO_NAME_DEP'..."
 
-$rubyScriptDEP = @"
+    $rubyScriptDEP = @"
 begin
   # Find root user and namespace
   user = User.find_by_username('root')
@@ -302,124 +316,129 @@ rescue => e
 end
 "@
 
-# Execute the script by piping it to docker exec
-$rubyScriptUI | docker exec -i gitlab gitlab-rails runner -
+    # Execute the script by piping it to docker exec
+    $rubyScriptUI | docker exec -i gitlab gitlab-rails runner -
 
-# Check exit code
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to create GitLab project '$REPO_NAME_UI'"
-    exit 1
+    # Check exit code
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to create GitLab project '$REPO_NAME_UI'"
+        exit 1
+    }
+
+    # Execute the script by piping it to docker exec
+    $rubyScriptAPI | docker exec -i gitlab gitlab-rails runner -
+
+    # Check exit code
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to create GitLab project '$REPO_NAME_API'"
+        exit 1
+    }
+
+    # Execute the script by piping it to docker exec
+    $rubyScriptDEP | docker exec -i gitlab gitlab-rails runner -
+
+    # Check exit code
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to create GitLab project '$rubyScriptDEP'"
+        exit 1
+    }
+
+    # Clone GitHub repo locally
+    #Get-ChildItem -Path github-repo -Recurse | Remove-Item -force -recurse
+    #Remove-Item github-repo -Force 
+    Write-Host "Cloning GitHub repository..."
+    $BRANCH_NAME = "crypto-agility-jenkins"
+    $SOURCE_FOLDER_UI = "demos/crypto-agile-cicd-jenkins/power-company-ui"
+    $SOURCE_FOLDER_API = "demos/crypto-agile-cicd-jenkins/power-company-api"
+    $SOURCE_FOLDER_DEP = "demos/crypto-agile-cicd-jenkins/deployment"
+    #if (-not (Test-Path "github-repo")) {
+    git config --global core.longpaths true
+    git clone --branch $BRANCH_NAME --single-branch $GITHUB_REPO github-repo
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to clone GitHub repository. Check the URL, branch name, or your network."
+        exit 1
+    }
+    #}
+
+    # Push UI app to GitLab
+    Write-Host "Preparing to push '$SOURCE_FOLDER_UI' to GitLab..."
+    Set-Location github-repo
+    # Create a temporary directory for the filtered content
+    $SOURCE_FULL_PATH_UI = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_UI
+
+    if (-not (Test-Path $SOURCE_FULL_PATH_UI)) {
+        Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_UI"
+        exit 1
+    }
+
+    # Initialize new git repo with just the filtered content
+    Set-Location $SOURCE_FULL_PATH_UI
+    git init --initial-branch=main
+    git add .
+    git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_UI"
+
+
+    git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_UI.git -f
+    git push --set-upstream origin main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
+        exit 1
+    }
+
+    # Push API app to GitLab
+    Write-Host "Preparing to push '$SOURCE_FOLDER_API' to GitLab..."
+    Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
+    # Create a temporary directory for the filtered content
+    $SOURCE_FULL_PATH_API = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_API
+
+    if (-not (Test-Path $SOURCE_FULL_PATH_API)) {
+        Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_API"
+        exit 1
+    }
+
+    # Initialize new git repo with just the filtered content
+    Set-Location $SOURCE_FULL_PATH_API
+    git init --initial-branch=main
+    git add .
+    git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_API"
+
+
+    git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_API.git -f
+    git push --set-upstream origin main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
+        exit 1
+    }
+
+    # Push Deployment scripts (Jenkinsfile) to GitLab
+    Write-Host "Preparing to push '$SOURCE_FOLDER_DEP' to GitLab..."
+    Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
+    # Create a temporary directory for the filtered content
+    $SOURCE_FULL_PATH_DEP = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_DEP
+
+    if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
+        Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_DEP"
+        exit 1
+    }
+
+    # Initialize new git repo with just the filtered content
+    Set-Location $SOURCE_FULL_PATH_DEP
+    git init --initial-branch=main
+    git add Jenkinsfile
+    git add app-deployment.yaml
+    git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_DEP"
+
+    git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_DEP.git -f
+    git push --set-upstream origin main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
+        exit 1
+    }
+}
+else {
+    Write-Host "Skipping Git projects setup"
 }
 
-# Execute the script by piping it to docker exec
-$rubyScriptAPI | docker exec -i gitlab gitlab-rails runner -
-
-# Check exit code
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to create GitLab project '$REPO_NAME_API'"
-    exit 1
-}
-
-# Execute the script by piping it to docker exec
-$rubyScriptDEP | docker exec -i gitlab gitlab-rails runner -
-
-# Check exit code
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to create GitLab project '$rubyScriptDEP'"
-    exit 1
-}
-
-# Clone GitHub repo locally
-#Get-ChildItem -Path github-repo -Recurse | Remove-Item -force -recurse
-#Remove-Item github-repo -Force 
-Write-Host "Cloning GitHub repository..."
-$BRANCH_NAME = "crypto-agility-jenkins"
-$SOURCE_FOLDER_UI = "demos/crypto-agile-cicd-jenkins/power-company-ui"
-$SOURCE_FOLDER_API = "demos/crypto-agile-cicd-jenkins/power-company-api"
-$SOURCE_FOLDER_DEP = "demos/crypto-agile-cicd-jenkins/deployment"
-#if (-not (Test-Path "github-repo")) {
-git config --global core.longpaths true
-git clone --branch $BRANCH_NAME --single-branch $GITHUB_REPO github-repo
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to clone GitHub repository. Check the URL, branch name, or your network."
-    exit 1
-}
-#}
-
-# Push UI app to GitLab
-Write-Host "Preparing to push '$SOURCE_FOLDER_UI' to GitLab..."
-Set-Location github-repo
-# Create a temporary directory for the filtered content
-$SOURCE_FULL_PATH_UI = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_UI
-
-if (-not (Test-Path $SOURCE_FULL_PATH_UI)) {
-    Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_UI"
-    exit 1
-}
-
-# Initialize new git repo with just the filtered content
-Set-Location $SOURCE_FULL_PATH_UI
-git init --initial-branch=main
-git add .
-git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_UI"
-
-
-git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_UI.git -f
-git push --set-upstream origin main
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
-    exit 1
-}
-
-# Push API app to GitLab
-Write-Host "Preparing to push '$SOURCE_FOLDER_API' to GitLab..."
-Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
-# Create a temporary directory for the filtered content
-$SOURCE_FULL_PATH_API = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_API
-
-if (-not (Test-Path $SOURCE_FULL_PATH_API)) {
-    Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_API"
-    exit 1
-}
-
-# Initialize new git repo with just the filtered content
-Set-Location $SOURCE_FULL_PATH_API
-git init --initial-branch=main
-git add .
-git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_API"
-
-
-git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_API.git -f
-git push --set-upstream origin main
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
-    exit 1
-}
-
-# Push Deployment scripts (Jenkinsfile) to GitLab
-Write-Host "Preparing to push '$SOURCE_FOLDER_DEP' to GitLab..."
-Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
-# Create a temporary directory for the filtered content
-$SOURCE_FULL_PATH_DEP = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_DEP
-
-if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
-    Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_DEP"
-    exit 1
-}
-
-# Initialize new git repo with just the filtered content
-Set-Location $SOURCE_FULL_PATH_DEP
-git init --initial-branch=main
-git add Jenkinsfile
-git add app-deployment.yaml
-git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_DEP"
-
-git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_DEP.git -f
-git push --set-upstream origin main
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
-    exit 1
-}
 
 # Wait for Jenkins to be fully ready
 Write-Host "Waiting for Jenkins to start..."
