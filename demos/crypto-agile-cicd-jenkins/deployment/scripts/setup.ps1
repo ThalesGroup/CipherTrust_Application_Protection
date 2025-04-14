@@ -35,48 +35,48 @@ New-Item -ItemType Directory -Force -Path $configDir
 
 if (-not (Test-Path $certFile) -or -not (Test-Path $keyFile)) {
     # Create certificate
-    $cert = New-SelfSignedCertificate `
-        -Subject "CN=localhost" `
-        -KeyAlgorithm RSA `
-        -KeyLength 4096 `
-        -NotBefore (Get-Date) `
-        -NotAfter (Get-Date).AddYears(1) `
-        -CertStoreLocation "Cert:\CurrentUser\My" `
-        -KeyExportPolicy Exportable `
-        -KeySpec Signature `
-        -HashAlgorithm SHA256
+    # $cert = New-SelfSignedCertificate `
+    #     -Subject "CN=localhost" `
+    #     -KeyAlgorithm RSA `
+    #     -KeyLength 4096 `
+    #     -NotBefore (Get-Date) `
+    #     -NotAfter (Get-Date).AddYears(1) `
+    #     -CertStoreLocation "Cert:\CurrentUser\My" `
+    #     -KeyExportPolicy Exportable `
+    #     -KeySpec Signature `
+    #     -HashAlgorithm SHA256
 
-    # Export certificate in PEM format
-    $certBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
-    $certPem = "-----BEGIN CERTIFICATE-----`n"
-    $certPem += [Convert]::ToBase64String($certBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
-    $certPem += "`n-----END CERTIFICATE-----"
-    [System.IO.File]::WriteAllText("$certsDir\domain.crt", $certPem)
+    # # Export certificate in PEM format
+    # $certBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+    # $certPem = "-----BEGIN CERTIFICATE-----`n"
+    # $certPem += [Convert]::ToBase64String($certBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
+    # $certPem += "`n-----END CERTIFICATE-----"
+    # [System.IO.File]::WriteAllText("$certsDir\domain.crt", $certPem)
 
-    # Export private key in PEM format
-    $password = ConvertTo-SecureString -String "YourPassword123!" -Force -AsPlainText
-    $pfxBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $password)
-    $pfx = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
+    # # Export private key in PEM format
+    # $password = ConvertTo-SecureString -String "YourPassword123!" -Force -AsPlainText
+    # $pfxBytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $password)
+    # $pfx = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes, $password, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable)
 
-    if ($PSVersionTable.PSVersion.Major -ge 7) {
-        # PowerShell 7+ method
-        $keyBytes = $pfx.GetRSAPrivateKey().ExportPkcs8PrivateKey()
-        $keyPem = "-----BEGIN PRIVATE KEY-----`n"
-        $keyPem += [Convert]::ToBase64String($keyBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
-        $keyPem += "`n-----END PRIVATE KEY-----"
-    } else {
-        # Windows PowerShell fallback
-        $rsa = $pfx.PrivateKey -as [System.Security.Cryptography.RSACryptoServiceProvider]
-        $keyPem = "-----BEGIN RSA PRIVATE KEY-----`n"
-        $keyPem += [Convert]::ToBase64String($rsa.ExportCspBlob($true), [System.Base64FormattingOptions]::InsertLineBreaks)
-        $keyPem += "`n-----END RSA PRIVATE KEY-----"
-    }
+    # if ($PSVersionTable.PSVersion.Major -ge 7) {
+    #     # PowerShell 7+ method
+    #     $keyBytes = $pfx.GetRSAPrivateKey().ExportPkcs8PrivateKey()
+    #     $keyPem = "-----BEGIN PRIVATE KEY-----`n"
+    #     $keyPem += [Convert]::ToBase64String($keyBytes, [System.Base64FormattingOptions]::InsertLineBreaks)
+    #     $keyPem += "`n-----END PRIVATE KEY-----"
+    # } else {
+    #     # Windows PowerShell fallback
+    #     $rsa = $pfx.PrivateKey -as [System.Security.Cryptography.RSACryptoServiceProvider]
+    #     $keyPem = "-----BEGIN RSA PRIVATE KEY-----`n"
+    #     $keyPem += [Convert]::ToBase64String($rsa.ExportCspBlob($true), [System.Base64FormattingOptions]::InsertLineBreaks)
+    #     $keyPem += "`n-----END RSA PRIVATE KEY-----"
+    # }
 
-    [System.IO.File]::WriteAllText("$certsDir\domain.key", $keyPem)
+    # [System.IO.File]::WriteAllText("$certsDir\domain.key", $keyPem)
     
-    Write-Host "PEM-format certificates generated successfully:"
-    Write-Host "Certificate: $certsDir\domain.crt"
-    Write-Host "Private key: $certsDir\domain.key"
+    # Write-Host "PEM-format certificates generated successfully:"
+    # Write-Host "Certificate: $certsDir\domain.crt"
+    # Write-Host "Private key: $certsDir\domain.key"
 }
 else 
 {
@@ -93,31 +93,33 @@ if (-not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
 
 # Create or retrieve GitLab personal access token for root (before starting services)
 Write-Host "Creating or retrieving GitLab personal access token for root..."
-docker-compose up -d gitlab  # Start GitLab first
-$gitlabReady = $false
-$timeout = 600
-$elapsed = 0
-$interval = 10
-while (-not $gitlabReady -and $elapsed -lt $timeout) {
-    try {
-        $response = Invoke-WebRequest -Uri "$GITLAB_URL/users/sign_in" -UseBasicParsing -ErrorAction Stop
-        if ($response.StatusCode -eq 200) {
-            $gitlabReady = $true
-            Write-Progress -Activity "Waiting for GitLab" -Status "GitLab is ready!" -PercentComplete 100 -Completed
-            Write-Host "GitLab is ready for token creation!"
-        }
-    } catch {
-        $percentComplete = [math]::Min(($elapsed / $timeout) * 100, 99)  # Cap at 99% until success
-        $secondsRemaining = $timeout - $elapsed        
-        Write-Progress -Activity "Waiting for GitLab" -Status "Checking availability... ($elapsed of $timeout seconds elapsed)" -PercentComplete $percentComplete -SecondsRemaining $secondsRemaining
-        Start-Sleep -Seconds $interval
-        $elapsed += $interval
-    }
-}
-if (-not $gitlabReady) {
-    Write-Progress -Activity "Waiting for GitLab" -Status "Error: GitLab failed to start within 10 minutes." -PercentComplete 100 -Completed
-    Write-Host "Error: GitLab failed to start within 10 minutes."
-    exit 1
+if ($configGitlab -eq "yes") {
+  docker-compose up -d gitlab
+  $gitlabReady = $false
+  $timeout = 600
+  $elapsed = 0
+  $interval = 10
+  while (-not $gitlabReady -and $elapsed -lt $timeout) {
+      try {
+          $response = Invoke-WebRequest -Uri "$GITLAB_URL/users/sign_in" -UseBasicParsing -ErrorAction Stop
+          if ($response.StatusCode -eq 200) {
+              $gitlabReady = $true
+              Write-Progress -Activity "Waiting for GitLab" -Status "GitLab is ready!" -PercentComplete 100 -Completed
+              Write-Host "GitLab is ready for token creation!"
+          }
+      } catch {
+          $percentComplete = [math]::Min(($elapsed / $timeout) * 100, 99)  # Cap at 99% until success
+          $secondsRemaining = $timeout - $elapsed        
+          Write-Progress -Activity "Waiting for GitLab" -Status "Checking availability... ($elapsed of $timeout seconds elapsed)" -PercentComplete $percentComplete -SecondsRemaining $secondsRemaining
+          Start-Sleep -Seconds $interval
+          $elapsed += $interval
+      }
+  }
+  if (-not $gitlabReady) {
+      Write-Progress -Activity "Waiting for GitLab" -Status "Error: GitLab failed to start within 10 minutes." -PercentComplete 100 -Completed
+      Write-Host "Error: GitLab failed to start within 10 minutes."
+      exit 1
+  }
 }
 $tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Integration'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Integration', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
 $token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
