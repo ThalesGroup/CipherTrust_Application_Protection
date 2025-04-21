@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.ciphertrust.cryptoagility.entity.SmartMeterData;
 import io.ciphertrust.cryptoagility.repository.SmartMeterDataRepository;
 import io.ciphertrust.cryptoagility.service.SmartMeterDataService;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -17,9 +19,15 @@ public class SmartMeterDataServiceImpl implements SmartMeterDataService {
     @Autowired
     private SmartMeterDataRepository smartMeterDataRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Override
+    @Transactional
     public SmartMeterData saveSmartMeterData(SmartMeterData data) {
-        return smartMeterDataRepository.save(data);
+        SmartMeterData saved = smartMeterDataRepository.save(data);
+        entityManager.flush();
+        return saved;
     }
 
     @Override

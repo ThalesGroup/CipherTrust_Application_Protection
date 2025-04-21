@@ -5,10 +5,11 @@ FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 
 # Copy the JAR file into the container
+COPY ./keys /app/keys
 COPY target/smartmeter-*.jar app.jar
 
 # Define environment variable names
-ENV SM_API_URL=http://localhost:9090/api/v1/smart-meter-data
+ENV SM_API_URL=http://192.168.2.216:9090/api/v1/smart-meter-data
 ENV SM_USER_ID=1
 ENV SM_SMART_METER_ID=1
 

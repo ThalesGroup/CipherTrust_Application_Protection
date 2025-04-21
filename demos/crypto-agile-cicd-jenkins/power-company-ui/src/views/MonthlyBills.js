@@ -27,7 +27,7 @@ function MonthlyBills() {
     };
 
     fetchBills();
-  }, []);
+  }, [apiUrl]);
 
   return (
     <div className="p-6 bg-gray-100 dark:bg-gray-900 min-h-screen">

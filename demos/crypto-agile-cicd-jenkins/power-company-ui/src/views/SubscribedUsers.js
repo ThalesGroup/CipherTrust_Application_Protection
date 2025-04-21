@@ -42,7 +42,7 @@ function SubscribedUsers() {
     };
 
     fetchData();
-  }, []);
+  }, [apiUrl]);
 
   // Handle form input changes
   const handleInputChange = (e) => {

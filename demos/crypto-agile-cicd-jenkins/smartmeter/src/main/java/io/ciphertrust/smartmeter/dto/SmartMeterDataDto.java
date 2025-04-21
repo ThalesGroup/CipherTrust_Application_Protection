@@ -1,18 +1,24 @@
 package io.ciphertrust.smartmeter.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class SmartMeterDataDto {
-    private double totalEnergyConsumption;
-    private double instantaneousPowerUsage;
-    private double voltage;
-    private double current;
-    private double powerFactor;
-    private double frequency;
+    private String totalEnergyConsumption;
+    private String instantaneousPowerUsage;
+    private String voltage;
+    private String current;
+    private String powerFactor;
+    private String frequency;
     private String timestamp;
-    private double temperature;
-    private double humidity;
+    private String temperature;
+    private String humidity;
     private String detailedConsumptionIntervals;
     private SmartMeterDto smartMeter;
     

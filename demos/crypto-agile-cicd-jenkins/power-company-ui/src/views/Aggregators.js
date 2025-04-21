@@ -22,7 +22,7 @@ function Aggregators() {
     };
 
     fetchData();
-  }, []);
+  }, [apiUrl]);
 
   // Handle restart aggregator
   const handleRestart = async (aggregatorId) => {

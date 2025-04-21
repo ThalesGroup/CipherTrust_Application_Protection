@@ -35,7 +35,7 @@ function UpdatePayment() {
     };
 
     fetchDefaultValues();
-  }, []);
+  }, [apiUrl]);
 
   // Handle form field changes
   const handleChange = (e) => {

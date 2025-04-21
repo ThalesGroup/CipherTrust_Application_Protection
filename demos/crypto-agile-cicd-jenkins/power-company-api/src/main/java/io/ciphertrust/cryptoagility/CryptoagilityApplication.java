@@ -11,13 +11,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import io.ciphertrust.cryptoagility.entity.*;
+import io.ciphertrust.cryptoagility.repository.SmartMeterRepository;
 import io.ciphertrust.cryptoagility.service.*;
+import jakarta.persistence.EntityManager;
 
 @SpringBootApplication
 public class CryptoagilityApplication {
 
 	@Autowired
     private AggregatorService aggregatorService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private SmartMeterService smartMeterService;
@@ -27,6 +32,9 @@ public class CryptoagilityApplication {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SmartMeterRepository smartMeterRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CryptoagilityApplication.class, args);
@@ -72,19 +80,28 @@ public class CryptoagilityApplication {
 
             // Create Smart Meter Data
             SmartMeterData smartMeterData1 = new SmartMeterData();
-            smartMeterData1.setTotalEnergyConsumption(50.5);
-            smartMeterData1.setInstantaneousPowerUsage(2.5);
-            smartMeterData1.setVoltage(220.0);
-            smartMeterData1.setCurrent(10.0);
-            smartMeterData1.setPowerFactor(0.9);
-            smartMeterData1.setFrequency(60.0);
+            smartMeterData1.setTotalEnergyConsumption("50.5");
+            smartMeterData1.setInstantaneousPowerUsage("2.5");
+            smartMeterData1.setVoltage("220.0");
+            smartMeterData1.setCurrent("10.0");
+            smartMeterData1.setPowerFactor("0.9");
+            smartMeterData1.setFrequency("60.0");
             smartMeterData1.setTimestamp(LocalDateTime.now());
-            smartMeterData1.setTemperature(25.0);
-            smartMeterData1.setHumidity(50.0);
+            smartMeterData1.setTemperature("25.0");
+            smartMeterData1.setHumidity("50.0");
             smartMeterData1.setDetailedConsumptionIntervals("{\"intervals\": [{\"start\": \"12:00\", \"end\": \"12:30\", \"usage\": 1.5}]}");
-            smartMeterData1.setSmartMeter(smartMeter1);
-            smartMeterData1 = smartMeterDataService.saveSmartMeterData(smartMeterData1);
-
+            SmartMeter linkedSmartMeter = smartMeterRepository.findById(smartMeter1.getId())
+                .orElseThrow(() -> new RuntimeException("Smart meter not found"));
+            smartMeterData1.setSmartMeter(linkedSmartMeter);
+            try {
+                SmartMeterData saved = smartMeterDataService.saveSmartMeterData(smartMeterData1);
+                entityManager.flush();
+                System.out.println("===============SmartMeter Data:====================" + saved.toString());
+            } catch (Exception e) {
+                // TODO: handle exception
+                System.out.println("Error saving smart meter data: " + e.getMessage());
+            }
+            
             // Create User Payment Info
             UserPayment userPaymentInfo1 = new UserPayment();
             userPaymentInfo1.setCardNumber("9876543210987654");

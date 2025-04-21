@@ -2,8 +2,9 @@ package io.ciphertrust.cryptoagility.entity;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,37 +17,36 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "smart_meter_data")
 public class SmartMeterData {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "total_energy_consumption", nullable = false)
-    private Double totalEnergyConsumption; // in kWh
+    @Column(name = "total_energy_consumption")
+    private String totalEnergyConsumption; // in kWh
 
-    @Column(name = "instantaneous_power_usage", nullable = false)
-    private Double instantaneousPowerUsage; // in kW
+    @Column(name = "instantaneous_power_usage")
+    private String instantaneousPowerUsage; // in kW
 
-    @Column(name = "voltage", nullable = false)
-    private Double voltage; // in volts
+    @Column(name = "voltage")
+    private String voltage; // in volts
 
-    @Column(name = "current", nullable = false)
-    private Double current; // in amperes
+    @Column(name = "current")
+    private String current; // in amperes
 
-    @Column(name = "power_factor", nullable = false)
-    private Double powerFactor; // dimensionless (0 to 1)
+    @Column(name = "power_factor")
+    private String powerFactor; // dimensionless (0 to 1)
 
-    @Column(name = "frequency", nullable = false)
-    private Double frequency; // in Hz
+    @Column(name = "frequency")
+    private String frequency; // in Hz
 
-    @Column(name = "timestamp", nullable = false)
+    @Column(name = "timestamp")
     private LocalDateTime timestamp; // timestamp of the reading
 
     @Column(name = "temperature")
-    private Double temperature; // in °C (optional)
+    private String temperature; // in °C (optional)
 
     @Column(name = "humidity")
-    private Double humidity; // in % (optional)
+    private String humidity; // in % (optional)
 
     @Column(name = "detailed_consumption_intervals")
     private String detailedConsumptionIntervals; // JSON or CSV format for detailed intervals
@@ -55,7 +55,7 @@ public class SmartMeterData {
     @JoinColumn(name = "smart_meter_id", nullable = false)
     @JsonBackReference("smartmeter-telemetry")
     private SmartMeter smartMeter; // Associated smart meter
-
+  
     public Long getId() {
         return id;
     }
@@ -64,51 +64,51 @@ public class SmartMeterData {
         this.id = id;
     }
 
-    public Double getTotalEnergyConsumption() {
+    public String getTotalEnergyConsumption() {
         return totalEnergyConsumption;
     }
 
-    public void setTotalEnergyConsumption(Double totalEnergyConsumption) {
+    public void setTotalEnergyConsumption(String totalEnergyConsumption) {
         this.totalEnergyConsumption = totalEnergyConsumption;
     }
 
-    public Double getInstantaneousPowerUsage() {
+    public String getInstantaneousPowerUsage() {
         return instantaneousPowerUsage;
     }
 
-    public void setInstantaneousPowerUsage(Double instantaneousPowerUsage) {
+    public void setInstantaneousPowerUsage(String instantaneousPowerUsage) {
         this.instantaneousPowerUsage = instantaneousPowerUsage;
     }
 
-    public Double getVoltage() {
+    public String getVoltage() {
         return voltage;
     }
 
-    public void setVoltage(Double voltage) {
+    public void setVoltage(String voltage) {
         this.voltage = voltage;
     }
 
-    public Double getCurrent() {
+    public String getCurrent() {
         return current;
     }
 
-    public void setCurrent(Double current) {
+    public void setCurrent(String current) {
         this.current = current;
     }
 
-    public Double getPowerFactor() {
+    public String getPowerFactor() {
         return powerFactor;
     }
 
-    public void setPowerFactor(Double powerFactor) {
+    public void setPowerFactor(String powerFactor) {
         this.powerFactor = powerFactor;
     }
 
-    public Double getFrequency() {
+    public String getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(Double frequency) {
+    public void setFrequency(String frequency) {
         this.frequency = frequency;
     }
 
@@ -120,19 +120,19 @@ public class SmartMeterData {
         this.timestamp = timestamp;
     }
 
-    public Double getTemperature() {
+    public String getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(Double temperature) {
+    public void setTemperature(String temperature) {
         this.temperature = temperature;
     }
 
-    public Double getHumidity() {
+    public String getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(Double humidity) {
+    public void setHumidity(String humidity) {
         this.humidity = humidity;
     }
 
@@ -154,4 +154,15 @@ public class SmartMeterData {
 
     public SmartMeterData() {
     }
+
+    @Override
+    public String toString() {
+        return "SmartMeterData [id=" + id + ", totalEnergyConsumption=" + totalEnergyConsumption
+                + ", instantaneousPowerUsage=" + instantaneousPowerUsage + ", voltage=" + voltage + ", current="
+                + current + ", powerFactor=" + powerFactor + ", frequency=" + frequency + ", timestamp=" + timestamp
+                + ", temperature=" + temperature + ", humidity=" + humidity + ", detailedConsumptionIntervals="
+                + detailedConsumptionIntervals + ", smartMeter=" + smartMeter + "]";
+    }
+
+    
 }

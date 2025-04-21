@@ -2,6 +2,7 @@ package io.ciphertrust.smartmeter.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -47,6 +48,7 @@ public class SmartMeterSimulatorService {
 
         try {
             SmartMeterDataDto data = generateSimulatedData();
+            System.out.println(data);
             
             logger.debug("Sending simulated data for user {} and smart meter {}: {}", 
                 userId, smartMeterId, data);
@@ -73,15 +75,15 @@ public class SmartMeterSimulatorService {
         smartMeter.setId(smartMeterId);
         
         // Generate simulated values
-        data.setTotalEnergyConsumption(100 + RANDOM.nextDouble() * 50);
-        data.setInstantaneousPowerUsage(2 + RANDOM.nextDouble() * 3);
-        data.setVoltage(220 + RANDOM.nextDouble() * 20);
-        data.setCurrent(5 + RANDOM.nextDouble() * 5);
-        data.setPowerFactor(0.9 + RANDOM.nextDouble() * 0.1);
-        data.setFrequency(50 + RANDOM.nextDouble() * 2);
+        data.setTotalEnergyConsumption(String.valueOf(100 + RANDOM.nextDouble() * 50));
+        data.setInstantaneousPowerUsage(String.valueOf(2 + RANDOM.nextDouble() * 3));
+        data.setVoltage(String.valueOf(220 + RANDOM.nextDouble() * 20));
+        data.setCurrent(String.valueOf(5 + RANDOM.nextDouble() * 5));
+        data.setPowerFactor(String.valueOf(0.9 + RANDOM.nextDouble() * 0.1));
+        data.setFrequency(String.valueOf(50 + RANDOM.nextDouble() * 2));
         data.setTimestamp(LocalDateTime.now().format(TIMESTAMP_FORMAT));
-        data.setTemperature(20 + RANDOM.nextDouble() * 10);
-        data.setHumidity(40 + RANDOM.nextDouble() * 30);
+        data.setTemperature(String.valueOf(20 + RANDOM.nextDouble() * 10));
+        data.setHumidity(String.valueOf(40 + RANDOM.nextDouble() * 30));
         data.setDetailedConsumptionIntervals(
             "0-15min: " + (0.5 + RANDOM.nextDouble() * 0.5) + "kWh");
         data.setSmartMeter(smartMeter);

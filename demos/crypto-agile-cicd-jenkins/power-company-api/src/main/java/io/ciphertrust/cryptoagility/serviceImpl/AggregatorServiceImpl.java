@@ -80,19 +80,23 @@ public class AggregatorServiceImpl implements AggregatorService{
     public AggregatorEnergyStatus calculateEnergyStatus(Long aggregatorId, double threshold) {
         // Fetch the Aggregator
         Aggregator aggregator = aggregatorRepository.findById(aggregatorId)
-                .orElseThrow(() -> new RuntimeException("Aggregator not found"));
+            .orElseThrow(() -> new RuntimeException("Aggregator not found"));
 
         // Calculate the total energy consumption for the last 24 hours
         LocalDateTime startTime = LocalDateTime.now().minusHours(24);
         double totalEnergyConsumption = aggregator.getSmartMeters().stream()
-                .mapToDouble(smartMeter -> {
-                    List<SmartMeterData> telemetryData = smartMeterDataRepository
-                            .findTelemetryDataBySmartMeterIdAndTimestampAfter(smartMeter.getId(), startTime);
-                    return telemetryData.stream()
-                            .mapToDouble(SmartMeterData::getTotalEnergyConsumption)
-                            .sum();
-                })
-                .sum();
+            .mapToDouble(smartMeter -> {
+                List<SmartMeterData> telemetryData = smartMeterDataRepository
+                    .findTelemetryDataBySmartMeterIdAndTimestampAfter(smartMeter.getId(), startTime);
+                return telemetryData.stream()
+                    .mapToDouble(data -> {
+                        //String totalEnergyStr = bcService.decryptTelemetryData(data.getTotalEnergyConsumption());
+                        String totalEnergyStr = data.getTotalEnergyConsumption();
+                        return Double.parseDouble(totalEnergyStr);
+                    })
+                    .sum();
+            })
+            .sum();
 
         // Determine the status based on the threshold
         String status;
@@ -116,14 +120,17 @@ public class AggregatorServiceImpl implements AggregatorService{
                     // Calculate total energy consumption for the last 24 hours
                     LocalDateTime startTime = LocalDateTime.now().minusHours(24);
                     double totalEnergyConsumption = aggregator.getSmartMeters().stream()
-                            .mapToDouble(smartMeter -> {
-                                List<SmartMeterData> telemetryData = smartMeterDataRepository
-                                        .findTelemetryDataBySmartMeterIdAndTimestampAfter(smartMeter.getId(), startTime);
-                                return telemetryData.stream()
-                                        .mapToDouble(SmartMeterData::getTotalEnergyConsumption)
-                                        .sum();
-                            })
-                            .sum();
+                        .mapToDouble(smartMeter -> {
+                            List<SmartMeterData> telemetryData = smartMeterDataRepository
+                                .findTelemetryDataBySmartMeterIdAndTimestampAfter(smartMeter.getId(), startTime);
+                            return telemetryData.stream()
+                                .mapToDouble(data -> {
+                                    String totalEnergyStr = data.getTotalEnergyConsumption();
+                                    return Double.parseDouble(totalEnergyStr);
+                                })
+                                .sum();
+                        })
+                        .sum();
 
                     // Determine the status based on the threshold
                     String status;
@@ -140,12 +147,12 @@ public class AggregatorServiceImpl implements AggregatorService{
 
                     // Create and return the AggregatorSummary DTO
                     return new AggregatorSummary(
-                            aggregator.getId(),
-                            aggregator.getName(),
-                            aggregator.getLocation(),
-                            totalEnergyConsumption,
-                            status,
-                            totalSmartMeters
+                        aggregator.getId(),
+                        aggregator.getName(),
+                        aggregator.getLocation(),
+                        totalEnergyConsumption,
+                        status,
+                        totalSmartMeters
                     );
                 })
                 .collect(Collectors.toList());
