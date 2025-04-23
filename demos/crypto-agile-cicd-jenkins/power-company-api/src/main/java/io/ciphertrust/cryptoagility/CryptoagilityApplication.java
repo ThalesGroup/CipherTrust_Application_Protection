@@ -104,13 +104,13 @@ public class CryptoagilityApplication {
             
             // Create User Payment Info
             UserPayment userPaymentInfo1 = new UserPayment();
-            userPaymentInfo1.setCardNumber("9876543210987654");
+            userPaymentInfo1.setCardNumber("9876-5432-1098-7654");
             userPaymentInfo1.setCardType("Visa");
             userPaymentInfo1.setCvv("123");
             userPaymentInfo1.setExpirationDate(LocalDate.of(2025, 12, 31));
 
 			UserPayment userPaymentInfo2 = new UserPayment();
-            userPaymentInfo2.setCardNumber("1234567890123456");
+            userPaymentInfo2.setCardNumber("1234-5678-9012-3456");
             userPaymentInfo2.setCardType("MasterCard");
             userPaymentInfo2.setCvv("456");
             userPaymentInfo2.setExpirationDate(LocalDate.of(2025, 12, 31));
@@ -121,7 +121,7 @@ public class CryptoagilityApplication {
             user1.setUsername("johndoe");
             user1.setPassword("password123");
             user1.setEmail("john.doe@example.com");
-            user1.setContactNum("1234567890");
+            user1.setContactNum("(666)123-4567");
             user1.setAddressLineOne("123 Main St");
             user1.setAddressLineTwo("Apt 4B");
             user1.setCity("Stittsville");
@@ -137,7 +137,7 @@ public class CryptoagilityApplication {
             user2.setUsername("janedoe");
             user2.setPassword("password123");
             user2.setEmail("jane.doe@example.com");
-            user2.setContactNum("1234567890");
+            user2.setContactNum("(666)987-6543");
             user2.setAddressLineOne("123 Upper St");
             user2.setAddressLineTwo("Apt 101");
             user2.setCity("Toronto");
