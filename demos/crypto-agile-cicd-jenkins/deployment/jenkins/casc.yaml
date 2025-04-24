@@ -63,6 +63,70 @@ jobs:
         }
       }
 
+      pipelineJob('Deploy_Sample_App_ADP_UI') {
+        parameters {
+          stringParam("GIT_REPO_UI", "http://gitlab:80/root/crestline-ui.git", "URL of the Crestline UI Git repository")
+          stringParam("DOCKER_REGISTRY", "${REGISTRY_ADDRESS}", "URL of the Docker registry")
+          stringParam("API_SERVER_IP", "${API_SERVER_IP}", "URL of the API Server")
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { 
+                  url('http://gitlab:80/root/crestline-ui.git')
+                  credentials('gitlab-credentials')
+                }
+                branch('main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+        triggers {
+          gitlabPush {
+            buildOnPushEvents(true)
+            buildOnMergeRequestEvents(false)
+            enableCiSkip(false)
+            setBuildDescription(true)
+          }
+        }
+      }
+
+      pipelineJob('Deploy_Sample_App_ADP_API') {
+        parameters {
+          stringParam("GIT_REPO_API", "http://gitlab:80/root/crestline-api.git", "URL of the Crestline API Git repository")
+          stringParam("DOCKER_REGISTRY", "${REGISTRY_ADDRESS}", "URL of the Docker registry")
+          stringParam("DATASOURCE_URL", "jdbc:postgresql://postgres-service.jenkins.svc.cluster.local:5432/cdsp", "Connection string for DB")
+          stringParam("DATASOURCE_USERNAME", "postgres", "Username for the DB")
+          stringParam("DATASOURCE_PASSWORD", "ChangeIt01!", "Password for the DB")
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { 
+                  url('http://gitlab:80/root/crestline-api.git')
+                  credentials('gitlab-credentials')
+                }
+                branch('main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+        triggers {
+          gitlabPush {
+            buildOnPushEvents(true)
+            buildOnMergeRequestEvents(false)
+            enableCiSkip(false)
+            setBuildDescription(true)
+          }
+        }
+      }
+
 credentials:
   system:
     domainCredentials:

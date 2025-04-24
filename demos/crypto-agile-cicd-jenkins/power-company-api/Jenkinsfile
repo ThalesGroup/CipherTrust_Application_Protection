@@ -1,0 +1,99 @@
+pipeline {
+    agent any
+
+    environment {
+        // Use the parameters in the environment
+        GIT_REPO_API = "${params.GIT_REPO_API}"
+        DOCKER_REGISTRY = "${params.DOCKER_REGISTRY}"
+        DATASOURCE_URL = "${params.DATASOURCE_URL}"
+        DATASOURCE_USERNAME = "${params.DATASOURCE_USERNAME}"
+        DATASOURCE_PASSWORD = "${params.DATASOURCE_PASSWORD}"
+        KUBE_CONFIG_TEST = '/var/jenkins_home/kubeconfig-test'
+        KUBE_CONFIG_PROD = '/var/jenkins_home/kubeconfig-prod'
+    }
+
+    stages {
+        stage('Configure Git Safe Directory') {
+            steps {
+                script {
+                    // Add the workspace directory to Git's safe directory list
+                    sh 'git config --global --add safe.directory /var/jenkins_home/workspace/Deploy_Sample_App_ADP/crestline-api'
+                }
+            }
+        }
+        stage('Checkout Code') {
+            steps {
+                script {
+                    // Pull code from Git repositories into separate directories
+                    dir('crestline-api') {
+                        git branch: 'main', url: "${env.GIT_REPO_API}"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    sh 'docker build -t registry:5000/crestline-api:latest -f crestline-api/Dockerfile ./crestline-api'
+                }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                script {
+                    sh '''
+                        set -ex
+                        echo "==> Checking Registry Reachability"
+                        curl -k https://registry:5000/v2/
+
+                        echo "==> Pushing crestline-api"
+                        docker push registry:5000/crestline-api:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Test Kubernetes Environment') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'jenkins-serviceaccount-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                        withKubeConfig([kubeconfig: KUBECONFIG_FILE]) {
+                            sh """
+                                set -ex
+                                export KUBECONFIG=/var/jenkins_home/jenkins-sa-kubeconfig.yaml
+                                kubectl rollout restart deployment/crestline-api -n jenkins --insecure-skip-tls-verify --validate=false
+                            """ 
+                        }                      
+                    }
+                }
+            }
+        }
+
+        stage('Manual Verification') {
+            steps {
+                input message: 'Verify the deployment in the test environment. Proceed to production?', ok: 'Deploy to Production'
+            }
+        }
+
+        stage('Deploy to Production Kubernetes Environment') {
+            steps {
+                script {
+                    withKubeConfig([credentialsId: 'kubeconfig-prod', kubeconfigFile: "${KUBE_CONFIG_PROD}"]) {
+                        sh 'kubectl apply -f crestline-deployment/app-deployment.yaml'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}

@@ -7,7 +7,7 @@ $GITHUB_REPO = "https://github.com/ThalesGroup/CipherTrust_Application_Protectio
 $GITLAB_URL = "http://localhost"
 $GITLAB_ROOT_PASSWORD = "ChangeIt01!"
 $REPO_NAME_UI = "crestline-ui"
-$REPO_NAME_API = "Crestline-api"
+$REPO_NAME_API = "crestline-api"
 $REPO_NAME_DEP = "crestline-deployment"
 $JENKINS_ADMIN_PASSWORD = "ChangeIt01!"
 $SCRIPTS_Dir = Get-Location
@@ -377,6 +377,31 @@ end
     }
     #}
 
+    # Push Deployment scripts (Jenkinsfile) to GitLab
+    Write-Host "Preparing to push '$SOURCE_FOLDER_DEP' to GitLab..."
+    Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
+    # Create a temporary directory for the filtered content
+    $SOURCE_FULL_PATH_DEP = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_DEP
+
+    if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
+        Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_DEP"
+        exit 1
+    }
+
+    # Initialize new git repo with just the filtered content
+    Set-Location $SOURCE_FULL_PATH_DEP
+    git init --initial-branch=main
+    git add Jenkinsfile
+    git add app-deployment.yaml
+    git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_DEP"
+
+    git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_DEP.git -f
+    git push --set-upstream origin main
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
+        exit 1
+    }
+
     # Push UI app to GitLab
     Write-Host "Preparing to push '$SOURCE_FOLDER_UI' to GitLab..."
     Set-Location github-repo
@@ -421,31 +446,6 @@ end
 
 
     git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_API.git -f
-    git push --set-upstream origin main
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
-        exit 1
-    }
-
-    # Push Deployment scripts (Jenkinsfile) to GitLab
-    Write-Host "Preparing to push '$SOURCE_FOLDER_DEP' to GitLab..."
-    Set-Location (Join-Path -Path $SCRIPTS_DIR -ChildPath "github-repo")
-    # Create a temporary directory for the filtered content
-    $SOURCE_FULL_PATH_DEP = Join-Path -Path (Get-Location) -ChildPath $SOURCE_FOLDER_DEP
-
-    if (-not (Test-Path $SOURCE_FULL_PATH_DEP)) {
-        Write-Host "Error: Source folder not found at $SOURCE_FULL_PATH_DEP"
-        exit 1
-    }
-
-    # Initialize new git repo with just the filtered content
-    Set-Location $SOURCE_FULL_PATH_DEP
-    git init --initial-branch=main
-    git add Jenkinsfile
-    git add app-deployment.yaml
-    git commit -m "Initial commit of filtered content from $SOURCE_FULL_PATH_DEP"
-
-    git remote add origin http://root:$GITLAB_ROOT_PASSWORD@localhost/root/$REPO_NAME_DEP.git -f
     git push --set-upstream origin main
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: Failed to push to GitLab. Check GitLab logs or credentials."
@@ -503,43 +503,6 @@ if ($LASTEXITCODE -ne 0) {
     #exit 1
 }
 
-# Create or retrieve GitLab personal access token for root
-# Write-Host "Creating or retrieving GitLab personal access token for root..."
-# $tokenScript = "token = PersonalAccessToken.find_by_description('Jenkins Webhook'); unless token; token = PersonalAccessToken.create!(user: User.find_by_username('root'), name: 'Jenkins Webhook', scopes: ['api'], expires_at: Date.today + 365); end; puts token.token"
-# $token = docker exec gitlab gitlab-rails runner "$tokenScript" | Select-Object -Last 1
-# if (-not $token) {
-#     Write-Host "Error: Failed to create or retrieve GitLab access token."
-#     exit 1
-# }
-# Write-Host "GitLab token: $token"
-
-# Set the token as an environment variable for Jenkins
-# Write-Host "Setting GitLab token as environment variable for Jenkins..."
-# $env:GITLAB_PERSONAL_ACCESS_TOKEN = $token
-# docker-compose restart jenkins
-
-# Wait for Jenkins to restart
-# Start-Sleep -Seconds 30
-# $jenkinsReady = $false
-# $elapsed = 0
-# while (-not $jenkinsReady -and $elapsed -lt $timeout) {
-#     try {
-#         $response = Invoke-WebRequest -Uri "$JENKINS_URL/login" -UseBasicParsing -ErrorAction Stop
-#         if ($response.StatusCode -eq 200) {
-#             $jenkinsReady = $true
-#             Write-Host "Jenkins restarted successfully!"
-#         }
-#     } catch {
-#         Write-Host "Jenkins not ready yet after restart. Error: $($_.Exception.Message)"
-#         Start-Sleep -Seconds 10
-#         $elapsed += 10
-#     }
-# }
-# if (-not $jenkinsReady) {
-#     Write-Host "Error: Jenkins failed to restart within 10 minutes."
-#     exit 1
-# }
-
 # Fetch the project ID for crestline-deployment
 Write-Host "Fetching project ID for root/crestline-deployment..."
 $headers = @{
@@ -558,27 +521,42 @@ try {
     Write-Host "Error fetching project ID: $($_.Exception.Message)"
     exit 1
 }
-
-# Configure GitLab webhook for crestline-deployment
-# Write-Host "Configuring GitLab webhook to trigger Jenkins..."
-# $webhookUrl = "http://custom_jenkins:8080/gitlab-webhook/post"
-# $headers = @{
-#     "PRIVATE-TOKEN" = $token
-#     "Content-Type" = "application/json"
-# }
-# $body = @{
-#     url = $webhookUrl
-#     push_events = $true
-#     merge_requests_events = $false
-# } | ConvertTo-Json
-# try {
-#     #$projectId = 3  # Adjust based on order of creation (crestline-deployment is third)
-#     $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/hooks" -Method Post -Headers $headers -Body $body -ErrorAction Stop
-#     Write-Host "Webhook configured successfully!"
-# } catch {
-#     Write-Host "Error: Failed to configure webhook. Error: $($_.Exception.Message)"
-#     exit 1
-# }
+# Fetch the project ID for crestline-ui
+Write-Host "Fetching project ID for root/crestline-ui..."
+$headers = @{
+    "PRIVATE-TOKEN" = $token
+    "Content-Type" = "application/json"
+}
+try {
+    $projectsUI = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects?search=crestline-ui" -Method Get -Headers $headers -ErrorAction Stop
+    $ProjectUIId = ($projectsUI | Where-Object { $_.path_with_namespace -eq "root/crestline-ui" }).id
+    if (-not $ProjectUIId) {
+        Write-Host "Error: Could not find project root/crestline-ui."
+        exit 1
+    }
+    Write-Host "Found UI project ID: $ProjectUIId"
+} catch {
+    Write-Host "Error fetching UI project ID: $($_.Exception.Message)"
+    exit 1
+}
+# Fetch the project ID for crestline-api
+Write-Host "Fetching project ID for root/crestline-api..."
+$headers = @{
+    "PRIVATE-TOKEN" = $token
+    "Content-Type" = "application/json"
+}
+try {
+    $projectsAPI = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects?search=crestline-api" -Method Get -Headers $headers -ErrorAction Stop
+    $ProjectAPIId = ($projectsAPI | Where-Object { $_.path_with_namespace -eq "root/crestline-api" }).id
+    if (-not $ProjectAPIId) {
+        Write-Host "Error: Could not find project root/crestline-api."
+        exit 1
+    }
+    Write-Host "Found API project ID: $ProjectAPIId"
+} catch {
+    Write-Host "Error fetching API project ID: $($_.Exception.Message)"
+    exit 1
+}
 
 # Configure GitLab Jenkins integration
 Write-Host "Configuring GitLab Jenkins integration..."
@@ -595,6 +573,8 @@ $body = @{
 } | ConvertTo-Json
 try {
     $response = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectId/integrations/jenkins" -Method Put -Headers $headers -Body $body -ErrorAction Stop
+    $responseAPI = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectAPIId/integrations/jenkins" -Method Put -Headers $headers -Body $body -ErrorAction Stop
+    $responseUI = Invoke-RestMethod -Uri "$GITLAB_API_URL/projects/$projectUIId/integrations/jenkins" -Method Put -Headers $headers -Body $body -ErrorAction Stop
     Write-Host "Jenkins integration configured successfully!"
 } catch {
     Write-Host "Error: Failed to configure Jenkins integration."
