@@ -1,13 +1,9 @@
 /*************************************************************************
-**                                                                                                                             **
-** Copyright(c) 2022                                      Confidential Material                                           **
-**                                                                                                                             **
-** This file is the property of Thales Group.                                                                          **
-** The contents are proprietary and confidential.                                                               **
-** Unauthorized use, duplication, or dissemination of this document,                                      **
-** in whole or in part, is forbidden without the express consent of                                         **
-** Thales Group.                                                                                                              **
-**                                                                                                                             **
+**                                                                      **
+** Sample code is provided for educational purposes.                    **
+** No warranty of any kind, either expressed or implied by fact or law. **
+** Use of this item is not restricted by copyright or license terms.    **
+**                                                                      **
 **************************************************************************/
 /*
  ***************************************************************************
