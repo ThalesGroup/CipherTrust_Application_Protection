@@ -38,6 +38,7 @@ public class CADPClientRegistrationSample {
 
 			// Register the Client
 			centralManagementProvider.addProvider();
+			System.out.println("CADP client registered successfully.");
 
 		} catch (Exception e) {
 			e.printStackTrace();
