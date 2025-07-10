@@ -11,3 +11,6 @@ This repository will hold code samples and/or integrations that you can use in y
 [Banking Demo Application](sample-banking-app): Multi tier application, that leverages stack like ReactJs, SpringBoot, and MongoDB, to demonstrate how you can protect your data, that is consumed by Rest APIs, via Ciphertrust Data Protection stack, specifically Data Protection Gateway (DPG), seamlessly.
 
 [Ecommerce Application](sample-ecommerce-app): Multi tier application to mimic an online shopping portal, that leverages stack like ReactJs, SpringBoot, and MongoDB, to demonstrate how you can protect your sensitive data like payment information as well as user's personal information, that is consumed by Rest APIs, via Ciphertrust Data Protection stack, specifically Data Protection Gateway (DPG). 
+
+
+[GenAI](sample-ecommerce-app): Projects to help developers build GenAI applications that require policy-driven data protection to meet some compliance requirement, and protect sensitive data for GenAI.
