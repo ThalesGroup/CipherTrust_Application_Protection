@@ -1,0 +1,8 @@
+[submodule "mcp-server/ciphertrust-manager-mcp-server"]
+	path = mcp-server/ciphertrust-manager-mcp-server
+	url = https://github.com/sanyambassi/ciphertrust-manager-mcp-server.git
+	branch = main
+[submodule "mcp-servers/ciphertrust-manager-mcp-server"]
+	path = mcp-servers/ciphertrust-manager-mcp-server
+	url = https://github.com/sanyambassi/ciphertrust-manager-mcp-server.git
+	branch = main
