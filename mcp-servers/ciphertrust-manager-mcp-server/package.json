@@ -1,0 +1,17 @@
+{
+  "name": "ciphertrust-manager-mcp-server-testing",
+  "version": "1.0.0",
+  "description": "Testing utilities for CipherTrust Manager MCP Server",
+  "scripts": {
+    "test:inspector:ui": "npx @modelcontextprotocol/inspector --config tests/mcp_inspector_config.json --server ciphertrust-local",
+    "test:inspector:cli": "npx @modelcontextprotocol/inspector --cli --config tests/mcp_inspector_config.json --server ciphertrust-local --method tools/list",
+    "test:full": "npm run test:python && npm run test:inspector:cli",
+    "test:python": "uv run python -m pytest tests/test_server.py -v"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.14.2"
+  },
+  "keywords": ["mcp", "ciphertrust", "testing"],
+  "author": "Your Name",
+  "license": "MIT"
+}
