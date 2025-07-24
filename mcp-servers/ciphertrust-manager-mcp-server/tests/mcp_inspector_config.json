@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "ciphertrust-local": {
+      "command": "uv",
+      "args": ["run", "ciphertrust-mcp-server"],
+      "env": {
+        "CIPHERTRUST_URL": "https://your-ciphertrust.example.com",
+        "CIPHERTRUST_USER": "your-username",
+        "CIPHERTRUST_PASSWORD": "your-password",
+        "CIPHERTRUST_NOSSLVERIFY": "true",
+        "LOG_LEVEL": "DEBUG"
+      }
+    },
+    "ciphertrust-production": {
+      "command": "uv",
+      "args": ["run", "ciphertrust-mcp-server"],
+      "env": {
+        "CIPHERTRUST_URL": "https://your-ciphertrust.example.com",
+        "CIPHERTRUST_USER": "your-username",
+        "CIPHERTRUST_PASSWORD": "your-password",
+		"CIPHERTRUST_NOSSLVERIFY": "true",
+        "LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
