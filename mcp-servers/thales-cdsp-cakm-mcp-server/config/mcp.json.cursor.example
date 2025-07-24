@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "database_tde": {
+      "command": "/path/to/your/database-tde-mcp-server/.venv/bin/database-tde-mcp-server",
+      "args": [],
+      "env": {
+        "DB_TDE_SERVER_NAME": "database-tde-mcp",
+        "DB_TDE_LOG_LEVEL": "INFO",
+        "DB_TDE_CONNECTION_TIMEOUT": "30",
+        "DB_TDE_DATABASE_CONNECTIONS": "[{\"name\": \"prod_sql\", \"db_type\": \"sqlserver\", \"host\": \"your-sql-server.company.com\", \"port\": 1433, \"instance\": \"MSSQLSERVER\", \"username\": \"your_username\", \"password\": \"your_password\", \"driver\": \"ODBC Driver 17 for SQL Server\"}, {\"name\": \"oracle_cdb1\", \"db_type\": \"oracle\", \"host\": \"your-oracle-server.company.com\", \"port\": 1521, \"username\": \"sys\", \"password\": \"your_password\", \"oracle_config\": {\"oracle_home\": \"/u01/app/oracle/product/21.0.0/dbhome_1\", \"oracle_sid\": \"cdb1\", \"service_name\": \"orcl\", \"mode\": \"SYSDBA\", \"wallet_root\": \"/opt/oracle/wallet\"}, \"ssh_config\": {\"host\": \"your-oracle-server.company.com\", \"username\": \"oracle\", \"private_key_path\": \"/path/to/your/private-key.pem\", \"port\": 22, \"timeout\": 30}}]"
+      }
+    }
+  }
+} 
