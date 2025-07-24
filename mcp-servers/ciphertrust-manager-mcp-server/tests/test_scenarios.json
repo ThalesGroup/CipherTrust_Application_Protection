@@ -1,0 +1,38 @@
+{
+  "test_scenarios": [
+    {
+      "name": "Basic Server Initialization",
+      "description": "Test server startup and tool listing",
+      "commands": [
+        {
+          "method": "tools/list",
+          "expected_tools": ["key_management", "system_information", "cte_client_management"]
+        }
+      ]
+    },
+    {
+      "name": "Key Management Operations",
+      "description": "Test key management functionality",
+      "commands": [
+        {
+          "method": "tools/call",
+          "tool": "key_management",
+          "args": {"action": "list", "limit": 5},
+          "expected_status": "success"
+        }
+      ]
+    },
+    {
+      "name": "System Information",
+      "description": "Test system information retrieval",
+      "commands": [
+        {
+          "method": "tools/call",
+          "tool": "system_information",
+          "args": {"action": "get"},
+          "expected_status": "success"
+        }
+      ]
+    }
+  ]
+}
