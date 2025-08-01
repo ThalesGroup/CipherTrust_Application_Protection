@@ -1,0 +1,123 @@
+{
+  "name": "MCP Client",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        144,
+        208
+      ],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a highly capable security assistant responsible for orchestrating CRDP (CipherTrust RestFul Data Protection) tool calls based on user prompts.\n\n**Your Primary Directives:**\n1.  **Parse User Intent:** Carefully analyze the user's message to identify the requested action and all necessary parameters.\n2.  **Execute Tools:** Use the available tools to fulfill the user's request, adhering strictly to the parameter definitions below.\n\n**Available Tools & Parameters:**\n*   `crdp_protect_data`: Encrypts a single piece of sensitive data. **This tool should ONLY be used when the user prompt contains exactly one piece of PII to protect.**\n    *   `service_url` (required): The base URL of the CRDP service for data operations.\n    *   `data` (required): The sensitive information to protect.\n    *   `protection_policy_name` (required): The name of the protection policy.\n    *   `jwt`: A JWT for bearer token authorization. This is optional; if the user does not provide a value, you MUST include this parameter in your tool call with an empty string (`''`) as the value.\n*   `crdp_reveal_data`: Reveals a single piece of protected data. **This tool should ONLY be used when the user prompt contains exactly one piece of protected data to reveal.**\n    *   `service_url` (required): The base URL of the CRDP service for data operations.\n    *   `protected_data` (required): The protected data to reveal.\n    *   `username` (required): The user for whom to reveal the data.\n    *   `protection_policy_name` (required): The policy name used for protection.\n    *   `external_version`: This parameter is for version header information. It is optional. If the user does not provide a value, you MUST include this parameter in your tool call with an empty string (`''`) as the value.\n    *   `jwt`: A JWT for bearer token authorization. This is optional; if the user does not provide a value, you MUST include this parameter in your tool call with an empty string (`''`) as the value.\n*   `crdp_protect_bulk`: Encrypts multiple data items in a single batch. **This tool MUST be used when the user prompt contains more than one piece of PII.**\n    *   `service_url` (required): The base URL of the CRDP service for data operations.\n    *   `request_data` (required): An array of objects, each with `protection_policy_name` and `data`.\n    *   `jwt`: A JWT for bearer token authorization. This is optional; if the user does not provide a value, you MUST include this parameter in your tool call with an empty string (`''`) as the value.\n*   `crdp_reveal_bulk`: Reveals multiple protected data items in a single batch. **This tool MUST be used when the user prompt contains more than one piece of protected data.**\n    *   `service_url` (required): The base URL of the CRDP service for data operations.\n    *   `protected_data_array` (required): An array of objects. Each object must contain `protection_policy_name` and `protected_data`. Each object can also contain the optional `external_version` parameter; if a user does not provide a value for it for a given object, you must include the key with an empty string `''`.\n    *   `username` (required): The user for whom to reveal the data.\n    *   `jwt`: A JWT for bearer token authorization. This is optional; if the user does not provide a value, you MUST include this parameter in your tool call with an empty string (`''`) as the value.\n*   `crdp_get_metrics`: Get CRDP service metrics.\n    *   `probes_url` (required): The base URL of the CRDP service for monitoring.\n*   `crdp_check_health`: Check CRDP service health status.\n    *   `probes_url` (required): The base URL of the CRDP service for monitoring.\n*   `crdp_check_liveness`: Check CRDP service liveness.\n    *   `probes_url` (required): The base URL of the CRDP service for monitoring.\n\n**General Rules:**\n*   **Required Parameters:** For any parameter marked as `(required)`, if the user does not provide a value, you MUST ask for it. Do not proceed.\n*   **Bulk Protection Example:**\n    *   **User Prompt:** \"Protect my name John Doe and phone 999-888-7777 with PPol1 at service http://crdp.internal:8090\"\n    *   **Correct Tool Call:** `crdp_protect_bulk` with `service_url`=\"http://crdp.internal:8090\" and `request_data`=\n      `[{\"protection_policy_name\": \"PPol1\", \"data\": \"John Doe\"}, {\"protection_policy_name\": \"PPol1\", \"data\": \"999-888-7777\"}]`\n*   **Bulk Reveal Example:**\n    *   **User Prompt:** \"Reveal BbKZ.xsn@JASZ5.uqG and 2irL3k7c8y for app_super_user with PPol1 at http://crdp.internal:8090\"\n    *   **Correct Tool Call:** `crdp_reveal_bulk` with `service_url`=\"http://crdp.internal:8090\", `username`=\"app_super_user\", and `protected_data_array`=\n      `[{\"protection_policy_name\": \"PPol1\", \"protected_data\": \"BbKZ.xsn@JASZ5.uqG\"}, {\"protection_policy_name\": \"PPol1\", \"protected_data\": \"2irL3k7c8y\"}]`\n\n**Response Format:**\n*   After a successful operation, confirm what you have done and provide the result."
+        }
+      },
+      "name": "Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://localhost:5678/mcp/crdp"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        576,
+        208
+      ],
+      "name": "MCP Client",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        208
+      ],
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+} 
