@@ -1,0 +1,311 @@
+{
+  "name": "MCP Server",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "crdp"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -48
+      ],
+      "name": "MCP Server Trigger"
+    },
+    {
+      "parameters": {
+        "toolDescription": "This tool checks the health of the CRDP service at its `/healthz` endpoint. It accepts a `probes_url` parameter for the monitoring URL.",
+        "url": "={{ $fromAI('probes_url', '', 'string') }}/healthz",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        96,
+        160
+      ],
+      "name": "crdp_check_health"
+    },
+    {
+      "parameters": {
+        "toolDescription": "This tool is used to encrypt sensitive data by calling the `/v1/protect` endpoint. It accepts `service_url`, `data`, `protection_policy_name`, and an optional `jwt` for authorization.",
+        "method": "POST",
+        "url": "={{ $fromAI('service_url', '', 'string') }}/v1/protect",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $fromAI('jwt', '', 'string') ? 'Bearer ' + $fromAI('jwt', '', 'string') : '' }}",
+              "options": {
+                "sendIsEmpty": false
+              }
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{ $fromAI('data', ``, 'string') }}"
+            },
+            {
+              "name": "protection_policy_name",
+              "value": "={{ $fromAI('protection_policy_name', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        128
+      ],
+      "name": "crdp_protect_data"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Reveals protected data using CipherTrust CRDP by calling the `/v1/reveal` endpoint. It accepts `service_url`, `protected_data`, `username`, `protection_policy_name`, optional `external_version`, and an optional `jwt` for authorization.",
+        "method": "POST",
+        "url": "={{ $fromAI('service_url', '', 'string') }}/v1/reveal",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $fromAI('jwt', '', 'string') ? 'Bearer ' + $fromAI('jwt', '', 'string') : '' }}",
+              "options": {
+                "sendIsEmpty": false
+              }
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "protected_data",
+              "value": "={{ $fromAI('protected_data', ``, 'string') }}"
+            },
+            {
+              "name": "username",
+              "value": "={{ $fromAI('username', ``, 'string') }}"
+            },
+            {
+              "name": "protection_policy_name",
+              "value": "={{ $fromAI('protection_policy_name', ``, 'string') }}"
+            },
+            {
+              "name": "external_version",
+              "value": "={{ $fromAI('external_version', ``, 'string') }}",
+              "options": {
+                "sendIsEmpty": false
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        256
+      ],
+      "name": "crdp_reveal_data"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Protect multiple data items in a single batch operation by calling `/v1/protectbulk`. Accepts `service_url`, `request_data`, and an optional `jwt` for authorization.",
+        "method": "POST",
+        "url": "={{ $fromAI('service_url', '', 'string') }}/v1/protectbulk",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $fromAI('jwt', '', 'string') ? 'Bearer ' + $fromAI('jwt', '', 'string') : '' }}",
+              "options": {
+                "sendIsEmpty": false
+              }
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "request_data",
+              "value": "={{ $fromAI('request_data', [], 'json') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        384
+      ],
+      "name": "crdp_protect_bulk"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Reveal multiple protected data items in a single batch operation by calling `/v1/revealbulk`. Accepts `service_url`, `username`, `protected_data_array`, and an optional `jwt` for authorization.",
+        "method": "POST",
+        "url": "={{ $fromAI('service_url', '', 'string') }}/v1/revealbulk",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $fromAI('jwt', '', 'string') ? 'Bearer ' + $fromAI('jwt', '', 'string') : '' }}",
+              "options": {
+                "sendIsEmpty": false
+              }
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "username",
+              "value": "={{ $fromAI('username', ``, 'string') }}"
+            },
+            {
+              "name": "protected_data_array",
+              "value": "={{ $fromAI('protected_data_array', [], 'json') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        -272,
+        512
+      ],
+      "name": "crdp_reveal_bulk"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get CRDP service metrics from the `/metrics` endpoint. Accepts a `probes_url` parameter for the monitoring URL.",
+        "url": "={{ $fromAI('probes_url', '', 'string') }}/metrics",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        96,
+        288
+      ],
+      "name": "crdp_get_metrics"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Check CRDP service liveness at its `/liveness` endpoint. Accepts a `probes_url` parameter for the monitoring URL.",
+        "url": "={{ $fromAI('probes_url', '', 'string') }}/liveness",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        96,
+        416
+      ],
+      "name": "crdp_check_liveness"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "crdp_check_health": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_protect_data": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_reveal_data": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_protect_bulk": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_reveal_bulk": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_get_metrics": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crdp_check_liveness": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+} 
