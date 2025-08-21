@@ -49,8 +49,8 @@ class TemplateListParams(BaseModel):
     Supports filtering by name, labels, creation dates, and metadata. Includes pagination
     controls and search capabilities. All operations support domain-specific execution.
     """
-    limit: Optional[int] = Field(None, description="Maximum number of templates to return")
-    skip: Optional[int] = Field(None, description="Offset at which to start the search")
+    limit: Optional[int] = Field(None, description="The maximum number of templates to return.")
+    offset: Optional[int] = Field(None, description="The starting offset for the template list.")
     name: Optional[str] = Field(None, description="Filter by template name, ID, URI, or alias")
     id: Optional[str] = Field(None, description="Specify the type of identifier (name, id, uri, alias)")
     labels_query: Optional[str] = Field(None, description="Filter by label selector expressions")
@@ -59,78 +59,34 @@ class TemplateListParams(BaseModel):
     meta_contains: Optional[str] = Field(None, description="Search for Meta Data in Template")
     key_attributes_contains: Optional[str] = Field(None, description="Search for Key Attributes in Template")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to list templates from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TemplateCreateParams(BaseModel):
-    """Parameters for creating a template.
-    
-    Supports creation of templates with key attributes, metadata, and labels.
-    Can accept either individual key attribute parameters or a complete JSON
-    specification. All operations support domain-specific execution.
-    
-    Important: 'desc' is the template description, while 'key_description' 
-    is the description that will be associated with keys generated from this template.
-    """
-    name: str = Field(..., description="Template name (no special characters like <,> or \\)")
-    desc: Optional[str] = Field(None, description="Template description (describes the template itself)")
-    labels: Optional[str] = Field(None, description="Comma-separated key=value labels")
-    meta: Optional[str] = Field(None, description="Meta information in JSON format")
-    key_attributes: Optional[str] = Field(None, description="Key attributes in JSON format")
-    template_jsonfile: Optional[str] = Field(None, description="Template information passed in JSON format via a file")
-    
-    # Individual key attribute parameters (for easier use)
-    algorithm: Optional[str] = Field(None, description="Template algorithm (AES, RSA, EC, etc.)")
-    size: Optional[int] = Field(None, description="Template size in bits")
-    curve_id: Optional[str] = Field(None, description="Elliptic curve ID for EC templates")
-    usage_mask: Optional[int] = Field(None, description="Template usage mask")
-    undeletable: Optional[bool] = Field(None, description="Template cannot be deleted")
-    unexportable: Optional[bool] = Field(None, description="Template cannot be exported")
-    activation_date: Optional[str] = Field(None, description="Date/time the object becomes active")
-    archive_date: Optional[str] = Field(None, description="Date/time the object becomes archived")
-    deactivation_date: Optional[str] = Field(None, description="Date/time the object becomes inactive")
-    process_start_date: Optional[str] = Field(None, description="Date/time when object may begin processing crypto operations")
-    process_stop_date: Optional[str] = Field(None, description="Date/time after which object will not be used for crypto processing")
-    protect_stop_date: Optional[str] = Field(None, description="Date/time after which object will not be used for crypto protection")
-    
-    # Additional key attributes parameters
-    object_type: Optional[str] = Field(None, description="Type of cryptographic object")
-    key_meta: Optional[str] = Field(None, description="Meta information for keys in JSON format with ownerId")
-    format: Optional[str] = Field(None, description="Key format specification")
-    xts: Optional[bool] = Field(None, description="Whether to use XTS mode for AES")
-    state: Optional[str] = Field(None, description="Initial state of objects created from template")
-    key_description: Optional[str] = Field(None, description="Description for keys generated using this template")
-    
+    """Parameters for creating a key template."""
+    name: str = Field(..., description="The name of the key template.")
+    key_type: str = Field(..., description="The key type (e.g., 'AES').")
+    key_size: int = Field(..., description="The key size in bits (e.g., 256).")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to create template in (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TemplateGetParams(BaseModel):
-    """Parameters for getting a template.
-    
-    Retrieves detailed information about a specific template by name.
-    Uses ksctl --id parameter which accepts template names directly.
-    Supports domain-specific execution for multi-tenant environments.
-    """
-    id: str = Field(..., description="Template name or ID (ksctl --id parameter accepts template names)")
+    """Parameters for retrieving a key template."""
+    id: str = Field(..., description="The ID of the key template.")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to get template from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TemplateDeleteParams(BaseModel):
-    """Parameters for deleting a template.
-    
-    Deletes a template by name using ksctl --id parameter.
-    The --id parameter accepts template names directly in ksctl.
-    Includes safety checks and domain-specific execution for secure template management.
-    """
-    id: str = Field(..., description="Template name or ID (ksctl --id parameter accepts template names)")
+    """Parameters for deleting a key template."""
+    id: str = Field(..., description="The ID of the key template.")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to delete template from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TemplateModifyParams(BaseModel):
@@ -143,39 +99,11 @@ class TemplateModifyParams(BaseModel):
     Important: 'desc' is the template description, while 'key_description' 
     is the description that will be associated with keys generated from this template.
     """
-    id: str = Field(..., description="Template name or ID (ksctl --id parameter accepts template names)")
-    name: Optional[str] = Field(None, description="New name for the template")
-    desc: Optional[str] = Field(None, description="Template description (describes the template itself)")
-    labels: Optional[str] = Field(None, description="Comma-separated key=value labels")
-    meta: Optional[str] = Field(None, description="Meta information in JSON format")
-    key_attributes: Optional[str] = Field(None, description="Key attributes in JSON format")
-    template_jsonfile: Optional[str] = Field(None, description="Template information passed in JSON format via a file")
-    
-    # Individual key attribute parameters (for easier use)
-    algorithm: Optional[str] = Field(None, description="Template algorithm")
-    size: Optional[int] = Field(None, description="Template size in bits")
-    curve_id: Optional[str] = Field(None, description="Elliptic curve ID for EC templates")
-    usage_mask: Optional[int] = Field(None, description="Template usage mask")
-    undeletable: Optional[bool] = Field(None, description="Template cannot be deleted")
-    unexportable: Optional[bool] = Field(None, description="Template cannot be exported")
-    activation_date: Optional[str] = Field(None, description="Date/time the object becomes active")
-    archive_date: Optional[str] = Field(None, description="Date/time the object becomes archived")
-    deactivation_date: Optional[str] = Field(None, description="Date/time the object becomes inactive")
-    process_start_date: Optional[str] = Field(None, description="Date/time when object may begin processing crypto operations")
-    process_stop_date: Optional[str] = Field(None, description="Date/time after which object will not be used for crypto processing")
-    protect_stop_date: Optional[str] = Field(None, description="Date/time after which object will not be used for crypto protection")
-    
-    # Additional key attributes parameters
-    object_type: Optional[str] = Field(None, description="Type of cryptographic object")
-    key_meta: Optional[str] = Field(None, description="Meta information for keys in JSON format with ownerId")
-    format: Optional[str] = Field(None, description="Key format specification")
-    xts: Optional[bool] = Field(None, description="Whether to use XTS mode for AES")
-    state: Optional[str] = Field(None, description="Initial state of objects created from template")
-    key_description: Optional[str] = Field(None, description="Description for keys generated using this template")
-    
+    id: str = Field(..., description="The ID of the key template to update.")
+    name: Optional[str] = Field(None, description="The new name for the key template.")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to modify template in (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 # Tool Implementations - Core CRUD
@@ -523,7 +451,7 @@ class TemplateManagementTool(BaseTool):
                 raise ValueError(f"Unknown action: {action}")
                 
         except Exception as e:
-            # Enhanced error handling
+            # Comprehensive error handling
             error_msg = str(e)
             if "validation error" in error_msg.lower():
                 raise ValueError(f"Parameter validation error: {error_msg}")
@@ -736,7 +664,7 @@ def get_template_examples():
             "action": "modify",
             "id": "temp_aes",  # Template name
             "algorithm": "AES",
-            "size": 128,  # Changed from 256 to 128
+            "size": 128,  # Default key size
             "key_description": "Updated key description for generated keys",  # Key description
             "state": "Pre-Active"
             # Note: Tool automatically preserves other existing key attributes

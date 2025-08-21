@@ -1,4 +1,5 @@
 # Thales CipherTrust Data Security Platform CAKM MCP Server
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/sanyambassi/thales-cdsp-cakm-mcp-server)](https://archestra.ai/mcp-catalog/sanyambassi__thales-cdsp-cakm-mcp-server)
 
 A Model Context Protocol (MCP) server for Database EKM/TDE operations using CipherTrust Application Key Management (CAKM).
 

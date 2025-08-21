@@ -14,60 +14,60 @@ Use the configured MCP server and test the following scenarios:
 
 ### 1. Basic Database Operations
 
-**List all databases on the prod_sql SQL server.**
+**1. List all databases on the prod_sql SQL server.**
 ```
 List all databases on the prod_sql SQL server.
 ```
 
-**List all encrypted databases.**
+**2. List all encrypted databases.**
 ```
 List all encrypted databases.
 ```
 
 ### 2. Database Encryption
 
-**Encrypt Db01 with master key MEK01. Use ctm_ekm_provider as the cryptographic provider. Ciphertrust username is tdeuser, password is tdeuser_password and CipherTrust domain is TDE**
+**3. Encrypt Db01 with master key MEK01. Use ctm_ekm_provider as the cryptographic provider. Ciphertrust username is admin and password is tdeuser_password**
 ```
-Encrypt Db01 with master key MEK01. Use ctm_ekm_provider as the cryptographic provider. Ciphertrust username is tdeuser and password is tdeuser_password and domain is TDE.
+Encrypt Db01 with master key MEK01. Use ctm_ekm_provider as the cryptographic provider. Ciphertrust username is admin and password is tdeuser_password
 ```
 
-**Encrypt Db02 and Db03 with key shared_key. Use the same cryptographic provider and CipherTrust credentials as before.**
+**4. Encrypt Db02 and Db03 with key shared_key. Use the same cryptographic provider and CipherTrust credentials as before.**
 ```
 Encrypt Db02 and Db03 with key shared_key. Use the same cryptographic provider and CipherTrust credentials as before.
 ```
 
-**Encrypt Db05 with key Db05Key.**
+**5. Encrypt Db05 with key Db05Key.**
 ```
 Encrypt Db05 with key Db05Key.
 ```
 
 ### 3. Key Management and Queries
 
-**List the name of the master encryption key for Db05**
+**6. List the name of the master encryption key for Db05**
 ```
 List the name of the master encryption key for Db05
 ```
 
 ### 4. Key Rotation Operations
 
-**Rotate the database encryption key for Db05.**
+**7. Rotate the database encryption key for Db05.**
 ```
 Rotate the database encryption key for Db05.
 ```
 
-**Rotate the master key for Db05 database. Use new_Db05_key as the key name. The new key type is RSA of size 3072.**
+**8. Rotate the master key for Db05 database. Use new_Db05_key as the key name. The new key type is RSA of size 3072.**
 ```
 Rotate the master key for Db05 database. Use new_Db05_key as the key name. The new key type is RSA of size 3072.
 ```
 
-**List the name of the master encryption key for Db05**
+**9. List the name of the master encryption key for Db05**
 ```
-List the name of the master encryption key for Db05
+List the name of the master encryption key for Db05.
 ```
 
 ### 6. Comprehensive Status Reports
 
-**List all encrypted databases with the associated master keys.**
+**10. List all encrypted databases with the associated master keys.**
 ```
 List all encrypted databases with the associated master keys.
 ```
@@ -78,19 +78,19 @@ Use the configured MCP server and test the following scenarios:
 
 ### 1. Connection and TDE Status
 
-**List all Oracle database connections.**
+**1. List all Oracle database connections.**
 ```
 List all Oracle database connections.
 ```
 
-**Is TDE enabled on any Oracle database from the list?**
+**2. Is TDE enabled on any Oracle database from the list?**
 ```
 Is TDE enabled on any Oracle database from the list?
 ```
 
 ### 2. Complete TDE Setup with Auto-login
 
-**Enable TDE on oracle_cdb2? Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:**
+**3. Enable TDE on oracle_cdb2? Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:**
 ```
 Enable TDE on oracle_cdb2. Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:
 User- tdeuser
@@ -102,7 +102,7 @@ Setup auto-login as well. Use soft_wallet_password as the software wallet passwo
 
 ### 3. TDE Setup without Auto-login
 
-**Enable TDE on oracle_cdb3. Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:**
+**4. Enable TDE on oracle_cdb3. Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:**
 ```
 Enable TDE on oracle_cdb3. Automatically restart the database, if needed. Use the following CipherTrust manager credentials to setup TDE:
 User- tdeuser
@@ -114,7 +114,7 @@ Skip auto-login wallet setup/creation.
 
 ### 4. Configuration Parameter Queries
 
-**What's the value of the following system parameters on oracle_cdb2?**
+**5. What's the value of the following system parameters on oracle_cdb2?**
 ```
 What's the value of the following system parameters on oracle_cdb2?
 a. tde_configuration
@@ -124,7 +124,7 @@ c. encrypt_new_tablespaces
 
 ### 5. Migration Assessment
 
-**Migrate TDE for oracle_cd1 database using the following credentials. Specify CipherTrust manager credentials here.**
+**6. Migrate TDE for oracle_cd1 database using the following credentials. Specify CipherTrust manager credentials here.**
 ```
 Migrate TDE for oracle_cd1 database using the following credentials. Specify CipherTrust manager credentials here.
 ```
