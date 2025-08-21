@@ -1,6 +1,17 @@
 """
-Oracle TDE Deployment Tools
-Reliable Oracle TDE operations with comprehensive error handling and status detection.
+Oracle TDE deployment and setup tools
+
+This module provides tools for deploying and setting up Oracle Transparent Data Encryption (TDE).
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available tools:
+- oracle_tde_deployment: Complete Oracle TDE deployment operations
+  - Operations: setup_hsm_only, setup_hsm_with_autologin, add_autologin, migrate_software_to_hsm, get_tde_status
+  - Provides complete TDE infrastructure setup from scratch
+  - Supports HSM-only and HSM-with-autologin configurations
+  - Handles migration from software to HSM keystores
+  - Includes comprehensive status checking and validation
 """
 
 import json
