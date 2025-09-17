@@ -1,0 +1,10 @@
+source snow-env/bin/activate
+export GITHUB_TOKEN=ghp_your_githubpersonalaccesstoken
+docker build -t thales-snow-scs-crdp-service -t ghcr.io/yourgithubid/thales-snow-scs-crdp-service .
+docker login ghcr.io -u yourgithubid
+docker build -t thales-snow-scs-crdp-service -t ghcr.io/yourgithubid/thales-snow-scs-crdp-service .
+docker push ghcr.io/yourgithubid/thales-snow-scs-crdp-service
+snow --config-file snow.toml spcs image-registry login
+docker tag ghcr.io/yourgithubid/thales-snow-scs-crdp-service:latest yoursnowflakeaccount.registry.snowflakecomputing.com/yourdb/yourschema/your_repo/thales-snow-scs-crdp-service:latest
+docker push yoursnowflakeaccount.registry.snowflakecomputing.com/yourdb/yourschema/your_repo/thales-snow-scs-crdp-service:latest
+
