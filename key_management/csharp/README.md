@@ -7,6 +7,8 @@ The following samples shows how to manage keys.
   *  This sample shows how to *fetch key name, key version and corresponding version header bytes using UUID for NAE versioned key*.
 * NaeKeyManagement.cs
   * This sample shows how to *get the attributes of the key*.
+* NaeGetKeyNames.cs
+  * This sample shows how to *get the list of the key names* based on multiple attributes and *get the list of key names* accessible to user.
 * ExportWrappedKey.cs
   * This sample shows how to *export an AES key wrapped using an RSA key*.
 
