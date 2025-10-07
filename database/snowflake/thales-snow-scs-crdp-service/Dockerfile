@@ -1,0 +1,24 @@
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY thales-snow-scs-crdp-service-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8083
+ENV CRDPIP=http://thales-crdp-service.stuff.svc.spcs.internal
+ENV BATCHSIZE=1000
+ENV DEFAULTMETADATA=1001000
+ENV DEFAULTMODE=internal
+ENV DEFAULTCHARPOLICY=char-internal
+ENV DEFAULTNBRCHARPOLICY=nbr-char-internal
+ENV DEFAULTNBRNBRPOLICY=nbr-nbr-internal
+ENV DEFAULTINTERNALCHARPOLICY=char-internal
+ENV DEFAULTINTERNALNBRCHARPOLICY=nbr-char-internal
+ENV DEFAULTINTERNALNBRNBRPOLICY=nbr-nbr-internal
+ENV DEFAULTEXTERNALCHARPOLICY=char-external
+ENV DEFAULTEXTERNALNBRCHARPOLICY=nbr-char-external
+ENV DEFAULTEXTERNALNBRNBRPOLICY=nbr-nbr-external
+ENV DEFAULTREVEALUSER=admin
+
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

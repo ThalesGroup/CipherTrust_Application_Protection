@@ -7,6 +7,8 @@ TestCryptoDataUtility.cs sample shows how to use CryptoDataUtility.dll for user 
 
 AddTransactionIdSample.cs sample shows how to set and unset Transaction ID in the log entries using TransactionID property of LoggerWrapper class.
 
+CryptoHeaderModuleSample.cs sample shows how to use CryptoHeaderModule.dll for user to perform encryption, decryption, HMAC generation, and HMAC verification. Encrypting data comes in two flavors: with headers and without headers.
+
 ## Prerequisites: 
 In order to run C# samples, 
 1. .NET 6.0 or higher must be installed.
@@ -17,6 +19,7 @@ In order to run C# samples,
 1. From the available sample cs files, add anyone to the project.
 1. Add the CipherTrust.CADP.NETCore NuGet package to the project. To know more about NuGet package and how to add it, refer to [CipherTrust.CADP.NETCore](https://www.nuget.org/packages/CipherTrust.CADP.NETCore/)
 1. [**For TestCryptoDataUtility sample only**] Add CryptoDataUtility.dll as reference in project. On installing CADP for .NetCore Nuget package, this dll would be available at "%UserProfile%\\.nuget\packages\ciphertrust.cadp.netcore\\<package-version\>\utility\" folder.
+1. [**For CryptoHeaderModule sample only**] Add CryptoHeaderModule.dll as reference in project. On installing CADP for .NetCore Nuget package, this dll would be available at "%UserProfile%\\.nuget\packages\ciphertrust.cadp.netcore\\<package-version\>\utility\" folder.
 1. Build using command `dotnet build -c Release`.
 1. Use either of the following commands to run-
     * `dotnet run` command to run the project at a terminal prompt.
