@@ -2,4 +2,4 @@
 # package>=version
 functions-framework
 urllib3==2.5.0
-urllib3==1.26.18
+urllib3==2.6.0
