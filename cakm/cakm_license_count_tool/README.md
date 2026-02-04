@@ -1,8 +1,8 @@
-# CAKM for Oracle TDE & SQL EKM - License Count Tool
+# CAKM for Oracle TDE & SQL EKM (Traditional) - License Count Tool
 
 ## Overview (Objective)
 
-This tool provides a set of scripts to count the number of running database instances that have the Thales CipherTrust Application Key Management (CAKM) library loaded. This is essential for determining the required license count for "CAKM for Oracle TDE" or "CAKM for SQL EKM".
+This tool provides a set of scripts to count the number of running database instances that have the Thales CipherTrust Application Key Management (CAKM) library loaded. This is essential for determining the required license count for traditional "CAKM for Oracle TDE" or "CAKM for SQL EKM".
 
 The tool includes scripts for different operating systems:
 *   `cakm_license_count_tool.sh`: For Linux (RHEL), and AIX environments running Oracle Database.
@@ -135,3 +135,4 @@ Total license count required for CAKM for Oracle TDE: 1
 ```
 
 **Total Cluster License Count**: 1 (from Node 1) + 1 (from Node 2) = **2**
+
