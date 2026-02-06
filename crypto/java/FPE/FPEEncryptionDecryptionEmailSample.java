@@ -56,17 +56,17 @@ public class FPEEncryptionDecryptionEmailSample
 			tweakData   = args[4];
 		}
 
-	// add Ingrian provider to the list of JCE providers
-	Security.addProvider(new IngrianProvider());
-
-	// get the list of all registered JCE providers
-	Provider[] providers = Security.getProviders();
-	for (Provider provider : providers) {
-		System.out.println(provider.getInfo());
-	}
-
 	String dataToEncryptEmail = "fpe_encrypt_654321_decrypt@sample.com";
 	System.out.println("Data to encrypt - Email : " + dataToEncryptEmail + "\"");
+	
+	// Add Ingrian provider to the list of JCE providers
+	Security.addProvider(new IngrianProvider());
+
+	// Get the list of all registered JCE providers
+	Provider[] providers = Security.getProviders();
+	for (int i = 0; i < providers.length; i++)
+		System.out.println(providers[i].getInfo());
+
 	NAESession session  = null;
 	try {
 	    // create NAE Session: pass in Key Manager user name and password

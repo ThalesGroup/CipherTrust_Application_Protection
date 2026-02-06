@@ -3,6 +3,7 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
 import java.security.Security;
 
 import com.ingrian.internal.kmip.api.CryptographicUsageMask.UsageMask;
@@ -35,8 +36,6 @@ public class KMIPWrapUnwrapSample {
 		{
 			usage();
 		} 
-		// add Ingrian provider to the list of JCE providers
-		Security.addProvider(new IngrianProvider());
 		String wrapping_key = args[2];
 		String wrapped_key = args[3];
 
@@ -58,6 +57,13 @@ public class KMIPWrapUnwrapSample {
 		String keyRoleType = null;			// not required as of now
 		String encodingOption = "NoEncoding";
 
+		// add Ingrian provider to the list of JCE providers
+        Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+		
 		//initiate KMIP session
 		KMIPSession session  = KMIPSession.getSession(new NAEClientCertificate(args[0], args[1].toCharArray()));
 

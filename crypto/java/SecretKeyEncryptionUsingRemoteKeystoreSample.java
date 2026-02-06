@@ -22,6 +22,9 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to encrypt/decrypt data in CADP for JAVA using keystore placed at remote URL.
+ * This would be needed to support TLS in cases when a disk is not directly accessible by an application 
+ * such as when using a User Defined Function (UDF) running as a Function as A Service (FaaS) cloud offering, 
+ * AWS Lambda Functions, Azure and GCP Functions etc.
  */
 
 public class SecretKeyEncryptionUsingRemoteKeystoreSample 
@@ -52,6 +55,9 @@ public class SecretKeyEncryptionUsingRemoteKeystoreSample
 			if (inputStream != null)
 				inputStream.close();
 		}
+		
+		String dataToEncrypt = "2D2D2D2D2D424547494E2050455253495354454E54204346EB17960";
+		System.out.println("Data to encrypt \"" + dataToEncrypt + "\"");
 
 		// add Ingrian provider to the list of providers
 		Security.addProvider(new IngrianProvider.Builder().addKeyStore(keystore).build());
@@ -62,8 +68,6 @@ public class SecretKeyEncryptionUsingRemoteKeystoreSample
 			System.out.println(provider.getInfo());
 		}
 
-		String dataToEncrypt = "2D2D2D2D2D424547494E2050455253495354454E54204346EB17960";
-		System.out.println("Data to encrypt \"" + dataToEncrypt + "\"");
 		NAESession session  = null;
 		try {
 			// create NAE Session: pass in Key Manager user name and password

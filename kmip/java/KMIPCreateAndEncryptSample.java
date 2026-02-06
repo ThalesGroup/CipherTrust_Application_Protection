@@ -4,6 +4,7 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 // Standard JCE classes. 
+import java.security.Provider;
 import java.security.Security;
 import java.util.Calendar;
 
@@ -52,6 +53,11 @@ public class KMIPCreateAndEncryptSample
 
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
         KMIPSession kmipSession=null;
         NAESession naeSession=null;
         try {
@@ -110,7 +116,7 @@ public class KMIPCreateAndEncryptSample
             
             /* Now use the NAEKey created for encryption using an NAESession
              * to a Key Manager server. Essentially this is the same code as the
-             * SecretKeyEncryptionSample.java program
+             * code_samples\SecretKeyEncryptionSample.java program
              * Nothing new is required to use the KMIP-created key on the 
              * Key Manager server.
              */
@@ -149,7 +155,6 @@ public class KMIPCreateAndEncryptSample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         finally {
         	if(kmipSession!=null)

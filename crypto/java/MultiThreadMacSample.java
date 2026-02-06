@@ -5,7 +5,7 @@
 */
 // Standard JCE classes. 
 import java.security.Security;
-
+import java.security.Provider;
 import java.security.SecureRandom;
 
 // CADP for JAVA specific classes.
@@ -38,10 +38,16 @@ public class MultiThreadMacSample extends Thread{
 		// this sample will create 5 threads
 		int threadCount = 5;
 
-		// add Ingrian provider to the list of JCE providers
+		MultiThreadMacSample[] list = new MultiThreadMacSample[threadCount];
+		
+		// Add Ingrian provider to the list of JCE providers
 		Security.addProvider(new IngrianProvider());
 
-		MultiThreadMacSample[] list = new MultiThreadMacSample[threadCount];
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+
 		NAESession session = null;
 		try { 
 			// create NAE Session: pass in Key Manager user name and password

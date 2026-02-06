@@ -6,6 +6,7 @@
 // Standard JCE classes. 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -50,13 +51,18 @@ public class KMIPSecretDataSample
         
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
        KMIPSession session  = KMIPSession.getSession(new NAEClientCertificate( args[0],  args[1].toCharArray()));
         try {
             // generate the secret data (the bytes of a public key)
             // For IBM Java, change the provider from "SUN/SunRsaSign" to "IBMJCE"
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            keyGen.initialize(1024, random);
+            keyGen.initialize(2048, random);
             KeyPair keyPair = keyGen.generateKeyPair();
             PublicKey pub = keyPair.getPublic();
 
@@ -69,7 +75,7 @@ public class KMIPSecretDataSample
             initialAttributes.add(KMIPAttribute.CryptographicUsageMask, (int)
                     ( UsageMask.Verify.getValue() ));
 
-            NAEParameterSpec spec = new NAEParameterSpec(keyName, 1024, 
+            NAEParameterSpec spec = new NAEParameterSpec(keyName, 2048, 
                     (KMIPAttributes) initialAttributes, session);
             //create the secret data object as a KMIP secret data Password type
             KMIPSecretData secretDataManagedObject = new KMIPSecretData(keyName, 
@@ -95,7 +101,6 @@ public class KMIPSecretDataSample
         catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         	finally{
         		if(session!=null)

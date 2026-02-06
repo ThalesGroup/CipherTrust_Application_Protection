@@ -3,6 +3,9 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
+import java.security.Security;
+
 import com.ingrian.internal.kmip.api.crypto.KMIPCipher;
 import com.ingrian.internal.kmip.api.crypto.KMIPCryptoResult;
 import com.ingrian.internal.kmip.api.crypto.KMIPGCMSpec;
@@ -27,7 +30,7 @@ import com.ingrian.security.nae.NAEClientCertificate;
  */
 public class KMIPEncryptAndDecrypt {
 
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) {
 
 		if (args.length < 6) {
 			checkUsage();
@@ -44,7 +47,14 @@ public class KMIPEncryptAndDecrypt {
 		 */
 		String iv = args[4];
 		String data = args[5];
-
+		
+		// add Ingrian provider to the list of JCE providers
+        Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
 		KMIPSession session = null;
 		try {
 			//opening a valid kmip session
@@ -86,8 +96,6 @@ public class KMIPEncryptAndDecrypt {
 			System.out.println(new String(decResult.getData()));
 		} catch (Exception e) {
 			e.printStackTrace();
-                         System.out.println("The Cause is " + e.getMessage() + ".");
-	                 throw e;
 		} finally {
 			session.closeSession();
 		}

@@ -2,22 +2,15 @@
 * Sample code is provided for educational purposes.
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
-*/
-// Standard JCE classes. 
+*/ 
 import java.io.FileInputStream;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.NAECertificate;
 import com.ingrian.security.nae.NAEParameterSpec;
 import com.ingrian.security.nae.NAESession;
-import com.ingrian.security.nae.*;
 
 /**
  * This sample shows how to use different certificate operations:
@@ -53,6 +46,14 @@ public class CertSample {
     String pkcs12Pass = null;
     if (args.length == 6)
     	pkcs12Pass = args[5];
+    
+	// Add Ingrian provider to the list of JCE providers
+	Security.addProvider(new IngrianProvider());
+
+	// Get the list of all registered JCE providers
+	Provider[] providers = Security.getProviders();
+	for (int i = 0; i < providers.length; i++)
+		System.out.println(providers[i].getInfo());
     
     NAESession session = null;
 

@@ -28,23 +28,24 @@ public class HMACSample
     {
 	if (args.length != 3)
 	{
-            System.err.println("Usage: java HMACSample user password hmacKeyName");
+            System.err.println("Usage: java HMACSample user password keyname");
             System.exit(-1);
 	} 
         String username  = args[0];
         String password  = args[1];
         String keyName   = args[2];
 
-	// add Ingrian provider to the list of JCE providers
-	Security.addProvider(new IngrianProvider());
-
-	// get the list of all registered JCE providers
-	Provider[] providers = Security.getProviders();
-	for (int i = 0; i < providers.length; i++)
-	    System.out.println(providers[i].getInfo());
-	
 	String dataToMac = "2D2D2D2D2D424547494E2050455253495354454E54204346EB17960";
 	System.out.println("Data to mac \"" + dataToMac + "\"");
+	
+	// Add Ingrian provider to the list of JCE providers
+	Security.addProvider(new IngrianProvider());
+
+	// Get the list of all registered JCE providers
+	Provider[] providers = Security.getProviders();
+	for (int i = 0; i < providers.length; i++)
+		System.out.println(providers[i].getInfo());
+
 	NAESession session  =null;
 	try {
 	    // create HMAC key on the server

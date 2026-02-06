@@ -5,6 +5,7 @@
 */
 // Standard JCE classes. 
 import java.io.IOException;
+import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Set;
@@ -45,8 +46,6 @@ public class KMIPBatchSample
     public static void main( String[] args ) throws Exception
     {
 
-        KMIPSession session = null;
-
         int keyLength = 256;
         if (args.length != 3)
         {
@@ -56,6 +55,12 @@ public class KMIPBatchSample
         String keyName = args[2];
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
+        KMIPSession session = null;
 
         try {
 
@@ -134,7 +139,6 @@ public class KMIPBatchSample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
 	     finally{
         	if(session!=null)
