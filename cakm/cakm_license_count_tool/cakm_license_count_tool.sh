@@ -15,7 +15,8 @@ os_type=$(uname)
 # Find all running pmon processes, which indicate a running Oracle instance.
 # The output of `ps` is filtered to get the SID.
 # The awk command extracts the last column (ora_pmon_SID) and then substr removes "ora_pmon_".
-pmon_processes=$(ps -ef | grep -o 'ora_pmon_[^ ]*' | sed 's/ora_pmon_//' | sort -u)
+# pmon_processes=$(ps -ef | grep -o 'ora_pmon_[^ ]*' | sed 's/ora_pmon_//' | sort -u) # not working on AIX
+pmon_processes=$(ps -ef | grep ora_pmon_ | grep -v grep | sed -n 's/.*ora_pmon_//p' | sort -u)
 
 if [ -z "$pmon_processes" ]; then
     echo "No running Oracle instances found (pmon process not detected)."
