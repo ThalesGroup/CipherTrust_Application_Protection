@@ -58,7 +58,7 @@ foreach ($service in $dbServices) {
         $serviceProcess = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($service.Name)'" | Select-Object -ExpandProperty ProcessId
         
         if (-not $serviceProcess) {
-            Write-Warning "Could not find process for service '$($service.Name)'. It might be the TNS Listener. Skipping."
+            Write-Warning "Could not find process for the database service '$($service.Name)'. Skipping."
             continue
         }
         
@@ -95,7 +95,7 @@ foreach ($service in $dbServices) {
         #Write-Host "loadedModules $loadedModules"
 
         if ($null -eq $loadedModules) {
-            Write-Warning "Could not inspect modules for PID $processId. Check script permissions (run as Administrator)."
+            Write-Warning "Could not inspect modules for process ID $processId due to insufficient permissions. Run as Administrator."
             continue
         }
 
@@ -126,3 +126,4 @@ if ($DatabaseType -eq 'Oracle') {
     Write-Host "Total license count required for CAKM for SQLEKM: $instanceCount"
 }
 Write-Host "-------------------------------------------"
+
