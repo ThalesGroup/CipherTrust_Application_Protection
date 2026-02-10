@@ -116,7 +116,7 @@ public class KMIPCreateAndEncryptSample
             
             /* Now use the NAEKey created for encryption using an NAESession
              * to a Key Manager server. Essentially this is the same code as the
-             * code_samples\SecretKeyEncryptionSample.java program
+             * SecretKeyEncryptionSample.java program
              * Nothing new is required to use the KMIP-created key on the 
              * Key Manager server.
              */
