@@ -3,6 +3,7 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
 import java.security.Security;
 
 import javax.crypto.Cipher;
@@ -21,7 +22,6 @@ import com.ingrian.security.nae.NAESession;
  * This sample shows how to create AES and HmacSHA256 key by key derivation function (KDF) based on a hash-based message 
  * authentication code (HMAC) using a Master Key present on Key Manager. It illustrates that two keys created using HKDF 
  * have same key data using Encryption/Decryption and MAC/MACVerfiy operations. 
- * Note: Master Key should be AES 256 bit key.
  * 
  */
 public class HKDFSecretKeySample {
@@ -32,7 +32,7 @@ public class HKDFSecretKeySample {
 			System.exit(-1);
 			/*
 			 * Usage description: 
-			 * masterKeyName: Master key to create the AES and Hmac keys. 
+			 * masterKeyName: Master key to create the AES and Hmac keys.
 			 * aesKeyName_1 and aesKeyName_2: AES key names to be created. These are used to determine that their key data is same 
 			 * using Encryption/Decryption operation.  
 			 * hmacKeyName_1 and hmacKeyName_2: Hmac key names to be created. These are used to determine that their key data is same
@@ -49,9 +49,16 @@ public class HKDFSecretKeySample {
 		String hmacKeyName_1 =args[5];
 		String hmacKeyName_2 =args[6];
 		
-		//Add Ingrian provider to the list of JCE providers
-		Security.addProvider(new IngrianProvider());
 		String dataToMac = "2D2D2D2D2D424547494E2050455253495354454E54204346EB17960";
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+
 		NAESession session = null;
 
 		try {

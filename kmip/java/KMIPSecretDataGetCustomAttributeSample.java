@@ -5,6 +5,7 @@
 */
 // Standard JCE classes. 
 
+import java.security.Provider;
 import java.security.Security;
 
 import com.ingrian.internal.kmip.api.Attribute;
@@ -24,10 +25,16 @@ public class KMIPSecretDataGetCustomAttributeSample {
 			usage();
 
 		}
-		// add Ingrian provider to the list of JCE providers
-		Security.addProvider(new IngrianProvider());
 		String secretDataName =   args[2];
 		String custattrib =  args[3];
+		
+		// add Ingrian provider to the list of JCE providers
+        Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+		
 		// create NAE Session: pass in Key Manager user name and password
 		KMIPSession session = KMIPSession.getSession(new NAEClientCertificate( args[0],  args[1].toCharArray()));
 		KMIPAttributes getAttributes = new KMIPAttributes();
@@ -50,8 +57,6 @@ public class KMIPSecretDataGetCustomAttributeSample {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-                       System.out.println("The Cause is " + e.getMessage() + ".");
-	               throw e;
 		}
 		finally{
         	if(session!=null)

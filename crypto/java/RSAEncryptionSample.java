@@ -17,7 +17,6 @@ import com.ingrian.security.nae.NAESession;
 
 /**
  * This sample shows how to encrypt and decrypt data using RSA key.
- * Note: Use the RSA key which has encrypt and decrypt permission.
  */
 public class RSAEncryptionSample {
     
@@ -26,23 +25,23 @@ public class RSAEncryptionSample {
 	if (args.length != 3)
         {
             System.err.println("Usage: java RSAEncryptionSample user password keyname");
-		    System.exit(-1);
+            System.exit(-1);
 	} 
         String username  = args[0];
         String password  = args[1];
         String keyName   = args[2];
 
-	// add Ingrian provider to the list of JCE providers
-	Security.addProvider(new IngrianProvider());
-	
-	// get the list of all registered JCE providers
-	Provider[] providers = Security.getProviders();
-	for (Provider provider : providers) {
-		System.out.println(provider.getInfo());
-	}
-
 	String dataToEncrypt = "dataToEncrypt";
 	System.out.println("Data to encrypt \"" + dataToEncrypt + "\"");
+	
+	// Add Ingrian provider to the list of JCE providers
+	Security.addProvider(new IngrianProvider());
+
+	// Get the list of all registered JCE providers
+	Provider[] providers = Security.getProviders();
+	for (int i = 0; i < providers.length; i++)
+		System.out.println(providers[i].getInfo());
+
 	NAESession session = null;
 	try { 
 	    // create NAE Session: pass in NAE user name and password

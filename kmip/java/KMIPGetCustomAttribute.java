@@ -4,6 +4,7 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 // Standard JCE classes. 
+import java.security.Provider;
 import java.security.Security;
 import java.text.SimpleDateFormat;
 import java.util.Set;
@@ -39,8 +40,13 @@ public class KMIPGetCustomAttribute {
 
 		}
 		// add Ingrian provider to the list of JCE providers
-		Security.addProvider(new IngrianProvider());
-KMIPSession session=null;
+        Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
+		KMIPSession session=null;
 		try {
 
 			// Create session to KMIP port based on authentication by an
@@ -142,7 +148,6 @@ KMIPSession session=null;
 		catch (Exception e) {
 			System.out.println("The Cause is " + e.getMessage() + ".");
 			e.printStackTrace();
-                        throw e;
 		}
 		finally {
         	if(session!=null)
