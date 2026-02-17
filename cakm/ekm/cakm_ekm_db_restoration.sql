@@ -31,6 +31,7 @@ DECLARE @exec_prop_bkp_cmd NVARCHAR(MAX);
 DECLARE @exec_prop_cmd NVARCHAR(MAX);
 DECLARE @exec_exec_uuid_cmd NVARCHAR(MAX);
 DECLARE @exec_exec_fp_cmd NVARCHAR(MAX);
+DECLARE @exec_exec_cka_id_cmd NVARCHAR(MAX);
 DECLARE @exec_rm_prop_bkp_cmd NVARCHAR(MAX);
 
 SET @keyname = N'$(keyname)';
@@ -60,8 +61,14 @@ END
 SET @exec_prop_bkp_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file + '" "' + @prop_file_bkp + '"''';
 SET @exec_prop_cmd = 'EXEC xp_cmdshell ''copy "' + @prop_file_bkp + '" "' + @prop_file + '"''';
 SET @exec_rm_prop_bkp_cmd = 'EXEC xp_cmdshell ''del "' + @prop_file_bkp + '"''';
-SET @exec_exec_uuid_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" UUID'';';
-SET @exec_exec_fp_cmd = 'EXEC xp_cmdshell ''"' + @cakm_prop_change + '" FP'';';
+SET @exec_exec_uuid_cmd =
+'EXEC xp_cmdshell ''cmd /c ""' + @cakm_prop_change + '"" UUID''';
+
+SET @exec_exec_fp_cmd =
+'EXEC xp_cmdshell ''cmd /c ""' + @cakm_prop_change + '"" FP''';
+
+SET @exec_exec_cka_id_cmd =
+'EXEC xp_cmdshell ''cmd /c ""' + @cakm_prop_change + '"" CKA_ID''';
 
 -- Execute the command
 PRINT "Creating the Backup of Property file";
@@ -94,9 +101,9 @@ EXEC sp_executesql @exec_table_cmd;
 SELECT TOP 1 ISNULL(Column1, 'Successfully set the VKM_mode as ''yes''') AS output FROM TempOutput;
 delete from TempOutput;
 
---PRINT @prop_file;
---PRINT @prop_file_bkp;
---PRINT @cakm_prop_change;
+PRINT @prop_file;
+PRINT @prop_file_bkp;
+PRINT @cakm_prop_change;
 
 PRINT "Getting Asymmetric Key from Key Manager"
 
@@ -178,31 +185,55 @@ IF @@ERROR <> 0
 		PRINT 'Restoring DB';		
 		RESTORE DATABASE @dbname FROM DISK = @backup WITH REPLACE;
 		IF @@ERROR <> 0
-    		BEGIN
+			BEGIN
 				PRINT 'Restore Failure';
-				PRINT "dropping login and cred for the key"
-				--PRINT @drop_alter_login;
-				EXEC sp_executesql @drop_alter_login;
-				--PRINT @drop_cred;
-				EXEC sp_executesql @drop_cred;
-				--PRINT @drop_login;
-				EXEC sp_executesql @drop_login;
 				PRINT "Dropping Asymmetric Key"
 				--PRINT @drop_sql;
 				EXEC sp_executesql @drop_sql;
+				--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
+				--EXEC xp_cmdshell 'whoami';
+				--EXEC xp_cmdshell 'C:\EKM\a.exe';
+				PRINT "Setting the VKM_mode to 'yes_short_thumb' in Property file"
+				--PRINT @exec_exec_cka_id_cmd;
+				SET @exec_table_cmd = 'INSERT INTO TempOutput (Column1)' + @exec_exec_cka_id_cmd + ';';
+				EXEC sp_executesql @exec_table_cmd;
+				SELECT TOP 1 ISNULL(Column1, 'Successfully set the VKM_mode as ''yes_short_thumb''') AS output FROM TempOutput;
+				delete from TempOutput;
+
+				PRINT "Getting Asymmetric Key from Key Manager"
+				--PRINT @sql;
+				EXEC sp_executesql @sql;
+				--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
+		
+				PRINT 'Restoring DB';		
+				RESTORE DATABASE @dbname FROM DISK = @backup WITH REPLACE, MOVE 'CAQM_Key2' TO 'C:\SQLData\CAQM_Key2.mdf', MOVE 'CAQM_Key2_log' TO 'C:\SQLData\CAQM_Key2_log.ldf';
+				IF @@ERROR <> 0
+					BEGIN
+						PRINT 'Restore Failure';
+						PRINT "dropping login and cred for the key"
+						--PRINT @drop_alter_login;
+						EXEC sp_executesql @drop_alter_login;
+						--PRINT @drop_cred;
+						EXEC sp_executesql @drop_cred;
+						--PRINT @drop_login;
+						EXEC sp_executesql @drop_login;
+						PRINT "Dropping Asymmetric Key"
+						--PRINT @drop_sql;
+						EXEC sp_executesql @drop_sql;
+				END
+				ELSE
+				BEGIN
+					PRINT 'Restore Successful.';
+				END
+			END
 		END
-		ELSE
-		BEGIN
-			PRINT 'Restore Successful.';
-		END
-    END
     ELSE
     BEGIN
         PRINT 'Restore Successful.';
     END
 
 PRINT "Restoring the Backup of Property file";
---PRINT @exec_prop_cmd;
+PRINT @exec_prop_cmd;
 
 SET @exec_table_cmd = 'INSERT INTO TempOutput (Column1)' + @exec_prop_cmd + ';';
 EXEC sp_executesql @exec_table_cmd;
@@ -210,8 +241,9 @@ SELECT TOP 1 ISNULL(Column1, 'Success') AS output FROM TempOutput;
 delete from TempOutput;
 
 PRINT "Removing the Backup of Property file";
---PRINT @exec_rm_prop_bkp_cmd;
+PRINT @exec_rm_prop_bkp_cmd;
 SET @exec_table_cmd = 'INSERT INTO TempOutput (Column1)' + @exec_rm_prop_bkp_cmd + ';';
 EXEC sp_executesql @exec_table_cmd;
 SELECT TOP 1 ISNULL(Column1, 'Removed Successfully') AS output FROM TempOutput;
 drop table TempOutput;
+
