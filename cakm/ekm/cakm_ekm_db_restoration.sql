@@ -206,7 +206,7 @@ IF @@ERROR <> 0
 				--SELECT  name,thumbprint FROM SYS.ASYMMETRIC_KEYS where name = @keyname;
 		
 				PRINT 'Restoring DB';		
-				RESTORE DATABASE @dbname FROM DISK = @backup WITH REPLACE, MOVE 'CAQM_Key2' TO 'C:\SQLData\CAQM_Key2.mdf', MOVE 'CAQM_Key2_log' TO 'C:\SQLData\CAQM_Key2_log.ldf';
+				RESTORE DATABASE @dbname FROM DISK = @backup WITH REPLACE;
 				IF @@ERROR <> 0
 					BEGIN
 						PRINT 'Restore Failure';
@@ -246,4 +246,5 @@ SET @exec_table_cmd = 'INSERT INTO TempOutput (Column1)' + @exec_rm_prop_bkp_cmd
 EXEC sp_executesql @exec_table_cmd;
 SELECT TOP 1 ISNULL(Column1, 'Removed Successfully') AS output FROM TempOutput;
 drop table TempOutput;
+
 
