@@ -108,7 +108,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ncrypt.lib;ncrypt.lib</AdditionalDependencies>
+      <AdditionalDependencies>ncrypt.lib;bcrypt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -145,8 +145,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\8.0\Cryptographic Provider Development Kit\Lib\win8\x64</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ncrypt_provider.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ncrypt.lib;bcrypt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
