@@ -1,0 +1,31 @@
+-- Structured Streaming example using Unity Catalog secured views
+--
+-- Databricks documentation currently states that in Databricks Runtime 14.1+
+-- you can stream from Unity Catalog views backed by Delta tables.
+--
+-- This is the governed pattern:
+-- 1. Create a secured view such as main.security.v_customer_reveal
+-- 2. Read that view as a stream from a compute cluster job
+
+-- Example secured view should already exist:
+--   main.security.v_customer_reveal
+
+-- PySpark usage:
+--
+-- stream_df = spark.readStream.table("main.security.v_customer_reveal")
+-- query = (
+--     stream_df.writeStream
+--     .format("delta")
+--     .outputMode("append")
+--     .option("checkpointLocation", "/Volumes/main/security/checkpoints/v_customer_reveal_stream")
+--     .toTable("main.security.customer_reveal_stream_from_view")
+-- )
+
+-- Example query result shape:
+--
+-- +-------------+------------+-----------+-----------------+---------------------+-------------------+
+-- | customer_id | first_name | last_name | customer_status | created_ts          | email             |
+-- +-------------+------------+-----------+-----------------+---------------------+-------------------+
+-- | C1001       | Alice      | Smith     | ACTIVE          | 2026-04-07 09:00:00 | alice@example.com |
+-- | C1002       | Bob        | Jones     | ACTIVE          | 2026-04-07 09:05:00 | bob@example.com   |
+-- +-------------+------------+-----------+-----------------+---------------------+-------------------+

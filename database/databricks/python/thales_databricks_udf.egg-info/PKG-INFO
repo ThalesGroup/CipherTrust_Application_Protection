@@ -1,3 +1,10 @@
+Metadata-Version: 2.4
+Name: thales-databricks-udf
+Version: 0.1.1
+Summary: Thales CRDP helpers for Databricks
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+
 # Thales Databricks UDF
 
 This project contains Java and Python examples for protecting and revealing
@@ -7,10 +14,6 @@ It supports two deployment styles:
 
 - Databricks compute clusters with Java UDF adapters
 - Databricks SQL warehouse with Python UDF definitions
-
-For the current file-by-file guide, start with:
-
-- [DOCUMENTATION_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\docs\DOCUMENTATION_INDEX.md)
 
 ## What is in this project
 
@@ -27,36 +30,31 @@ Spark Java UDF adapters for compute clusters:
 - bulk adapters
 - hardcoded char/nbr bulk adapters
 - column-aware bulk adapters
-- current examples use string tokenization plus cast-back for numeric values
+- type-aware numeric scalar adapters for `INTEGER` and `BIGINT`
 
 SQL warehouse Python example:
 
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+- `sql_warehouse/thales_crdp_python_udf_examples.py`
+- `sql_warehouse/thales_crdp_uc_function_templates.sql`
 - `sql_warehouse/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
-- `sql_warehouse/SQL_WAREHOUSE_ROLLOUT_CHECKLIST.md`
-- `sql_warehouse/sample_create_uc_secure_views.sql`
-- `sql_warehouse/sample_grant_uc_secure_views.sql`
-- `sql_warehouse/sample_thales_crdp_python_udf_imports.py`
-- `sql_warehouse/legacy_create_uc_functions_built_wheel.sql`
-- `sql_warehouse/legacy_thales_crdp_uc_function_templates.sql`
+- `sql_warehouse/create_uc_functions_built_wheel.sql`
+- `sql_warehouse/create_uc_secure_views.sql`
+- `sql_warehouse/grant_uc_secure_views.sql`
 
 Compute cluster notebook:
 
 - `notebooks/databricks_compute_cluster_udf_smoke_test.py`
-- `notebooks/compute_cluster_table_reveal_castback.py`
-- `notebooks/compute_cluster_table_reveal_castback.sql`
-- `notebooks/databricks_compute_cluster_udf_numbers_smoke_test.py`
-- `notebooks/compute_cluster_numbers_setup.sql`
-- `notebooks/compute_cluster_plaintext_protected_internal_setup.sql`
+- `notebooks/compute_cluster_secure_view_examples.sql`
 - `notebooks/python_secure_api_examples.py`
 - `COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md`
-- `TEST_RUNBOOK.md`
 - `notebooks/compute_cluster_grant_examples.sql`
 - `RUN_ORDER_GUIDE.md`
-- `docs/DOCUMENTATION_INDEX.md`
-- `docs/EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md`
+- `CUSTOMER_ARCHITECTURE.md`
+- `FIELD_FAQ.md`
+- `EXECUTION_MODEL_MATRIX.md`
+- `STREAMING_AND_LAKEFLOW_GUIDE.md`
+- `STREAMING_CAPABILITY_MATRIX.md`
+- `docs/java-udf-executor-flow.svg`
 
 Config example:
 
@@ -298,20 +296,9 @@ The shaded jar is created at:
 Upload the shaded jar to Databricks and set:
 
 ```text
-spark.driverEnv.UDF_CONFIG_VOLUME_PATH /tmp/thales_config/udfConfig.properties
-spark.executorEnv.UDF_CONFIG_VOLUME_PATH /tmp/thales_config/udfConfig.properties
+spark.driverEnv.UDF_CONFIG_VOLUME_PATH=/Workspace/Users/<user>/demo/udfConfig.properties
+spark.executorEnv.UDF_CONFIG_VOLUME_PATH=/Workspace/Users/<user>/demo/udfConfig.properties
 ```
-
-Important:
-
-- in the Databricks Spark config UI, these are key/value pairs
-- do not use an `=` sign in that box
-- the current working setup uses an init script to copy `udfConfig.properties`
-  from the Unity Catalog volume to `/tmp/thales_config/udfConfig.properties`
-
-Working cluster settings are documented here:
-
-- [TEST_RUNBOOK.md](E:\eclipse-workspace\thales.databricks.udf\TEST_RUNBOOK.md)
 
 Register Java UDFs, for example:
 
@@ -347,13 +334,24 @@ caller-supplied username string.
 The Java Spark UDF adapters in this project take string inputs, so numeric
 Spark columns are often cast to `STRING` before calling the UDF.
 
+For true numeric measure columns, the compute-cluster path also includes
+type-aware scalar Java UDF adapters so customers do not have to change schemas
+just to call the UDF. These adapters are intended for values such as balances,
+amounts, counters, and quantities.
+
+Examples:
+
+- `ThalesCrdpProtectIntegerByColumnUdf`
+- `ThalesCrdpRevealIntegerByColumnWithUserUdf`
+- `ThalesCrdpProtectLongByColumnUdf`
+- `ThalesCrdpRevealLongByColumnWithUserUdf`
 Recommended guidance:
 
 - use the string-based `nbr` path for identifier-like values such as `ssn`,
   `creditcard`, `phone`, and `zip`
-- for whole-number and decimal measure columns, the current examples also use
-  the string-based `nbr` path and cast the revealed value back in the query or
-  view
+- use the typed integer/long adapters for true whole-number measure columns
+- for decimal measures, protect via the string-based `nbr` path and cast the
+  revealed value back to `DECIMAL` in the query or view
 
 Important behavior:
 
@@ -442,9 +440,8 @@ For SQL warehouse, use Python UDF definitions rather than Java adapters.
 
 See:
 
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+- `sql_warehouse/thales_crdp_python_udf_examples.py`
+- `sql_warehouse/thales_crdp_uc_function_templates.sql`
 - `sql_warehouse/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
 
 The SQL template file includes ready-to-customize Unity Catalog
@@ -546,7 +543,7 @@ Misuse protection:
 - a call such as `thales_crdp_python_function_bulk_secure(..., "fred")` is rejected
 - this prevents callers from trying to sneak a reveal user in positionally
 
-- `sql_warehouse/sample_thales_crdp_python_udf_imports.py`
+- `sql_warehouse/thales_crdp_python_udf_examples.py`
 
 That file now re-exports the packaged module so notebook usage can stay simple.
 
@@ -570,7 +567,7 @@ python -m build
 
 3. The wheel will be created in:
 
-- `dist/thales_databricks_udf-0.1.1-py3-none-any.whl`
+- `dist/thales_databricks_udf-0.1.0-py3-none-any.whl`
 
 ### Steps to deploy the wheel
 
@@ -588,7 +585,7 @@ CREATE OR REPLACE FUNCTION main.security.test_func(x STRING)
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.1-py3-none-any.whl"]'
+  dependencies = '["/Volumes/main/security/libs/thales_databricks_udf-0.1.0-py3-none-any.whl"]'
 )
 AS $$
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_legacy

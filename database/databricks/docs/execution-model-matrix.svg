@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="980" viewBox="0 0 1800 980">
+  <defs>
+    <style>
+      .bg { fill: #f7f4ee; }
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #1d2a33; }
+      .subtitle { font: 400 18px 'Segoe UI', Arial, sans-serif; fill: #44515a; }
+      .header { fill: #17384d; }
+      .headerText { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .cellA { fill: #ffffff; }
+      .cellB { fill: #eef3f6; }
+      .num { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #17384d; }
+      .body { font: 18px 'Segoe UI', Arial, sans-serif; fill: #22313a; }
+      .small { font: 16px 'Segoe UI', Arial, sans-serif; fill: #36454f; }
+      .foot { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #4f5d66; }
+      .rule { stroke: #d4dde3; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="980"/>
+
+  <text class="title" x="70" y="70">Databricks Execution Model Matrix</text>
+  <text class="subtitle" x="70" y="105">Where each option runs, when to use it, and what to expect operationally.</text>
+
+  <rect class="header" x="70" y="140" width="90" height="72" rx="10"/>
+  <rect class="header" x="165" y="140" width="360" height="72" rx="10"/>
+  <rect class="header" x="530" y="140" width="280" height="72" rx="10"/>
+  <rect class="header" x="815" y="140" width="390" height="72" rx="10"/>
+  <rect class="header" x="1210" y="140" width="520" height="72" rx="10"/>
+
+  <text class="headerText" x="105" y="184">#</text>
+  <text class="headerText" x="195" y="184">Option</text>
+  <text class="headerText" x="560" y="184">Runs Where</text>
+  <text class="headerText" x="845" y="184">Best Use Case</text>
+  <text class="headerText" x="1240" y="184">Notes</text>
+
+  <!-- Row 1 -->
+  <rect class="cellA" x="70" y="225" width="90" height="120" rx="10"/>
+  <rect class="cellA" x="165" y="225" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="530" y="225" width="280" height="120" rx="10"/>
+  <rect class="cellA" x="815" y="225" width="390" height="120" rx="10"/>
+  <rect class="cellA" x="1210" y="225" width="520" height="120" rx="10"/>
+  <text class="num" x="108" y="294">1</text>
+  <text class="body" x="195" y="273">Java Spark UDF</text>
+  <text class="small" x="195" y="301">(UDF1 / UDF2 / etc.)</text>
+  <text class="body" x="560" y="286">Spark executors</text>
+  <text class="body" x="845" y="286">High-performance</text>
+  <text class="small" x="845" y="314">compute-cluster ETL</text>
+  <text class="body" x="1240" y="272">Lowest overhead in this project.</text>
+  <text class="small" x="1240" y="302">Leverages Java Spark UDFs for fast executor-scale ETL.</text>
+
+  <!-- Row 2 -->
+  <rect class="cellB" x="70" y="360" width="90" height="120" rx="10"/>
+  <rect class="cellB" x="165" y="360" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="530" y="360" width="280" height="120" rx="10"/>
+  <rect class="cellB" x="815" y="360" width="390" height="120" rx="10"/>
+  <rect class="cellB" x="1210" y="360" width="520" height="120" rx="10"/>
+  <text class="num" x="108" y="429">2</text>
+  <text class="body" x="195" y="408">Python direct helper call</text>
+  <text class="body" x="560" y="408">Notebook / driver-side</text>
+  <text class="small" x="560" y="436">normally not distributed</text>
+  <text class="body" x="845" y="408">Notebook testing,</text>
+  <text class="small" x="845" y="436">small controlled Python workflows</text>
+  <text class="body" x="1240" y="394">Good for direct testing.</text>
+  <text class="small" x="1240" y="424">Passing spark_session helps identity lookup,</text>
+  <text class="small" x="1240" y="448">not executor distribution.</text>
+
+  <!-- Row 3 -->
+  <rect class="cellA" x="70" y="495" width="90" height="120" rx="10"/>
+  <rect class="cellA" x="165" y="495" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="530" y="495" width="280" height="120" rx="10"/>
+  <rect class="cellA" x="815" y="495" width="390" height="120" rx="10"/>
+  <rect class="cellA" x="1210" y="495" width="520" height="120" rx="10"/>
+  <text class="num" x="108" y="564">3</text>
+  <text class="body" x="195" y="551">Python Spark UDF</text>
+  <text class="body" x="560" y="556">Spark executors</text>
+  <text class="body" x="845" y="543">Cluster notebooks / jobs</text>
+  <text class="small" x="845" y="571">when Python implementation is preferred</text>
+  <text class="body" x="1240" y="542">Easier to write than Java.</text>
+  <text class="small" x="1240" y="570">Higher overhead than Java Spark UDFs.</text>
+
+  <!-- Row 4 -->
+  <rect class="cellB" x="70" y="630" width="90" height="120" rx="10"/>
+  <rect class="cellB" x="165" y="630" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="530" y="630" width="280" height="120" rx="10"/>
+  <rect class="cellB" x="815" y="630" width="390" height="120" rx="10"/>
+  <rect class="cellB" x="1210" y="630" width="520" height="120" rx="10"/>
+  <text class="num" x="108" y="699">4</text>
+  <text class="body" x="195" y="686">Pandas UDF</text>
+  <text class="body" x="560" y="691">Spark executors</text>
+  <text class="body" x="845" y="678">Higher-volume Python</text>
+  <text class="small" x="845" y="706">batch / vectorized processing</text>
+  <text class="body" x="1240" y="675">Vectorized model.</text>
+  <text class="small" x="1240" y="703">Often faster than row-by-row Python UDFs.</text>
+
+  <!-- Row 5 -->
+  <rect class="cellA" x="70" y="765" width="90" height="120" rx="10"/>
+  <rect class="cellA" x="165" y="765" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="530" y="765" width="280" height="120" rx="10"/>
+  <rect class="cellA" x="815" y="765" width="390" height="120" rx="10"/>
+  <rect class="cellA" x="1210" y="765" width="520" height="120" rx="10"/>
+  <text class="num" x="108" y="834">5</text>
+  <text class="body" x="195" y="821">Unity Catalog Python UDF</text>
+  <text class="body" x="560" y="808">Managed Databricks</text>
+  <text class="small" x="560" y="836">SQL / runtime execution</text>
+  <text class="body" x="845" y="808">SQL Warehouse, views, BI,</text>
+  <text class="small" x="845" y="836">DLT / Lakeflow, governed SQL access</text>
+  <text class="body" x="1240" y="807">Best governed database-style model.</text>
+  <text class="small" x="1240" y="835">Strong fit for secured views and grants.</text>
+
+  <text class="foot" x="70" y="930">Recommended default: Java Spark UDF for compute-cluster ETL, Unity Catalog Python UDF plus secured views for SQL Warehouse and BI access.</text>
+</svg>
