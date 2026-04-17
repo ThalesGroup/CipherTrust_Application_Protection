@@ -52,7 +52,7 @@ Before running the CADP for C Integration code samples, ensure the following:
 - **System.Security.Cryptography**: Access to CNG classes
 
 ### C++ Prerequisites:
-- **Visual Studio 2019 or later**: For compilation of C++ projects
+- **Visual Studio 2022 or later**: For compilation of C++ projects
 - **Windows SDK**: For CNG header files and libraries
 - **NCrypt Library**: Windows CNG library (ncrypt.lib)
 
