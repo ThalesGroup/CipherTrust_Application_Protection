@@ -74,21 +74,21 @@ class CipherTrustMCPServer:
         @self.server.list_resources()
         async def handle_list_resources() -> list[Resource]:
             """List available resources."""
-            # For now, we don't expose any resources
-            # In the future, we could expose CT configuration, policies, etc.
+            # Currently, no resources are exposed
+            # Potentially could expose CT configuration, policies, etc.
             return []
 
         @self.server.list_prompts()
         async def handle_list_prompts() -> list[Prompt]:
             """List available prompts."""
-            # For now, we don't have any prompts
-            # In the future, we could add prompts for common CipherTrust workflows
+            # Currently, no prompts are available
+            # Potentially could add prompts for common CipherTrust workflows
             return []
 
         @self.server.get_prompt()
         async def handle_get_prompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
             """Handle get prompt requests."""
-            # For now, we don't have any prompts
+            # Currently, no prompts are available
             raise ValueError(f"Unknown prompt: {name}")
 
     async def run(self) -> None:

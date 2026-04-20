@@ -1,5 +1,7 @@
 # Thales CDSP CRDP MCP Server
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/sanyambassi/thales-cdsp-crdp-mcp-server)](https://archestra.ai/mcp-catalog/sanyambassi__thales-cdsp-crdp-mcp-server)
+
 A Model Context Protocol (MCP) server that allows interacting with the CipherTrust RestFul Data Protection (CRDP) service.
 
 ## Overview
