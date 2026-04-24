@@ -5,8 +5,10 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_ALWAYS_SENSITIVE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_APPLICATION;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_CLASS;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_DECRYPT;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EC_PARAMS;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_ENCRYPT;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_END_DATE;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_ID;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_KEY_TYPE;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_LABEL;
@@ -29,7 +31,13 @@ import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PRIVATE_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_PUBLIC_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKO_SECRET_KEY;
 import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKU_USER;
-import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKA_EXTRACTABLE;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_RSA;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_SHA_1_HMAC;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_SHA224_HMAC;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_SHA256_HMAC;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_SHA512_HMAC;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_SHA384_HMAC;
+import static com.vormetric.pkcs11.wrapper.PKCS11Constants.CKK_EC;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -156,6 +164,9 @@ public class Helper {
     public static final long CKM_THALES_BASE64 = 0x08000000L;
     public static final long CKM_THALES_FPE = 0x80004001L;
     public static final long CKM_THALES_FF1 = 0x80004002L;
+    public static final long CKM_THALES_FF3_1 = 0x80004003L;
+
+    public static final long CKM_THALES_FF1_V2 = 0x80004004L;
 	public static final long CKM_AES_GCM = 0x00001087L;
 
 
@@ -225,7 +236,7 @@ public class Helper {
         	{
                 new CK_ATTRIBUTE (CKA_LABEL, keyName),
                 new CK_ATTRIBUTE (CKA_CLASS, CKO_SECRET_KEY),
-                new CK_ATTRIBUTE (CKA_THALES_CACHE_CLEAR, true)
+                new CK_ATTRIBUTE (CKA_THALES_CACHE_CLEAR, true),
             };
 
         try
@@ -550,10 +561,15 @@ public class Helper {
 
     public static long createKey(Vpkcs11Session session, String keyName, long genAction, int ls_days)
     {
-        return createKey(session, keyName, genAction, ls_days, false, false);
+        return createKey(session, keyName, genAction, ls_days, false, false, null);
+    }
+	
+	public static long createKey(Vpkcs11Session session, String keyName, long genAction, int ls_days, boolean bAlwSens, boolean bNevExtr)
+    {
+        return createKey(session, keyName, genAction, ls_days, bAlwSens, bAlwSens, null);
     }
 
-    public static long createKey(Vpkcs11Session session, String keyName, long genAction, int ls_days, boolean bAlwSens, boolean bNevExtr)
+    public static long createKey(Vpkcs11Session session, String keyName, long genAction, int ls_days, boolean bAlwSens, boolean bNevExtr, String keyIdentifier)
     {
         long keyID = 0;
         String year, month, day;
@@ -598,6 +614,11 @@ public class Helper {
                 attrs = Arrays.copyOf(attrs, attrs.length + 1);
                 attrs[attrs.length-1] = new CK_ATTRIBUTE (Helper.CKA_THALES_KEY_VERSION_LIFE_SPAN, ls_days);
             }
+            
+            if(keyIdentifier != null){
+                attrs = Arrays.copyOf(attrs, attrs.length + 1);
+                attrs[attrs.length-1] = new CK_ATTRIBUTE (CKA_ID, keyIdentifier);
+            }
 
             System.out.println ("Before generating Key. Key Handle: " + keyID);
             keyID = session.p11.C_GenerateKey (session.sessionHandle, mechanism, attrs);
@@ -610,7 +631,7 @@ public class Helper {
         return keyID;
     }
 
-    public static long createKeyObject(Vpkcs11Session session, String keyName, String appName, byte[] keyValue, boolean bAlwSens, boolean bNevExtr) {
+    public static long createKeyObject(Vpkcs11Session session, String keyName, String appName, byte[] keyValue, boolean bAlwSens, boolean bNevExtr, String keyIdentifier) {
         long keyID = 0;
         try {
             /* Create an AES 256 key on the KeyManager */
@@ -638,6 +659,11 @@ public class Helper {
                             new CK_ATTRIBUTE(CKA_ALWAYS_SENSITIVE, bAlwSens),
                             new CK_ATTRIBUTE(CKA_NEVER_EXTRACTABLE, bNevExtr),
                     };
+            
+            if(keyIdentifier != null){
+                attrs = Arrays.copyOf(attrs, attrs.length + 1);
+                attrs[attrs.length-1] = new CK_ATTRIBUTE (CKA_ID, keyIdentifier);
+            }
 
             keyID = session.p11.C_CreateObject(session.sessionHandle, attrs);
             System.out.println("Object successfully created. Object Handle: " + keyID);
@@ -720,8 +746,7 @@ public class Helper {
                     switch ((int) attr.type) {
                         case (int) CKA_CLASS:
                         case (int) CKA_KEY_TYPE:
-                        case (int) CKA_MODULUS_BITS:
-                        case (int) CKA_ID:
+                        case (int) CKA_MODULUS_BITS: 
                             System.out.println("\tAttr type: " + attr.type + " Value: " + (attr.getLong() & 0xFFFFL));
                             break;
 
@@ -767,6 +792,7 @@ public class Helper {
                         case (int) CKA_THALES_CUSTOM_3:
                         case (int) CKA_THALES_CUSTOM_4:
                         case (int) CKA_THALES_CUSTOM_5:
+                        case (int) CKA_ID:
                             valArray = attr.getByteArray();
                             buf = new StringBuilder(valArray.length);
                             for (byte b : valArray) {
@@ -787,6 +813,9 @@ public class Helper {
 
                             ep_date = new Date(lTime * 1000);
                             System.out.println(typeLabel + ": " + ep_date.toString());
+                            break;
+                        case (int) CKA_EC_PARAMS:
+                            System.out.println("\tAttr type: " + attr.type + " Value: " + new String(attr.getByteArray()));
                             break;
                         default:
                             System.out.println("\tAttr type: " + attr.type + " Value: " + attr.toString());
@@ -855,5 +884,77 @@ public class Helper {
             }
         }
         PKCS11ConstantNames = cNames;
+    }
+    
+    public static long[] findKeysUsingKeyIdentifier(Vpkcs11Session session, String keyIdentifier)
+    {
+        CK_ATTRIBUTE[] attrs = null;
+        long key_type = getKeyType(keyIdentifier);
+        if (key_type != -1) {
+            attrs = new CK_ATTRIBUTE[]
+                    {
+                            new CK_ATTRIBUTE(CKA_KEY_TYPE, key_type)
+                    };
+        } else {
+            /* Find the keys on the KeyManager */
+            attrs = new CK_ATTRIBUTE[]
+                    {
+                            new CK_ATTRIBUTE(CKA_ID, keyIdentifier),
+                            new CK_ATTRIBUTE(CKA_THALES_CACHE_CLEAR, true)
+                    };
+        }
+
+        try
+        {
+            /* Call C_FindObjectsFinal in case there is another find objects going on  */
+            session.p11.C_FindObjectsFinal (session.sessionHandle);
+            session.p11.C_FindObjectsInit (session.sessionHandle, attrs);
+            long[] keyID = session.p11.C_FindObjects (session.sessionHandle, 1);
+            session.p11.C_FindObjectsFinal (session.sessionHandle);
+            if (keyID.length > 0)
+            {
+                return keyID;
+            }
+        }
+        catch (PKCS11Exception e)
+        {
+            if(e.getErrorCode() == PKCS11Constants.CKR_OBJECT_HANDLE_INVALID)
+                return null;
+            System.out.println ("Exception thrown : " + e.getMessage());
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            System.out.println ("Exception thrown : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return new long[0];
+    }
+    /**
+     * Method to return value based on the keyIdentifier
+     * @param keyIdentifier
+     * @return KEY_TYPE value based on the keyIdentifier
+     */
+    public static long getKeyType(String keyIdentifier){
+        switch (keyIdentifier){
+            case "AES":
+                return CKK_AES;
+            case "RSA":
+                return CKK_RSA;
+            case "HMAC-SHA1":
+                return CKK_SHA_1_HMAC;
+            case "HMAC-SHA256":
+                return CKK_SHA256_HMAC;
+            case "HMAC-SHA384":
+                return CKK_SHA384_HMAC;
+            case "HMAC-SHA512":
+                return CKK_SHA512_HMAC;
+            case "HMAC-SHA224":
+                return CKK_SHA224_HMAC;
+            case "EC":
+                return CKK_EC;
+            default:
+                return -1;
+        }
     }
 }
