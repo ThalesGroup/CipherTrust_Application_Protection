@@ -89,7 +89,7 @@ public class EncryptDecryptMessage {
         System.out.println("-a: aad data (additional authenticated data)");
         System.out.println("-t: tagSize for GCM/tweak String for FPE");
         System.out.println("-iu: input utf-mode-name");
-        System.out.println("-ta: Tweak Algo for FF3-1");
+        System.out.println("-ta: Tweak Algo");
 
         System.exit (1);
     }
