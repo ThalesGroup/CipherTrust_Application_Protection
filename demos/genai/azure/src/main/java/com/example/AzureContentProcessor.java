@@ -3,26 +3,24 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.logging.log4j.core.Filter.Result;
 
 import com.azure.ai.textanalytics.TextAnalyticsClient;
 import com.azure.ai.textanalytics.TextAnalyticsClientBuilder;
 import com.azure.ai.textanalytics.models.PiiEntity;
 import com.azure.ai.textanalytics.models.RecognizePiiEntitiesOptions;
 import com.azure.ai.textanalytics.models.PiiEntityCategory;
-import com.azure.ai.textanalytics.models.RecognizeEntitiesResult;
 import com.azure.ai.textanalytics.models.RecognizePiiEntitiesResult;
-import com.azure.ai.textanalytics.util.RecognizeEntitiesResultCollection;
 import com.azure.ai.textanalytics.util.RecognizePiiEntitiesResultCollection;
 import com.azure.core.credential.AzureKeyCredential;
 
@@ -70,47 +68,54 @@ public class AzureContentProcessor extends ContentProcessor {
 	@Override
 	public int processFile(File inputFile, File outputDir, String projectId, ThalesProtectRevealHelper tprh,
 			String mode, boolean skiphdr) {
-
-		int nbroflines = 0; // Counter for the number of lines processed.
-		// Use try-with-resources to ensure BufferedReader and BufferedWriter are closed automatically.
 		try (BufferedReader reader = Files.newBufferedReader(inputFile.toPath());
 				BufferedWriter writer = Files.newBufferedWriter(outputDir.toPath())) {
-
-			// If skiphdr is true, read and discard the first line (assuming it's a header).
-			if (skiphdr) {
-				String headerLine = reader.readLine();
-			}
-			String line;
-			String content = null;
-			// Read the file line by line until the end.
-			while ((line = reader.readLine()) != null) {
-				nbroflines++; // Increment line counter.
-
-				// Process the line based on its length and the specified mode.
-				if (line.length() < 2) {
-					// If the line is very short, treat it as content directly (might be an empty or nearly empty line).
-					content = line;
-				} else {
-					// If the mode is "protect", encrypt PII in the line. Otherwise, decrypt.
-					if (mode.equalsIgnoreCase("protect")) {
-						content = processTextChunk(line, tprh); // Encrypt PII in the line.
-					} else {
-						content = decryptLine(line, tprh); // Decrypt PII in the line.
-					}
-				}
-
-				writer.write(content); // Write the processed content to the output file.
-				writer.newLine(); // Add a new line character after each processed line.
-			}
-
+			int nbroflines = processReader(reader, writer, tprh, mode, skiphdr);
 			System.out.println("Processing complete! Check the output file: " + outputDir.getAbsolutePath());
-
+			return nbroflines;
 		} catch (IOException e) {
-			// Print stack trace if an I/O error occurs during file operations.
 			e.printStackTrace();
+			return 0;
 		}
+	}
 
-		return nbroflines; // Return the total number of lines processed.
+	/**
+	 * Streams content from an input stream to an output stream while protecting or
+	 * revealing sensitive data line by line.
+	 */
+	public int processStream(InputStream inputStream, OutputStream outputStream, String projectId,
+			ThalesProtectRevealHelper tprh, String mode, boolean skiphdr) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+			return processReader(reader, writer, tprh, mode, skiphdr);
+		}
+	}
+
+	private int processReader(BufferedReader reader, BufferedWriter writer, ThalesProtectRevealHelper tprh, String mode,
+			boolean skiphdr) throws IOException {
+		int nbroflines = 0;
+		if (skiphdr) {
+			reader.readLine();
+		}
+		String line;
+		while ((line = reader.readLine()) != null) {
+			nbroflines++;
+			String content = processLine(line, tprh, mode);
+			writer.write(content);
+			writer.newLine();
+		}
+		writer.flush();
+		return nbroflines;
+	}
+
+	private String processLine(String line, ThalesProtectRevealHelper tprh, String mode) {
+		if (line.length() < 2) {
+			return line;
+		}
+		if (mode.equalsIgnoreCase("protect")) {
+			return processTextChunk(line, tprh);
+		}
+		return decryptLine(line, tprh);
 	}
 
 	/**
