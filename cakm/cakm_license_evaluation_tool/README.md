@@ -1,12 +1,16 @@
-# CAKM for Oracle TDE & SQL EKM (Traditional) - License Count Tool
+# CAKM 8.x (Traditional) License Evaluation Tool
 
-## Overview (Objective)
+## Overview
+ 
+This tool provides a set of scripts to count the number of running database instances that have the Thales CipherTrust Application Key Management (CAKM) library loaded.
 
-This tool provides a set of scripts to count the number of running database instances that have the Thales CipherTrust Application Key Management (CAKM) library loaded. This is essential for determining the required license count for traditional "CAKM for Oracle TDE" or "CAKM for SQL EKM".
+This helps determine the required license count for:
+*   **CAKM for Oracle TDE**
+*   **CAKM for MSSQL Server EKM**
 
 The tool includes scripts for different operating systems:
-*   `cakm_license_count_tool.sh`: For Linux (RHEL), and AIX environments running Oracle Database.
-*   `cakm_license_count_tool.ps1`: For Windows environments running Oracle Database or Microsoft SQL Server.
+*   `cakm_license_count_tool.sh`: For Linux (RHEL), and AIX environments running Oracle Database
+*   `cakm_license_count_tool.ps1`: For Windows environments running Oracle Database or Microsoft SQL Server
 
 The scripts automatically detect running database instances and inspect their processes to see if the CAKM library is loaded.
 
@@ -14,15 +18,19 @@ The scripts automatically detect running database instances and inspect their pr
 
 ### Linux/AIX (`cakm_license_count_tool.sh`)
 
-*   **Supported OS**: RHEL (or compatible Linux), AIX.
-*   **Supported Database**: Oracle Database.
-*   **Permissions**: The script must be executed by a user with sufficient privileges to inspect the processes of the running Oracle instances. This is typically the `root` user or the `oracle` software owner. The script needs to execute commands like `ps`, `lsof` (Linux), and `procldd` (AIX).
+*   **Supported OS**: RHEL (OLE), AIX
+*   **Supported Database**: Oracle Database
+*   **Permissions**: Run as `root` or `oracle` user
+*   **Commands:**  Script executes the following commands internally:  
+	* `ps`
+	* `lsof` (Linux)
+	* `procldd` (AIX)
 
 ### Windows (`cakm_license_count_tool.ps1`)
 
-*   **Supported OS**: Windows Server (with PowerShell).
-*   **Supported Databases**: Oracle Database, Microsoft SQL Server.
-*   **Permissions**: The script requires administrative privileges to inspect process modules. You must run the script from an elevated PowerShell session (using "Run as Administrator").
+*   **Supported OS**: Windows Server (with PowerShell)
+*   **Supported Databases**: Oracle Database, Microsoft SQL Server
+*   **Permissions**: Run PowerShell as Administrator (64 bit PowerShell)
 
 ## How to Run
 
@@ -32,7 +40,7 @@ A single node refers to a standalone database server that is not part of a clust
 
 #### Linux/AIX
 
-1.  Transfer the `cakm_license_count_tool.sh` script to the database server.
+1.  Copy the `cakm_license_count_tool.sh` script to the database server.
 2.  Open a terminal session on the server.
 3.  Grant execute permissions to the script:
     ```sh
@@ -45,7 +53,7 @@ A single node refers to a standalone database server that is not part of a clust
 
 #### Windows
 
-1.  Transfer the `cakm_license_count_tool.ps1` script to the database server.
+1.  Copy the `cakm_license_count_tool.ps1` script to the database server.
 2.  Right-click the PowerShell icon and select **"Run as Administrator"** to open an elevated session.
 3.  Navigate to the directory where you saved the script.
 4.  Execute the script.
