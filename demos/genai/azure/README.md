@@ -7,6 +7,8 @@ The repository now includes two related solution patterns:
 - the **non-purview file-to-file and prompt-protection samples**
 - the **Microsoft Purview-driven storage and Azure SQL protection flow**
 
+For the runtime step-by-step behavior of the unstructured storage, local document, and structured SQL paths, see [operations.md](E:\codex\work\azure-purview\azure\operations.md).
+
 ## What Is In This Repo
 
 At a high level, the samples show how to:
@@ -26,6 +28,7 @@ This is the non-purview local file to local file batch-processing pattern.
 - Detect sensitive values in the content with Azure AI Language PII detection
 - Protect those values with Thales CipherTrust
 - Write a protected output file
+- Optionally emit extracted text and a PII findings JSON report for review
 - Optionally reverse the process with reveal mode
 
 Primary class:
@@ -56,13 +59,20 @@ This is the newer governed workflow for Azure Storage and ADLS Gen2.
 - Stream those assets directly from Azure Storage
 - Use Azure AI Language PII detection to identify sensitive values in file content
 - Protect those values with Thales CipherTrust
+- Optionally emit extracted text and a PII findings JSON report alongside the primary output blob
 - Stream protected output back to a governed target location
+
+This storage path now uses a hybrid execution model:
+
+- text-like assets such as `.txt`, `.csv`, and `.json` stay on the streaming path
+- document assets such as `.pdf`, `.doc`, `.docx`, `.xls`, and `.xlsx` are staged temporarily, converted to text, processed, and then written back out as text-based artifacts
 
 Primary classes:
 
 - [ThalesAzurePurviewBatchProcessor.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\ThalesAzurePurviewBatchProcessor.java)
 - [AzureStoragePurviewProcessor.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\AzureStoragePurviewProcessor.java)
 - [PurviewClient.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\PurviewClient.java)
+- [DocumentConversionService.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\DocumentConversionService.java)
 
 ### 4. Purview-driven Azure SQL protection
 
@@ -84,6 +94,9 @@ Primary class:
 
 - [AzureContentProcessor.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\AzureContentProcessor.java)
   Performs line-by-line processing for files and streams. Uses the Azure AI Language PII detection API to identify sensitive values in text before protection or after reveal.
+
+- [DocumentConversionService.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\DocumentConversionService.java)
+  Converts PDF, Word, Excel, text, CSV, and JSON inputs into text so the same unstructured protection path can be used consistently.
 
 - [ContentProcessor.java](E:\codex\work\azure-purview\azure\src\main\java\com\example\ContentProcessor.java)
   Shared base class for file/text content processing, tag mapping, PII policy mapping, and helper logic for protected-string formatting.
@@ -225,6 +238,14 @@ Important property groups:
 
 These mappings decide which Thales protection policy is applied to each detected PII type.
 
+### Optional unstructured review artifacts
+
+- `UNSTRUCTURED_OUTPUT_WRITE_EXTRACTED_TEXT`
+- `UNSTRUCTURED_OUTPUT_WRITE_PROTECTED_TEXT`
+- `UNSTRUCTURED_OUTPUT_WRITE_FINDINGS_REPORT`
+
+These settings apply to the local file-to-file sample and the Purview storage flow. When enabled, the unstructured path can emit extracted text, the primary protected or revealed text output, and a PII findings JSON report.
+
 ### Azure AI Language PII detection
 
 For the current samples, the endpoint and key are passed on the command line rather than stored in the properties file.
@@ -304,6 +325,8 @@ They print sample commands for:
 - Purview identifies sensitive assets or columns
 - the application processes only the relevant storage assets or SQL columns
 - file content still uses Azure AI Language PII detection for fine-grained in-content detection
+- for text-like storage assets, content can stay on the streaming path
+- for document formats such as PDF and Office files, content is converted to text first and then processed
 - SQL uses Purview column classification as the field-level targeting signal
 
 ## Important Notes
@@ -311,7 +334,9 @@ They print sample commands for:
 - Purview is used here as the discovery and governance layer, not as the fine-grained in-record detection engine
 - Azure AI Language PII detection is the in-content detection API used for file content
 - SQL protection does not require Azure AI Language PII detection because Purview already identifies the sensitive columns
+- SQL protection stores plain protected values for structured columns and does not use the unstructured locator tag wrapper
 - Storage processing in the Purview flow now uses direct streaming from source blob to destination blob
+- Storage processing now uses hybrid handling: direct streaming for text-like blobs and temporary staging plus text conversion for document formats
 - The file-to-file sample remains useful when you want a simple local processing demo without Purview
 
 ## Suggested Future Enhancements

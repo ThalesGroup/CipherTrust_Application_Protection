@@ -142,9 +142,9 @@ public class AzureSqlPurviewProcessor extends ContentProcessor {
 						total_entities_found++;
 						String piiMapping = piiMap.getOrDefault(inferPiiKey(columnName), tprh.defaultPolicy);
 						if ("protect".equalsIgnoreCase(mode)) {
-							finalValue = encryptData(finalValue, tprh, piiMapping);
+							finalValue = protectStructuredValue(finalValue, piiMapping, tprh);
 						} else {
-							finalValue = decryptLine(finalValue, tprh);
+							finalValue = revealStructuredValue(finalValue, piiMapping, tprh);
 						}
 					}
 					insertStatement.setString(i, finalValue);
@@ -203,6 +203,22 @@ public class AzureSqlPurviewProcessor extends ContentProcessor {
 			return "USSocialSecurityNumber";
 		}
 		return "Person";
+	}
+
+	private String protectStructuredValue(String value, String protectionProfile, ThalesProtectRevealHelper tprh) {
+		String profileToUse = protectionProfile != null ? protectionProfile : tprh.defaultPolicy;
+		String policyType = profileToUse != null && profileToUse.toLowerCase(Locale.ROOT).contains("internal")
+				? "internal"
+				: "external";
+		return tprh.protectData(value, profileToUse, policyType);
+	}
+
+	private String revealStructuredValue(String value, String protectionProfile, ThalesProtectRevealHelper tprh) {
+		String profileToUse = protectionProfile != null ? protectionProfile : tprh.defaultPolicy;
+		String policyType = profileToUse != null && profileToUse.toLowerCase(Locale.ROOT).contains("internal")
+				? "internal"
+				: "external";
+		return tprh.revealData(value, profileToUse, policyType);
 	}
 
 	private boolean containsIgnoreCase(Set<String> values, String candidate) {

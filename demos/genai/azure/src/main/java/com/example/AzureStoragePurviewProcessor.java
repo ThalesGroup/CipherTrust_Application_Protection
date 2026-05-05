@@ -2,17 +2,18 @@ package com.example;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.specialized.BlobInputStream;
-import com.azure.storage.blob.specialized.BlockBlobClient;
 
 /**
  * Reads the same blob/file assets Purview classified, protects their content,
@@ -23,10 +24,12 @@ public class AzureStoragePurviewProcessor {
 	private final Properties properties;
 	private final PurviewConfig purviewConfig;
 	private final BlobServiceClient blobServiceClient;
+	private final DocumentConversionService documentConversionService;
 
 	public AzureStoragePurviewProcessor(Properties properties, PurviewConfig purviewConfig) {
 		this.properties = properties;
 		this.purviewConfig = purviewConfig;
+		this.documentConversionService = new DocumentConversionService();
 		this.blobServiceClient = new BlobServiceClientBuilder()
 				.connectionString(purviewConfig.storageConnectionString)
 				.buildClient();
@@ -84,26 +87,77 @@ public class AzureStoragePurviewProcessor {
 		if (!targetContainer.exists()) {
 			targetContainer.create();
 		}
-		BlobClient targetBlob = targetContainer.getBlobClient(targetBlobName);
 
-		BlockBlobClient blockBlobClient = targetBlob.getBlockBlobClient();
-		try (BlobInputStream blobInputStream = sourceBlob.openInputStream();
-				OutputStream outputStream = blockBlobClient.getBlobOutputStream(true)) {
-			int processedRecords = fileProcessor.processStream(blobInputStream, outputStream, asset.getQualifiedName(),
-					tprh, mode, false);
-			summary.processedAssetCount++;
-			summary.processedRecordCount += processedRecords;
-			System.out.println("Processed Purview asset " + asset.getQualifiedName() + " -> " + targetBlobName);
+		ProcessedContentArtifacts artifacts = documentConversionService.isTextLikeFileName(sourceBlobName)
+				? processTextLikeBlob(sourceBlob, fileProcessor, asset, tprh, mode)
+				: processDocumentBlob(sourceBlob, fileProcessor, asset, tprh, mode);
+		writeBlobArtifact(targetContainer, targetBlobName, artifacts.outputText);
+		if (shouldWriteExtractedText()) {
+			writeBlobArtifact(targetContainer, buildArtifactBlobName(sourceBlobName, "extracted", null),
+					artifacts.extractedText);
+		}
+		if (shouldWriteFindingsReport() && "protect".equalsIgnoreCase(mode)) {
+			writeBlobArtifact(targetContainer, buildArtifactBlobName(sourceBlobName, "findings", ".json"),
+					artifacts.findingsReport(mode, asset.getQualifiedName()));
+		}
+		summary.processedAssetCount++;
+		summary.processedRecordCount += artifacts.recordCount;
+		System.out.println("Processed Purview asset " + asset.getQualifiedName() + " -> " + targetBlobName);
+	}
+
+	private ProcessedContentArtifacts processTextLikeBlob(BlobClient sourceBlob, AzureContentProcessor fileProcessor,
+			PurviewAsset asset, ThalesProtectRevealHelper tprh, String mode) throws IOException {
+		try (BlobInputStream blobInputStream = sourceBlob.openInputStream()) {
+			return fileProcessor.processStreamArtifacts(blobInputStream, asset.getQualifiedName(), tprh, mode, false);
+		}
+	}
+
+	private ProcessedContentArtifacts processDocumentBlob(BlobClient sourceBlob, AzureContentProcessor fileProcessor,
+			PurviewAsset asset, ThalesProtectRevealHelper tprh, String mode) throws IOException {
+		String sourceBlobName = asset.getStorageBlobName();
+		String fileName = sourceBlobName == null ? asset.getName() : sourceBlobName;
+		String suffix = fileName != null && fileName.contains(".")
+				? fileName.substring(fileName.lastIndexOf('.'))
+				: ".tmp";
+		Path tempFile = Files.createTempFile("purview-asset-", suffix);
+		try {
+			sourceBlob.downloadToFile(tempFile.toString(), true);
+			String extractedText = documentConversionService.extractText(tempFile.toFile());
+			return fileProcessor.processTextArtifacts(extractedText, asset.getQualifiedName(), tprh, mode, false);
+		} finally {
+			Files.deleteIfExists(tempFile);
 		}
 	}
 
 	private String buildTargetBlobName(String sourceBlobName, String mode) {
+		return buildArtifactBlobName(sourceBlobName, "protect".equalsIgnoreCase(mode) ? "protected" : "revealed", null);
+	}
+
+	private String buildArtifactBlobName(String sourceBlobName, String label, String forcedExtension) {
 		String prefix = purviewConfig.storageTargetPrefix == null ? "" : purviewConfig.storageTargetPrefix.trim();
 		if (!prefix.isEmpty() && !prefix.endsWith("/")) {
 			prefix = prefix + "/";
 		}
-		return prefix + ("protect".equalsIgnoreCase(mode) ? "protected-" : "revealed-")
-				+ sourceBlobName.replace('\\', '/');
+		String normalizedName = sourceBlobName.replace('\\', '/');
+		String targetName = prefix + label + "-" + normalizedName;
+		if (forcedExtension == null) {
+			return targetName;
+		}
+		return targetName + forcedExtension;
+	}
+
+	private void writeBlobArtifact(BlobContainerClient targetContainer, String blobName, String content) {
+		targetContainer.getBlobClient(blobName)
+				.getBlockBlobClient()
+				.upload(BinaryData.fromString(content), true);
+	}
+
+	private boolean shouldWriteExtractedText() {
+		return Boolean.parseBoolean(properties.getProperty("UNSTRUCTURED_OUTPUT_WRITE_EXTRACTED_TEXT", "false"));
+	}
+
+	private boolean shouldWriteFindingsReport() {
+		return Boolean.parseBoolean(properties.getProperty("UNSTRUCTURED_OUTPUT_WRITE_FINDINGS_REPORT", "false"));
 	}
 
 	private boolean matchesQualifiedNamePrefix(PurviewAsset asset) {
