@@ -23,6 +23,8 @@ import com.azure.ai.textanalytics.models.PiiEntityCategory;
 import com.azure.ai.textanalytics.models.RecognizePiiEntitiesResult;
 import com.azure.ai.textanalytics.util.RecognizePiiEntitiesResultCollection;
 import com.azure.core.credential.AzureKeyCredential;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Extends ContentProcessor to provide Azure-specific functionalities for
@@ -41,6 +43,8 @@ public class AzureContentProcessor extends ContentProcessor {
 	// Static variables to hold Azure Cognitive Services endpoint and API key.
 	static String  cognitiveservices_endpoint = null;
 	static String cognitiveservices_apiKey = null;
+	private final Properties localProperties;
+	private final DocumentConversionService documentConversionService;
 
 	/**
 	 * Constructor for AzureContentProcessor.
@@ -49,6 +53,8 @@ public class AzureContentProcessor extends ContentProcessor {
 	 */
 	public AzureContentProcessor(Properties p) {
 		super(p);
+		this.localProperties = p;
+		this.documentConversionService = new DocumentConversionService();
 		// TODO Auto-generated constructor stub - This comment indicates that
 		// further initialization specific to AzureContentProcessor might be needed here.
 	}
@@ -68,11 +74,13 @@ public class AzureContentProcessor extends ContentProcessor {
 	@Override
 	public int processFile(File inputFile, File outputDir, String projectId, ThalesProtectRevealHelper tprh,
 			String mode, boolean skiphdr) {
-		try (BufferedReader reader = Files.newBufferedReader(inputFile.toPath());
-				BufferedWriter writer = Files.newBufferedWriter(outputDir.toPath())) {
-			int nbroflines = processReader(reader, writer, tprh, mode, skiphdr);
+		try {
+			String extractedText = documentConversionService.extractText(inputFile);
+			ProcessedContentArtifacts artifacts = processTextArtifacts(extractedText, inputFile.getAbsolutePath(),
+					tprh, mode, skiphdr);
+			writeLocalArtifacts(inputFile, outputDir, artifacts, mode);
 			System.out.println("Processing complete! Check the output file: " + outputDir.getAbsolutePath());
-			return nbroflines;
+			return artifacts.recordCount;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return 0;
@@ -85,37 +93,52 @@ public class AzureContentProcessor extends ContentProcessor {
 	 */
 	public int processStream(InputStream inputStream, OutputStream outputStream, String projectId,
 			ThalesProtectRevealHelper tprh, String mode, boolean skiphdr) throws IOException {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-			return processReader(reader, writer, tprh, mode, skiphdr);
+		ProcessedContentArtifacts artifacts = processStreamArtifacts(inputStream, projectId, tprh, mode, skiphdr);
+		try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+			writer.write(artifacts.outputText);
+			writer.flush();
+		}
+		return artifacts.recordCount;
+	}
+
+	public ProcessedContentArtifacts processStreamArtifacts(InputStream inputStream, String projectId,
+			ThalesProtectRevealHelper tprh, String mode, boolean skiphdr) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+			return processReaderArtifacts(reader, tprh, mode, skiphdr, projectId);
 		}
 	}
 
-	private int processReader(BufferedReader reader, BufferedWriter writer, ThalesProtectRevealHelper tprh, String mode,
-			boolean skiphdr) throws IOException {
+	public ProcessedContentArtifacts processTextArtifacts(String extractedText, String sourceId,
+			ThalesProtectRevealHelper tprh, String mode, boolean skiphdr) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new java.io.StringReader(extractedText))) {
+			return processReaderArtifacts(reader, tprh, mode, skiphdr, sourceId);
+		}
+	}
+
+	private ProcessedContentArtifacts processReaderArtifacts(BufferedReader reader, ThalesProtectRevealHelper tprh,
+			String mode, boolean skiphdr, String sourceId) throws IOException {
 		int nbroflines = 0;
+		StringBuilder extractedBuilder = new StringBuilder();
+		StringBuilder outputBuilder = new StringBuilder();
+		JSONArray findings = new JSONArray();
 		if (skiphdr) {
 			reader.readLine();
 		}
 		String line;
 		while ((line = reader.readLine()) != null) {
 			nbroflines++;
-			String content = processLine(line, tprh, mode);
-			writer.write(content);
-			writer.newLine();
+			extractedBuilder.append(line).append(System.lineSeparator());
+			if (mode.equalsIgnoreCase("protect")) {
+				LineProtectionResult result = processTextChunk(line, tprh, nbroflines, sourceId);
+				outputBuilder.append(result.outputLine).append(System.lineSeparator());
+				for (int i = 0; i < result.findings.length(); i++) {
+					findings.put(result.findings.getJSONObject(i));
+				}
+			} else {
+				outputBuilder.append(decryptLine(line, tprh)).append(System.lineSeparator());
+			}
 		}
-		writer.flush();
-		return nbroflines;
-	}
-
-	private String processLine(String line, ThalesProtectRevealHelper tprh, String mode) {
-		if (line.length() < 2) {
-			return line;
-		}
-		if (mode.equalsIgnoreCase("protect")) {
-			return processTextChunk(line, tprh);
-		}
-		return decryptLine(line, tprh);
+		return new ProcessedContentArtifacts(nbroflines, extractedBuilder.toString(), outputBuilder.toString(), findings);
 	}
 
 	/**
@@ -145,6 +168,11 @@ public class AzureContentProcessor extends ContentProcessor {
 	 * @return The modified line with identified PII entities encrypted.
 	 */
 	public String processTextChunk(String line, ThalesProtectRevealHelper tprh) {
+		return processTextChunk(line, tprh, -1, null).outputLine;
+	}
+
+	public LineProtectionResult processTextChunk(String line, ThalesProtectRevealHelper tprh, int lineNumber,
+			String sourceId) {
 
 		String resultString = line; // Initialize result with the original line.
 
@@ -157,6 +185,7 @@ public class AzureContentProcessor extends ContentProcessor {
 
 		// Map to store original PII values and their encrypted versions.
 		Map<String, String> nameEncryptionMap = new HashMap<>();
+		JSONArray findings = new JSONArray();
 
 		// Configure options for PII entity recognition, specifying categories to filter.
 		RecognizePiiEntitiesOptions options = new RecognizePiiEntitiesOptions()
@@ -207,26 +236,31 @@ public class AzureContentProcessor extends ContentProcessor {
 						originalValue = entity.getText();
 						updatedValue = encryptData(originalValue, tprh, protection_type); // Encrypt the data.
 						nameEncryptionMap.put(originalValue, updatedValue); // Store mapping for replacement.
+						findings.put(createFinding(lineNumber, sourceId, entity, originalValue, updatedValue));
 					} else if ("Address".equals(entity.getCategory().toString())
 							&& entity.getConfidenceScore() >= CONFIDENCE_THRESHOLD) {
 						originalValue = entity.getText();
 						updatedValue = encryptData(originalValue, tprh, protection_type);
 						nameEncryptionMap.put(originalValue, updatedValue);
+						findings.put(createFinding(lineNumber, sourceId, entity, originalValue, updatedValue));
 					} else if ("PhoneNumber".equals(entity.getCategory().toString())
 							&& entity.getConfidenceScore() >= CONFIDENCE_THRESHOLD) {
 						originalValue = entity.getText();
 						updatedValue = encryptData(originalValue, tprh, protection_type);
 						nameEncryptionMap.put(originalValue, updatedValue);
+						findings.put(createFinding(lineNumber, sourceId, entity, originalValue, updatedValue));
 					} else if ("Email".equals(entity.getCategory().toString())
 							&& entity.getConfidenceScore() >= CONFIDENCE_THRESHOLD) {
 						originalValue = entity.getText();
 						updatedValue = encryptData(originalValue, tprh, protection_type);
 						nameEncryptionMap.put(originalValue, updatedValue);
+						findings.put(createFinding(lineNumber, sourceId, entity, originalValue, updatedValue));
 					} else if ("URL".equals(entity.getCategory().toString())
 							&& entity.getConfidenceScore() >= CONFIDENCE_THRESHOLD) {
 						originalValue = entity.getText();
 						updatedValue = encryptData(originalValue, tprh, protection_type);
 						nameEncryptionMap.put(originalValue, updatedValue);
+						findings.put(createFinding(lineNumber, sourceId, entity, originalValue, updatedValue));
 					}
 					else // If the entity category is not explicitly handled or confidence is too low.
 					{
@@ -243,7 +277,67 @@ public class AzureContentProcessor extends ContentProcessor {
 		}
 		resultString = line; // Update the resultString with the modified line.
 
-		return resultString; // Return the line with encrypted PII.
+		return new LineProtectionResult(resultString, findings); // Return the line with encrypted PII.
+	}
+
+	private JSONObject createFinding(int lineNumber, String sourceId, PiiEntity entity, String originalValue,
+			String protectedValue) {
+		JSONObject finding = new JSONObject();
+		if (sourceId != null) {
+			finding.put("sourceId", sourceId);
+		}
+		if (lineNumber > 0) {
+			finding.put("lineNumber", lineNumber);
+		}
+		finding.put("text", originalValue);
+		finding.put("protectedText", protectedValue);
+		finding.put("category", entity.getCategory().toString());
+		finding.put("confidence", entity.getConfidenceScore());
+		finding.put("offset", entity.getOffset());
+		finding.put("length", entity.getLength());
+		return finding;
+	}
+
+	private void writeLocalArtifacts(File inputFile, File primaryOutputFile, ProcessedContentArtifacts artifacts, String mode)
+			throws IOException {
+		if (shouldWriteExtractedText()) {
+			Files.writeString(buildSiblingArtifactPath(primaryOutputFile, "extracted-" + inputFile.getName()),
+					artifacts.extractedText, StandardCharsets.UTF_8);
+		}
+		if (shouldWriteProtectedText()) {
+			Files.writeString(primaryOutputFile.toPath(), artifacts.outputText, StandardCharsets.UTF_8);
+		}
+		if (shouldWriteFindingsReport() && mode.equalsIgnoreCase("protect")) {
+			Files.writeString(buildSiblingArtifactPath(primaryOutputFile, "findings-" + inputFile.getName() + ".json"),
+					artifacts.findingsReport(mode, inputFile.getAbsolutePath()), StandardCharsets.UTF_8);
+		}
+	}
+
+	private java.nio.file.Path buildSiblingArtifactPath(File primaryOutputFile, String fileName) {
+		File parentDir = primaryOutputFile.getParentFile();
+		return new File(parentDir, fileName).toPath();
+	}
+
+	private boolean shouldWriteExtractedText() {
+		return Boolean.parseBoolean(localProperties.getProperty("UNSTRUCTURED_OUTPUT_WRITE_EXTRACTED_TEXT", "false"));
+	}
+
+	private boolean shouldWriteProtectedText() {
+		return Boolean.parseBoolean(localProperties.getProperty("UNSTRUCTURED_OUTPUT_WRITE_PROTECTED_TEXT", "true"));
+	}
+
+	private boolean shouldWriteFindingsReport() {
+		return Boolean.parseBoolean(localProperties.getProperty("UNSTRUCTURED_OUTPUT_WRITE_FINDINGS_REPORT", "false"));
+	}
+
+	public static class LineProtectionResult {
+		public final String outputLine;
+		public final JSONArray findings;
+
+		public LineProtectionResult(String outputLine, JSONArray findings) {
+			this.outputLine = outputLine;
+			this.findings = findings;
+		}
 	}
 
 	/**
