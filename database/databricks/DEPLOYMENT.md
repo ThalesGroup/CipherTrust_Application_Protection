@@ -132,9 +132,9 @@ In general:
 
 See:
 
-- `sql_warehouse/sample_thales_crdp_python_udf_imports.py`
-- `sql_warehouse/legacy_thales_crdp_uc_function_templates.sql`
-- `sql_warehouse/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
+- `sql_warehouse/samples/sample_thales_crdp_python_udf_imports.py`
+- `sql_warehouse/legacy/legacy_thales_crdp_uc_function_templates.sql`
+- `sql_warehouse/docs/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
 
 That file is a starting point for warehouse-compatible Python functions. The
 warehouse deployment model is different from cluster Java UDFs, so keep the
@@ -144,16 +144,16 @@ Python code path separate from the Java adapter classes.
 
 Use the SQL template file to create warehouse-facing Unity Catalog functions:
 
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
-- `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
-- `sql_warehouse/sample_create_uc_secure_views.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+- `sql_warehouse/samples/sample_create_uc_secure_views.sql`
 
 Suggested deployment flow:
 
 1. Upload or install the Python package so `thales_databricks_udf` is available
    to the SQL warehouse runtime.
-2. Start with `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`.
+2. Start with `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`.
 3. If needed, use the optimized companion for the array-view path.
 4. Run the `CREATE OR REPLACE FUNCTION` statements in Databricks SQL.
 5. For secure reveal, wrap the `*_with_user` functions with views or SQL
@@ -169,18 +169,18 @@ Recommended governance pattern:
 Recommended run order for SQL Warehouse:
 
 1. Create the Unity Catalog functions with:
-   `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+   `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
 2. Create the secured wrapper views with:
-   `sql_warehouse/sample_create_uc_secure_views.sql`
+   `sql_warehouse/samples/sample_create_uc_secure_views.sql`
 
 ## Compute cluster smoke-test notebook
 
 Use the notebook below to register the Java UDF adapters and validate the
 cluster deployment after attaching the shaded jar:
 
-- `notebooks/databricks_compute_cluster_udf_smoke_test.py`
-- `notebooks/compute_cluster_table_reveal_castback.py`
-- `notebooks/compute_cluster_table_reveal_castback.sql`
+- `notebooks/compute_cluster_udf_smoke_test.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.sql`
 - `COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md`
 
 The notebook covers:
@@ -192,8 +192,10 @@ The notebook covers:
 
 If you also want SQL wrapper views on compute clusters, use:
 
-- `notebooks/compute_cluster_table_reveal_castback.py`
-- `notebooks/compute_cluster_table_reveal_castback.sql`
+- `notebooks/numbers/numbers_reveal_castback_examples.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.sql`
 
 Those examples show how to inject `current_user()` in Spark SQL after the Java
 UDFs are registered.
+
+

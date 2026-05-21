@@ -3,6 +3,22 @@
 This runbook covers the recommended setup and execution order for testing the
 Java UDF deployment on a Databricks compute cluster.
 
+## Compute cluster model
+
+| Thing | Compute cluster Java UDF path | Persistent? |
+|---|---|---|
+| Protected tables | `CREATE TABLE`, `INSERT OVERWRITE` | Yes |
+| Java UDF registrations | `spark.udf.registerJavaFunction(...)` | No, session-scoped |
+| Reveal views using those Java UDFs | `TEMP VIEW` | No, session-scoped |
+| Grants on protected tables | normal catalog grants | Yes |
+
+## Best-practice summary
+
+| Deployment path | Best fit | Why |
+|---|---|---|
+| Compute cluster Java UDFs | ETL, batch jobs, executor-parallel transforms, session-driven work | good fit for Spark job execution and large-scale transformation workloads |
+| SQL Warehouse / Unity Catalog functions | persistent, governed, shareable functions and views | best fit for durable shared access, grants, and analyst-facing reveal views |
+
 ## 1. Choose the jar version to test
 
 Use only one active Thales UDF jar on the cluster at a time.
@@ -123,26 +139,32 @@ Recommended practice:
 7. run the generic smoke test notebook
 8. if needed, run the debug notebook
 9. run the customer table setup or numeric setup scripts
-10. run the current table reveal castback example
+10. optionally run the current table reveal castback example notebook for a smaller walkthrough
 
 ## 9. Smoke test notebook
 
 Run first:
 
-- [databricks_compute_cluster_udf_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\databricks_compute_cluster_udf_smoke_test.py)
+- [compute_cluster_udf_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_udf_smoke_test.py)
 
 What this notebook does:
 
 - registers the Java UDFs
 - validates the config-path environment settings
-- runs basic scalar and bulk protect/reveal smoke tests
+- runs basic scalar and bulk protect/reveal smoke tests, including external scalar and external bulk reveal
 - does not require existing customer tables
+
+Important:
+
+- this notebook is mainly for validation and troubleshooting
+- the setup notebooks now self-register the object-aware Java UDFs they use
+- you do not need to run the smoke test first just to make the setup notebooks work
 
 ## 10. Optional debug notebook
 
 Run this only if you need deeper troubleshooting against the `plaintext_protected_internal` flow:
 
-- [databricks_compute_cluster_udf_plaintext_protected_internal_debug.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\databricks_compute_cluster_udf_plaintext_protected_internal_debug.py)
+- [legacy_internal_debug_reveal_examples.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\legacy_internal_debug_reveal_examples.py)
 
 What this notebook does:
 
@@ -154,38 +176,63 @@ What this notebook does:
 
 ## 11. Customer-table setup scripts
 
-For the `plaintext_protected_internal` workflow:
+For the main plaintext customer-table workflow:
 
-- [compute_cluster_plaintext_protected_internal_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_plaintext_protected_internal_setup.sql)
+- [plaintext_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\plaintext_setup.sql)
 
 Important:
 
 - this script inserts readable sample plaintext values
 - if you want to test reveal workflows, those rows must first be protected by your loader or another protection step
+- this notebook self-registers the required object-aware Java UDFs in the current session
+- it creates persistent protected tables and session `TEMP VIEW` reveal views
 
 For the numeric-measure workflow:
 
-- [compute_cluster_numbers_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_numbers_setup.sql)
+- [numbers_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_setup.sql)
+
+Important:
+
+- this notebook also self-registers the required object-aware Java UDFs in the current session
+- it creates persistent protected tables and session `TEMP VIEW` reveal views
 
 ## 12. Current supported reveal examples
 
-For the customer-table castback flow:
+For the compute-cluster customer-table setup flow:
 
-- [compute_cluster_table_reveal_castback.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_table_reveal_castback.py)
-- [compute_cluster_table_reveal_castback.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_table_reveal_castback.sql)
+- [plaintext_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\plaintext_setup.sql)
+
+For the Python/SQL castback walkthrough:
+
+- [numbers_reveal_castback_examples.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_reveal_castback_examples.py)
+- [numbers_reveal_castback_examples.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_reveal_castback_examples.sql)
 
 For numeric measures:
 
-- [databricks_compute_cluster_udf_numbers_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\databricks_compute_cluster_udf_numbers_smoke_test.py)
+- [numbers_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_smoke_test.py)
 
 ## 13. Objects created by the current customer-table flow
 
-The castback examples create or replace these session-scoped temp views and tables:
+The main setup flow now creates:
 
-- `temp_v_plaintext_protected_internal_reveal`
+- persistent protected Delta tables
+- session `TEMP VIEW` reveal views
+
+Example persistent tables:
+
+- `my_catalog.my_schema.plaintext_protected_internal`
+- `my_catalog.my_schema.plaintext_protected_external`
 - `my_catalog.my_schema.plaintext_protected_internal_arrays`
-- `temp_v_plaintext_protected_internal_array_reveal`
-- `temp_v_plaintext_final_reveal_flat`
+- `my_catalog.my_schema.plaintext_protected_external_arrays`
+
+Example session temp reveal views:
+
+- `v_plaintext_protected_internal_revealed`
+- `v_plaintext_protected_external_revealed`
+- `v_plaintext_protected_internal_array_reveal`
+- `v_plaintext_protected_external_array_reveal`
+- `v_plaintext_final_reveal_flat`
+- `v_plaintext_external_final_reveal_flat`
 
 ## 14. Expected validation points
 
@@ -193,16 +240,23 @@ After the smoke test and reveal examples run, validate the following:
 
 - the driver prints the configured `UDF_CONFIG_VOLUME_PATH`
 - Java UDF registration succeeds without class-not-found errors
-- the row-level temp reveal view returns data for the current Databricks user
+- the row-level temp reveal views return data for the current Databricks user
 - the arrays table contains batched arrays grouped by `batch_id`
-- the bulk reveal temp view returns decrypted or masked arrays as expected
-- the final flat temp view reconstructs row-shaped output from the arrays
+- the bulk reveal views return decrypted or masked arrays as expected
+- the final flat views reconstruct row-shaped output from the arrays
 - source row count and final flat row count match
 
 ## 15. Data type note for Java UDF testing
 
 The Java UDF adapters accept string inputs, so numeric columns are commonly
 cast to `STRING` at the UDF boundary.
+
+This is part of the recommended **cast-back pattern**:
+
+- keep the original business table in natural numeric types
+- store protected numeric values in a staging/protected table as `STRING`
+- reveal from that protected table
+- cast the revealed plaintext back to the original numeric type in the reveal view
 
 Important:
 
@@ -216,17 +270,23 @@ Example:
 SELECT
   CAST(
     thales_reveal_by_column_with_user(
-      CAST(amount_token AS STRING),
+      CAST(amount_decimal AS STRING),
       'nbr',
       'amount',
       current_user()
     )
     AS DECIMAL(18,2)
   ) AS amount
-FROM secure_view
+FROM my_catalog.my_schema.account_balance_plaintext_protected_internal
 ```
 
 Use this pattern for values that must later be averaged or summed.
+
+Why this matters:
+
+- protected numeric values are tokens, not true business numerics
+- numeric storage types can normalize or alter the token representation
+- that can break reliable reveal if leading zeros, scale, or formatting change
 
 Aggregation example:
 
@@ -235,7 +295,7 @@ SELECT
   SUM(
     CAST(
       thales_reveal_by_column_with_user(
-        CAST(amount_token AS STRING),
+        CAST(amount_decimal AS STRING),
         'nbr',
         'amount',
         current_user()
@@ -246,7 +306,7 @@ SELECT
   AVG(
     CAST(
       thales_reveal_by_column_with_user(
-        CAST(balance_token AS STRING),
+        CAST(balance_long AS STRING),
         'nbr',
         'balance',
         current_user()
@@ -254,7 +314,23 @@ SELECT
       AS DECIMAL(18,2)
     )
   ) AS avg_balance
-FROM secure_view
+FROM my_catalog.my_schema.account_balance_plaintext_protected_internal
+```
+
+For external-policy numeric tables with sibling header columns, use:
+
+```sql
+SELECT
+  CAST(
+    thales_reveal_by_column_with_external_header_and_user(
+      CAST(amount_decimal AS STRING),
+      CAST(amount_decimal_header AS STRING),
+      'nbr',
+      'amount',
+      current_user()
+    ) AS DECIMAL(18,2)
+  ) AS amount
+FROM my_catalog.my_schema.account_balance_plaintext_protected_external
 ```
 
 ## 16. Recommended setup summary
@@ -293,3 +369,4 @@ Init script:
 - [Compute-scoped libraries](https://docs.databricks.com/aws/en/libraries/cluster-libraries)
 - [Compute configuration reference](https://docs.databricks.com/en/compute/configure.html)
 - [Workspace files](https://docs.databricks.com/aws/en/files/workspace)
+

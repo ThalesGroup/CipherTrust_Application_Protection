@@ -12,9 +12,14 @@ __all__ = [
     "demo_bulk_test",
     "load_properties",
     "prepare_reveal_input",
+    "prepare_reveal_input_with_versions",
     "resolve_runtime_reveal_user",
+    "thales_crdp_python_protect_with_external_header",
+    "thales_crdp_python_protect_with_external_header_by_object",
     "thales_crdp_python_function_bulk_secure",
     "thales_crdp_python_function_bulk_secure_legacy",
+    "thales_crdp_python_function_bulk_by_object",
+    "thales_crdp_python_function_bulk_secure_by_object",
 ]
 
 
@@ -114,15 +119,45 @@ def check_valid(databricks_inputdata, datatype, bad_data_tag: Optional[str] = No
 
 
 def prepare_reveal_input(protected_data, protection_policy_name, key_metadata_location, external_version=None, username="admin"):
+    return prepare_reveal_input_with_versions(
+        protected_data,
+        protection_policy_name,
+        key_metadata_location,
+        external_versions=None,
+        external_version=external_version,
+        username=username,
+    )
+
+
+def prepare_reveal_input_with_versions(
+    protected_data,
+    protection_policy_name,
+    key_metadata_location,
+    external_versions=None,
+    external_version=None,
+    username="admin",
+):
     payload = {
         "protection_policy_name": protection_policy_name,
         "username": username,
         "protected_data_array": [],
     }
-    if str(key_metadata_location).lower() == "external" and external_version:
-        payload["protected_data_array"] = [
-            {"protected_data": data, "external_version": external_version} for data in protected_data
-        ]
+    if str(key_metadata_location).lower() == "external":
+        if external_versions is not None:
+            payload["protected_data_array"] = []
+            for index, data in enumerate(protected_data):
+                item = {"protected_data": data}
+                item_external_version = external_versions[index] if index < len(external_versions) else None
+                item_external_version = first_non_blank(item_external_version, external_version)
+                if item_external_version:
+                    item["external_version"] = item_external_version
+                payload["protected_data_array"].append(item)
+        elif external_version:
+            payload["protected_data_array"] = [
+                {"protected_data": data, "external_version": external_version} for data in protected_data
+            ]
+        else:
+            payload["protected_data_array"] = [{"protected_data": data} for data in protected_data]
     else:
         payload["protected_data_array"] = [{"protected_data": data} for data in protected_data]
     return payload
@@ -130,6 +165,10 @@ def prepare_reveal_input(protected_data, protection_policy_name, key_metadata_lo
 
 def normalize_column_key(column_name: Optional[str]) -> Optional[str]:
     return None if column_name is None else column_name.strip().lower()
+
+
+def normalize_object_key(object_name: Optional[str]) -> Optional[str]:
+    return None if object_name is None else object_name.strip().lower()
 
 
 def first_non_blank(*values):
@@ -175,6 +214,50 @@ def parse_column_profiles(properties: dict) -> dict:
     return profiles
 
 
+def parse_object_profiles(properties: dict, prefix: str) -> dict:
+    object_profiles = {}
+    normalized_prefix = prefix.strip()
+    for property_name, property_value in properties.items():
+        if not property_name.startswith(normalized_prefix):
+            continue
+        object_name = normalize_object_key(property_name[len(normalized_prefix):])
+        if not object_name:
+            continue
+        column_profiles = {}
+        for entry in str(property_value).split(","):
+            item = entry.strip()
+            if not item:
+                continue
+            parts = item.split("|", 1)
+            column_name = parts[0].strip().lower()
+            profile_alias = parts[1].strip() if len(parts) > 1 else ""
+            column_profiles[column_name] = profile_alias
+        object_profiles[object_name] = column_profiles
+    return object_profiles
+
+
+def resolve_object_profile_alias(
+    properties: dict,
+    object_name: Optional[str],
+    column_name: Optional[str],
+    mode: Optional[str] = None,
+) -> Optional[str]:
+    normalized_object = normalize_object_key(object_name)
+    normalized_column = normalize_column_key(column_name)
+    if normalized_object is None or normalized_column is None:
+        return None
+
+    use_reveal_profiles = str(mode or "").lower().startswith("reveal")
+    reveal_profiles = parse_object_profiles(properties, "reveal.object.")
+    if use_reveal_profiles:
+        configured = reveal_profiles.get(normalized_object, {}).get(normalized_column)
+        if configured:
+            return configured
+
+    protect_profiles = parse_object_profiles(properties, "protect.object.")
+    return protect_profiles.get(normalized_object, {}).get(normalized_column)
+
+
 def resolve_alias(properties: dict, configured_profile: Optional[str]) -> Optional[str]:
     if configured_profile is None or not configured_profile.strip():
         return None
@@ -195,9 +278,16 @@ def resolve_column_property(properties: dict, column_name: Optional[str], suffix
     )
 
 
-def resolve_profile(properties: dict, datatype: str, column_name: Optional[str] = None):
+def resolve_profile(
+    properties: dict,
+    datatype: str,
+    column_name: Optional[str] = None,
+    object_name: Optional[str] = None,
+    mode: Optional[str] = None,
+):
     column_profiles = parse_column_profiles(properties)
     configured_profile = first_non_blank(
+        resolve_object_profile_alias(properties, object_name, column_name, mode),
         resolve_column_property(properties, column_name, "profile"),
         column_profiles.get(normalize_column_key(column_name)),
         properties.get("protection_profile"),
@@ -268,12 +358,73 @@ def _validate_spark_session(spark_session):
     )
 
 
+def thales_crdp_python_protect_with_external_header(
+    value,
+    datatype,
+    column_name=None,
+    object_name=None,
+    *,
+    properties=None,
+    spark_session=None,
+):
+    validated_properties = _validate_properties(properties)
+    _validate_spark_session(spark_session)
+    props = validated_properties or get_default_properties()
+
+    if value is None:
+        return {"protected_value": None, "external_header": None}
+
+    normalized_value = value
+    if str(datatype).lower() != "char":
+        normalized_value = check_valid(value, datatype, get_bad_data_tag(props))
+    else:
+        normalized_value = check_valid(value, datatype, get_bad_data_tag(props))
+
+    policy_name, policy_type = resolve_profile(props, datatype, column_name, object_name, "protectbulk")
+    url = build_url(props, "protectbulk")
+    payload = {
+        "protection_policy_name": policy_name,
+        "data_array": [normalized_value],
+    }
+    response_json = post_json(url, payload)
+    items = response_json.get("protected_data_array", [])
+    if not items:
+        return {"protected_value": normalized_value, "external_header": None}
+
+    item = items[0]
+    return {
+        "protected_value": item.get("protected_data"),
+        "external_header": item.get("external_version") if policy_type == "external" else None,
+    }
+
+
+def thales_crdp_python_protect_with_external_header_by_object(
+    value,
+    datatype,
+    object_name,
+    column_name=None,
+    *,
+    properties=None,
+    spark_session=None,
+):
+    return thales_crdp_python_protect_with_external_header(
+        value,
+        datatype,
+        column_name=column_name,
+        object_name=object_name,
+        properties=properties,
+        spark_session=spark_session,
+    )
+
+
 def _thales_crdp_python_function_bulk_impl(
     databricks_inputdata,
     mode,
     datatype,
     column_name=None,
+    object_name=None,
     reveal_user=None,
+    external_versions=None,
     properties=None,
     spark_session=None,
     allow_runtime_reveal_user_override: bool = True,
@@ -300,6 +451,10 @@ def _thales_crdp_python_function_bulk_impl(
     runtime_reveal_user = resolve_runtime_reveal_user(validated_spark_session, explicit_reveal_user, props)
 
     normalized_values = list(databricks_inputdata or [])
+    normalized_external_versions = None if external_versions is None else list(external_versions)
+    if normalized_external_versions is not None and len(normalized_external_versions) != len(normalized_values):
+        raise ValueError("external_versions must have the same length as databricks_inputdata")
+
     if mode == "protectbulk":
         if str(datatype).lower() != "char":
             normalized_values = [check_valid(value, datatype, get_bad_data_tag(props)) for value in normalized_values]
@@ -308,7 +463,7 @@ def _thales_crdp_python_function_bulk_impl(
     else:
         normalized_values = [None if value is None else str(value) for value in normalized_values]
 
-    policy_name, policy_type = resolve_profile(props, datatype, column_name)
+    policy_name, policy_type = resolve_profile(props, datatype, column_name, object_name, mode)
     url = build_url(props, mode)
 
     try:
@@ -324,8 +479,15 @@ def _thales_crdp_python_function_bulk_impl(
             normalized_values,
             policy_name,
             key_metadata_location if policy_type != "none" else "none",
-            external_version_from_ext_source if policy_type == "external" else None,
-            runtime_reveal_user,
+            external_version=external_version_from_ext_source if policy_type == "external" else None,
+            username=runtime_reveal_user,
+        ) if normalized_external_versions is None else prepare_reveal_input_with_versions(
+            normalized_values,
+            policy_name,
+            key_metadata_location if policy_type != "none" else "none",
+            external_versions=normalized_external_versions if policy_type == "external" else None,
+            external_version=external_version_from_ext_source if policy_type == "external" else None,
+            username=runtime_reveal_user,
         )
         response_json = post_json(url, payload)
         return [item["data"] for item in response_json.get("data_array", [])]
@@ -340,8 +502,10 @@ def thales_crdp_python_function_bulk(
     mode,
     datatype,
     column_name=None,
+    object_name=None,
     *,
     reveal_user=None,
+    external_versions=None,
     properties=None,
     spark_session=None,
 ):
@@ -356,7 +520,9 @@ def thales_crdp_python_function_bulk(
         mode,
         datatype,
         column_name=column_name,
+        object_name=object_name,
         reveal_user=reveal_user,
+        external_versions=external_versions,
         properties=properties,
         spark_session=spark_session,
         allow_runtime_reveal_user_override=True,
@@ -368,7 +534,9 @@ def thales_crdp_python_function_bulk_secure(
     mode,
     datatype,
     column_name=None,
+    object_name=None,
     *,
+    external_versions=None,
     properties=None,
     spark_session=None,
 ):
@@ -384,7 +552,9 @@ def thales_crdp_python_function_bulk_secure(
         mode,
         datatype,
         column_name=column_name,
+        object_name=object_name,
         reveal_user=None,
+        external_versions=external_versions,
         properties=properties,
         spark_session=spark_session,
         allow_runtime_reveal_user_override=False,
@@ -395,12 +565,60 @@ def thales_crdp_python_function_bulk_legacy(databricks_inputdata, mode, datatype
     return thales_crdp_python_function_bulk(databricks_inputdata, mode, datatype, None)
 
 
+def thales_crdp_python_function_bulk_by_object(
+    databricks_inputdata,
+    mode,
+    datatype,
+    object_name,
+    column_name=None,
+    *,
+    reveal_user=None,
+    external_versions=None,
+    properties=None,
+    spark_session=None,
+):
+    return thales_crdp_python_function_bulk(
+        databricks_inputdata,
+        mode,
+        datatype,
+        column_name,
+        object_name=object_name,
+        reveal_user=reveal_user,
+        external_versions=external_versions,
+        properties=properties,
+        spark_session=spark_session,
+    )
+
+
 def thales_crdp_python_function_bulk_secure_legacy(databricks_inputdata, mode, datatype, *, properties=None, spark_session=None):
     return thales_crdp_python_function_bulk_secure(
         databricks_inputdata,
         mode,
         datatype,
         None,
+        properties=properties,
+        spark_session=spark_session,
+    )
+
+
+def thales_crdp_python_function_bulk_secure_by_object(
+    databricks_inputdata,
+    mode,
+    datatype,
+    object_name,
+    column_name=None,
+    *,
+    external_versions=None,
+    properties=None,
+    spark_session=None,
+):
+    return thales_crdp_python_function_bulk_secure(
+        databricks_inputdata,
+        mode,
+        datatype,
+        column_name,
+        object_name=object_name,
+        external_versions=external_versions,
         properties=properties,
         spark_session=spark_session,
     )

@@ -34,6 +34,7 @@ public class ThalesDataBricksCADPFPE {
 	 */
 
 	private static final IngrianProvider provider;
+	private static final ThalesLogger LOG = ThalesLogger.get(ThalesDataBricksCADPFPE.class);
 	private static Properties properties;
 
     static {
@@ -75,7 +76,7 @@ public class ThalesDataBricksCADPFPE {
 			// Initialize the IngrianProvider using the static context
 			provider = new IngrianProvider.Builder().addConfigFileInputStream(inputStream).build();
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("cadp_provider_init_failed", e);
 			throw new RuntimeException("Failed to initialize IngrianProvider.", e);
 		}
 	}
@@ -89,11 +90,11 @@ public class ThalesDataBricksCADPFPE {
 		String request_decrypt_nbr = "8310258662548";
 		String request = "554";
 		String response = null;
-		System.out.println("input data = " + request);
 		String mode = "encrypt";
 		String datatype = "nbr";
 
-		System.out.println("results = " + thales_cadp_udf(request, mode, datatype));
+		LOG.info("cadp_demo_start", "mode", mode, "datatype", datatype);
+		thales_cadp_udf(request, mode, datatype);
 	}
 
 	public static String thales_cadp_udf(String databricks_inputdata, String mode, String datatype) throws Exception {
@@ -113,17 +114,17 @@ public class ThalesDataBricksCADPFPE {
 
 					// Check if the number is between -1 and -9
 					if (number.compareTo(lowerBound) >= 0 && number.compareTo(upperBound) <= 0) {
-						System.out.println("The input is a negative number between -1 and -9.");
+						LOG.debug("cadp_input_skipped_negative_single_digit");
 						return databricks_inputdata;
 					}
 				} catch (NumberFormatException e) {
-					System.out.println("The input is not a valid number.");
+					LOG.debug("cadp_input_not_numeric");
 					return databricks_inputdata;
 				}
 			}
 
 		} else {
-			System.out.println("The input is either null or empty.");
+			LOG.debug("cadp_input_blank");
 			return databricks_inputdata;
 		}
 
@@ -196,7 +197,7 @@ public class ThalesDataBricksCADPFPE {
 
 		} catch (Exception e) {
 
-			System.out.println("in exception with " + e.getMessage());
+			LOG.warn("cadp_operation_exception", e, "mode", mode, "datatype", datatype);
 
 			if (returnciphertextbool) {
 				if (e.getMessage().contains("1401")
@@ -206,11 +207,11 @@ public class ThalesDataBricksCADPFPE {
 					}
 
 				} else {
-					e.printStackTrace(System.out);
+					LOG.error("cadp_operation_failed", e, "mode", mode, "datatype", datatype);
 
 				}
 			} else {
-				e.printStackTrace(System.out);
+				LOG.error("cadp_operation_failed", e, "mode", mode, "datatype", datatype);
 
 			}
 		} finally

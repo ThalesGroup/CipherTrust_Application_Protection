@@ -10,14 +10,20 @@ import java.util.Properties;
 public final class ThalesDataBricksUdfConfig {
 
     private static final String COLUMN_PROFILES_KEY = "COLUMN_PROFILES";
+    private static final String PROTECT_OBJECT_PREFIX = "protect.object.";
+    private static final String REVEAL_OBJECT_PREFIX = "reveal.object.";
     private static final int DEFAULT_BATCH_SIZE = 1000;
 
     private final Properties properties;
     private final Map<String, String> columnProfiles;
+    private final Map<String, Map<String, String>> protectObjectProfiles;
+    private final Map<String, Map<String, String>> revealObjectProfiles;
 
     private ThalesDataBricksUdfConfig(Properties properties) {
         this.properties = properties;
         this.columnProfiles = parseColumnProfiles(properties.getProperty(COLUMN_PROFILES_KEY));
+        this.protectObjectProfiles = parseObjectProfiles(properties, PROTECT_OBJECT_PREFIX);
+        this.revealObjectProfiles = parseObjectProfiles(properties, REVEAL_OBJECT_PREFIX);
     }
 
     public static ThalesDataBricksUdfConfig load() {
@@ -51,7 +57,7 @@ public final class ThalesDataBricksUdfConfig {
     }
 
     public int getBatchSize() {
-        return parseInt(firstNonBlank(property("BATCH_SIZE"), property("BATCHSIZE")), DEFAULT_BATCH_SIZE);
+        return parseInt(firstNonBlank(property("BATCH_SIZE")), DEFAULT_BATCH_SIZE);
     }
 
     public boolean isReturnCiphertextForUnauthorizedEnabled() {
@@ -75,6 +81,34 @@ public final class ThalesDataBricksUdfConfig {
                 "10000"), 10000);
     }
 
+    public ThalesLogger.Level getAppLogLevel() {
+        return ThalesLogger.Level.parse(firstNonBlank(
+                property("APP_LOG_LEVEL"),
+                property("app.log.level"),
+                "INFO"));
+    }
+
+    public String getAppLogFormat() {
+        return firstNonBlank(
+                property("APP_LOG_FORMAT"),
+                property("app.log.format"),
+                "kv");
+    }
+
+    public boolean isAppLogIncludeStacktrace() {
+        return parseBooleanFlag(firstNonBlank(
+                property("APP_LOG_INCLUDE_STACKTRACE"),
+                property("app.log.includeStacktrace"),
+                "false"));
+    }
+
+    public String getAppLogComponent() {
+        return firstNonBlank(
+                property("APP_LOG_COMPONENT"),
+                property("app.log.component"),
+                "thales-databricks-udf");
+    }
+
     public String getDefaultRevealUser() {
         return firstNonBlank(property("DEFAULTREVEALUSER"), property("CRDPUSER"), property("databricksuser"), "admin");
     }
@@ -87,8 +121,36 @@ public final class ThalesDataBricksUdfConfig {
         return firstNonBlank(property("DEFAULTMODE"), property("keymetadatalocation"), "external");
     }
 
+    public String getExternalTableHeaderValue() {
+        return firstNonBlank(
+                property("external_table_header_value"),
+                property("EXTERNAL_TABLE_HEADER_VALUE"),
+                "header");
+    }
+
+    public String getExternalTableHeaderDelimiter() {
+        return firstNonBlank(
+                property("external_table_header_delimiter"),
+                property("EXTERNAL_TABLE_HEADER_DELIMITER"),
+                "_");
+    }
+
+    public String resolveExternalHeaderColumnName(String columnName) {
+        if (isBlank(columnName)) {
+            return null;
+        }
+        return normalizeColumnKey(columnName)
+                + getExternalTableHeaderDelimiter()
+                + getExternalTableHeaderValue();
+    }
+
     public String resolvePolicyName(String columnName, String dataType, String mode) {
+        return resolvePolicyName(null, columnName, dataType, mode);
+    }
+
+    public String resolvePolicyName(String objectName, String columnName, String dataType, String mode) {
         String configuredProfile = firstNonBlank(
+                getObjectColumnProfileAlias(objectName, columnName, mode),
                 getColumnProperty(columnName, "profile"),
                 getColumnProfileAlias(columnName),
                 getLegacyProfileAlias(dataType, mode),
@@ -104,7 +166,12 @@ public final class ThalesDataBricksUdfConfig {
     }
 
     public String resolvePolicyType(String columnName, String dataType, String mode) {
+        return resolvePolicyType(null, columnName, dataType, mode);
+    }
+
+    public String resolvePolicyType(String objectName, String columnName, String dataType, String mode) {
         String configuredProfile = firstNonBlank(
+                getObjectColumnProfileAlias(objectName, columnName, mode),
                 getColumnProperty(columnName, "profile"),
                 getColumnProfileAlias(columnName),
                 getLegacyProfileAlias(dataType, mode),
@@ -127,14 +194,22 @@ public final class ThalesDataBricksUdfConfig {
     }
 
     public String resolveMetadata(String columnName) {
+        return resolveMetadata(null, columnName);
+    }
+
+    public String resolveMetadata(String objectName, String columnName) {
         return firstNonBlank(getColumnProperty(columnName, "metadata"), getDefaultMetadata());
     }
 
     public String resolveRevealUser(String columnName) {
+        return resolveRevealUser(null, columnName);
+    }
+
+    public String resolveRevealUser(String objectName, String columnName) {
         return firstNonBlank(getColumnProperty(columnName, "revealUser"), getDefaultRevealUser());
     }
 
-    public String resolveRevealUser(String columnName, String runtimeRevealUser) {
+    public String resolveRevealUser(String objectName, String columnName, String runtimeRevealUser) {
         return firstNonBlank(runtimeRevealUser, getColumnProperty(columnName, "revealUser"), getDefaultRevealUser());
     }
 
@@ -174,6 +249,23 @@ public final class ThalesDataBricksUdfConfig {
 
     private String getColumnProfileAlias(String columnName) {
         return isBlank(columnName) ? null : this.columnProfiles.get(normalizeColumnKey(columnName));
+    }
+
+    private String getObjectColumnProfileAlias(String objectName, String columnName, String mode) {
+        if (isBlank(objectName) || isBlank(columnName)) {
+            return null;
+        }
+        Map<String, String> objectProfiles = getObjectProfilesForMode(mode).get(normalizeObjectKey(objectName));
+        if (objectProfiles == null) {
+            return null;
+        }
+        return objectProfiles.get(normalizeColumnKey(columnName));
+    }
+
+    private Map<String, Map<String, String>> getObjectProfilesForMode(String mode) {
+        return "reveal".equalsIgnoreCase(normalizeToken(mode)) && !this.revealObjectProfiles.isEmpty()
+                ? this.revealObjectProfiles
+                : this.protectObjectProfiles;
     }
 
     private String resolveAlias(String configuredProfile) {
@@ -216,6 +308,21 @@ public final class ThalesDataBricksUdfConfig {
             profiles.put(normalizeColumnKey(columnName), profileAlias);
         }
         return profiles;
+    }
+
+    private static Map<String, Map<String, String>> parseObjectProfiles(Properties properties, String prefix) {
+        Map<String, Map<String, String>> objectProfiles = new LinkedHashMap<>();
+        for (String key : properties.stringPropertyNames()) {
+            if (key == null || !key.regionMatches(true, 0, prefix, 0, prefix.length())) {
+                continue;
+            }
+            String objectName = trimToNull(key.substring(prefix.length()));
+            if (objectName == null) {
+                continue;
+            }
+            objectProfiles.put(normalizeObjectKey(objectName), parseColumnProfiles(properties.getProperty(key)));
+        }
+        return objectProfiles;
     }
 
     private static String normalizeTagKey(String configuredProfile) {
@@ -267,6 +374,10 @@ public final class ThalesDataBricksUdfConfig {
 
     private static String normalizeColumnKey(String columnName) {
         return columnName.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static String normalizeObjectKey(String objectName) {
+        return objectName.trim().toLowerCase(Locale.ROOT);
     }
 
     private static String normalizeToken(String value) {
