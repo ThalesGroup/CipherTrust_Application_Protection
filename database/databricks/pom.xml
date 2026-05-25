@@ -48,7 +48,7 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}\libs</outputDirectory>
                             <includeScope>runtime</includeScope>
-                            <excludeArtifactIds>${project.artifactId}</excludeArtifactIds>
+                            <excludeArtifactIds>${project.artifactId},log4j-api,log4j-core,slf4j-api,slf4j-nop,commons-logging</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -67,6 +67,15 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>all</shadedClassifierName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                                    <exclude>org.slf4j:slf4j-api</exclude>
+                                    <exclude>org.slf4j:slf4j-nop</exclude>
+                                    <exclude>commons-logging:commons-logging</exclude>
+                                </excludes>
+                            </artifactSet>
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -77,11 +86,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.thales.appprotection.utilities.tool.CsvDirectoryProtectionTool</mainClass>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

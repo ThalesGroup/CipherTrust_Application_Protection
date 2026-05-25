@@ -16,14 +16,18 @@ Use compute-cluster Java UDFs when you want:
 Use the SQL Warehouse / Unity Catalog Python function path when your main use
 case is Databricks SQL, BI tools, or shared governed SQL functions.
 
+If you are unsure which compute-cluster notebook to run after deployment, see:
+
+- [NOTEBOOK_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\NOTEBOOK_INDEX.md)
+
 ## Artifacts in this project
 
 - `target/thales.databricks.udf-0.0.1-SNAPSHOT-all.jar`
 - `src/main/resources/udfConfig.properties`
-- `notebooks/databricks_compute_cluster_udf_smoke_test.py`
-- `notebooks/compute_cluster_table_reveal_castback.py`
-- `notebooks/compute_cluster_table_reveal_castback.sql`
-- `notebooks/compute_cluster_grant_examples.sql`
+- `notebooks/compute_cluster_udf_smoke_test.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.sql`
+- `notebooks/utils/grant_examples.sql`
 - `cluster_init_scripts/copy_udf_config_init.sh`
 
 ## Deployment overview
@@ -83,7 +87,7 @@ Init script volume path:
 
 Use:
 
-- `notebooks/databricks_compute_cluster_udf_smoke_test.py`
+- `notebooks/compute_cluster_udf_smoke_test.py`
 
 That notebook registers:
 
@@ -231,7 +235,7 @@ Recommended least-privilege pattern:
 
 Use:
 
-- `notebooks/compute_cluster_grant_examples.sql`
+- `notebooks/utils/grant_examples.sql`
 
 Recommended model:
 
@@ -266,7 +270,8 @@ Important limitation:
 
 - `DEPLOYMENT.md`
 - `README.md`
-- `notebooks/databricks_compute_cluster_udf_smoke_test.py`
-- `notebooks/compute_cluster_table_reveal_castback.py`
-- `notebooks/compute_cluster_table_reveal_castback.sql`
-- `notebooks/compute_cluster_grant_examples.sql`
+- `notebooks/compute_cluster_udf_smoke_test.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.sql`
+- `notebooks/utils/grant_examples.sql`
+

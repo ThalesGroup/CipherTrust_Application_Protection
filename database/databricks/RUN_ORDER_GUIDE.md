@@ -34,44 +34,47 @@ Use compute clusters when you want:
    ```
 
    Expected artifact:
-   - `dist/thales_databricks_udf-0.1.1-py3-none-any.whl`
+   - `dist/thales_databricks_udf-0.1.4-py3-none-any.whl`
 
 2. Upload the wheel to a Unity Catalog volume.
 
    Example:
-   - `/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.1-py3-none-any.whl`
+   - `/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl`
 
 3. Review the deployment guide.
 
    File:
-   - `sql_warehouse/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
+   - `sql_warehouse/docs/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
 
 4. Create the Unity Catalog functions.
 
    Preferred current file for `plaintext_protected_internal`:
-   - `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+   - `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+
+   External-policy companion:
+   - `sql_warehouse/deploy/create_uc_plaintext_protected_external_reveal_functions_and_views_embedded_config.sql`
 
    Optional optimized companion:
-   - `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
+   - `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
 
    Future packaged-config option:
-   - `sql_warehouse/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+   - `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
 
    Legacy concrete reference:
-   - `sql_warehouse/legacy_create_uc_functions_built_wheel.sql`
+   - `sql_warehouse/legacy/legacy_create_uc_functions_built_wheel.sql`
 
    Legacy generic template:
-   - `sql_warehouse/legacy_thales_crdp_uc_function_templates.sql`
+   - `sql_warehouse/legacy/legacy_thales_crdp_uc_function_templates.sql`
 
 5. Create the secured wrapper views.
 
    File:
-   - `sql_warehouse/sample_create_uc_secure_views.sql`
+   - `sql_warehouse/samples/sample_create_uc_secure_views.sql`
 
 6. Apply grants.
 
    File:
-   - `sql_warehouse/sample_grant_uc_secure_views.sql`
+   - `sql_warehouse/samples/sample_grant_uc_secure_views.sql`
 
 7. Validate.
 
@@ -125,31 +128,43 @@ Use compute clusters when you want:
    File:
    - `COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md`
 
-5. Register the Java UDFs and run smoke tests.
+5. Optionally run the generic smoke test notebook for validation and troubleshooting.
 
    File:
-   - `notebooks/databricks_compute_cluster_udf_smoke_test.py`
+   - `notebooks/compute_cluster_udf_smoke_test.py`
 
-6. Run the current customer-table reveal example.
+6. Run the setup script that self-registers the Java UDFs it needs and creates the protected tables plus session temp reveal views.
+
+   Files:
+   - `notebooks/plaintext_setup.sql`
+   - `notebooks/numbers/numbers_setup.sql`
+
+7. Optionally run the Python or SQL cast-back example notebooks if you want a
+   smaller session-scoped walkthrough in addition to the setup flow.
 
    File:
-   - `notebooks/compute_cluster_table_reveal_castback.py`
-   - `notebooks/compute_cluster_table_reveal_castback.sql`
+   - `notebooks/numbers/numbers_reveal_castback_examples.py`
+   - `notebooks/numbers/numbers_reveal_castback_examples.sql`
 
-7. Apply grants if you created persistent views.
+8. Apply grants if you created additional persistent tables or views outside the setup scripts.
 
    File:
-   - `notebooks/compute_cluster_grant_examples.sql`
+   - `notebooks/utils/grant_examples.sql`
 
-8. Validate.
+9. Validate.
 
    Example checks:
 
    ```sql
-   SELECT * FROM temp_v_plaintext_protected_internal_reveal LIMIT 10;
-   SELECT * FROM temp_v_plaintext_protected_internal_array_reveal LIMIT 10;
-   SELECT * FROM temp_v_plaintext_final_reveal_flat LIMIT 10;
+   SELECT * FROM v_plaintext_protected_internal_revealed LIMIT 10;
+   SELECT * FROM v_plaintext_protected_internal_array_reveal LIMIT 10;
+   SELECT * FROM v_plaintext_final_reveal_flat LIMIT 10;
    ```
+
+For focused numeric validation after the generic registration notebook, also use:
+
+- `notebooks/numbers/numbers_smoke_test.py`
+- `notebooks/numbers/numbers_setup.sql`
 
 ## Simplest recommended production pattern
 
@@ -163,13 +178,15 @@ SQL Warehouse:
 Compute cluster:
 
 - build jar
-- register Java UDFs
-- optionally create persistent views
-- grant users only on the views if you created them
+- run a setup notebook that self-registers the Java UDFs for the current session
+- create persistent protected tables plus session temp reveal views
+- grant users on persistent protected tables or on any separate persistent SQL Warehouse views you create
 
 ## Related files
 
 - `README.md`
 - `DEPLOYMENT.md`
-- `sql_warehouse/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
+- `sql_warehouse/docs/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
 - `COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md`
+
+

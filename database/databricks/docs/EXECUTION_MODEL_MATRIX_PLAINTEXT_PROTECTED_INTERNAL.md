@@ -10,7 +10,7 @@ This guide shows how the current implementation styles map to the
 | 1 | Java Spark UDF on compute cluster | Yes | Protect/reveal in controlled cluster ETL and notebooks | `thales_reveal_by_column_with_user`, `temp_v_plaintext_protected_internal_reveal` |
 | 2 | Python direct helper call | No, normally driver-side | Notebook diagnostics and small direct tests | `thales_crdp_python_function_bulk(...)` |
 | 3 | Pandas UDF on compute cluster | Yes, in vectorized Python batches | Higher-volume Python batch processing when a notebook/job must stay Python-first | `pandas_udf`, `thales_crdp_python_function_bulk(...)` |
-| 4 | Unity Catalog Python UDF | Managed Databricks SQL/runtime execution | SQL Warehouse and governed reveal access | `thales_reveal_by_column_uc_embedded`, `v_plaintext_protected_internal_reveal_uc_embedded` |
+| 4 | Unity Catalog Python UDF | Managed Databricks SQL/runtime execution | SQL Warehouse and governed reveal access | `thales_reveal_by_object_and_column_uc_embedded`, `v_plaintext_protected_internal_reveal_uc_embedded` |
 | 5 | Optimized UC Python UDF bundle | Managed Databricks SQL/runtime execution | Lower Databricks UDF overhead for array/batch reveal | `thales_reveal_bundle_by_columns_uc_embedded_optimized`, `v_plaintext_protected_internal_array_reveal_uc_embedded_optimized` |
 | 6 | Lakeflow / streaming from secured UC views | Managed pipeline runtime or compute streaming read | Governed downstream consumption | `plaintext_protected_internal_reveal_gold`, `plaintext_protected_internal_reveal_flat_gold` |
 
@@ -29,9 +29,9 @@ Use when:
 
 Current example files:
 
-- [databricks_compute_cluster_udf_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\databricks_compute_cluster_udf_smoke_test.py)
-- [compute_cluster_table_reveal_castback.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_table_reveal_castback.py)
-- [compute_cluster_table_reveal_castback.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_table_reveal_castback.sql)
+- [compute_cluster_udf_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_udf_smoke_test.py)
+- [numbers_reveal_castback_examples.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_reveal_castback_examples.py)
+- [numbers_reveal_castback_examples.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers_reveal_castback_examples.sql)
 
 Example:
 
@@ -82,7 +82,7 @@ result = thales_crdp_python_function_bulk(
     "nbr",
     "ssn",
     properties={
-        "CRDPIP": "20.221.216.246",
+        "CRDPIP": "yourip",
         "CRDPPORT": "8090",
         "DEFAULTINTERNALNBRNBRPOLICY": "nbr-nbr-internal",
         "COLUMN_PROFILES": "ssn|tag.nbr.internal",
@@ -160,8 +160,8 @@ Current example file:
 
 Example objects:
 
-- `my_catalog.my_schema.thales_reveal_by_column_uc_embedded`
-- `my_catalog.my_schema.thales_reveal_bulk_by_column_uc_embedded`
+- `my_catalog.my_schema.thales_reveal_by_object_and_column_uc_embedded`
+- `my_catalog.my_schema.thales_reveal_bulk_by_object_and_column_uc_embedded`
 - `my_catalog.my_schema.v_plaintext_protected_internal_reveal_uc_embedded`
 - `my_catalog.my_schema.v_plaintext_protected_internal_array_reveal_uc_embedded`
 - `my_catalog.my_schema.v_plaintext_final_reveal_flat_uc_embedded`
@@ -174,23 +174,24 @@ Best fit:
 SQL-Warehouse-style Python example:
 
 ```sql
-CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_by_column_uc_embedded(
+CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_by_object_and_column_uc_embedded(
   value STRING,
   datatype STRING,
+  object_name STRING,
   column_name STRING,
   reveal_user STRING
 )
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.1-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
-from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk
+from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_by_object
 
 PROPERTIES = {
-    "CRDPIP": "20.221.216.246",
+    "CRDPIP": "yourip",
     "CRDPPORT": "8090",
     "CRDPUSER": "admin",
     "DEFAULTREVEALUSER": "admin",
@@ -198,6 +199,7 @@ PROPERTIES = {
     "DEFAULTMODE": "external",
     "BADDATATAG": "999999999",
     "COLUMN_PROFILES": "email|tag.char.internal,address|tag.char.internal,ssn|tag.nbr.internal,creditcard|tag.nbr.internal,creditcardcode|tag.nbr.internal",
+    "protect.object.my_catalog.my_schema.plaintext_protected_internal": "email|tag.char.internal,address|tag.char.internal,ssn|tag.nbr.internal,creditcard|tag.nbr.internal,creditcardcode|tag.nbr.internal",
     "column.ssn.metadata": "1002000",
     "column.creditcard.metadata": "1002000",
     "column.creditcardcode.metadata": "1002000",
@@ -210,10 +212,11 @@ PROPERTIES = {
 if value is None:
     return None
 
-result = thales_crdp_python_function_bulk(
+result = thales_crdp_python_function_bulk_by_object(
     [value],
     "revealbulk",
     datatype,
+    object_name,
     column_name=column_name,
     reveal_user=reveal_user,
     properties=PROPERTIES,
@@ -290,3 +293,4 @@ If you only need one answer:
 - for durable governed SQL access, use the UC embedded reveal views
 - for better SQL Warehouse array-view performance, use the optimized bundled UC view
 - for Lakeflow, read from the governed UC reveal views rather than trying to persist cluster-scoped Java UDFs
+
