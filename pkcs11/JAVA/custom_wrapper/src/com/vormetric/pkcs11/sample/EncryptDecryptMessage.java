@@ -41,23 +41,22 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.bind.DatatypeConverter;
 
 import com.vormetric.pkcs11.wrapper.CK_MECHANISM;
 import com.vormetric.pkcs11.wrapper.PKCS11Constants;
 import com.vormetric.pkcs11.wrapper.PKCS11Exception;
+import com.vormetric.pkcs11.wrapper.params.CK_FPE_GENERIC_PARAMS;
 import com.vormetric.pkcs11.wrapper.params.CK_GCM_PARAMS;
 
 
 public class EncryptDecryptMessage {
     public static int tagSize = 96;
     public static final byte[] iv = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-    public static final byte[] gcm_iv = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};    public static final byte[] UTF8_BOM = { (byte)0xef, (byte)0xbb, (byte)0xbf };
+    public static final byte[] gcm_iv = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C};
+    public static final byte[] UTF8_BOM = { (byte)0xef, (byte)0xbb, (byte)0xbf };
 
     public static final byte[] UTF16BE_BOM = { (byte)0xfe, (byte)0xff };
     public static final byte[] UTF16LE_BOM = { (byte)0xff, (byte)0xfe };
@@ -67,6 +66,7 @@ public class EncryptDecryptMessage {
 
     public static final String plainTextInp = "Plain text message to be encrypted. Must be multiple of 16 bytes in order to support all ciphers";
 
+    private static final Set<String> operations = new HashSet<>(Arrays.asList("FPE", "FF1", "FF3-1", "FF1v2"));
     static void usage()
     {
         System.out.println("usage: java com.vormetric.pkcs11.sample.EncryptDecryptMessage -p pin [-k keyName] [-m module] [-o operation] [-L leftMost] [-R rightMost]");
@@ -74,13 +74,13 @@ public class EncryptDecryptMessage {
         System.out.println("-p: Username:Password of Keymanager");
         System.out.println("-m: Path of directory where dll is deployed/installed");
         System.out.println("-k: Keyname on Keymanager");
-        System.out.println("-o: Operation {CTR | CBC_PAD (default) | CBC | GCM | FPE | FF1}");
+        System.out.println("-o: Operation {CTR | CBC_PAD (default) | CBC | GCM | FPE | FF1 | FF3-1 | FF1v2}");
         System.out.println("-f: Input file path for plainText ");
-        System.out.println("-L: Number of characters from left "); 
+        System.out.println("-L: Number of characters from left ");
         System.out.println("-R: Number of characters from right");
-        System.out.println("-c: Charset "); 
-        System.out.println("-r: File path of charset"); 
-        System.out.println("-l: Literal charset file"); 
+        System.out.println("-c: Charset ");
+        System.out.println("-r: File path of charset");
+        System.out.println("-l: Literal charset file");
         System.out.println("-d: Decrypted file path");
         System.out.println("-ls: Lifespan");
         System.out.println("-u: Utf-mode-name is one of ASCII, UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE");
@@ -89,7 +89,8 @@ public class EncryptDecryptMessage {
         System.out.println("-a: aad data (additional authenticated data)");
         System.out.println("-t: tagSize for GCM/tweak String for FPE");
         System.out.println("-iu: input utf-mode-name");
-        
+        System.out.println("-ta: Tweak Algo");
+
         System.exit (1);
     }
     public static ByteOrder getSelByteOrder(String strMode) {
@@ -121,6 +122,12 @@ public class EncryptDecryptMessage {
             btmode = 5;
         else if(strMode.equalsIgnoreCase("ASCII"))
             btmode = 0;
+        else if(strMode.equalsIgnoreCase("CS_CARD10"))
+            btmode = 6;
+        else if(strMode.equalsIgnoreCase("CS_CARD26"))
+            btmode = 7;
+        else if(strMode.equalsIgnoreCase("CS_CARD62"))
+            btmode = 8;
         return btmode;
     }
 
@@ -187,6 +194,7 @@ public class EncryptDecryptMessage {
     }
 
     public static void main ( String[] args) throws Exception {
+
         String pin = null;
         String libPath = null;
         String operation = "CBC_PAD";
@@ -215,7 +223,8 @@ public class EncryptDecryptMessage {
         int rightMost = 0; // reserve righttmost characters not encrypted (excluding filtered char)
         int left = 0;  // reserve leftmost characters not encrypted (including filtered char)
         int right = 0; // reserve righttmost characters not encrypted (including filtered char)
-        
+        String tweakAlgo = null;
+
         CK_MECHANISM encMechFpe = null;
         CK_MECHANISM decMechFpe = null;
         CK_MECHANISM encMech = null;
@@ -224,8 +233,8 @@ public class EncryptDecryptMessage {
         boolean bAsymKey = false;
         String aad = "";
         int lifespan = 0;
-        
-        if (args.length == 0) {
+
+       if (args.length == 0) {
             usage();
             System.exit(0);
         }
@@ -261,6 +270,7 @@ public class EncryptDecryptMessage {
             else if (args[i].equals("-R")) rightMost = Integer.parseInt(args[i + 1]);
             else if (args[i].equals("-a")) aad = args[i + 1];
             else if (args[i].equals("-t")) tagSize = Integer.parseInt(args[i + 1]);
+            else if (args[i].equals("-ta")) tweakAlgo = args[i + 1];
             else usage();
         }
         if(utfMode == null) utfMode = "ASCII";
@@ -320,20 +330,26 @@ public class EncryptDecryptMessage {
             } else if (operation.equals("GCM")) {
             	System.out.println("GCM mode selected");
             	byte[] aadBytes = aad.getBytes();
-            	
+
             	CK_GCM_PARAMS gcmParams = new CK_GCM_PARAMS(gcm_iv, gcm_iv.length, gcm_iv.length<<3, aadBytes,aadBytes.length, tagSize);
             	//System.out.println(gcmParams.toByteArray().length);
             	CK_MECHANISM encMechGcm = new CK_MECHANISM(Helper.CKM_AES_GCM, gcmParams);
-            	encMech = encMechGcm; 
+            	encMech = encMechGcm;
             	decMech = encMechGcm;
             }
-            else if (operation.equals("FPE") || operation.equals("FF1")) {
-                System.out.println("FPE/FF1 mode selected");
+            else if (isValidOperation(operation)) {
+                System.out.println(operation + " operation selected");
 
                 if(charSetInputFile != null && !charSetInputFile.isEmpty())
                 {
                     byteContent = Files.readAllBytes(Paths.get(charSetInputFile));
-                    fileUtfMode = checkEncodingBOM(byteContent);
+                  //  fileUtfMode = checkEncodingBOM(byteContent);
+                    if(inputUtfMode == null || !(inputUtfMode.equals("UTF-16") || inputUtfMode.equals("UTF-16LE")))
+                        fileUtfMode = checkEncodingBOM(byteContent);
+                    else if(inputUtfMode.equals("UTF-16"))
+                        fileUtfMode = "UTF-16";
+                    else if(inputUtfMode.equals("UTF-16LE"))
+                        fileUtfMode = "UTF-16LE";
 
                     if(charSetChoc == 'l' ) {
                         String content;
@@ -408,7 +424,7 @@ public class EncryptDecryptMessage {
                         int rstart, rend, rcp;
 
                         List cpLists = new ArrayList();
-                        
+
                         try {
                             baos.reset();
                             for (String t : tokens) {
@@ -477,6 +493,19 @@ public class EncryptDecryptMessage {
                 {
                     radix = charSet.length;
                 }
+                if (utfMode.equals("CS_CARD10")) {
+                    radix =  (short) 10;
+                    utfMode = "ASCII";
+                }
+                if (utfMode.equals("CS_CARD26")) {
+                    radix = (short) 26;
+                    utfMode = "ASCII";
+                }
+                if (utfMode.equals("CS_CARD62")) {
+                    radix = (short) 62;
+                    utfMode = "ASCII";
+                }
+
 
                 ByteArrayOutputStream fpeIVBytes;
                 DataOutputStream dos;
@@ -484,7 +513,7 @@ public class EncryptDecryptMessage {
                 if(operation.equals("FPE")) {
                     if (utfMode.equals("ASCII")) {
                         // tweak + radix + charset len need to fit fpeIVBytes
-                        if (tweakStr != null){ 
+                        if (tweakStr != null){
                             tweakSet = DatatypeConverter.parseHexBinary(tweakStr);
                         }
                         fpeIVBytes = new ByteArrayOutputStream(tweakSet.length + 1 + charSet.length);
@@ -515,7 +544,7 @@ public class EncryptDecryptMessage {
                     decMechFpe = encMechFpe;
                 }
                 else if(operation.equals("FF1")) {
-                    if (tweakStr != null){ 
+                    if (tweakStr != null){
                         tweakSet = DatatypeConverter.parseHexBinary(tweakStr);
                     }
                     System.out.printf( "tweakSet :0x%s\n", DatatypeConverter.printHexBinary( tweakSet ));
@@ -543,8 +572,18 @@ public class EncryptDecryptMessage {
 
                     encMechFpe = new CK_MECHANISM(Helper.CKM_THALES_FF1, fpeIVBytes.toByteArray());
                     decMechFpe = encMechFpe;
+                } else if (operation.equals("FF3-1") || operation.equals("FF1v2")) {
+                    System.out.println(operation+ " operation selected");
+
+                    CK_FPE_GENERIC_PARAMS params = new CK_FPE_GENERIC_PARAMS(tweakAlgo.getBytes(), tweakAlgo.length(), tweakStr.getBytes(),
+                            tweakStr.length(), (short) (btMode & 0xFF), (short) (radix & 0xFFFF), charSet.length, charSet);
+                    if (operation.equals("FF3-1"))
+                        encMechFpe = new CK_MECHANISM(Helper.CKM_THALES_FF3_1, params);
+                    else
+                        encMechFpe = new CK_MECHANISM(Helper.CKM_THALES_FF1_V2, params);
+                    decMechFpe = encMechFpe;
                 }
-                encMech = encMechFpe; /* also used for FF1 */
+                encMech = encMechFpe;
                 decMech = decMechFpe;
             } else if (operation.equals("CBC")) {
                 System.out.println("CBC mode selected");
@@ -589,10 +628,10 @@ public class EncryptDecryptMessage {
 
                 File inputFile = new File(plainInputFile);
 
-                if (operation.equals("FPE") || operation.equals("FF1")) {
+                if (isValidOperation(operation)) {
                     int skippedLine = 0;
                     int unmatchedLine = 0;
-                    
+
                     BufferedReader br = null;
 
                     try {
@@ -608,7 +647,7 @@ public class EncryptDecryptMessage {
                         while ((line = br.readLine()) != null) {
                             plainText = line.replaceAll("[\n\r]", "");
                             if(plainText.length() >= 2) {
-                                
+
                                 System.out.println("\nPlainText: " + plainText);
                                 System.out.println("charSetStr: " + charSetStr);
                                 System.out.println("leftMost: " + leftMost);
@@ -624,7 +663,7 @@ public class EncryptDecryptMessage {
                                     }
                                     left++;
                                 }
-                                
+
                                 cnt = 0;
                                 while (cnt < rightMost && right < maskStr.length()) {
                                     char c = maskStr.charAt(maskStr.length()-right-1);
@@ -633,12 +672,12 @@ public class EncryptDecryptMessage {
                                     }
                                     right++;
                                 }
-                                
+
                                 // filter out char not in charSetStr.
                                 StringBuilder newPlainText = new StringBuilder();
-                                if (leftMost < 0 || rightMost < 0 
-                                                 || leftMost > plainText.length() 
-                                                 || rightMost > plainText.length() 
+                                if (leftMost < 0 || rightMost < 0
+                                                 || leftMost > plainText.length()
+                                                 || rightMost > plainText.length()
                                                  || left+right > plainText.length()){
                                     System.out.println("Error: Invalid leftMost or rightMost.\n");
                                     System.exit(1);
@@ -687,11 +726,11 @@ public class EncryptDecryptMessage {
                                     plainBytes = baos.toByteArray();
                                 }
 
-                                decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID}, 
+                                decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID},
                                                                    plainBytes, encryptedWriter, utfMode,
                                                                    left, right, maskStr, charSetStr);
                                 decryptedText = new String(decryptedBytes, Charset.forName(utfMode));
-                                
+
                                 // reconstruct decrypted message to compare with original message (maskStr)
                                 if (maskStr.length() > decryptedText.length()) {
                                     StringBuilder newDecryptedText = new StringBuilder();
@@ -699,8 +738,8 @@ public class EncryptDecryptMessage {
                                     int d = 0;
                                     while (m < maskStr.length()){
                                         char c = maskStr.charAt(m);
-                                        if (m >= left && m < maskStr.length()-right 
-                                                      && charSetStr.indexOf(c) >= 0 
+                                        if (m >= left && m < maskStr.length()-right
+                                                && charSetStr!=null && charSetStr.indexOf(c) >= 0
                                                       && d < decryptedText.length()) {
                                             newDecryptedText.append(decryptedText.charAt(d));
                                             d++;
@@ -708,11 +747,11 @@ public class EncryptDecryptMessage {
                                             newDecryptedText.append(c);
                                         }
                                         m++;
-                                    } 
+                                    }
                                     decryptedText = newDecryptedText.toString();
                                     System.out.println("Reconstructed Decrypted Text = " + decryptedText);
                                 }
-                                
+
                                 if (maskStr.equals(decryptedText)) {
                                     System.out.println("=== plainText and decryptedTextStr are equal !!!===");
                                 } else {
@@ -759,7 +798,7 @@ public class EncryptDecryptMessage {
                     plainBytesLen = inputFS.read(plainBytes);
                     plainText = new String(plainBytes);
 
-                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID}, 
+                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID},
                                                        plainBytes, encryptedWriter, utfMode,
                                                        left, right, maskStr, charSetStr);
                     decryptedText = new String(decryptedBytes);
@@ -779,11 +818,11 @@ public class EncryptDecryptMessage {
                 plainBytes = plainTextInp.getBytes();
 
                 if(bAsymKey == true) {
-                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{publickeyID, privatekeyID}, 
+                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{publickeyID, privatekeyID},
                                                        plainBytes, encryptedWriter, utfMode, left, right, maskStr, charSetStr);
                 }
                 else {
-                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID}, 
+                    decryptedBytes = encryptDecryptBuf(session, encMech, decMech, new long[]{keyID},
                                                        plainBytes, encryptedWriter, utfMode,
                                                        left, right, maskStr, charSetStr);
                 }
@@ -822,11 +861,15 @@ public class EncryptDecryptMessage {
         }
     }
 
-        public static byte[]  encryptDecryptBuf(Vpkcs11Session session, 
-                                                CK_MECHANISM encMech, 
-                                                CK_MECHANISM decMech, 
-                                                long[] keyIDArr, 
-                                                byte[] plainBytes, 
+    private static boolean isValidOperation(String operation) {
+        return operations.contains(operation);
+    }
+
+    public static byte[]  encryptDecryptBuf(Vpkcs11Session session,
+                                                CK_MECHANISM encMech,
+                                                CK_MECHANISM decMech,
+                                                long[] keyIDArr,
+                                                byte[] plainBytes,
                                                 FileWriter encryptedWriter,
                                                 String utfMode,
                                                 int left,
@@ -846,7 +889,7 @@ public class EncryptDecryptMessage {
                 long privatekeyID = 0;
                 boolean bAsymKey = false;
                 int tagLen = tagSize/8;
-                
+
                 long keyID = 0;
                 if(keyIDArr.length == 1) {
                     keyID = keyIDArr[0];
@@ -877,8 +920,8 @@ public class EncryptDecryptMessage {
 
                 encryptedBytes = new byte[encryptedDataLen];
                 System.arraycopy(encryptedText, 0, encryptedBytes, 0, encryptedDataLen);
-                String encryptedTextStr = new String(encryptedBytes, Charset.forName(utfMode));
-                
+                String encryptedTextStr = new String(encryptedBytes,Charset.forName(utfMode));
+
                 // keep cipher string same format as plaintext
                 if (maskStr.length() > encryptedTextStr.length()) {
                     StringBuilder newEncryptedTextStr = new StringBuilder();
@@ -887,7 +930,7 @@ public class EncryptDecryptMessage {
                     while (m < maskStr.length()){
                         char c = maskStr.charAt(m);
                         if (m >= left && m < maskStr.length()-right
-                                          && charSetStr.indexOf(c) >= 0 
+                                          && charSetStr.indexOf(c) >= 0
                                           && d < encryptedTextStr.length()) {
                             newEncryptedTextStr.append(encryptedTextStr.charAt(d));
                             d++;
@@ -895,7 +938,7 @@ public class EncryptDecryptMessage {
                             newEncryptedTextStr.append(c);
                         }
                         m++;
-                    } 
+                    }
                     encryptedTextStr = newEncryptedTextStr.toString();
                 }
                 if(encMech.mechanism == PKCS11Constants.CKM_AES_GCM) {
@@ -903,9 +946,9 @@ public class EncryptDecryptMessage {
                 	System.arraycopy(encryptedText, (int)encryptedDataLen-tagLen , temp, 0, tagLen);
                 	System.arraycopy(encryptedText, 0, temp, tagLen, (int)encryptedDataLen-tagLen);
                 	encryptedBytes=temp;
-                	
+
                 }
-                
+
                 System.out.println("Encrypted Text =  " + encryptedTextStr);
                 encryptedWriter.write(encryptedTextStr);
 
@@ -926,9 +969,9 @@ public class EncryptDecryptMessage {
                 System.arraycopy(decryptedData, 0, decryptedBytes, 0, decryptedDataLen);
 
                 String decryptedTextStr = new String(decryptedBytes, Charset.forName(utfMode));
-                String plainTextStr = new String(plainBytes, Charset.forName(utfMode));
+                String plainTextStr = new String(plainBytes,  Charset.forName(utfMode));
 
-                System.out.println("Decrypted Text = " + decryptedTextStr);
+                System.out.println("Decrypted Text = " + decryptedTextStr );
 
                 return decryptedBytes;
 
