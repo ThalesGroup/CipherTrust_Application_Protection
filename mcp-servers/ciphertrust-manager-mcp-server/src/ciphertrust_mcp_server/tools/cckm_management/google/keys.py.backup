@@ -1,0 +1,542 @@
+"""Google Cloud Keys operations for CCKM."""
+from typing import Any, Dict
+
+def get_key_operations() -> Dict[str, Any]:
+    """Return schema and action requirements for Google Cloud key operations."""
+    return {
+        "schema_properties": {
+            "google_keys_params": {
+                "type": "object",
+                "properties": {
+                    # Basic key parameters
+                    "key_name": {
+                        "type": "string", 
+                        "description": "Name of the key"
+                    },
+                    "key_ring": {
+                        "type": "string", 
+                        "description": "ID or Resource URL of the GCP KeyRing where key will be created/managed"
+                    },
+                    "project_id": {
+                        "type": "string", 
+                        "description": "GCP Project ID"
+                    },
+                    "location": {
+                        "type": "string", 
+                        "description": "GCP location/region"
+                    },
+                    "connection_identifier": {
+                        "type": "string", 
+                        "description": "Name or ID of the connection which has been created earlier - required for smart resolution to access GCP APIs"
+                    },
+                    
+                    # Key creation/upload parameters
+                    "gcp_algorithm": {
+                        "type": "string", 
+                        "description": "Algorithm of the Key. Options: RSA_SIGN_PSS_2048_SHA256, RSA_SIGN_PSS_3072_SHA256, RSA_SIGN_PSS_4096_SHA256, RSA_SIGN_PSS_4096_SHA512, RSA_SIGN_PKCS1_2048_SHA256, RSA_SIGN_PKCS1_3072_SHA256, RSA_SIGN_PKCS1_4096_SHA256, RSA_SIGN_PKCS1_4096_SHA512, RSA_DECRYPT_OAEP_2048_SHA256, RSA_DECRYPT_OAEP_3072_SHA256, RSA_DECRYPT_OAEP_4096_SHA256, RSA_DECRYPT_OAEP_4096_SHA512, EC_SIGN_P256_SHA256, EC_SIGN_P384_SHA384, GOOGLE_SYMMETRIC_ENCRYPTION, EC_SIGN_SECP256K1_SHA256"
+                    },
+                    "protection_level": {
+                        "type": "string", 
+                        "description": "Protection level of the key. Options: SOFTWARE, HSM"
+                    },
+                    "purpose": {
+                        "type": "string", 
+                        "description": "Purpose of the key. Options: ENCRYPT_DECRYPT, ASYMMETRIC_SIGN, ASYMMETRIC_DECRYPT, MAC"
+                    },
+                    "destroy_scheduled_duration": {
+                        "type": "string", 
+                        "description": "Duration of the scheduled for destruction state in format '<duration>s' (e.g., '360000s')"
+                    },
+                    "import_only": {
+                        "type": "boolean", 
+                        "description": "Whether to restrict key versions to import only"
+                    },
+                    "next_rotation_time": {
+                        "type": "string", 
+                        "description": "Time when the GCP key will be automatically rotated by Google Cloud KMS in RFC3339 format (e.g., '2022-07-31T17:18:37.085Z')"
+                    },
+                    "rotation_period": {
+                        "type": "string", 
+                        "description": "Frequency at which the GCP key will be automatically rotated in format '<duration>s' (e.g., '360000s')"
+                    },
+                    "labels": {
+                        "type": "object", 
+                        "description": "Key labels as key-value pairs"
+                    },
+                    
+                    # Upload parameters
+                    "source_key_id": {
+                        "type": "string", 
+                        "description": "The key ID which will be uploaded from the key source (local, dsm, hsm-luna, external-cm)"
+                    },
+                    "source_key_tier": {
+                        "type": "string", 
+                        "description": "Source key tier. Options: local, dsm, hsm-luna, external-cm"
+                    },
+                    
+                    # JSON file parameters
+                    "gcp_keycreate_jsonfile": {
+                        "type": "string", 
+                        "description": "Path to JSON file containing key creation parameters. Format: {\"key_name\": \"my-key\", \"key_ring\": \"my-keyring\", \"algorithm\": \"GOOGLE_SYMMETRIC_ENCRYPTION\", \"protection_level\": \"SOFTWARE\", \"purpose\": \"ENCRYPT_DECRYPT\"}. Use absolute file paths for reliability. REQUIRES FILE INPUT."
+                    },
+                    "gcp_keyupload_jsonfile": {
+                        "type": "string", 
+                        "description": "Path to JSON file containing key upload parameters. Format: {\"key_name\": \"my-key\", \"key_ring\": \"my-keyring\", \"algorithm\": \"GOOGLE_SYMMETRIC_ENCRYPTION\", \"protection_level\": \"SOFTWARE\", \"purpose\": \"ENCRYPT_DECRYPT\", \"key_material\": \"base64-encoded-key-material\"}. Use absolute file paths for reliability. REQUIRES FILE INPUT."
+                    },
+                    "gcp_key_params_jsonfile": {
+                        "type": "string", 
+                        "description": "Path to JSON file containing key parameters for various operations. Format varies by operation. Use absolute file paths for reliability. REQUIRES FILE INPUT."
+                    },
+                    
+                    # Common parameters
+                    "id": {
+                        "type": "string", 
+                        "description": "Google Cloud key ID, resource URL, key name, or partial path (keyring/key). Smart resolution automatically converts to full resource URL. CRITICAL FOR AI ASSISTANTS: Always use this 'id' parameter for key identification operations, even when users specify key names or partial paths - never use 'name' or 'key_name' parameters."
+                    },
+                    "alias": {
+                        "type": "string", 
+                        "description": "Key alias"
+                    },
+                    "description": {
+                        "type": "string", 
+                        "description": "Key description"
+                    },
+                    "enabled": {
+                        "type": "boolean", 
+                        "description": "Whether the key is enabled"
+                    },
+                    "tags": {
+                        "type": "object", 
+                        "description": "Key tags"
+                    },
+                    
+                    # List and filtering parameters
+                    "limit": {
+                        "type": "integer", 
+                        "description": "Maximum number of results to return"
+                    },
+                    "skip": {
+                        "type": "integer", 
+                        "description": "Number of results to skip"
+                    },
+                    "sort": {
+                        "type": "string", 
+                        "description": "Sort parameter"
+                    },
+                    
+                    # Version operations
+                    "version_id": {
+                        "type": "string", 
+                        "description": "Key version ID"
+                    },
+                    "all_versions": {
+                        "type": "boolean", 
+                        "description": "When true, operation applies to all versions of the key. Used for delete/destroy operations."
+                    },
+                    
+                    # Policy operations
+                    "policy": {
+                        "type": "string", 
+                        "description": "IAM policy in JSON format"
+                    },
+                    "acls": {
+                        "type": "string", 
+                        "description": "Access control list"
+                    },
+                    
+                    # Metadata operations
+                    "file_path": {
+                        "type": "string", 
+                        "description": "File path for metadata download"
+                    },
+                    
+                    # Backup/restore operations
+                    "backup_data": {
+                        "type": "string", 
+                        "description": "Backup data for restore operations"
+                    },
+                    
+                    # Job operations
+                    "job_id": {
+                        "type": "string", 
+                        "description": "Job ID for synchronization operations"
+                    },
+                    
+                    # Synchronization parameters
+                                    "key_rings": {
+                    "type": "string", 
+                    "description": "Comma-separated list of key ring identifiers for synchronization operations. SMART RESOLUTION: Supports three scenarios: 1) Single keyring: 'my-keyring-1' + location parameter + project_id, 2) Multiple keyrings same location: 'my-keyring-1,my-keyring-2' + location parameter + project_id, 3) Multiple keyrings different locations: 'global/my-keyring-1,us-central1/my-keyring-2' + project_id (location/keyring-name format). Full resource names (e.g., 'projects/my-project/locations/global/keyRings/my-keyring-1') are also supported. CRITICAL FOR AI ASSISTANTS: When user specifies keyrings in different locations, use 'location/keyring-name' format in this parameter!"
+                },
+                    "synchronize_all": {
+                        "type": "boolean", 
+                        "description": "Synchronize/refresh all keys from all key rings. Note: 'synchronize' and 'refresh' are equivalent terms for this operation. Mutually exclusive with key_rings parameter."
+                    },
+                    "overall_status": {
+                        "type": "string", 
+                        "description": "Filter the results based on overall status parameter for synchronization jobs"
+                    }
+                }
+            }
+        },
+        "action_requirements": {
+            # CRITICAL FOR AI ASSISTANTS: Parameter usage depends on operation type:
+            # - EXISTING key operations (get, delete, enable, disable, update) use 'id' parameter
+            # - NEW key operations (create, upload) use specific 'key_name' parameters  
+            "keys_create": {"required": ["key_name", "key_ring"], "optional": ["gcp_algorithm", "protection_level", "purpose", "labels", "next_rotation_time", "rotation_period", "destroy_scheduled_duration", "import_only", "gcp_keycreate_jsonfile", "gcp_key_params_jsonfile"]},  # key_name: name for new key
+            "keys_list": {"required": [], "optional": ["key_name", "key_ring", "project_id", "location", "algorithm", "protection_level", "purpose", "limit", "skip", "sort"]},
+            "keys_get": {"required": ["id"], "optional": []},  # id parameter accepts key ID, resource URL, name, or partial path
+            "keys_update": {"required": ["id"], "optional": ["labels", "next_rotation_time", "rotation_period", "primary_version"]},  # id parameter accepts key ID, resource URL, name, or partial path
+
+            "keys_enable": {"required": ["id"], "optional": []},  # id parameter accepts key ID, resource URL, name, or partial path
+            "keys_disable": {"required": ["id"], "optional": []},  # id parameter accepts key ID, resource URL, name, or partial path
+            "keys_rotate": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_destroy": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_restore": {
+                "required": ["backup_data"], 
+                "optional": []
+            },
+            "keys_add_version": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_cancel_schedule_destroy": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_disable_auto_rotation": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_disable_version": {
+                "required": ["id", "version_id"], 
+                "optional": []
+            },
+            "keys_download_metadata": {
+                "required": [], 
+                "optional": ["project_id", "location", "key_ring", "limit", "skip", "file_path"]
+            },
+            "keys_download_public_key": {
+                "required": ["id"], 
+                "optional": ["version_id"]
+            },
+            "keys_enable_auto_rotation": {
+                "required": ["id"], 
+                "optional": ["next_rotation_time", "rotation_period"]
+            },
+            "keys_enable_version": {
+                "required": ["id", "version_id"], 
+                "optional": []
+            },
+            "keys_get_update_all_versions_status": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_get_version": {
+                "required": ["id", "version_id"], 
+                "optional": []
+            },
+            "keys_list_version": {
+                "required": ["id"], 
+                "optional": ["limit", "skip"]
+            },
+            "keys_policy": {
+                "required": ["id"], 
+                "optional": ["policy"]
+            },
+            "keys_policy_get": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_policy_update": {
+                "required": ["id", "policy"], 
+                "optional": []
+            },
+            "keys_policy_get_iam_roles": {
+                "required": [], 
+                "optional": []
+            },
+            "keys_re_import": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_refresh": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_refresh_version": {
+                "required": ["id", "version_id"], 
+                "optional": []
+            },
+            "keys_schedule_destroy": {
+                "required": ["id"], 
+                "optional": ["version_id", "destroy_scheduled_duration"]  # version_id optional - if not provided, all versions will be scheduled for destruction
+            },
+            "keys_delete": {  # Alias for keys_schedule_destroy for user convenience
+                "required": ["id"], 
+                "optional": ["version_id", "destroy_scheduled_duration"]  # version_id optional - if not provided, all versions will be scheduled for destruction
+            },
+            "keys_upload": {
+                "required": [], 
+                "optional": ["key_name", "key_ring", "project_id", "location", "gcp_algorithm", "protection_level", "purpose", "source_key_id", "source_key_tier", "destroy_scheduled_duration", "import_only", "next_rotation_time", "rotation_period", "labels", "gcp_keyupload_jsonfile", "gcp_key_params_jsonfile"]
+            },
+            "keys_update_all_versions_jobs": {
+                "required": ["id"], 
+                "optional": []
+            },
+            # Key synchronization/refresh operations (synchronize and refresh are equivalent terms)
+            "keys_sync_jobs_start": {
+                "required": [], 
+                "optional": ["key_rings", "synchronize_all"]
+            },
+            "keys_sync_jobs_get": {
+                "required": ["job_id"], 
+                "optional": []
+            },
+            "keys_sync_jobs_status": {
+                "required": [], 
+                "optional": ["limit", "skip", "sort", "key_rings", "overall_status", "id"]
+            },
+            "keys_sync_jobs_cancel": {
+                "required": ["job_id"], 
+                "optional": []
+            },
+            # Additional synchronization operations for consistency with other cloud platforms
+            "keys_synchronize": {
+                "required": ["id"], 
+                "optional": []
+            },
+            "keys_synchronize_version": {
+                "required": ["id", "version_id"], 
+                "optional": []
+            }
+        }
+    }
+
+def build_key_command(action: str, google_params: Dict[str, Any]) -> list:
+    """Build the ksctl command for a given Google Cloud key operation."""
+    cmd = ["cckm", "google", "keys"]
+    
+    # Extract the base operation name (remove 'keys_' prefix)
+    base_action = action.replace("keys_", "")
+    
+    # Handle synchronization jobs separately
+    if base_action.startswith("sync_jobs_"):
+        sync_action = base_action.replace("sync_jobs_", "")
+        cmd.extend(["synchronization-jobs", sync_action])
+        
+        if sync_action == "start":
+            if "key_rings" in google_params:
+                cmd.extend(["--key-rings", google_params["key_rings"]])
+            if "synchronize_all" in google_params and google_params["synchronize_all"]:
+                cmd.append("--synchronize-all")
+            # Note: project_id is not needed for sync jobs as it's included in the key_rings resource names
+        elif sync_action in ["get", "cancel"]:
+            cmd.extend(["--id", google_params["job_id"]])
+        elif sync_action == "status":
+            if "limit" in google_params:
+                cmd.extend(["--limit", str(google_params["limit"])])
+            if "skip" in google_params:
+                cmd.extend(["--skip", str(google_params["skip"])])
+            if "sort" in google_params:
+                cmd.extend(["--sort", google_params["sort"]])
+            if "key_rings" in google_params:
+                cmd.extend(["--key-rings", google_params["key_rings"]])
+            if "overall_status" in google_params:
+                cmd.extend(["--overall-status", google_params["overall_status"]])
+            if "id" in google_params:
+                cmd.extend(["--id", google_params["id"]])
+            # Note: project_id is not needed for sync status as it's included in the key_rings resource names
+        
+        return cmd
+    
+    # Handle policy operations separately
+    if base_action.startswith("policy"):
+        cmd.append("policy")
+        if base_action == "policy":
+            cmd.extend(["get", "--id", google_params["id"]])
+        elif base_action == "policy_get":
+            cmd.extend(["get", "--id", google_params["id"]])
+        elif base_action == "policy_update":
+            cmd.extend(["update", "--id", google_params["id"]])
+            if "policy" in google_params:
+                cmd.extend(["--policy", google_params["policy"]])
+        elif base_action == "policy_get_iam_roles":
+            cmd.extend(["get-iam-roles"])
+        
+        return cmd
+    
+    # Simple actions that only need --id parameter
+    simple_actions = [
+        "get", "enable", "disable", "rotate", "destroy", 
+        "add_version", "cancel_schedule_destroy", "disable_auto_rotation",
+        "download_public_key", "get_update_all_versions_status", "re_import", 
+        "refresh", "synchronize", "update_all_versions_jobs"
+    ]
+    
+    if base_action in simple_actions:
+        cmd.append(base_action.replace("_", "-"))
+        cmd.extend(["--id", google_params["id"]])
+        
+        # Add version_id for operations that need it
+        if base_action in ["disable_version", "enable_version", "get_version", "refresh_version", "synchronize_version"] and "version_id" in google_params:
+            cmd.extend(["--version-id", google_params["version_id"]])
+        
+        return cmd
+    
+    # Handle specific operations
+    if base_action == "list":
+        cmd.append("list")
+        if "project_id" in google_params:
+            cmd.extend(["--project-id", google_params["project_id"]])
+        if "location" in google_params:
+            cmd.extend(["--location", google_params["location"]])
+        if "key_ring" in google_params:
+            cmd.extend(["--key-ring", google_params["key_ring"]])
+        if "key_name" in google_params:
+            cmd.extend(["--key-id", google_params["key_name"]])
+        if "gcp_algorithm" in google_params:
+            cmd.extend(["--gcp-algorithm", google_params["gcp_algorithm"]])
+        if "protection_level" in google_params:
+            cmd.extend(["--protection-level", google_params["protection_level"]])
+        if "purpose" in google_params:
+            cmd.extend(["--purpose", google_params["purpose"]])
+        if "limit" in google_params:
+            cmd.extend(["--limit", str(google_params["limit"])])
+        if "skip" in google_params:
+            cmd.extend(["--skip", str(google_params["skip"])])
+        if "sort" in google_params:
+            cmd.extend(["--sort", google_params["sort"]])
+            
+    elif base_action == "create":
+        cmd.append("create")
+        
+        # Handle JSON file parameter first (overrides individual parameters)
+        if "gcp_keycreate_jsonfile" in google_params:
+            cmd.extend(["--gcp-keycreate-jsonfile", google_params["gcp_keycreate_jsonfile"]])
+        else:
+            # Individual parameters
+            if "key_name" in google_params:
+                cmd.extend(["--key-name", google_params["key_name"]])
+            if "key_ring" in google_params:
+                cmd.extend(["--key-ring", google_params["key_ring"]])
+            if "gcp_algorithm" in google_params:
+                cmd.extend(["--gcp-algorithm", google_params["gcp_algorithm"]])
+            if "protection_level" in google_params:
+                cmd.extend(["--protection-level", google_params["protection_level"]])
+            if "purpose" in google_params:
+                cmd.extend(["--purpose", google_params["purpose"]])
+            if "destroy_scheduled_duration" in google_params:
+                cmd.extend(["--destroy-scheduled-duration", google_params["destroy_scheduled_duration"]])
+            if "import_only" in google_params and google_params["import_only"]:
+                cmd.append("--import-only")
+            if "next_rotation_time" in google_params:
+                cmd.extend(["--next-rotation-time", google_params["next_rotation_time"]])
+            if "rotation_period" in google_params:
+                cmd.extend(["--rotation-period", google_params["rotation_period"]])
+            if "gcp_key_params_jsonfile" in google_params:
+                cmd.extend(["--gcp-key-params-jsonfile", google_params["gcp_key_params_jsonfile"]])
+                
+    elif base_action == "upload":
+        cmd.append("upload-key")
+        
+        # Handle JSON file parameter first (overrides individual parameters)
+        if "gcp_keyupload_jsonfile" in google_params:
+            cmd.extend(["--gcp-keyupload-jsonfile", google_params["gcp_keyupload_jsonfile"]])
+        else:
+            # Individual parameters
+            if "key_name" in google_params:
+                cmd.extend(["--key-name", google_params["key_name"]])
+            if "key_ring" in google_params:
+                cmd.extend(["--key-ring", google_params["key_ring"]])
+            if "gcp_algorithm" in google_params:
+                cmd.extend(["--gcp-algorithm", google_params["gcp_algorithm"]])
+            if "protection_level" in google_params:
+                cmd.extend(["--protection-level", google_params["protection_level"]])
+            if "purpose" in google_params:
+                cmd.extend(["--purpose", google_params["purpose"]])
+            if "source_key_id" in google_params:
+                cmd.extend(["--source-key-id", google_params["source_key_id"]])
+            if "source_key_tier" in google_params:
+                cmd.extend(["--source-key-tier", google_params["source_key_tier"]])
+            if "destroy_scheduled_duration" in google_params:
+                cmd.extend(["--destroy-scheduled-duration", google_params["destroy_scheduled_duration"]])
+            if "import_only" in google_params and google_params["import_only"]:
+                cmd.append("--import-only")
+            if "next_rotation_time" in google_params:
+                cmd.extend(["--next-rotation-time", google_params["next_rotation_time"]])
+            if "rotation_period" in google_params:
+                cmd.extend(["--rotation-period", google_params["rotation_period"]])
+            if "gcp_key_params_jsonfile" in google_params:
+                cmd.extend(["--gcp-key-params-jsonfile", google_params["gcp_key_params_jsonfile"]])
+                
+    elif base_action == "update":
+        cmd.extend(["update", "--id", google_params["id"]])
+        if "alias" in google_params:
+            cmd.extend(["--alias", google_params["alias"]])
+        if "description" in google_params:
+            cmd.extend(["--description", google_params["description"]])
+        if "enabled" in google_params:
+            cmd.extend(["--enabled", str(google_params["enabled"]).lower()])
+        if "next_rotation_time" in google_params:
+            cmd.extend(["--next-rotation-time", google_params["next_rotation_time"]])
+        if "rotation_period" in google_params:
+            cmd.extend(["--rotation-period", google_params["rotation_period"]])
+            
+    elif base_action == "restore":
+        cmd.extend(["restore", "--backup-data", google_params["backup_data"]])
+        
+    elif base_action == "enable_auto_rotation":
+        cmd.extend(["enable-auto-rotation", "--id", google_params["id"]])
+        if "next_rotation_time" in google_params:
+            cmd.extend(["--next-rotation-time", google_params["next_rotation_time"]])
+        if "rotation_period" in google_params:
+            cmd.extend(["--rotation-period", google_params["rotation_period"]])
+            
+    elif base_action in ["schedule_destroy", "delete"]:
+        # Note: This function builds command for a SINGLE version. 
+        # When no version_id is provided, google_operations.py will handle 
+        # getting all versions and calling this function multiple times.
+        cmd.extend(["schedule-destroy", "--id", google_params["id"]])
+        
+        # version_id is required for schedule-destroy command
+        if "version_id" in google_params:
+            cmd.extend(["--version-id", google_params["version_id"]])
+        else:
+            # This should not happen if google_operations.py handles it correctly
+            raise ValueError("version_id is required for schedule-destroy operation")
+            
+        if "destroy_scheduled_duration" in google_params:
+            cmd.extend(["--destroy-scheduled-duration", google_params["destroy_scheduled_duration"]])
+            
+    elif base_action == "download_metadata":
+        cmd.append("download-metadata")
+        if "project_id" in google_params:
+            cmd.extend(["--project-id", google_params["project_id"]])
+        if "location" in google_params:
+            cmd.extend(["--location", google_params["location"]])
+        if "key_ring" in google_params:
+            cmd.extend(["--key-ring", google_params["key_ring"]])
+        if "limit" in google_params:
+            cmd.extend(["--limit", str(google_params["limit"])])
+        if "skip" in google_params:
+            cmd.extend(["--skip", str(google_params["skip"])])
+        if "file_path" in google_params:
+            cmd.extend(["--file-path", google_params["file_path"]])
+            
+    elif base_action == "list_version":
+        cmd.extend(["list-version", "--id", google_params["id"]])
+        if "limit" in google_params:
+            cmd.extend(["--limit", str(google_params["limit"])])
+        if "skip" in google_params:
+            cmd.extend(["--skip", str(google_params["skip"])])
+            
+    else:
+        raise ValueError(f"Unsupported Google Cloud keys action: {action}")
+    
+    return cmd 

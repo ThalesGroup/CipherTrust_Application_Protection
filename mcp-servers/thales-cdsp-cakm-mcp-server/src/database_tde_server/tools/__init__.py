@@ -1,21 +1,27 @@
 """
-Database TDE tools package - CONSOLIDATED with unified tools
+Database TDE tools package
 
-AUTO-LOGIN TOOLS CONSOLIDATION:
-- All auto-login functionality is now consolidated in manage_oracle_autologin
-- Removed redundant tools: enable_oracle_autologin, configure_oracle_autologin_hsm
-- Use manage_oracle_autologin with appropriate operation parameter:
-  * operation="setup" - Complete auto-login setup from scratch
-  * operation="setup_hsm" - Setup auto-login for HSM migration
-  * operation="create" - Create auto-login wallet from existing keystore
-  * operation="update" - Update auto-login wallet password
-  * operation="update_secret" - Update HSM credentials in auto-login wallet
-  * operation="remove" - Remove auto-login wallet
+This package provides tools for managing database Transparent Data Encryption (TDE).
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
 
-ORACLE RELIABILITY IMPROVEMENTS:
-- Added oracle_reliable_tools for bulletproof TDE operations
-- Fixed container switching logic to handle "ALL" correctly
-- Improved error handling and rollback mechanisms
+Available tools:
+- list_database_connections: List all configured database connections
+- status_tde_ekm: Comprehensive TDE status assessment for SQL Server and Oracle
+  - SQL Server operations: assess_sql, compliance_report, best_practices, export_config, validate_setup
+  - Oracle operations: assess_oracle, list_containers, list_tablespaces
+- manage_sql_ekm_objects: Manage SQL Server EKM objects (providers, credentials, logins)
+- manage_sql_keys: Manage SQL Server cryptographic keys (create, list, drop, rotate)
+- manage_oracle_keys: Manage Oracle Master Encryption Keys (generate, rotate, list)
+- manage_sql_encryption: Encrypt/decrypt SQL Server databases
+- manage_oracle_tablespace_encryption: Encrypt Oracle tablespaces and list encryption status
+- manage_oracle_wallet: Comprehensive Oracle wallet management
+  - Operations: open, close, status, backup, merge, autologin
+  - Autologin operations: create, update, remove, setup, setup_hsm, update_secret
+- manage_oracle_configuration: Manage Oracle TDE configuration parameters
+  - Operations: get, set, verify
+- oracle_tde_deployment: Complete Oracle TDE deployment operations
+  - Operations: setup_hsm_only, setup_hsm_with_autologin, add_autologin, migrate_software_to_hsm, get_tde_status
 """
 
 from .key_management_tools import register_key_management_tools

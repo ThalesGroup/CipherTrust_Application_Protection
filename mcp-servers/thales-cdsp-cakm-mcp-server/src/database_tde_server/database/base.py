@@ -1,5 +1,11 @@
 """
 Base database interface for TDE operations
+
+This module defines the base interface for database Transparent Data Encryption (TDE) operations.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Provides abstract base classes and interfaces for implementing TDE operations across different database platforms.
 """
 
 from abc import ABC, abstractmethod

@@ -142,5 +142,6 @@ class EKMOperations(CCKMOperations):
             raise ValueError(f"Unsupported Google EKM action: {action}")
         
         # Execute command
+        # Pass domain parameters to execute_command
         result = self.execute_command(cmd, params.get("domain"), params.get("auth_domain"))
         return result.get("data", result.get("stdout", "")) 

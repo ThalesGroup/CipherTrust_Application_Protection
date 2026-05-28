@@ -1,12 +1,25 @@
-"""AWS operations for CCKM."""
+"""Manages AWS operations for CipherTrust Cloud Key Manager (CCKM).
 
+This module provides the `AWSOperations` class, which handles various AWS-related
+operations within CCKM. It is responsible for building and executing `ksctl` commands
+for managing keys, custom key stores, IAM, KMS, reports, and bulk jobs.
+"""
 from typing import Any, Dict, List
 from .base import CCKMOperations
-from .constants import AWS_PARAMETERS, CLOUD_OPERATIONS
-
+from .constants import CLOUD_OPERATIONS
+from .aws import (
+    get_key_operations, build_key_command,
+    get_kms_operations, build_kms_command,
+    get_iam_operations, build_iam_command,
+    get_reports_operations, build_reports_command,
+    get_bulkjob_operations, build_bulkjob_command,
+    get_custom_key_stores_operations, build_custom_key_stores_command,
+    get_logs_operations, build_logs_command,
+    create_smart_resolver
+)
 
 class AWSOperations(CCKMOperations):
-    """AWS key operations for CCKM."""
+    """Handles AWS operations for CCKM by building and executing ksctl commands."""
     
     def get_operations(self) -> List[str]:
         """Return list of supported AWS operations."""
@@ -14,218 +27,172 @@ class AWSOperations(CCKMOperations):
     
     def get_schema_properties(self) -> Dict[str, Any]:
         """Return schema properties for AWS operations."""
+        key_ops = get_key_operations()
+        kms_ops = get_kms_operations()
+        iam_ops = get_iam_operations()
+        reports_ops = get_reports_operations()
+        bulkjob_ops = get_bulkjob_operations()
+        custom_key_stores_ops = get_custom_key_stores_operations()
+        logs_ops = get_logs_operations()
         return {
-            "aws_params": {
-                "type": "object",
-                "properties": AWS_PARAMETERS,
-                "description": "AWS-specific parameters"
-            }
+            **key_ops.get("schema_properties", {}),
+            **kms_ops.get("schema_properties", {}),
+            **iam_ops.get("schema_properties", {}),
+            **reports_ops.get("schema_properties", {}),
+            **bulkjob_ops.get("schema_properties", {}),
+            **custom_key_stores_ops.get("schema_properties", {}),
+            **logs_ops.get("schema_properties", {})
         }
-    
+
     def get_action_requirements(self) -> Dict[str, Dict[str, Any]]:
         """Return action-specific parameter requirements for AWS."""
         return {
-            "list": {
-                "required": [],
-                "optional": ["alias", "enabled", "limit", "skip", "domain", "auth_domain"]
-            },
-            "get": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "create": {
-                "required": ["alias", "region", "key_spec"],
-                "optional": ["description", "enabled", "tags", "key_usage", "origin", "domain", "auth_domain"]
-            },
-            "update": {
-                "required": ["id"],
-                "optional": ["alias", "description", "enabled", "tags", "domain", "auth_domain"]
-            },
-            "delete": {
-                "required": ["id"],
-                "optional": ["pending_window_in_days", "domain", "auth_domain"]
-            },
-            "enable": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "disable": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "rotate": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "add_alias": {
-                "required": ["id", "alias"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "delete_alias": {
-                "required": ["id", "alias"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "add_tags": {
-                "required": ["id", "tags"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "remove_tags": {
-                "required": ["id", "tags"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "schedule_deletion": {
-                "required": ["id", "pending_window_in_days"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "cancel_deletion": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "import_material": {
-                "required": ["id", "material"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "delete_material": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "upload": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "download_public_key": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "policy": {
-                "required": ["id", "policy"],
-                "optional": ["bypass_policy_lockout_safety_check", "domain", "auth_domain"]
-            },
-            "replicate_key": {
-                "required": ["id", "region"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "block": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            },
-            "unblock": {
-                "required": ["id"],
-                "optional": ["domain", "auth_domain"]
-            }
+            **get_key_operations()["action_requirements"],
+            **get_kms_operations()["action_requirements"],
+            **get_iam_operations()["action_requirements"],
+            **get_reports_operations()["action_requirements"],
+            **get_bulkjob_operations()["action_requirements"],
+            **get_custom_key_stores_operations()["action_requirements"],
+            **get_logs_operations()["action_requirements"],
         }
-    
+
     async def execute_operation(self, action: str, params: Dict[str, Any]) -> Any:
         """Execute AWS operation."""
-        aws_params = params.get("aws_params", {})
+        # Start with generic aws_params
+        aws_params = params.get("aws_params", {}).copy()
         
-        # Build base command
-        cmd = ["cckm", "aws", "keys"]
+        # Merge service-specific params into aws_params
+        service_specific_keys = [
+            "aws_kms_params",
+            "aws_iam_params", 
+            "aws_key_params",
+            "aws_keys_params",
+            "aws_reports_params",
+            "aws_bulkjob_params",
+            "aws_custom_key_stores_params",
+            "aws_logs_params"
+        ]
         
-        # Add action-specific command
-        if action == "list":
-            cmd.append("list")
-            if aws_params.get("alias"):
-                cmd.extend(["--alias", aws_params["alias"]])
-            if aws_params.get("enabled") is not None:
-                cmd.extend(["--enabled", "yes" if aws_params["enabled"] else "no"])
-            if aws_params.get("limit"):
-                cmd.extend(["--limit", str(aws_params["limit"])])
-            if aws_params.get("skip"):
-                cmd.extend(["--skip", str(aws_params["skip"])])
-                
-        elif action == "get":
-            cmd.extend(["get", "--id", aws_params["id"]])
-            
-        elif action == "create":
-            cmd.extend(["create", 
-                       "--alias", aws_params["alias"],
-                       "--region", aws_params["region"],
-                       "--key-spec", aws_params["key_spec"]])
-            if aws_params.get("description"):
-                cmd.extend(["--description", aws_params["description"]])
-            if aws_params.get("enabled") is not None:
-                cmd.extend(["--enabled", "yes" if aws_params["enabled"] else "no"])
-            if aws_params.get("tags"):
-                cmd.extend(["--tags", str(aws_params["tags"])])
-            if aws_params.get("key_usage"):
-                cmd.extend(["--key-usage", aws_params["key_usage"]])
-            if aws_params.get("origin"):
-                cmd.extend(["--origin", aws_params["origin"]])
-                
-        elif action == "update":
-            cmd.extend(["update", "--id", aws_params["id"]])
-            if aws_params.get("alias"):
-                cmd.extend(["--alias", aws_params["alias"]])
-            if aws_params.get("description"):
-                cmd.extend(["--description", aws_params["description"]])
-            if aws_params.get("enabled") is not None:
-                cmd.extend(["--enabled", "yes" if aws_params["enabled"] else "no"])
-            if aws_params.get("tags"):
-                cmd.extend(["--tags", str(aws_params["tags"])])
-                
-        elif action == "delete":
-            cmd.extend(["delete", "--id", aws_params["id"]])
-            if aws_params.get("pending_window_in_days"):
-                cmd.extend(["--pending-window-in-days", str(aws_params["pending_window_in_days"])])
-                
-        elif action == "enable":
-            cmd.extend(["enable", "--id", aws_params["id"]])
-            
-        elif action == "disable":
-            cmd.extend(["disable", "--id", aws_params["id"]])
-            
-        elif action == "rotate":
-            cmd.extend(["rotate", "--id", aws_params["id"]])
-            
-        elif action == "add_alias":
-            cmd.extend(["add-alias", "--id", aws_params["id"], "--alias", aws_params["alias"]])
-            
-        elif action == "delete_alias":
-            cmd.extend(["delete-alias", "--id", aws_params["id"], "--alias", aws_params["alias"]])
-            
-        elif action == "add_tags":
-            cmd.extend(["add-tags", "--id", aws_params["id"], "--tags", str(aws_params["tags"])])
-            
-        elif action == "remove_tags":
-            cmd.extend(["remove-tags", "--id", aws_params["id"], "--tags", str(aws_params["tags"])])
-            
-        elif action == "schedule_deletion":
-            cmd.extend(["schedule-deletion", "--id", aws_params["id"], 
-                       "--pending-window-in-days", str(aws_params["pending_window_in_days"])])
-            
-        elif action == "cancel_deletion":
-            cmd.extend(["cancel-deletion", "--id", aws_params["id"]])
-            
-        elif action == "import_material":
-            cmd.extend(["import-material", "--id", aws_params["id"], "--material", aws_params["material"]])
-            
-        elif action == "delete_material":
-            cmd.extend(["delete-material", "--id", aws_params["id"]])
-            
-        elif action == "upload":
-            cmd.extend(["upload", "--id", aws_params["id"]])
-            
-        elif action == "download_public_key":
-            cmd.extend(["download-public-key", "--id", aws_params["id"]])
-            
-        elif action == "policy":
-            cmd.extend(["policy", "--id", aws_params["id"], "--policy", aws_params["policy"]])
-            if aws_params.get("bypass_policy_lockout_safety_check"):
-                cmd.append("--bypass-policy-lockout-safety-check")
-                
-        elif action == "replicate_key":
-            cmd.extend(["replicate-key", "--id", aws_params["id"], "--region", aws_params["region"]])
-            
-        elif action == "block":
-            cmd.extend(["block", "--id", aws_params["id"]])
-            
-        elif action == "unblock":
-            cmd.extend(["unblock", "--id", aws_params["id"]])
-            
+        for service_key in service_specific_keys:
+            if service_key in params:
+                aws_params.update(params[service_key])
+        
+        cmd = []
+        
+        # Create smart resolver for ID resolution
+        smart_resolver = create_smart_resolver(self)
+        
+        # Check if this operation needs key ID resolution
+        if self._needs_key_id_resolution(action, aws_params):
+            await self._resolve_key_ids(action, aws_params, smart_resolver, params.get("cloud_provider", "aws"))
+        
+        # Route to appropriate command builder based on operation type
+        if action in ["keys_list", "keys_get", "keys_create", "keys_delete", "keys_enable", "keys_disable", "keys_rotate", "keys_add_alias", "keys_delete_alias", 
+                      "keys_add_tags", "keys_remove_tags", "keys_schedule_deletion", "keys_cancel_deletion", "keys_import_material", "keys_delete_material", 
+                      "keys_upload", "keys_download_public_key", "keys_policy", "keys_replicate_key", "keys_block", "keys_unblock", "keys_enable_auto_rotation", 
+                      "keys_disable_auto_rotation", "keys_enable_rotation_job", "keys_disable_rotation_job", "keys_list_rotations", "keys_verify_alias",
+                      "keys_link", "keys_update_description", "keys_update_primary_region", "keys_rotate_material", "keys_download_metadata",
+                      "keys_create_aws_cloudhsm", "keys_create_aws_hyok", "keys_policy_template_create", "keys_policy_template_delete",
+                      "keys_policy_template_get", "keys_policy_template_list", "keys_policy_template_update", "keys_sync_jobs_start", "keys_sync_jobs_cancel",
+                      "keys_sync_jobs_get", "keys_sync_jobs_status"]:
+            # Extract the base operation name (remove 'keys_' prefix)
+            base_action = action.replace("keys_", "")
+            cmd = build_key_command(base_action, aws_params)
+        elif action.startswith("kms_"):
+            cmd = build_kms_command(action, aws_params)
+        elif action.startswith("iam_"):
+            cmd = build_iam_command(action, aws_params)
+        elif action.startswith("reports_"):
+            cmd = build_reports_command(action, aws_params)
+        elif action.startswith("bulkjob_"):
+            cmd = build_bulkjob_command(action, aws_params)
+        elif action.startswith("custom_key_stores_"):
+            cmd = build_custom_key_stores_command(action, aws_params)
+        elif action == "logs_get_groups":
+            cmd = build_logs_command("get_log_groups", aws_params)
         else:
             raise ValueError(f"Unsupported AWS action: {action}")
-        
-        # Execute command
+            
+        # Pass domain parameters to execute_command
         result = self.execute_command(cmd, params.get("domain"), params.get("auth_domain"))
-        return result.get("data", result.get("stdout", "")) 
+        return result.get("data", result.get("stdout", ""))
+    
+    def _needs_key_id_resolution(self, action: str, aws_params: Dict[str, Any]) -> bool:
+        """Check if the operation needs key ID resolution."""
+        # Operations that require a key ID
+        id_required_actions = [
+            "keys_get", "keys_delete", "keys_enable", "keys_disable", "keys_rotate",
+            "keys_add_alias", "keys_delete_alias", "keys_add_tags", "keys_remove_tags",
+            "keys_schedule_deletion", "keys_cancel_deletion", "keys_import_material",
+            "keys_delete_material", "keys_download_public_key", "keys_policy",
+            "keys_replicate_key", "keys_block", "keys_unblock", "keys_enable_auto_rotation",
+            "keys_disable_auto_rotation", "keys_enable_rotation_job", "keys_disable_rotation_job",
+            "keys_list_rotations", "keys_verify_alias", "keys_link", "keys_update_description",
+            "keys_update_primary_region", "keys_rotate_material", "keys_download_metadata",
+            "keys_policy_template_delete", "keys_policy_template_get", "keys_policy_template_update",
+            "keys_sync_jobs_get", "keys_sync_jobs_cancel"
+        ]
+        
+        # Bulk job operations that need key ID resolution
+        bulkjob_id_required_actions = [
+            "bulkjob_create"
+        ]
+        
+        if action in id_required_actions:
+            # Check if the operation has an 'id' parameter that needs resolution
+            if "id" in aws_params:
+                from .aws import SmartIDResolver
+                resolver = SmartIDResolver(self)
+                return resolver.needs_resolution(aws_params["id"])
+        
+        elif action in bulkjob_id_required_actions:
+            # Check if the operation has a 'bulkjob_keys_id' parameter that needs resolution
+            if "bulkjob_keys_id" in aws_params:
+                from .aws import SmartIDResolver
+                resolver = SmartIDResolver(self)
+                # Check if any of the comma-separated key IDs need resolution
+                key_ids = aws_params["bulkjob_keys_id"].split(",")
+                for key_id in key_ids:
+                    if resolver.needs_resolution(key_id.strip()):
+                        return True
+        
+        return False
+    
+    async def _resolve_key_ids(self, action: str, aws_params: Dict[str, Any], smart_resolver, cloud_provider: str):
+        """Resolve key IDs using the smart resolver."""
+        if "id" in aws_params:
+            try:
+                resolved_id = await smart_resolver.resolve_key_id(
+                    aws_params["id"], 
+                    cloud_provider, 
+                    aws_params
+                )
+                aws_params["id"] = resolved_id
+            except Exception as e:
+                raise ValueError(f"Failed to resolve key ID for operation {action}: {str(e)}")
+        
+        elif "bulkjob_keys_id" in aws_params:
+            try:
+                # Split the comma-separated key IDs
+                key_ids = aws_params["bulkjob_keys_id"].split(",")
+                resolved_key_ids = []
+                
+                for key_id in key_ids:
+                    key_id = key_id.strip()
+                    if smart_resolver.needs_resolution(key_id):
+                        # Resolve this key ID
+                        resolved_id = await smart_resolver.resolve_key_id(
+                            key_id, 
+                            cloud_provider, 
+                            aws_params
+                        )
+                        resolved_key_ids.append(resolved_id)
+                    else:
+                        # No resolution needed, keep as is
+                        resolved_key_ids.append(key_id)
+                
+                # Update the bulkjob_keys_id with resolved IDs
+                aws_params["bulkjob_keys_id"] = ",".join(resolved_key_ids)
+                
+            except Exception as e:
+                raise ValueError(f"Failed to resolve bulk job key IDs for operation {action}: {str(e)}") 
