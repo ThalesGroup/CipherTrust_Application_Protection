@@ -22,6 +22,10 @@ For the quickest SQL Warehouse artifact chooser, see:
 
 - [SQL_WAREHOUSE_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\SQL_WAREHOUSE_INDEX.md)
 
+For the clearest TLS/SSL runtime split, see:
+
+- [DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md)
+
 ## What is in this project
 
 Core Java classes:
@@ -199,23 +203,38 @@ thales_crdp_python_function_bulk(values, "protectbulk", "char", "email")
 
 The Java and Python examples both use `udfConfig.properties`.
 
+TLS runtime note:
+
+- compute-cluster Java, compute-cluster Python, and SQL Warehouse do not use
+  the same TLS file-loading model
+- use [DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md)
+  before mixing PKCS12, PEM path, and SQL Warehouse embedded TLS settings
+
 Important runtime behavior:
 
 - the Java UDF path reads `udfConfig.properties` from the file pointed to by
   `UDF_CONFIG_VOLUME_PATH`
 - the Java code does **not** normally read the packaged copy from
   `src/main/resources` at runtime
-- the Python module also prefers `UDF_CONFIG_VOLUME_PATH`, but it can fall back
-  to:
-  - an explicitly supplied path
-  - or a local `udfConfig.properties` file if the env var is not set
+- the Python module itself still supports file-based config loading through:
+  - an explicit `path`
+  - `UDF_CONFIG_VOLUME_PATH`
+  - or a local `udfConfig.properties` fallback
 - the Python module loads configuration lazily and caches the default
   properties after first load unless explicitly refreshed
+- for compute-cluster Python usage, that file-based loading model is still valid
+- for SQL Warehouse Python UDF usage, the normal pattern is different:
+  - pass a full `properties` mapping into the wheel functions
+  - do **not** rely on `UDF_CONFIG_VOLUME_PATH`
+  - do **not** rely on a local `udfConfig.properties` file being present
+  - use embedded runtime properties for SQL Warehouse, especially for TLS
 
 Recommended practice:
 
 - treat the file referenced by `UDF_CONFIG_VOLUME_PATH` as the runtime source of
-  truth for both the Java jar and the Python wheel
+  truth for the Java jar and compute-cluster Python wheel usage
+- treat explicit `properties` passed into the wheel functions as the runtime
+  source of truth for SQL Warehouse Python UDF usage
 - keep the repo copy in `src/main/resources/udfConfig.properties` as the source
   example and baseline template, not as the primary runtime config
 
@@ -223,6 +242,18 @@ Key settings include:
 
 - `CRDPIP`
 - `CRDPPORT`
+- `CRDP_SSL_ENABLED`
+- `CRDP_SSL_VERIFY_SERVER`
+- `CRDP_CA_CERT_PATH`
+- `CRDP_CLIENT_PKCS12_PATH`
+- `CRDP_CLIENT_PKCS12_PASSWORD`
+- `CRDP_CLIENT_CERT_PATH`
+- `CRDP_CLIENT_KEY_PATH`
+- `CRDP_CONNECT_TIMEOUT_MS`
+- `CRDP_READ_TIMEOUT_MS`
+- `CRDP_WRITE_TIMEOUT_MS`
+- `CRDP_HTTP_MAX_IDLE_CONNECTIONS`
+- `CRDP_HTTP_KEEPALIVE_MINUTES`
 - `BATCH_SIZE`
 - `CRDPUSER`
 - `DEFAULTREVEALUSER`
@@ -244,6 +275,85 @@ TAG.char.external.policyType=external
 TAG.nbr.external=plain-nbr-ext
 TAG.nbr.external.policyType=external
 ```
+
+### HTTPS and client-auth configuration
+
+The Java compute-cluster CRDP client now supports:
+
+- HTTPS endpoints
+- optional PKCS12 client-certificate authentication
+- configurable timeouts
+- pooled keep-alive connections through a shared OkHttp client
+
+Recommended production pattern:
+
+- use `https://` in `CRDPIP` or set `CRDP_SSL_ENABLED=true`
+- keep `CRDP_SSL_VERIFY_SERVER=true`
+- provide a CA certificate path when CRDP uses a private CA
+- provide a PKCS12 client certificate when CRDP requires mutual TLS
+
+Example:
+
+```properties
+CRDPIP=https://192.168.49.2
+CRDPPORT=444
+CRDP_SSL_ENABLED=true
+CRDP_SSL_VERIFY_SERVER=true
+CRDP_CA_CERT_PATH=/tmp/thales_config/crdp-ca.pem
+CRDP_CLIENT_PKCS12_PATH=/tmp/thales_config/crdp-client.p12
+CRDP_CLIENT_PKCS12_PASSWORD=changeit
+CRDP_CONNECT_TIMEOUT_MS=10000
+CRDP_READ_TIMEOUT_MS=30000
+CRDP_WRITE_TIMEOUT_MS=30000
+CRDP_HTTP_MAX_IDLE_CONNECTIONS=20
+CRDP_HTTP_KEEPALIVE_MINUTES=5
+```
+
+Important behavior:
+
+- the Java path uses one shared `OkHttpClient`, so HTTPS connections can be
+  reused with keep-alive instead of paying a full TLS handshake for every call
+- if `CRDPIP` does not include a scheme, the Java client uses `https://` when
+  `CRDP_SSL_ENABLED=true` and `http://` otherwise
+- if `CRDP_SSL_VERIFY_SERVER=false`, the Java client disables certificate and
+  hostname verification; use this only for non-production testing
+- `CRDP_CA_CERT_PATH` can point to either:
+  - a single self-signed or trusted CA certificate
+  - or a PEM chain / CA bundle file if CRDP presents a chain anchored by a
+    private root or intermediate CA
+- the current Phase 1 HTTPS implementation supports PKCS12 for Java; the Python
+  path uses PEM client certificate and key files with a pooled `requests.Session()`
+
+### Python HTTPS and client-auth configuration
+
+The Python wheel now supports:
+
+- HTTPS endpoints
+- optional PEM client-certificate authentication
+- CA certificate or CA chain verification
+- pooled keep-alive connections through a shared `requests.Session()`
+
+Example:
+
+```properties
+CRDPIP=https://mycrdp.something.com
+CRDPPORT=444
+CRDP_SSL_ENABLED=true
+CRDP_SSL_VERIFY_SERVER=true
+CRDP_CA_CERT_PATH=/tmp/thales_config/crdp-ca.pem
+CRDP_CLIENT_CERT_PATH=/tmp/thales_config/databricks-crdp-client-cert.pem
+CRDP_CLIENT_KEY_PATH=/tmp/thales_config/databricks-crdp-client-key.pem
+CRDP_CONNECT_TIMEOUT_MS=10000
+CRDP_READ_TIMEOUT_MS=30000
+```
+
+Important behavior:
+
+- the Python path now reuses a shared HTTP session instead of opening a brand-new
+  request object for every call
+- this improves connection reuse and is intended to preserve keep-alive behavior
+- `CRDP_SSL_VERIFY_SERVER=false` is the Python equivalent of an insecure
+  verification bypass and should only be used for non-production testing
 
 ### How COLUMN_PROFILES works
 
@@ -750,7 +860,7 @@ python -m build
 
 3. The wheel will be created in:
 
-- `dist/thales_databricks_udf-0.1.4-py3-none-any.whl`
+- `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
 
 ### Steps to deploy the wheel
 
@@ -768,7 +878,7 @@ CREATE OR REPLACE FUNCTION main.security.test_func(x STRING)
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]'
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]'
 )
 AS $$
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_legacy
@@ -778,17 +888,16 @@ $$;
 
 ### About `requirements.txt`
 
-For this project, `requirements.txt` is mainly for local build tooling:
+For this project, `requirements.txt` includes both local build tooling and the
+runtime HTTP client used by the Python wheel:
 
 - `build`
 - `setuptools`
 - `wheel`
+- `requests`
 
-The Python CRDP helper code currently uses only the Python standard library, so
-there are no runtime third-party dependencies required by the wheel itself.
-
-If later you switch to `requests` or another external package in the packaged
-Python code, then you should also add that dependency to `pyproject.toml`.
+The Python CRDP helper code now depends on `requests` for pooled HTTPS session
+management, client certificate support, and connection reuse.
 
 ## Testing
 

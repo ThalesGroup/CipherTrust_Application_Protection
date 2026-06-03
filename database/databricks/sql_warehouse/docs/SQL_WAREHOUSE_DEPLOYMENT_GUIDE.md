@@ -3,6 +3,9 @@
 This guide packages and deploys the Thales CRDP Databricks Python helpers for
 Unity Catalog Python functions on Databricks SQL warehouses.
 
+For the full runtime-by-runtime TLS split, see
+[DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md).
+
 ## When to use this path
 
 Use this deployment model when you want:
@@ -13,6 +16,12 @@ Use this deployment model when you want:
 
 Use the compute-cluster Java adapters when your primary workload is high-volume
 Spark ETL on all-purpose or job clusters.
+
+Important TLS reminder:
+
+- compute-cluster Java, compute-cluster Python, and SQL Warehouse do not share
+  one cert-loading model
+- this guide documents the SQL Warehouse pattern only
 
 ## Databricks requirements
 
@@ -37,6 +46,10 @@ Based on current Databricks documentation:
   - `sql_warehouse/samples/sample_create_uc_secure_views.sql`
   - `sql_warehouse/samples/sample_grant_uc_secure_views.sql`
   - `sql_warehouse/samples/sample_thales_crdp_python_udf_imports.py`
+  - `sql_warehouse/samples/sample_tls_debug_uc_function.sql`
+- Generator utilities:
+  - `sql_warehouse/utils/generate_embedded_config_sql_from_properties.py`
+  - `sql_warehouse/utils/generate_reveal_views_from_properties.py`
 - Legacy reference scripts:
   - `sql_warehouse/legacy/legacy_create_uc_functions_built_wheel.sql`
   - `sql_warehouse/legacy/legacy_thales_crdp_uc_function_templates.sql`
@@ -148,7 +161,7 @@ py -m build --no-isolation
 
 Expected output artifact:
 
-- `dist/thales_databricks_udf-0.1.4-py3-none-any.whl`
+- `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
 - `dist/thales_databricks_udf-0.1.1.tar.gz`
 
 If your environment does not already have the build tool:
@@ -170,7 +183,7 @@ Windows note:
 Upload the wheel to a Unity Catalog volume path such as:
 
 ```text
-/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl
+/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl
 ```
 
 This volume path is referenced by the SQL template using the Python UDF
@@ -192,6 +205,14 @@ Keep this packaged-config script for future use if config is later bundled in
 the wheel:
 
 - `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+
+Recommended maintenance pattern for embedded config:
+
+- treat the checked-in embedded-config SQL files as reviewed templates/examples
+- generate environment-specific copies from `udfConfig.properties` instead of
+  hand-editing host, port, TLS, and cert/key settings inside the SQL directly
+- use:
+  - `sql_warehouse/utils/generate_embedded_config_sql_from_properties.py`
 
 Legacy/manual-customization references:
 
@@ -215,6 +236,55 @@ If you want the bundled-array memory sizing guidance and worked example for
 `plaintext_protected_internal`, also review:
 
 - `sql_warehouse/docs/OPTIMIZED_UDF_MEMORY_GUIDANCE.md`
+
+### Optional pre-step: Generate an environment-specific embedded-config SQL file
+
+If your SQL Warehouse rollout needs current CRDP host, port, TLS, CA, or
+client-cert settings from `udfConfig.properties`, generate a stamped SQL file
+first instead of editing the embedded `PROPERTIES` block by hand.
+
+Use:
+
+- `sql_warehouse/utils/generate_embedded_config_sql_from_properties.py`
+
+What it does:
+
+- reads active values from `udfConfig.properties`
+- renders a Python `PROPERTIES = {...}` block
+- replaces every embedded-config block in the chosen SQL template
+- writes a generated `.sql` file for review before execution
+
+Suggested settings in that generator:
+
+- `PROPERTIES_PATH`
+  - your canonical property file
+- `TEMPLATE_SQL_PATH`
+  - the checked-in embedded-config SQL template to stamp
+- `OUTPUT_SQL_PATH`
+  - a generated output path such as `C:\tmp\generated_...sql`
+- `SQL_WAREHOUSE_CA_CERT_SOURCE_PATH`
+  - local/source CA PEM file to embed as `CRDP_CA_CERT_PEM_B64`
+- `SQL_WAREHOUSE_CLIENT_CERT_SOURCE_PATH`
+  - local/source client certificate PEM file to embed as `CRDP_CLIENT_CERT_PEM_B64`
+- `SQL_WAREHOUSE_CLIENT_KEY_SOURCE_PATH`
+  - local/source client private-key PEM file to embed as `CRDP_CLIENT_KEY_PEM_B64`
+- `WHEEL_DEPENDENCY_PATH_OVERRIDE`
+  - optional dependency override when you want the generated SQL to point at a
+    specific wheel filename/version
+
+Recommended SQL Warehouse pattern:
+
+- do not assume SQL Warehouse can see a compute cluster's `/tmp/thales_config`
+- do not assume SQL Warehouse can use `/Volumes/...` TLS file paths directly in
+  `requests`
+- prefer embedding the config values directly
+- for SQL Warehouse TLS, prefer embedding cert material as:
+  - `CRDP_CA_CERT_PEM_B64`
+  - `CRDP_CLIENT_CERT_PEM_B64`
+  - `CRDP_CLIENT_KEY_PEM_B64`
+- the Python helper writes those bytes to local temp files at runtime before
+  configuring `requests`
+- this is the working SQL Warehouse TLS pattern validated in this project
 
 ## Step 5: Create secured wrapper views
 
@@ -363,6 +433,20 @@ If reveal behavior is denied or inconsistent:
 - verify CRDP policy membership and reveal-user authorization
 - verify external versus internal metadata handling for the selected profile
 
+If SQL Warehouse TLS is being introduced or changed:
+
+- regenerate the embedded-config SQL after updating any cert or key file
+- upload a fresh wheel filename/version when `crdp_udfs.py` changes
+- prefer the base64-embedded TLS material pattern over `/tmp/...` or
+  `/Volumes/...` TLS file paths
+- if needed, use:
+  - `sql_warehouse/samples/sample_tls_debug_uc_function.sql`
+  to confirm the warehouse runtime can:
+  - decode the embedded TLS properties
+  - write temp files
+  - load the CA bundle
+  - load the client cert/key pair
+
 ## Related files
 
 - `README.md`
@@ -372,6 +456,8 @@ If reveal behavior is denied or inconsistent:
 - `sql_warehouse/legacy/legacy_create_uc_functions_built_wheel.sql`
 - `sql_warehouse/samples/sample_create_uc_secure_views.sql`
 - `sql_warehouse/samples/sample_grant_uc_secure_views.sql`
+- `sql_warehouse/utils/generate_embedded_config_sql_from_properties.py`
+- `sql_warehouse/samples/sample_tls_debug_uc_function.sql`
 ## View generator
 
 If you want help generating persistent reveal-view SQL from

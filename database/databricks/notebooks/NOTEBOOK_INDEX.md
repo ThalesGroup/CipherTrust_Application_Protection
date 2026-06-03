@@ -13,7 +13,9 @@ Use it to:
 
 - register the Java UDFs
 - validate that the core internal and external signatures are working
+- validate the new object-aware bulk protect and reveal signatures for internal, external, and none
 - confirm the cluster and `udfConfig.properties` are wired correctly
+- serve as the recommended Java compute-cluster TLS smoke test when TLS is enabled in `udfConfig.properties`
 
 If you need sample plaintext tables for table-based examples, use:
 
@@ -40,15 +42,6 @@ Use it when you want:
 - bulk UDF performance tuning
 - executor and parallelism experiments
 
-### Use this for a simpler bulk benchmark
-
-- [internal_bulk_array_benchmark_basic.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_bulk_array_benchmark_basic.py)
-
-Use it when:
-
-- you want the original simpler bulk benchmark shape
-- you do not need `GROUP_COUNT_OVERRIDE`
-
 ### Use this for scalar benchmark comparisons
 
 - [internal_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_scalar_object_aware_benchmark.py)
@@ -71,7 +64,7 @@ Use it when you want:
 
 ### Use this for end-to-end pipeline realism
 
-- [internal_pipeline_end_to_end_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_pipeline_end_to_end_load_test.py)
+- [internal_pipeline_end_to_end_scalar_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_pipeline_end_to_end_scalar_load_test.py)
 
 Use it when you want:
 
@@ -88,17 +81,144 @@ not:
 
 - maximum tuning flexibility
 
-## External notebooks
+### Use this for end-to-end pipeline realism with bulk protect
 
-### Use this for the standard external load pattern
-
-- [external_scalar_with_headers_load.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_scalar_with_headers_load.py)
+- [internal_pipeline_end_to_end_bulk_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_pipeline_end_to_end_bulk_load_test.py)
 
 Use it when you want:
 
-- the recommended external-table load pattern
+- raw file generation
+- ADLS landing
+- Delta load
+- grouped array preparation
+- final bulk protect step timing
+
+This is the best internal notebook when the goal is:
+
+- customer-like pipeline realism plus bulk protect throughput
+
+not:
+
+- the simplest scalar demo path
+
+## External notebooks
+
+### Use this for scalar benchmark comparisons
+
+- [external_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_scalar_object_aware_benchmark.py)
+
+Use it when you want:
+
+- scalar/object-aware external benchmark numbers
+- comparison against the external bulk-array benchmark
+- a benchmark without ADLS pipeline overhead
+
+### Use this for the simplest production-style external load pattern
+
+- [external_scalar_object_aware_load.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_scalar_object_aware_load.py)
+
+Use it when you want:
+
+- the clearest distributed external protect example
 - protected value plus sibling external header columns
-- the simplest production-style external example
+- a customer-friendly scalar/object-aware load example
+
+### Use this for the external bulk benchmark path
+
+- [external_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_bulk_array_benchmark.py)
+
+Use it when you want:
+
+- grouped bulk external protect
+- object-aware external array mapping resolution
+- a generated high-row-count benchmark like the internal and none bulk notebooks
+- protected value plus sibling external header columns written back to the standard row table shape
+
+Backward-compatible wrapper:
+
+- [external_bulk_with_headers_load.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_bulk_with_headers_load.py)
+
+This wrapper is retained only so older references keep working. New runs should
+go directly to:
+
+- [external_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_bulk_array_benchmark.py)
+
+### Use this for end-to-end pipeline realism
+
+- [external_pipeline_end_to_end_scalar_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_pipeline_end_to_end_scalar_load_test.py)
+
+Use it when you want:
+
+- raw file generation
+- ADLS landing
+- Delta load
+- final scalar protect step timing
+
+### Use this for end-to-end pipeline realism with bulk protect
+
+- [external_pipeline_end_to_end_bulk_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_pipeline_end_to_end_bulk_load_test.py)
+
+Use it when you want:
+
+- raw file generation
+- ADLS landing
+- Delta load
+- grouped array preparation
+- final bulk protect step timing
+
+## None notebooks
+
+### Use this for scalar benchmark comparisons
+
+- [none_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_scalar_object_aware_benchmark.py)
+
+Use it when you want:
+
+- scalar/object-aware none benchmark numbers
+- comparison against the none bulk-array benchmark
+- a benchmark without ADLS pipeline overhead
+
+### Use this for the simplest production-style none load pattern
+
+- [none_scalar_object_aware_load.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_scalar_object_aware_load.py)
+
+Use it when you want:
+
+- the clearest distributed none protect example
+- a customer-friendly scalar/object-aware load example
+
+### Use this for the none-table benchmark path
+
+- [none_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_bulk_array_benchmark.py)
+
+Use it when you want:
+
+- a true bulk benchmark targeting `plaintext_protected_none`
+- object-aware none-table protection behavior
+- grouped-array materialization diagnostics for the none path
+
+### Use this for end-to-end pipeline realism
+
+- [none_pipeline_end_to_end_scalar_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_pipeline_end_to_end_scalar_load_test.py)
+
+Use it when you want:
+
+- raw file generation
+- ADLS landing
+- Delta load
+- final scalar protect step timing
+
+### Use this for end-to-end pipeline realism with bulk protect
+
+- [none_pipeline_end_to_end_bulk_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_pipeline_end_to_end_bulk_load_test.py)
+
+Use it when you want:
+
+- raw file generation
+- ADLS landing
+- Delta load
+- grouped array preparation
+- final bulk protect step timing
 
 ## Numbers notebooks
 
@@ -188,7 +308,12 @@ Use them only when:
 If you are unsure which notebook to use:
 
 1. Start with [compute_cluster_udf_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\compute_cluster_udf_smoke_test.py)
-2. Use [internal_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_bulk_array_benchmark.py) for the highest-control bulk tuning
-3. Use [internal_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_scalar_object_aware_benchmark.py) for scalar comparisons
-4. Use [internal_pipeline_end_to_end_load_test.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_pipeline_end_to_end_load_test.py) for pipeline realism
-5. Use [numbers_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers\numbers_setup.sql) plus the numbers notebooks for numeric examples
+2. Use [internal_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_bulk_array_benchmark.py), [external_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_bulk_array_benchmark.py), or [none_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_bulk_array_benchmark.py) for bulk benchmarking
+3. Use the matching scalar benchmark for the policy type you want to compare:
+   [internal_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_scalar_object_aware_benchmark.py),
+   [external_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_scalar_object_aware_benchmark.py),
+   or [none_scalar_object_aware_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_scalar_object_aware_benchmark.py)
+4. Use the matching scalar ADLS-backed batch-ingest example when you want end-to-end realism without grouped bulk orchestration
+5. Use the matching bulk ADLS-backed batch-ingest example when you want end-to-end realism plus bulk protect throughput
+6. Use the matching scalar load notebook when you want the simplest row-wise demo pattern
+7. Use [numbers_setup.sql](E:\eclipse-workspace\thales.databricks.udf\notebooks\numbers\numbers_setup.sql) plus the numbers notebooks for numeric examples

@@ -34,12 +34,12 @@ Use compute clusters when you want:
    ```
 
    Expected artifact:
-   - `dist/thales_databricks_udf-0.1.4-py3-none-any.whl`
+   - `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
 
 2. Upload the wheel to a Unity Catalog volume.
 
    Example:
-   - `/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl`
+   - `/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl`
 
 3. Review the deployment guide.
 

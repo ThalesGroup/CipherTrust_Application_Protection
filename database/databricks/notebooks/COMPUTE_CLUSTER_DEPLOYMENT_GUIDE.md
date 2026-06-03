@@ -4,6 +4,13 @@ This guide covers the Java UDF deployment path for Databricks compute clusters.
 Use this model when your main workload is Spark ETL, batch processing, or
 cluster-based notebooks/jobs rather than Databricks SQL warehouses.
 
+It also notes the optional Python wheel deployment path for compute-cluster
+notebooks that want to call the packaged Python helpers directly.
+
+For the full TLS runtime split across Java compute clusters, Python compute
+clusters, and SQL Warehouse, see
+[DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md).
+
 ## When to use this path
 
 Use compute-cluster Java UDFs when you want:
@@ -16,6 +23,14 @@ Use compute-cluster Java UDFs when you want:
 Use the SQL Warehouse / Unity Catalog Python function path when your main use
 case is Databricks SQL, BI tools, or shared governed SQL functions.
 
+If this deployment also needs HTTPS or mutual TLS, keep the runtime-specific
+TLS model straight:
+
+- Java compute cluster uses PKCS12 client auth
+- Python compute cluster uses PEM cert/key file paths
+- SQL Warehouse uses embedded base64 TLS material rather than direct `/tmp` or
+  `/Volumes` cert paths
+
 If you are unsure which compute-cluster notebook to run after deployment, see:
 
 - [NOTEBOOK_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\NOTEBOOK_INDEX.md)
@@ -23,6 +38,7 @@ If you are unsure which compute-cluster notebook to run after deployment, see:
 ## Artifacts in this project
 
 - `target/thales.databricks.udf-0.0.1-SNAPSHOT-all.jar`
+- `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
 - `src/main/resources/udfConfig.properties`
 - `notebooks/compute_cluster_udf_smoke_test.py`
 - `notebooks/numbers/numbers_reveal_castback_examples.py`
@@ -33,12 +49,14 @@ If you are unsure which compute-cluster notebook to run after deployment, see:
 ## Deployment overview
 
 1. Build the shaded jar.
-2. Attach the jar to the Databricks compute cluster.
-3. Configure the init script, `UDF_CONFIG_VOLUME_PATH`, and environment variables.
-4. Register the Java UDFs.
-5. Run smoke tests.
-6. Optionally create SQL wrapper views that inject `current_user()`.
-7. Grant consumers access to persistent views.
+2. Optionally build the Python wheel.
+3. Attach the jar to the Databricks compute cluster.
+4. Optionally attach the wheel when Python helper imports are needed on the cluster.
+5. Configure the init script, `UDF_CONFIG_VOLUME_PATH`, and environment variables.
+6. Register the Java UDFs.
+7. Run smoke tests.
+8. Optionally create SQL wrapper views that inject `current_user()`.
+9. Grant consumers access to persistent views.
 
 ## Step 1: Build the jar
 
@@ -52,12 +70,41 @@ Expected artifact:
 
 - `target/thales.databricks.udf-0.0.1-SNAPSHOT-all.jar`
 
-## Step 2: Attach the jar to the cluster
+## Step 2: Optionally build the Python wheel
+
+Build the wheel when you want the compute cluster to import the packaged Python
+helpers directly, for example:
+
+- Python TLS smoke tests
+- notebook-level Python helper testing
+- cluster-side validation of the packaged wheel
+
+Build command:
+
+```powershell
+python -m build
+```
+
+Expected artifact:
+
+- `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
+
+## Step 3: Attach the jar to the cluster
 
 Upload or reference the shaded jar in the compute cluster libraries UI or your
 cluster policy/deployment workflow.
 
-## Step 3: Configure the UDF config path
+## Step 4: Optionally attach the wheel to the cluster
+
+Attach the wheel as a cluster library if you want Python code on the compute
+cluster to import:
+
+- `thales_databricks_udf.crdp_udfs`
+
+This is not required for the Java UDF path itself. It is only needed when the
+compute cluster will also run the packaged Python helper path.
+
+## Step 5: Configure the UDF config path
 
 Use the cluster init script to copy `udfConfig.properties` from the Unity
 Catalog volume to a local `/tmp` path before Spark starts, then point both
@@ -83,7 +130,19 @@ Init script volume path:
 /Volumes/my_catalog/my_schema/volume_forjars/copy_udf_config_init.sh
 ```
 
-## Step 4: Register the Java UDFs
+For TLS-enabled deployments, the init script also copies optional certificate
+files such as:
+
+- `crdp-client.p12`
+- `crdp-ca.pem`
+- `databricks-crdp-client-cert.pem`
+- `databricks-crdp-client-key.pem`
+
+into:
+
+- `/tmp/thales_config`
+
+## Step 6: Register the Java UDFs
 
 Use:
 
@@ -98,7 +157,7 @@ That notebook registers:
 - hardcoded convenience bulk UDFs
 - the current examples use the string-based `nbr` path with cast-back for numeric values
 
-## Step 5: Row-based usage pattern
+## Step 7: Row-based usage pattern
 
 The most common pattern is still one protected value per row.
 
@@ -152,7 +211,7 @@ SELECT * FROM main.security.v_customer_reveal LIMIT 2;
 +-------------+------------+-----------+-----------------+---------------------+-------------------+
 ```
 
-## Step 6: Array-based usage pattern
+## Step 8: Array-based usage pattern
 
 Use the bulk UDFs only when the source table intentionally stores arrays in a
 single row.
@@ -271,6 +330,7 @@ Important limitation:
 - `DEPLOYMENT.md`
 - `README.md`
 - `notebooks/compute_cluster_udf_smoke_test.py`
+- `sql_warehouse/samples/sample_tls_smoke_test.py`
 - `notebooks/numbers/numbers_reveal_castback_examples.py`
 - `notebooks/numbers/numbers_reveal_castback_examples.sql`
 - `notebooks/utils/grant_examples.sql`

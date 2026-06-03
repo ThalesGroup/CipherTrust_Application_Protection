@@ -9,6 +9,14 @@
 -- MAGIC - create persistent views that inject `session_user()`
 -- MAGIC - cast revealed numeric values back to the target schema where needed
 -- MAGIC
+-- MAGIC Maintenance note:
+-- MAGIC - treat this file as the reviewed example/template
+-- MAGIC - for environment-specific host, port, TLS, or cert/key updates, generate
+-- MAGIC   a stamped copy from `udfConfig.properties` with:
+-- MAGIC   `sql_warehouse/utils/generate_embedded_config_sql_from_properties.py`
+-- MAGIC - this avoids hand-editing the embedded `PROPERTIES = {...}` block in
+-- MAGIC   multiple SQL Warehouse deployment files
+-- MAGIC
 -- MAGIC Prerequisites:
 -- MAGIC - a Pro or Serverless SQL Warehouse, or a UC-enabled cluster with Python UDF support
 -- MAGIC - the wheel uploaded to a UC volume
@@ -32,21 +40,22 @@ RETURNS STRING
 LANGUAGE PYTHON
 NOT DETERMINISTIC
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_by_object
 
 PROPERTIES = {
-    "CRDPIP": "yourip",
+    "CRDPIP": "your-crdp-ip",
     "CRDPPORT": "8090",
     "CRDPUSER": "admin",
     "DEFAULTREVEALUSER": "admin",
     "DEFAULTMETADATA": "1001000",
-    "DEFAULTMODE": "external",
+    "DEFAULTMODE": "internal",
+    "keymetadatalocation": "internal",
     "BADDATATAG": "999999999",
-    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "yes",
+    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "no",
     "DEFAULTINTERNALCHARPOLICY": "char-internal",
     "DEFAULTINTERNALNBRNBRPOLICY": "nbr-nbr-internal",
     "DEFAULTEXTERNALCHARPOLICY": "char-external",
@@ -112,21 +121,22 @@ RETURNS ARRAY<STRING>
 LANGUAGE PYTHON
 NOT DETERMINISTIC
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_by_object
 
 PROPERTIES = {
-    "CRDPIP": "yourip",
+    "CRDPIP": "your-crdp-ip",
     "CRDPPORT": "8090",
     "CRDPUSER": "admin",
     "DEFAULTREVEALUSER": "admin",
     "DEFAULTMETADATA": "1001000",
-    "DEFAULTMODE": "external",
+    "DEFAULTMODE": "internal",
+    "keymetadatalocation": "internal",
     "BADDATATAG": "999999999",
-    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "yes",
+    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "no",
     "DEFAULTINTERNALCHARPOLICY": "char-internal",
     "DEFAULTINTERNALNBRNBRPOLICY": "nbr-nbr-internal",
     "DEFAULTEXTERNALCHARPOLICY": "char-external",

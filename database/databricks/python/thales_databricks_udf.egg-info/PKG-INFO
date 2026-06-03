@@ -1,0 +1,955 @@
+Metadata-Version: 2.4
+Name: thales-databricks-udf
+Version: 0.1.7
+Summary: Thales CRDP helpers for Databricks
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.31.0
+
+# Thales Databricks UDF
+
+This project contains Java and Python examples for protecting and revealing
+sensitive data in Databricks using Thales CRDP v1 APIs.
+
+It supports two deployment styles:
+
+- Databricks compute clusters with Java UDF adapters
+- Databricks SQL warehouse with Python UDF definitions
+
+For the current file-by-file guide, start with:
+
+- [DOCUMENTATION_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\docs\DOCUMENTATION_INDEX.md)
+- [PERFORMANCE_CONSIDERATIONS.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\docs\PERFORMANCE_CONSIDERATIONS.md)
+- [LOGGING_DESIGN.md](E:\eclipse-workspace\thales.databricks.udf\docs\LOGGING_DESIGN.md)
+
+For the quickest notebook chooser, see:
+
+- [NOTEBOOK_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\NOTEBOOK_INDEX.md)
+
+For the quickest SQL Warehouse artifact chooser, see:
+
+- [SQL_WAREHOUSE_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\SQL_WAREHOUSE_INDEX.md)
+
+## What is in this project
+
+Core Java classes:
+
+- `ThalesDataBricksCRDPFPE`
+- `ThalesDataBricksCRDPBulkService`
+- `ThalesDataBricksUdfConfig`
+- `ThalesDataBricksCADPFPE`
+
+Spark Java UDF adapters for compute clusters:
+
+- scalar adapters
+- bulk adapters
+- hardcoded char/nbr bulk adapters
+- column-aware bulk adapters
+- current examples use string tokenization plus cast-back for numeric values
+- external protect/reveal adapters for sibling `*_header` columns
+
+SQL warehouse Python example:
+
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+- `sql_warehouse/docs/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
+- `sql_warehouse/docs/SQL_WAREHOUSE_ROLLOUT_CHECKLIST.md`
+- `sql_warehouse/samples/sample_create_uc_secure_views.sql`
+- `sql_warehouse/samples/sample_grant_uc_secure_views.sql`
+- `sql_warehouse/samples/sample_thales_crdp_python_udf_imports.py`
+- `sql_warehouse/utils/generate_reveal_views_from_properties.py`
+- `sql_warehouse/legacy/legacy_create_uc_functions_built_wheel.sql`
+- `sql_warehouse/legacy/legacy_thales_crdp_uc_function_templates.sql`
+
+Important SQL Warehouse generator note:
+
+- `sql_warehouse/utils/generate_reveal_views_from_properties.py` generates SQL
+  Warehouse / Unity Catalog view SQL, but it must be run from a Python-capable
+  Databricks cluster notebook, not from a SQL Warehouse notebook
+
+Compute cluster notebook:
+
+- `notebooks/compute_cluster_udf_smoke_test.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.py`
+- `notebooks/numbers/numbers_reveal_castback_examples.sql`
+- `notebooks/numbers/numbers_smoke_test.py`
+- `notebooks/numbers/numbers_setup.sql`
+- `notebooks/plaintext_setup.sql`
+- `notebooks/utils/python_crdp_api_examples.py`
+- `COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md`
+- `TEST_RUNBOOK.md`
+- `notebooks/utils/grant_examples.sql`
+- `RUN_ORDER_GUIDE.md`
+- `docs/DOCUMENTATION_INDEX.md`
+- `docs/EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md`
+
+If you are unsure which compute-cluster notebook to use first, start with:
+
+- [NOTEBOOK_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\NOTEBOOK_INDEX.md)
+
+Important compute-cluster note:
+
+- the compute-cluster setup notebooks now self-register the Java UDFs they use
+- the protected tables they create are persistent Delta tables
+- the reveal views they create are session-scoped `TEMP VIEW`s because Databricks
+  does not allow persistent catalog views to reference session-registered Java UDFs
+- if you need persistent governed reveal views, use the SQL Warehouse / Unity Catalog path
+
+## Execution model quick matrix
+
+| Thing | Compute cluster Java UDF path | Persistent? |
+|---|---|---|
+| Protected tables | `CREATE TABLE`, `INSERT OVERWRITE` | Yes |
+| Java UDF registrations | `spark.udf.registerJavaFunction(...)` | No, session-scoped |
+| Reveal views using those Java UDFs | `TEMP VIEW` | No, session-scoped |
+| Grants on protected tables | normal catalog grants | Yes |
+
+## Best-practice summary
+
+| Deployment path | Best fit | Why |
+|---|---|---|
+| Compute cluster Java UDFs | ETL, batch jobs, executor-parallel transforms, session-driven work | good fit for Spark job execution and large-scale transformation workloads |
+| SQL Warehouse / Unity Catalog functions | persistent, governed, shareable functions and views | best fit for durable shared access, grants, and analyst-facing reveal views |
+
+Additional guidance:
+
+- the compute-cluster setup notebooks are the right place to create in-session
+  temp reveal views
+- a separate reveal-view generator is most useful on the SQL Warehouse / Unity
+  Catalog path, where the underlying functions and views are both persistent
+
+## Large-scale OLTP guidance
+
+For very large OLTP-style feeds, the recommended pattern is:
+
+- land raw files in ADLS Gen2 by source and ingest date
+- ingest to bronze with Auto Loader and keep `_rescued_data`
+- standardize and deduplicate in silver
+- extract unique sensitive identities
+- protect only those unique identities on a compute cluster
+- build gold facts with surrogate keys and non-sensitive measures
+- use SQL Warehouse governed reveal views only when sensitive attributes must be exposed
+
+For new Databricks Delta tables, prefer liquid clustering and managed
+optimizations over hard-coding legacy partitioning or `ZORDER` as the default.
+
+Config example:
+
+- `src/main/resources/udfConfig.properties`
+
+Deployment notes:
+
+- `DEPLOYMENT.md`
+
+## CRDP modes in this project
+
+The CRDP REST implementation in this project uses v1 endpoints:
+
+- `/v1/protect`
+- `/v1/reveal`
+- `/v1/protectbulk`
+- `/v1/revealbulk`
+
+Important limitation:
+
+- each v1 bulk request must use a single `protection_policy_name`
+- bulk calls should group values for one resolved column/profile at a time
+- mixed-profile values from the same row must be sent in separate requests
+
+## Signatures
+
+### Java scalar
+
+Legacy style:
+
+```java
+ThalesDataBricksCRDPFPE.thales_crdp_udf(value, mode, datatype)
+```
+
+Column-aware style:
+
+```java
+ThalesDataBricksCRDPFPE.thales_crdp_udf(value, mode, datatype, columnName)
+```
+
+### Java bulk
+
+Legacy-compatible style:
+
+```java
+service.protectValues(values, "char")
+service.revealValues(values, "char")
+```
+
+Column-aware style:
+
+```java
+service.protectValues(values, "char", "email")
+service.revealValues(values, "char", "email")
+```
+
+### Python bulk
+
+Legacy style:
+
+```python
+thales_crdp_python_function_bulk(values, "protectbulk", "char")
+```
+
+Column-aware style:
+
+```python
+thales_crdp_python_function_bulk(values, "protectbulk", "char", "email")
+```
+
+## Configuration
+
+The Java and Python examples both use `udfConfig.properties`.
+
+Important runtime behavior:
+
+- the Java UDF path reads `udfConfig.properties` from the file pointed to by
+  `UDF_CONFIG_VOLUME_PATH`
+- the Java code does **not** normally read the packaged copy from
+  `src/main/resources` at runtime
+- the Python module also prefers `UDF_CONFIG_VOLUME_PATH`, but it can fall back
+  to:
+  - an explicitly supplied path
+  - or a local `udfConfig.properties` file if the env var is not set
+- the Python module loads configuration lazily and caches the default
+  properties after first load unless explicitly refreshed
+
+Recommended practice:
+
+- treat the file referenced by `UDF_CONFIG_VOLUME_PATH` as the runtime source of
+  truth for both the Java jar and the Python wheel
+- keep the repo copy in `src/main/resources/udfConfig.properties` as the source
+  example and baseline template, not as the primary runtime config
+
+Key settings include:
+
+- `CRDPIP`
+- `CRDPPORT`
+- `CRDP_SSL_ENABLED`
+- `CRDP_SSL_VERIFY_SERVER`
+- `CRDP_CA_CERT_PATH`
+- `CRDP_CLIENT_PKCS12_PATH`
+- `CRDP_CLIENT_PKCS12_PASSWORD`
+- `CRDP_CLIENT_CERT_PATH`
+- `CRDP_CLIENT_KEY_PATH`
+- `CRDP_CONNECT_TIMEOUT_MS`
+- `CRDP_READ_TIMEOUT_MS`
+- `CRDP_WRITE_TIMEOUT_MS`
+- `CRDP_HTTP_MAX_IDLE_CONNECTIONS`
+- `CRDP_HTTP_KEEPALIVE_MINUTES`
+- `BATCH_SIZE`
+- `CRDPUSER`
+- `DEFAULTREVEALUSER`
+- `DEFAULTMETADATA`
+- `DEFAULTMODE`
+- `REVEAL_CACHE_ENABLED`
+- `REVEAL_CACHE_MAX_SIZE`
+- `external_table_header_value`
+- `external_table_header_delimiter`
+- `COLUMN_PROFILES`
+- `TAG.*`
+
+Example profile mapping:
+
+```properties
+COLUMN_PROFILES=email|tag.char.external,ssn|tag.nbr.external,employee_id|tag.nbr.internal
+TAG.char.external=alpha-external
+TAG.char.external.policyType=external
+TAG.nbr.external=plain-nbr-ext
+TAG.nbr.external.policyType=external
+```
+
+### HTTPS and client-auth configuration
+
+The Java compute-cluster CRDP client now supports:
+
+- HTTPS endpoints
+- optional PKCS12 client-certificate authentication
+- configurable timeouts
+- pooled keep-alive connections through a shared OkHttp client
+
+Recommended production pattern:
+
+- use `https://` in `CRDPIP` or set `CRDP_SSL_ENABLED=true`
+- keep `CRDP_SSL_VERIFY_SERVER=true`
+- provide a CA certificate path when CRDP uses a private CA
+- provide a PKCS12 client certificate when CRDP requires mutual TLS
+
+Example:
+
+```properties
+CRDPIP=https://192.168.49.2
+CRDPPORT=444
+CRDP_SSL_ENABLED=true
+CRDP_SSL_VERIFY_SERVER=true
+CRDP_CA_CERT_PATH=/tmp/thales_config/crdp-ca.pem
+CRDP_CLIENT_PKCS12_PATH=/tmp/thales_config/crdp-client.p12
+CRDP_CLIENT_PKCS12_PASSWORD=changeit
+CRDP_CONNECT_TIMEOUT_MS=10000
+CRDP_READ_TIMEOUT_MS=30000
+CRDP_WRITE_TIMEOUT_MS=30000
+CRDP_HTTP_MAX_IDLE_CONNECTIONS=20
+CRDP_HTTP_KEEPALIVE_MINUTES=5
+```
+
+Important behavior:
+
+- the Java path uses one shared `OkHttpClient`, so HTTPS connections can be
+  reused with keep-alive instead of paying a full TLS handshake for every call
+- if `CRDPIP` does not include a scheme, the Java client uses `https://` when
+  `CRDP_SSL_ENABLED=true` and `http://` otherwise
+- if `CRDP_SSL_VERIFY_SERVER=false`, the Java client disables certificate and
+  hostname verification; use this only for non-production testing
+- `CRDP_CA_CERT_PATH` can point to either:
+  - a single self-signed or trusted CA certificate
+  - or a PEM chain / CA bundle file if CRDP presents a chain anchored by a
+    private root or intermediate CA
+- the current Phase 1 HTTPS implementation supports PKCS12 for Java; the Python
+  path uses PEM client certificate and key files with a pooled `requests.Session()`
+
+### Python HTTPS and client-auth configuration
+
+The Python wheel now supports:
+
+- HTTPS endpoints
+- optional PEM client-certificate authentication
+- CA certificate or CA chain verification
+- pooled keep-alive connections through a shared `requests.Session()`
+
+Example:
+
+```properties
+CRDPIP=https://mycrdp.something.com
+CRDPPORT=444
+CRDP_SSL_ENABLED=true
+CRDP_SSL_VERIFY_SERVER=true
+CRDP_CA_CERT_PATH=/tmp/thales_config/crdp-ca.pem
+CRDP_CLIENT_CERT_PATH=/tmp/thales_config/databricks-crdp-client-cert.pem
+CRDP_CLIENT_KEY_PATH=/tmp/thales_config/databricks-crdp-client-key.pem
+CRDP_CONNECT_TIMEOUT_MS=10000
+CRDP_READ_TIMEOUT_MS=30000
+```
+
+Important behavior:
+
+- the Python path now reuses a shared HTTP session instead of opening a brand-new
+  request object for every call
+- this improves connection reuse and is intended to preserve keep-alive behavior
+- `CRDP_SSL_VERIFY_SERVER=false` is the Python equivalent of an insecure
+  verification bypass and should only be used for non-production testing
+
+### How COLUMN_PROFILES works
+
+`COLUMN_PROFILES` is a shared column-name-to-profile mapping used by the
+column-aware Java and Python functions.
+
+Example:
+
+```properties
+COLUMN_PROFILES=email|tag.char.external,address|tag.char.external,ssn|tag.nbr.external
+TAG.char.external=alpha-external
+TAG.char.external.policyType=external
+TAG.nbr.external=plain-nbr-ext
+TAG.nbr.external.policyType=external
+```
+
+If you call a column-aware function like:
+
+```sql
+SELECT main.security.thales_crdp_scalar_by_column(email_token, 'reveal', 'char', 'email')
+```
+
+the resolution flow is:
+
+1. look up `email` in `COLUMN_PROFILES`
+2. find the alias `tag.char.external`
+3. resolve that alias through `TAG.char.external=alpha-external`
+4. resolve the policy type through `TAG.char.external.policyType=external`
+5. call CRDP using the resolved policy name and policy type
+
+Important behavior:
+
+- `COLUMN_PROFILES` is still a valid global fallback
+- the newer object-aware compute-cluster and SQL Warehouse functions can resolve
+  `protect.object.<catalog>.<schema>.<table>=column|tag...` mappings first
+- when both exist, the table-specific mapping overrides the global
+  `COLUMN_PROFILES` entry for that same logical column
+- explicit per-column properties such as `column.email.profile` can still
+  override the shared/global mapping
+
+For customer environments that need the same business column names to resolve
+different policies across different protected tables, prefer the object-aware
+function families and object-specific profile mappings.
+
+## Reveal cache
+
+The Java bulk service supports an optional reveal-only cache.
+
+Config:
+
+```properties
+REVEAL_CACHE_ENABLED=false
+REVEAL_CACHE_MAX_SIZE=10000
+```
+
+How it works:
+
+- cache is executor-local in memory
+- cache is only used for reveal operations
+- cache is bounded with an LRU-style eviction policy
+- cache key includes policy, policy type, metadata, reveal user, column name, and protected value
+
+When it helps:
+
+- the same protected values are revealed repeatedly
+- CRDP reveal latency is a bottleneck
+- repeated values tend to land on the same Spark executor
+
+When it may not help much:
+
+- most protected values are unique
+- data is heavily shuffled so repeats do not stay on the same executor
+
+Security note:
+
+- enabling the cache means revealed plaintext is stored in executor memory
+- keep it disabled unless you have a clear performance reason to use it
+
+### Reveal cache sizing
+
+The reveal cache is implemented in Java as an executor-local in-memory bounded
+LRU-style cache using `LinkedHashMap`. It is not based on an external caching
+library.
+
+Memory usage depends on:
+
+- number of cached entries
+- average ciphertext length
+- average plaintext length
+- cache-key length
+- JVM string and map-entry overhead
+
+The cache key includes:
+
+- policy name
+- policy type
+- metadata
+- reveal user
+- column name
+- protected value
+
+Because the key contains more than just the ciphertext, actual memory usage is
+larger than raw data size alone.
+
+Practical estimate:
+
+- plan roughly `200 to 500 bytes` per cached entry for typical values
+
+Example planning range:
+
+- `10,000` entries: about `3 MB to 5 MB` per executor
+- `20,000` entries: about `6 MB to 10 MB` per executor
+- `50,000` entries: about `15 MB to 25 MB` per executor
+
+Illustrative example:
+
+- if a protected value is about `20` bytes
+- and the revealed plaintext is about `20` bytes
+- and the rest of the cache key adds policy/user/column context
+
+then a `20,000`-entry cache often lands in the rough range of `6 MB to 10 MB`
+per executor JVM.
+
+Important:
+
+- this estimate is per executor, not cluster-wide total
+- overall cluster memory impact is roughly per-executor cache size multiplied by
+  the number of executors
+- because plaintext is cached in memory, security review matters as much as
+  memory sizing
+
+## Build
+
+Build the project with Maven:
+
+```powershell
+mvn -DskipTests package
+```
+
+The shaded jar is created at:
+
+- `target/thales.databricks.udf-0.0.1-SNAPSHOT-all.jar`
+
+## Compute cluster usage
+
+Upload the shaded jar to Databricks and set:
+
+```text
+spark.driverEnv.UDF_CONFIG_VOLUME_PATH /tmp/thales_config/udfConfig.properties
+spark.executorEnv.UDF_CONFIG_VOLUME_PATH /tmp/thales_config/udfConfig.properties
+```
+
+Important:
+
+- in the Databricks Spark config UI, these are key/value pairs
+- do not use an `=` sign in that box
+- the current working setup uses an init script to copy `udfConfig.properties`
+  from the Unity Catalog volume to `/tmp/thales_config/udfConfig.properties`
+
+Working cluster settings are documented here:
+
+- [TEST_RUNBOOK.md](E:\eclipse-workspace\thales.databricks.udf\TEST_RUNBOOK.md)
+
+Register Java UDFs, for example:
+
+```scala
+import org.apache.spark.sql.types.DataTypes
+
+spark.udf.registerJava(
+  "thales_bulk_protect_char",
+  "ThalesBulkProtectCharUdf",
+  DataTypes.createArrayType(DataTypes.StringType)
+)
+```
+
+Use them in SQL:
+
+```sql
+SELECT thales_bulk_protect_char(my_array_col)
+```
+
+For secure reveal behavior, prefer SQL session identity injection over a static
+username in properties:
+
+```sql
+SELECT thales_reveal_by_column_with_user(token_col, 'char', 'email', session_user())
+FROM my_table
+```
+
+This lets Databricks provide the active session user rather than trusting a
+caller-supplied username string.
+
+## Cast-back pattern for numeric data
+
+For both internal and external policy use cases, the safest Databricks pattern
+for numeric fields is:
+
+1. keep the original business table in its natural types such as `INT`,
+   `BIGINT`, or `DECIMAL`
+2. protect into a staging/protected table where transformed numeric values are
+   stored as `STRING`
+3. reveal from that protected table using the Thales UDFs
+4. cast the revealed plaintext back to the original business type in the view
+
+We refer to this as the **cast-back pattern**.
+
+Example:
+
+```sql
+CAST(
+  thales_reveal_by_column_with_user(
+    CAST(amount_decimal AS STRING),
+    'nbr',
+    'amount',
+    current_user()
+  ) AS DECIMAL(18,2)
+) AS amount_decimal
+```
+
+Why this pattern matters:
+
+- once a numeric value is protected, it is no longer really a business numeric
+  value; it is a token that must be preserved exactly
+- storing protected numeric tokens in numeric columns can change their
+  representation
+- leading zeros can be dropped
+- decimal scale can be normalized
+- token length or formatting can change
+- internal or external metadata-bearing values can be distorted
+
+CRDP reveal works reliably only when the protected value is returned exactly as
+stored.
+
+So the rule of thumb is:
+
+- original plaintext business table: keep natural numeric types
+- protected/token table: store transformed numeric fields as `STRING`
+- reveal view: cast back to the original business type
+
+This applies to both:
+
+- internal policies
+- external policies
+
+External policies add sibling header columns, but the protected value itself is
+still safest when stored as `STRING`.
+
+For external-policy tables that store sibling header columns, use:
+
+```sql
+SELECT
+  thales_reveal_by_column_with_external_header_and_user(
+    CAST(email AS STRING),
+    CAST(email_header AS STRING),
+    'char',
+    'email',
+    session_user()
+  ) AS email
+FROM my_external_table
+```
+
+For external protect on compute clusters, use:
+
+```sql
+thales_protect_by_column_with_external_header(...)
+```
+
+This returns:
+
+```text
+STRUCT<protected_value: STRING, external_header: STRING>
+```
+
+so the token and header can be persisted together.
+
+### Type handling at the Java UDF boundary
+
+The Java Spark UDF adapters in this project take string inputs, so numeric
+Spark columns are often cast to `STRING` before calling the UDF.
+
+Recommended guidance:
+
+- use the string-based `nbr` path for identifier-like values such as `ssn`,
+  `creditcard`, `phone`, and `zip`
+- for whole-number and decimal measure columns, the current examples also use
+  the string-based `nbr` path and cast the revealed value back in the query or
+  view
+
+Important behavior:
+
+- casting at the UDF boundary does not change the schema of the original source table
+- a view column uses the type of the expression in that view
+- if you persist a casted expression into a new table, the new table column uses that casted type
+
+Example:
+
+```sql
+SELECT thales_reveal_by_column_with_user(CAST(ssn AS STRING), 'nbr', 'ssn', current_user()) AS ssn
+FROM my_table
+```
+
+In that result, `ssn` is a `STRING`, but the original source table column type
+is unchanged.
+
+If you create a new table from a casted expression:
+
+```sql
+CREATE TABLE my_new_table AS
+SELECT CAST(amount AS STRING) AS amount
+FROM my_old_table
+```
+
+then `my_new_table.amount` will be stored as `STRING`.
+
+For columns that must later be used in arithmetic such as `SUM` or `AVG`, cast
+the revealed value back to a numeric type in the query or view:
+
+```sql
+SELECT
+  CAST(
+    thales_reveal_by_column_with_user(
+      CAST(amount_decimal AS STRING),
+      'nbr',
+      'amount',
+      current_user()
+    )
+    AS DECIMAL(18,2)
+  ) AS amount
+FROM my_catalog.my_schema.account_balance_plaintext_protected_internal
+```
+
+Example aggregations:
+
+```sql
+SELECT
+  SUM(
+    CAST(
+      thales_reveal_by_column_with_user(
+        CAST(amount_decimal AS STRING),
+        'nbr',
+        'amount',
+        current_user()
+      )
+      AS DECIMAL(18,2)
+    )
+  ) AS total_amount,
+  AVG(
+    CAST(
+      thales_reveal_by_column_with_user(
+        CAST(balance_long AS STRING),
+        'nbr',
+        'balance',
+        current_user()
+      )
+      AS DECIMAL(18,2)
+    )
+  ) AS avg_balance
+FROM my_catalog.my_schema.account_balance_plaintext_protected_internal
+```
+
+Practical guidance:
+
+- values such as `ssn`, `creditcard`, `phone`, and `zip` are usually best treated as strings
+- true whole-number measures such as counters and integer balances can use the
+  typed integer/long adapters
+- decimal measures such as `amount`, `fee`, and `balance` with scale should be
+  protected as strings and cast back to `DECIMAL`, `DOUBLE`, or another numeric
+  type after reveal
+
+## SQL warehouse usage
+
+For SQL warehouse, use Python UDF definitions rather than Java adapters.
+
+See:
+
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql`
+- `sql_warehouse/deploy/create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql`
+- `sql_warehouse/docs/SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md`
+
+The SQL template file includes ready-to-customize Unity Catalog
+`CREATE FUNCTION` examples for:
+
+- scalar legacy
+- scalar by column
+- scalar by column with runtime reveal user
+- bulk legacy
+- bulk by column
+- bulk by column with runtime reveal user
+
+Recommended secure pattern:
+
+- expose `*_with_user` functions only through governed SQL wrappers or views
+- inject `session_user()` or `current_user()` from Databricks SQL
+- do not rely on a caller-supplied username literal in BI tools
+
+You can also create Unity Catalog Python UDFs using inline `CREATE FUNCTION`
+statements based on the scalar and bulk examples prepared for this project.
+
+## Python wheel packaging
+
+You can deploy the Python logic in two different ways:
+
+- standalone Python file or notebook code
+- packaged wheel for cluster or SQL warehouse dependency management
+
+Yes, you can still deploy the Python code separately without using a wheel.
+The wheel is just the cleaner packaging option when you want reuse and a more
+formal deployment artifact.
+
+### Files added for wheel support
+
+- `pyproject.toml`
+- `requirements.txt`
+- `python/thales_databricks_udf/__init__.py`
+- `python/thales_databricks_udf/crdp_udfs.py`
+
+The standalone compatibility file remains here:
+
+## Secure Python API
+
+The Python package now exposes two usage styles:
+
+- production-safe functions
+- flexible testing/admin functions
+
+Production-safe entry points:
+
+- `thales_crdp_python_function_bulk_secure(...)`
+- `thales_crdp_python_function_bulk_secure_legacy(...)`
+- `thales_crdp_python_function_bulk_secure_by_object(...)`
+
+Testing/flexible entry points:
+
+- `thales_crdp_python_function_bulk(...)`
+- `thales_crdp_python_function_bulk_legacy(...)`
+- `thales_crdp_python_function_bulk_by_object(...)`
+- `thales_crdp_python_protect_with_external_header_by_object(...)`
+
+Recommended production notebook usage:
+
+```python
+from thales_databricks_udf.crdp_udfs import *
+
+results = thales_crdp_python_function_bulk_secure(
+    token_values,
+    "revealbulk",
+    "char",
+    "email",
+    spark_session=spark,
+)
+```
+
+How the secure function handles reveal user:
+
+- it does not accept a caller-supplied `reveal_user`
+- it first tries the active Spark session using `session_user()` and `current_user()`
+- if no Spark session is passed, it tries `SparkSession.getActiveSession()`
+- if session lookup is unavailable, it tries Databricks notebook context
+- only then does it fall back to configured defaults
+
+If `spark_session` is omitted:
+
+```python
+results = thales_crdp_python_function_bulk_secure(
+    token_values,
+    "revealbulk",
+    "char",
+    "email",
+)
+```
+
+the code still tries to find the active Spark session automatically. If that
+works, reveal uses the active Databricks identity. If not, it falls back to
+notebook-context lookup and then config/defaults.
+
+Misuse protection:
+
+- `properties` and `spark_session` are keyword-only for the secure function
+- a call such as `thales_crdp_python_function_bulk_secure(..., "fred")` is rejected
+- this prevents callers from trying to sneak a reveal user in positionally
+
+- `sql_warehouse/samples/sample_thales_crdp_python_udf_imports.py`
+
+That file now re-exports the packaged module so notebook usage can stay simple.
+
+The packaged Python module now loads configuration lazily, so importing the
+wheel does not immediately require `UDF_CONFIG_VOLUME_PATH` to already be set.
+Configuration is loaded when the helper functions are called.
+
+### Steps to build the wheel
+
+1. Install build tools:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+2. Build the wheel from the project root:
+
+```powershell
+python -m build
+```
+
+3. The wheel will be created in:
+
+- `dist/thales_databricks_udf-0.1.7-py3-none-any.whl`
+
+### Steps to deploy the wheel
+
+1. Build the wheel locally.
+2. Upload the `.whl` file to Databricks.
+3. Use one of these deployment patterns:
+
+- install it as a cluster library for notebook and job use
+- place it on a Unity Catalog volume and reference it from a SQL warehouse Python UDF `ENVIRONMENT`
+
+### Example SQL warehouse function using the wheel
+
+```sql
+CREATE OR REPLACE FUNCTION main.security.test_func(x STRING)
+RETURNS STRING
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]'
+)
+AS $$
+from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_legacy
+return thales_crdp_python_function_bulk_legacy([x], "protectbulk", "char")[0]
+$$;
+```
+
+### About `requirements.txt`
+
+For this project, `requirements.txt` includes both local build tooling and the
+runtime HTTP client used by the Python wheel:
+
+- `build`
+- `setuptools`
+- `wheel`
+- `requests`
+
+The Python CRDP helper code now depends on `requests` for pooled HTTPS session
+management, client certificate support, and connection reuse.
+
+## Testing
+
+### Java local testing
+
+Run the `main` methods in:
+
+- `ThalesDataBricksCRDPFPE`
+- `ThalesDataBricksCRDPBulkService`
+
+### Python notebook testing
+
+Set the config path:
+
+```python
+import os
+os.environ["UDF_CONFIG_VOLUME_PATH"] = "/Workspace/Users/<you>/demo/udfConfig.properties"
+```
+
+Then test:
+
+```python
+protected_values = thales_crdp_python_function_bulk(
+    ["Alice Smith", "Bob Jones"],
+    "protectbulk",
+    "char",
+    "email"
+)
+
+revealed_values = thales_crdp_python_function_bulk(
+    protected_values,
+    "revealbulk",
+    "char",
+    "email",
+    spark_session=spark
+)
+```
+
+Or use the Spark sample helper:
+
+```python
+demo_bulk_test(spark, mode="protectbulk", datatype="char", column_name="email")
+```
+
+### Runtime reveal user handling
+
+The Python helpers now try to derive the reveal user from trusted Databricks
+session context in this order:
+
+1. explicit `reveal_user` argument if supplied by trusted wrapper code
+2. `session_user()` from the active Spark session
+3. `current_user()` from the active Spark session
+4. notebook context username when available
+5. property-file fallback as a last resort
+
+For Java/Spark reveal UDFs, the recommended secure pattern is to use the
+`*_with_user` adapters and pass `session_user()` or `current_user()` from SQL.
+
+## Notes
+
+- the Java cluster path and the SQL warehouse Python path are intentionally separate
+- the project keeps legacy signatures for backward compatibility
+- the newer column-aware signatures are the recommended long-term direction
+
+
+

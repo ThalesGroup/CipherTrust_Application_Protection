@@ -4,6 +4,211 @@ This cheat sheet summarizes the main tuning variables used in
 [internal_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_bulk_array_benchmark.py)
 and how to think about them during performance testing.
 
+## When to use scalar vs bulk
+
+Use scalar UDFs when the workload is naturally row-oriented and simplicity is
+more important than bulk tuning.
+
+Best fit for scalar:
+
+- transaction-style processing
+- JDBC or application flows doing inserts, updates, or deletes one row at a time
+- smaller row-by-row transformations
+- simple `CREATE TABLE AS SELECT` or `INSERT ... SELECT` examples where the goal
+  is operational clarity rather than maximum throughput
+- cases where the simplest SQL pattern is preferred
+
+Use bulk UDFs when the workload is naturally batch-oriented and values can be
+grouped into arrays before protection or reveal.
+
+Best fit for bulk:
+
+- batch loads
+- migration jobs
+- larger backfills
+- analytics-style processing over medium or large result sets
+- performance benchmarking and throughput tuning
+
+Simple mental model:
+
+- scalar is best for transaction-oriented row processing
+- bulk is best for batch and analytics-style processing
+
+Important clarification:
+
+- scalar notebooks in this repo are still distributed across Spark partitions
+  and executors
+- they are scalar at the UDF level, meaning one protected value is handled at a
+  time inside each row expression
+- they do not use grouped bulk-array processing and are not the main notebooks
+  for `BATCH_SIZE` tuning
+- several scalar demo notebooks read the small sample tables created by
+  `plaintext_setup.sql`, which is why they often show about 20 rows instead of
+  benchmark-scale volumes
+
+## Benchmark notebooks
+
+There are three bulk benchmark notebooks that all follow the same general
+pattern:
+
+- generate a synthetic benchmark source table
+- bulk-protect 5 sensitive columns
+- write a protected benchmark target table
+- show sample encrypted rows
+- create a temporary reveal view
+- show sample revealed rows
+- record benchmark metrics in
+  `my_catalog.my_schema.thales_perf_test_metrics`
+
+### Internal bulk benchmark
+
+Notebook:
+
+- [internal_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\internal\internal_bulk_array_benchmark.py)
+
+What it does:
+
+- benchmarks object-aware bulk protect for the internal use case
+- uses `thales_protect_bulk_by_object_and_column(...)`
+- uses the protected object mapping for the internal arrays/table path
+
+Main output tables:
+
+- source:
+  `my_catalog.my_schema.plaintext_plaintext_bulk_parallelism_diag`
+- protected target:
+  `my_catalog.my_schema.plaintext_protected_internal_bulk_parallelism_diag`
+
+How to use it:
+
+- use it for bulk internal protect throughput testing
+- compare `generate_source_delta` and `protect_internal_table_bulk`
+- inspect encrypted rows in the target table
+- inspect revealed rows from the temp reveal view created at the end of the
+  notebook
+
+### External bulk benchmark
+
+Notebook:
+
+- [external_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\external\external_bulk_array_benchmark.py)
+
+What it does:
+
+- benchmarks object-aware bulk protect for the external use case
+- uses
+  `thales_protect_bulk_by_object_and_column_with_external_header(...)`
+- writes both protected values and sibling `*_header` columns
+
+Main output tables:
+
+- source:
+  `my_catalog.my_schema.plaintext_plaintext_external_bulk_parallelism_diag`
+- protected target:
+  `my_catalog.my_schema.plaintext_protected_external_bulk_parallelism_diag`
+
+How to use it:
+
+- use it for bulk external protect throughput testing
+- compare `generate_source_delta` and `protect_external_table_bulk`
+- inspect encrypted rows plus header columns in the target table
+- inspect revealed rows from the temp reveal view created at the end of the
+  notebook
+
+### None bulk benchmark
+
+Notebook:
+
+- [none_bulk_array_benchmark.py](E:\eclipse-workspace\thales.databricks.udf\notebooks\none\none_bulk_array_benchmark.py)
+
+What it does:
+
+- benchmarks object-aware bulk protect for the none use case
+- uses `thales_protect_bulk_by_object_and_column(...)`
+- writes the normal protected target table used for the benchmark
+- also writes a grouped array table after the timed protect step for follow-on
+  reveal testing
+
+Main output tables:
+
+- source:
+  `my_catalog.my_schema.plaintext_plaintext_bulk_parallelism_diag`
+- protected target:
+  `my_catalog.my_schema.plaintext_protected_none_bulk_parallelism_diag`
+- grouped array table:
+  `my_catalog.my_schema.plaintext_protected_none_bulk_parallelism_diag_arrays`
+
+How to use it:
+
+- use it for bulk none protect throughput testing
+- compare `generate_source_delta` and
+  `protect_none_table_bulk_object_aware`
+- inspect encrypted rows in the target table
+- inspect revealed rows from the temp reveal view created at the end of the
+  notebook
+
+## Recommended starting point
+
+For most benchmark runs:
+
+- set `BATCH_SIZE = 20000` in `udfConfig.properties`
+- leave it there unless benchmarking shows a clear reason to change it
+- tune the grouping controls in the notebook before tuning `BATCH_SIZE`
+
+Why this is the best starting point:
+
+- it keeps CRDP request chunking large enough for strong baseline throughput
+- it avoids forcing customers to hand-tune low-level request sizing too early
+- the benchmark notebooks already auto-shape the effective request size using
+  the grouping settings
+
+The practical idea is:
+
+- `BATCH_SIZE` is the maximum chunk size CRDP will accept per bulk request
+- the notebook decides how many values are grouped together before the Java
+  bulk path sees them
+- the effective request size is therefore auto-calculated from the notebook
+  settings and capped by `BATCH_SIZE`
+
+### Worked example from notebook output
+
+If the notebook prints:
+
+```text
+Row count: 100000
+Configured BATCH_SIZE: 20000
+Group size override: None
+Group count override: 64
+Group size multiplier: 1.0
+Resolved grouping strategy: group_count_override
+Resolved group size: 1563
+Estimated grouped UDF rows: 64
+```
+
+then the practical interpretation is:
+
+- Spark will shape the workload into about `64` grouped UDF rows
+- each grouped UDF row will carry about `1563` values for a given protected
+  column
+- the Java bulk path will compare that grouped size to `BATCH_SIZE = 20000`
+- because `1563 < 20000`, CRDP does not need to split the grouped call further
+- the effective CRDP request size is therefore about `1563`
+
+Simple formula:
+
+- effective request size ~= `min(resolved_group_size, BATCH_SIZE)`
+
+So for this example:
+
+- `min(1563, 20000) = 1563`
+
+That means:
+
+- `GROUP_COUNT_OVERRIDE` is the setting that really shaped the request size
+- `BATCH_SIZE` only acted as the upper ceiling
+- if the resolved group size had been `50000`, CRDP would have split it into
+  multiple requests because of the `20000` ceiling
+
 ## The three control layers
 
 ### 1. Spark work shape
@@ -19,6 +224,36 @@ Use these to shape:
 - total workload size
 - Spark task count
 - output write parallelism
+
+### How executors, cores, and partitions relate
+
+In Databricks, the compute cluster provides the driver and worker resources.
+Spark then uses those worker-side executors to process partitions.
+
+Simple mental model:
+
+- executors are the worker-side JVM processes doing the work
+- executor cores determine how many Spark tasks can run at the same time
+- partitions are the chunks of data Spark turns into those tasks
+
+That means:
+
+- more executor cores usually allow more tasks to run concurrently
+- more partitions give Spark more chunks of work to schedule
+- too few partitions can leave executors underutilized
+- too many partitions can increase task and shuffle overhead
+
+In these benchmark notebooks:
+
+- `GENERATE_PARTITIONS` shapes source-data generation parallelism
+- `TARGET_PARTITIONS` shapes protect/write parallelism
+- grouped UDF settings shape how much CRDP work each Spark task carries once it
+  starts running
+
+Practical rule of thumb:
+
+- cluster size sets the parallel capacity
+- partitions determine how much of that capacity Spark can actually use
 
 ### 2. Databricks grouping shape
 
@@ -109,6 +344,19 @@ Impact:
 - it is the **CRDP-side chunk ceiling**
 - it only matters if Databricks hands CRDP a list larger than this
 
+Recommended default:
+
+- set `BATCH_SIZE = 20000`
+
+For most customers, do not treat `BATCH_SIZE` as the first tuning knob.
+Instead:
+
+- leave `BATCH_SIZE` at `20000`
+- let the notebook auto-calculate the working request shape through:
+  - `GROUP_SIZE_OVERRIDE`
+  - `GROUP_COUNT_OVERRIDE`
+  - `GROUP_SIZE_MULTIPLIER`
+
 Important:
 
 - actual request size is roughly `min(resolved_group_size, BATCH_SIZE)`
@@ -119,6 +367,19 @@ So if:
 - `BATCH_SIZE = 20000`
 
 then CRDP request size is about `5469`, not `20000`.
+
+That is why `BATCH_SIZE = 20000` can stay fixed while the effective request
+size still changes from run to run. The benchmark notebook auto-calculates the
+grouping shape first, and then the CRDP layer uses `BATCH_SIZE` only as the
+final ceiling.
+
+Simple mental model:
+
+- start at `BATCH_SIZE = 20000`
+- change grouping settings in the notebook
+- let the resolved `GROUP_SIZE` determine the real request size
+- only change `BATCH_SIZE` if the resolved grouped calls are consistently
+  larger than `20000` and benchmarking shows a real benefit
 
 ### `GROUP_SIZE_OVERRIDE`
 

@@ -321,6 +321,26 @@ That usually means:
 
 The main benchmark notebook settings can remain the basis for repeatable comparison runs, but the architecture decision should move toward CRDP deployment shape rather than endless Spark tuning.
 
+## TLS performance note
+
+Current testing indicates that enabling TLS with client authentication can
+remain in the same general throughput class as non-TLS runs when the Java
+Databricks path uses pooled persistent HTTPS connections. The current Java
+implementation uses a shared HTTP client, so the expected behavior is to reuse
+TLS connections instead of paying a full handshake cost on every CRDP request.
+
+For a clean TLS versus non-TLS comparison, hold the following constant:
+
+- Databricks row count
+- partition counts
+- grouping settings
+- `BATCH_SIZE`
+- Databricks cluster shape
+- CRDP deployment shape
+
+The cleanest steady-state comparison is a warm-up run followed by repeated
+measured runs with only the transport changing between HTTP and HTTPS.
+
 ## Guidance for very large bulk loads
 
 For bulk ingestion, keep using one tuned job when:

@@ -24,7 +24,6 @@ public final class ThalesDataBricksCRDPBulkService {
 
     private static final MediaType JSON = MediaType.parse("application/json");
     private static final Gson GSON = new Gson();
-    private static final OkHttpClient CLIENT = new OkHttpClient.Builder().build();
     private static final Object REVEAL_CACHE_LOCK = new Object();
     private static Map<String, String> revealCache = new LinkedHashMap<>();
     private static int revealCacheMaxSize = -1;
@@ -149,6 +148,14 @@ public final class ThalesDataBricksCRDPBulkService {
 
     public List<String> protectValues(List<String> values, String dataType, String columnName) throws Exception {
         return transformValues(values, "protect", columnName, dataType);
+    }
+
+    public List<String> protectValues(
+            List<String> values,
+            String objectName,
+            String dataType,
+            String columnName) throws Exception {
+        return transformValues(values, "protect", objectName, columnName, dataType, null);
     }
 
     public ProtectResult protectValueWithExternalHeader(
@@ -589,7 +596,8 @@ public final class ThalesDataBricksCRDPBulkService {
                 .addHeader("Content-Type", "application/json")
                 .build();
 
-        try (Response response = CLIENT.newCall(request).execute()) {
+        OkHttpClient client = ThalesCrdpHttpClientFactory.getOrCreate(this.config);
+        try (Response response = client.newCall(request).execute()) {
             String responseBody = response.body() == null ? "" : response.body().string();
             if (!response.isSuccessful()) {
                 log.error(
@@ -680,7 +688,8 @@ public final class ThalesDataBricksCRDPBulkService {
         if (host.startsWith("http://") || host.startsWith("https://")) {
             return host + ":" + this.config.getCrdpPort() + path;
         }
-        return "http://" + host + ":" + this.config.getCrdpPort() + path;
+        String scheme = this.config.isCrdpSslEnabled() ? "https://" : "http://";
+        return scheme + host + ":" + this.config.getCrdpPort() + path;
     }
 
     private static String getRequiredString(JsonObject object, String key) {

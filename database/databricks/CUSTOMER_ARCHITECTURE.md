@@ -5,15 +5,7 @@ Thales CRDP with Databricks.
 
 ## High-level architecture
 
-```mermaid
-flowchart LR
-    A["Databricks Users<br/>SQL analysts, BI tools, ETL jobs"] --> B["Databricks Access Layer"]
-    B --> C["SQL Warehouse<br/>Unity Catalog Python functions + secured views"]
-    B --> D["Compute Clusters<br/>Java Spark UDFs + optional secured views"]
-    C --> E["Thales CRDP Service<br/>protect / reveal / protectbulk / revealbulk"]
-    D --> E
-    E --> F["CipherTrust Manager<br/>policy and key control plane"]
-```
+![Databricks and Thales CRDP architecture](E:\eclipse-workspace\thales.databricks.udf\docs\CUSTOMER_ARCHITECTURE.png)
 
 ## SQL Warehouse pattern
 

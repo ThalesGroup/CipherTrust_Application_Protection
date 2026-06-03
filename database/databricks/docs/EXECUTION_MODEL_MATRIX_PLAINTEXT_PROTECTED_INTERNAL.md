@@ -184,7 +184,7 @@ CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_by_object_and_colu
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
@@ -293,4 +293,3 @@ If you only need one answer:
 - for durable governed SQL access, use the UC embedded reveal views
 - for better SQL Warehouse array-view performance, use the optimized bundled UC view
 - for Lakeflow, read from the governed UC reveal views rather than trying to persist cluster-scoped Java UDFs
-

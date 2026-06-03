@@ -1019,10 +1019,10 @@ ORDER BY custid;
 -- MAGIC for statement in grant_statements:
 -- MAGIC     try:
 -- MAGIC         spark.sql(statement)
--- MAGIC         print(f\"Applied: {statement}\")
+-- MAGIC         print(f"Applied: {statement}")
 -- MAGIC     except Exception as exc:
--- MAGIC         print(f\"Skipped grant: {statement}\")
--- MAGIC         print(f\"Reason: {exc}\")
+-- MAGIC         print(f"Skipped grant: {statement}")
+-- MAGIC         print(f"Reason: {exc}")
 
 -- COMMAND ----------
 

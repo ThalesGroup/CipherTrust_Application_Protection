@@ -3,6 +3,7 @@ from .crdp_udfs import (
     PROPERTIES,
     check_valid,
     demo_bulk_test,
+    debug_tls_materials,
     load_properties,
     prepare_reveal_input,
     prepare_reveal_input_with_versions,

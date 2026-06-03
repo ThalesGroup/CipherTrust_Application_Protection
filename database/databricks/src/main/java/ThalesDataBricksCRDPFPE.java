@@ -124,6 +124,22 @@ public class ThalesDataBricksCRDPFPE {
         return BULK_SERVICE.transformValues(databricksInputData, mode, objectName, columnName, dataType, revealUser);
     }
 
+    public static List<String> thales_crdp_protect_udf_bulk(
+            List<String> databricksInputData,
+            String dataType,
+            String objectName,
+            String columnName) throws Exception {
+        return BULK_SERVICE.protectValues(databricksInputData, objectName, dataType, columnName);
+    }
+
+    public static List<ThalesDataBricksCRDPBulkService.ProtectResult> thales_crdp_protect_udf_bulk_with_external_headers(
+            List<String> databricksInputData,
+            String dataType,
+            String objectName,
+            String columnName) throws Exception {
+        return BULK_SERVICE.protectValuesWithExternalHeaders(databricksInputData, objectName, dataType, columnName);
+    }
+
     public static List<String> thales_crdp_reveal_udf_bulk_with_external_headers(
             List<String> databricksInputData,
             List<String> externalHeaderValues,

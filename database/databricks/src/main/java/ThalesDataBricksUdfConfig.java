@@ -56,6 +56,78 @@ public final class ThalesDataBricksUdfConfig {
         return firstNonBlank(property("CRDPIPPORT"), property("CRDPPORT"), property("crdpport"), "8090");
     }
 
+    public boolean isCrdpSslEnabled() {
+        String explicit = firstNonBlank(
+                property("CRDP_SSL_ENABLED"),
+                property("crdp.ssl.enabled"));
+        if (explicit != null) {
+            return parseBooleanFlag(explicit);
+        }
+        String host = getCrdpIp();
+        return host != null && host.trim().toLowerCase(Locale.ROOT).startsWith("https://");
+    }
+
+    public boolean isCrdpSslVerifyServerEnabled() {
+        return parseBooleanFlag(firstNonBlank(
+                property("CRDP_SSL_VERIFY_SERVER"),
+                property("crdp.ssl.verifyServer"),
+                "true"));
+    }
+
+    public String getCrdpClientPkcs12Path() {
+        return firstNonBlank(
+                property("CRDP_CLIENT_PKCS12_PATH"),
+                property("crdp.client.pkcs12.path"));
+    }
+
+    public String getCrdpClientPkcs12Password() {
+        return firstNonBlank(
+                property("CRDP_CLIENT_PKCS12_PASSWORD"),
+                property("crdp.client.pkcs12.password"),
+                "");
+    }
+
+    public String getCrdpCaCertPath() {
+        return firstNonBlank(
+                property("CRDP_CA_CERT_PATH"),
+                property("crdp.ca.cert.path"));
+    }
+
+    public int getCrdpConnectTimeoutMs() {
+        return parseInt(firstNonBlank(
+                property("CRDP_CONNECT_TIMEOUT_MS"),
+                property("crdp.connect.timeout.ms"),
+                "10000"), 10000);
+    }
+
+    public int getCrdpReadTimeoutMs() {
+        return parseInt(firstNonBlank(
+                property("CRDP_READ_TIMEOUT_MS"),
+                property("crdp.read.timeout.ms"),
+                "30000"), 30000);
+    }
+
+    public int getCrdpWriteTimeoutMs() {
+        return parseInt(firstNonBlank(
+                property("CRDP_WRITE_TIMEOUT_MS"),
+                property("crdp.write.timeout.ms"),
+                "30000"), 30000);
+    }
+
+    public int getCrdpHttpMaxIdleConnections() {
+        return parseInt(firstNonBlank(
+                property("CRDP_HTTP_MAX_IDLE_CONNECTIONS"),
+                property("crdp.http.maxIdleConnections"),
+                "20"), 20);
+    }
+
+    public int getCrdpHttpKeepAliveMinutes() {
+        return parseInt(firstNonBlank(
+                property("CRDP_HTTP_KEEPALIVE_MINUTES"),
+                property("crdp.http.keepAliveMinutes"),
+                "5"), 5);
+    }
+
     public int getBatchSize() {
         return parseInt(firstNonBlank(property("BATCH_SIZE")), DEFAULT_BATCH_SIZE);
     }

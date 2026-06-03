@@ -6,6 +6,7 @@ This file collects the main commands and runnable scripts for the
 It is the practical companion to:
 
 - [EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md](/E:/eclipse-workspace/thales.databricks.udf/docs/EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md)
+- [DATABRICKS_TLS_RUNTIME_GUIDE.md](/E:/eclipse-workspace/thales.databricks.udf/docs/DATABRICKS_TLS_RUNTIME_GUIDE.md)
 
 ## What This Covers
 
@@ -207,6 +208,11 @@ Important:
 For SQL Warehouse, use the embedded-config or wheel-includes-properties model,
 not the compute-cluster file-based config model.
 
+If SQL Warehouse TLS is involved, use the base64-embedded SQL Warehouse pattern
+from [DATABRICKS_TLS_RUNTIME_GUIDE.md](/E:/eclipse-workspace/thales.databricks.udf/docs/DATABRICKS_TLS_RUNTIME_GUIDE.md)
+and [sample_tls_debug_uc_function.sql](/E:/eclipse-workspace/thales.databricks.udf/sql_warehouse/samples/sample_tls_debug_uc_function.sql)
+rather than compute-cluster `/tmp/thales_config` paths.
+
 Representative current SQL Warehouse example:
 
 ```sql
@@ -220,14 +226,14 @@ CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_by_object_and_colu
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_by_object
 
 PROPERTIES = {
-    "CRDPIP": "20.221.216.246",
+    "CRDPIP": "your-crdp-ip",
     "CRDPPORT": "8090",
     "CRDPUSER": "admin",
     "DEFAULTREVEALUSER": "admin",

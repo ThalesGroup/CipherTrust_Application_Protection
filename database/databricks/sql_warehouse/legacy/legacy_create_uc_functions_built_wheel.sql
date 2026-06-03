@@ -26,7 +26,7 @@ import json
 import urllib.request
 from decimal import Decimal, InvalidOperation
 
-CRDP_IP = "yourip"
+CRDP_IP = "your-crdp-ip"
 CRDP_PORT = "8090"
 PROTECTION_PROFILE = "alpha-external"
 KEY_METADATA_LOCATION = "external"
@@ -108,7 +108,7 @@ import json
 import urllib.request
 from decimal import Decimal, InvalidOperation
 
-CRDP_IP = "yourip"
+CRDP_IP = "your-crdp-ip"
 CRDP_PORT = "8090"
 DEFAULT_METADATA = "1001000"
 DEFAULT_REVEAL_USER = "admin"
@@ -209,7 +209,7 @@ import json
 import urllib.request
 from decimal import Decimal, InvalidOperation
 
-CRDP_IP = "yourip"
+CRDP_IP = "your-crdp-ip"
 CRDP_PORT = "8090"
 DEFAULT_METADATA = "1001000"
 RETURN_CIPHERTEXT = True
