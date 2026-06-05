@@ -7,7 +7,7 @@
 # MAGIC
 # MAGIC - generating synthetic plaintext data directly into Delta
 # MAGIC - skipping raw CSV creation in ADLS Gen2
-# MAGIC - running `internal_scalar_object_aware_load.py` against that table
+# MAGIC - protecting the generated Delta table directly in this notebook
 # MAGIC
 # MAGIC Use this when you want to measure:
 # MAGIC
@@ -23,6 +23,7 @@
 import time
 from datetime import datetime, timezone
 from pyspark.sql import functions as F
+from pyspark.sql import types as T
 
 # COMMAND ----------
 
@@ -65,7 +66,27 @@ print("Benchmark mode:", BENCHMARK_MODE)
 print("Load pattern:", LOAD_PATTERN)
 print("Configured BATCH_SIZE:", CONFIG_BATCH_SIZE)
 print("Metrics helpers notebook path:", METRICS_HELPERS_NOTEBOOK_PATH)
-print("High-throughput notebook path:", HIGH_THROUGHPUT_NOTEBOOK_PATH)
+
+config_path = spark.conf.get("spark.driverEnv.UDF_CONFIG_VOLUME_PATH", None)
+if not config_path:
+    raise ValueError(
+        "spark.driverEnv.UDF_CONFIG_VOLUME_PATH is not set. "
+        "Configure the driver and executor env vars before running this notebook."
+    )
+
+
+def ensure_java_udf_registered(function_name, class_name, return_type):
+    if spark.catalog.functionExists(function_name):
+        return
+    spark.udf.registerJavaFunction(function_name, class_name, return_type)
+    print(f"Registered Java UDF: {function_name} -> {class_name}")
+
+
+ensure_java_udf_registered(
+    "thales_protect_by_object_and_column",
+    "ThalesCrdpProtectByObjectAndColumnUdf",
+    T.StringType(),
+)
 
 # COMMAND ----------
 
@@ -130,35 +151,50 @@ append_perf_metrics(
 
 # COMMAND ----------
 
-# Reuse the high-throughput notebook in the same session with notebook-scoped overrides.
 protect_start = time.time()
 protect_start_ts = datetime.now(timezone.utc)
 
 # COMMAND ----------
 
-# MAGIC %run ./internal_scalar_object_aware_load
+source_df = spark.table(SOURCE_TABLE).repartition(TARGET_PARTITIONS)
 
-# COMMAND ----------
+protected_df = source_df.select(
+    "custid",
+    "name",
+    F.expr(
+        f"thales_protect_by_object_and_column(CAST(address AS STRING), 'char', '{PROTECTED_OBJECT_NAME}', 'address')"
+    ).alias("address"),
+    "city",
+    "state",
+    "zip",
+    "phone",
+    F.expr(
+        f"thales_protect_by_object_and_column(CAST(email AS STRING), 'char', '{PROTECTED_OBJECT_NAME}', 'email')"
+    ).alias("email"),
+    "dob",
+    F.expr(
+        f"thales_protect_by_object_and_column(CAST(creditcard AS STRING), 'nbr', '{PROTECTED_OBJECT_NAME}', 'creditcard')"
+    ).alias("creditcard"),
+    F.expr(
+        f"thales_protect_by_object_and_column(CAST(creditcardcode AS STRING), 'nbr', '{PROTECTED_OBJECT_NAME}', 'creditcardcode')"
+    ).alias("creditcardcode"),
+    F.expr(
+        f"thales_protect_by_object_and_column(CAST(ssn AS STRING), 'nbr', '{PROTECTED_OBJECT_NAME}', 'ssn')"
+    ).alias("ssn"),
+)
 
-if not globals().get("HIGH_THROUGHPUT_LOAD_COMPLETED", False):
-    raise ValueError(
-        "High-throughput protect notebook did not finish cleanly. "
-        "Do not trust the protect timing or target table contents from this run. "
-        f"Notebook path used: {HIGH_THROUGHPUT_NOTEBOOK_PATH}. "
-        f"Expected target table: {TARGET_TABLE}"
-    )
-
-actual_target_count = globals().get("HIGH_THROUGHPUT_TARGET_COUNT", None)
-if actual_target_count != ROW_COUNT:
-    raise ValueError(
-        "High-throughput protect notebook completed with an unexpected target row count. "
-        f"Expected: {ROW_COUNT}, Actual: {actual_target_count}"
-    )
+(
+    protected_df.write
+    .format("delta")
+    .mode("overwrite")
+    .option("overwriteSchema", "true")
+    .saveAsTable(TARGET_TABLE)
+)
 
 protect_end = time.time()
 protect_end_ts = datetime.now(timezone.utc)
 print(f"Protect step completed in {protect_end - protect_start:.2f} seconds.")
-print(f"FINAL_PROTECT_ROW_COUNT={actual_target_count}")
+print("FINAL_PROTECT_ROW_COUNT=validation_skipped")
 print("THALES_BENCHMARK_FINISHED")
 
 append_perf_metrics(

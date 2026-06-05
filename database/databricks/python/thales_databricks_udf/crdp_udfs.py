@@ -1,15 +1,21 @@
 import json
 import os
+import hashlib
+import tempfile
+import base64
+import ssl
 from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
 from typing import Optional
-import urllib.request
+import requests
+from requests.adapters import HTTPAdapter
 
 __all__ = [
     "BADDATATAG",
     "PROPERTIES",
     "check_valid",
     "demo_bulk_test",
+    "debug_tls_materials",
     "load_properties",
     "prepare_reveal_input",
     "prepare_reveal_input_with_versions",
@@ -24,6 +30,8 @@ __all__ = [
 
 
 _CACHED_PROPERTIES: Optional[dict] = None
+_CACHED_HTTP_SESSION: Optional[requests.Session] = None
+_CACHED_HTTP_SESSION_SIGNATURE: Optional[str] = None
 
 
 def load_properties(path: Optional[str] = None, refresh: bool = False) -> dict:
@@ -48,6 +56,93 @@ def load_properties(path: Optional[str] = None, refresh: bool = False) -> dict:
 
 def get_default_properties(refresh: bool = False) -> dict:
     return load_properties(refresh=refresh)
+
+
+def _parse_boolean_flag(value: Optional[str], default: bool = False) -> bool:
+    normalized = first_non_blank(value)
+    if normalized is None:
+        return default
+    return normalized.lower() in {"true", "yes", "y", "1"}
+
+
+def _parse_positive_int(value: Optional[str], default: int) -> int:
+    try:
+        parsed = int(str(value).strip())
+        return parsed if parsed > 0 else default
+    except Exception:
+        return default
+
+
+def is_crdp_ssl_enabled(properties: dict) -> bool:
+    explicit = first_non_blank(properties.get("CRDP_SSL_ENABLED"), properties.get("crdp.ssl.enabled"))
+    if explicit is not None:
+        return _parse_boolean_flag(explicit, False)
+    crdp_ip = first_non_blank(properties.get("CRDPIP"), properties.get("crdpip"))
+    return crdp_ip is not None and crdp_ip.lower().startswith("https://")
+
+
+def is_crdp_ssl_verify_server_enabled(properties: dict) -> bool:
+    return _parse_boolean_flag(
+        first_non_blank(properties.get("CRDP_SSL_VERIFY_SERVER"), properties.get("crdp.ssl.verifyServer")),
+        True,
+    )
+
+
+def get_crdp_ca_cert_path(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CA_CERT_PATH"), properties.get("crdp.ca.cert.path"))
+
+
+def get_crdp_client_cert_path(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_CERT_PATH"), properties.get("crdp.client.cert.path"))
+
+
+def get_crdp_client_key_path(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_KEY_PATH"), properties.get("crdp.client.key.path"))
+
+
+def get_crdp_ca_cert_pem(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CA_CERT_PEM"), properties.get("crdp.ca.cert.pem"))
+
+
+def get_crdp_client_cert_pem(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_CERT_PEM"), properties.get("crdp.client.cert.pem"))
+
+
+def get_crdp_client_key_pem(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_KEY_PEM"), properties.get("crdp.client.key.pem"))
+
+
+def get_crdp_ca_cert_pem_b64(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CA_CERT_PEM_B64"), properties.get("crdp.ca.cert.pem.b64"))
+
+
+def get_crdp_client_cert_pem_b64(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_CERT_PEM_B64"), properties.get("crdp.client.cert.pem.b64"))
+
+
+def get_crdp_client_key_pem_b64(properties: dict) -> Optional[str]:
+    return first_non_blank(properties.get("CRDP_CLIENT_KEY_PEM_B64"), properties.get("crdp.client.key.pem.b64"))
+
+
+def get_crdp_connect_timeout_ms(properties: dict) -> int:
+    return _parse_positive_int(
+        first_non_blank(properties.get("CRDP_CONNECT_TIMEOUT_MS"), properties.get("crdp.connect.timeout.ms")),
+        10000,
+    )
+
+
+def get_crdp_read_timeout_ms(properties: dict) -> int:
+    return _parse_positive_int(
+        first_non_blank(properties.get("CRDP_READ_TIMEOUT_MS"), properties.get("crdp.read.timeout.ms")),
+        30000,
+    )
+
+
+def get_crdp_http_pool_maxsize(properties: dict) -> int:
+    return _parse_positive_int(
+        first_non_blank(properties.get("CRDP_HTTP_POOL_MAXSIZE"), properties.get("crdp.http.pool.maxsize")),
+        20,
+    )
 
 
 def get_bad_data_tag(properties: Optional[dict] = None) -> str:
@@ -322,19 +417,207 @@ def build_url(properties: dict, mode: str) -> str:
     crdp_port = first_non_blank(properties.get("CRDPPORT"), properties.get("CRDPIPPORT"), "8090")
     if crdp_ip.startswith("http://") or crdp_ip.startswith("https://"):
         return f"{crdp_ip}:{crdp_port}/v1/{mode}"
-    return f"http://{crdp_ip}:{crdp_port}/v1/{mode}"
+    scheme = "https" if is_crdp_ssl_enabled(properties) else "http"
+    return f"{scheme}://{crdp_ip}:{crdp_port}/v1/{mode}"
 
 
-def post_json(url: str, payload: dict) -> dict:
-    body = json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(
-        url,
-        data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
+def _hash_text(value: Optional[str]) -> str:
+    if not value:
+        return ""
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _hash_bytes(value: Optional[bytes]) -> str:
+    if not value:
+        return ""
+    return hashlib.sha256(value).hexdigest()
+
+
+def _write_tls_pem_temp_file(prefix: str, content: str) -> str:
+    tls_dir = os.path.join(tempfile.gettempdir(), "thales_databricks_udf_tls")
+    os.makedirs(tls_dir, exist_ok=True)
+    file_path = os.path.join(tls_dir, f"{prefix}-{_hash_text(content)}.pem")
+    if not os.path.exists(file_path):
+        with open(file_path, "w", encoding="utf-8", newline="\n") as pem_file:
+            pem_file.write(content)
+        try:
+            os.chmod(file_path, 0o600)
+        except Exception:
+            pass
+    return file_path
+
+
+def _decode_base64_content(value: Optional[str]) -> Optional[bytes]:
+    if not value:
+        return None
+    return base64.b64decode(value.encode("ascii"))
+
+
+def _write_tls_temp_file_bytes(prefix: str, content: bytes, suffix: str = ".pem") -> str:
+    tls_dir = os.path.join(tempfile.gettempdir(), "thales_databricks_udf_tls")
+    os.makedirs(tls_dir, exist_ok=True)
+    file_path = os.path.join(tls_dir, f"{prefix}-{_hash_bytes(content)}{suffix}")
+    if not os.path.exists(file_path):
+        with open(file_path, "wb") as pem_file:
+            pem_file.write(content)
+        try:
+            os.chmod(file_path, 0o600)
+        except Exception:
+            pass
+    return file_path
+
+
+def _resolve_tls_material_paths(properties: dict) -> tuple[Optional[str], Optional[str], Optional[str]]:
+    ca_cert_pem_b64 = get_crdp_ca_cert_pem_b64(properties)
+    client_cert_pem_b64 = get_crdp_client_cert_pem_b64(properties)
+    client_key_pem_b64 = get_crdp_client_key_pem_b64(properties)
+    ca_cert_pem = get_crdp_ca_cert_pem(properties)
+    client_cert_pem = get_crdp_client_cert_pem(properties)
+    client_key_pem = get_crdp_client_key_pem(properties)
+
+    ca_cert_path = (
+        _write_tls_temp_file_bytes("crdp-ca-cert", _decode_base64_content(ca_cert_pem_b64))
+        if ca_cert_pem_b64
+        else _write_tls_pem_temp_file("crdp-ca-cert", ca_cert_pem)
+        if ca_cert_pem
+        else get_crdp_ca_cert_path(properties)
     )
-    with urllib.request.urlopen(request) as response:
-        return json.loads(response.read().decode("utf-8"))
+    client_cert_path = (
+        _write_tls_temp_file_bytes("crdp-client-cert", _decode_base64_content(client_cert_pem_b64))
+        if client_cert_pem_b64
+        else _write_tls_pem_temp_file("crdp-client-cert", client_cert_pem)
+        if client_cert_pem
+        else get_crdp_client_cert_path(properties)
+    )
+    client_key_path = (
+        _write_tls_temp_file_bytes("crdp-client-key", _decode_base64_content(client_key_pem_b64))
+        if client_key_pem_b64
+        else _write_tls_pem_temp_file("crdp-client-key", client_key_pem)
+        if client_key_pem
+        else get_crdp_client_key_path(properties)
+    )
+    return ca_cert_path, client_cert_path, client_key_path
+
+def _build_http_session_signature(properties: dict) -> str:
+    return "|".join(
+        [
+            str(is_crdp_ssl_enabled(properties)),
+            str(is_crdp_ssl_verify_server_enabled(properties)),
+            _hash_text(get_crdp_ca_cert_pem_b64(properties)),
+            _hash_text(get_crdp_client_cert_pem_b64(properties)),
+            _hash_text(get_crdp_client_key_pem_b64(properties)),
+            _hash_text(get_crdp_ca_cert_pem(properties)),
+            _hash_text(get_crdp_client_cert_pem(properties)),
+            _hash_text(get_crdp_client_key_pem(properties)),
+            get_crdp_ca_cert_path(properties) or "",
+            get_crdp_client_cert_path(properties) or "",
+            get_crdp_client_key_path(properties) or "",
+            str(get_crdp_connect_timeout_ms(properties)),
+            str(get_crdp_read_timeout_ms(properties)),
+            str(get_crdp_http_pool_maxsize(properties)),
+        ]
+    )
+
+
+def _build_http_session(properties: dict) -> requests.Session:
+    session = requests.Session()
+    pool_maxsize = get_crdp_http_pool_maxsize(properties)
+    adapter = HTTPAdapter(pool_connections=pool_maxsize, pool_maxsize=pool_maxsize)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+
+    ca_cert_path, cert_path, key_path = _resolve_tls_material_paths(properties)
+    if cert_path and key_path:
+        session.cert = (cert_path, key_path)
+
+    verify_server = is_crdp_ssl_verify_server_enabled(properties)
+    if not verify_server:
+        session.verify = False
+    else:
+        session.verify = ca_cert_path if ca_cert_path else True
+
+    return session
+
+
+def get_http_session(properties: dict) -> requests.Session:
+    global _CACHED_HTTP_SESSION
+    global _CACHED_HTTP_SESSION_SIGNATURE
+
+    signature = _build_http_session_signature(properties)
+    if _CACHED_HTTP_SESSION is not None and _CACHED_HTTP_SESSION_SIGNATURE == signature:
+        return _CACHED_HTTP_SESSION
+
+    session = _build_http_session(properties)
+    _CACHED_HTTP_SESSION = session
+    _CACHED_HTTP_SESSION_SIGNATURE = signature
+    return session
+
+
+def post_json(url: str, payload: dict, properties: dict) -> dict:
+    session = get_http_session(properties)
+    timeout = (
+        get_crdp_connect_timeout_ms(properties) / 1000.0,
+        get_crdp_read_timeout_ms(properties) / 1000.0,
+    )
+    response = session.post(
+        url,
+        json=payload,
+        headers={"Content-Type": "application/json"},
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def debug_tls_materials(properties=None) -> dict:
+    props = _validate_properties(properties) or get_default_properties()
+    ca_cert_path, client_cert_path, client_key_path = _resolve_tls_material_paths(props)
+
+    result = {
+        "ssl_enabled": is_crdp_ssl_enabled(props),
+        "verify_server": is_crdp_ssl_verify_server_enabled(props),
+        "has_ca_cert_path_property": bool(get_crdp_ca_cert_path(props)),
+        "has_client_cert_path_property": bool(get_crdp_client_cert_path(props)),
+        "has_client_key_path_property": bool(get_crdp_client_key_path(props)),
+        "has_ca_cert_pem_property": bool(get_crdp_ca_cert_pem(props)),
+        "has_client_cert_pem_property": bool(get_crdp_client_cert_pem(props)),
+        "has_client_key_pem_property": bool(get_crdp_client_key_pem(props)),
+        "has_ca_cert_pem_b64_property": bool(get_crdp_ca_cert_pem_b64(props)),
+        "has_client_cert_pem_b64_property": bool(get_crdp_client_cert_pem_b64(props)),
+        "has_client_key_pem_b64_property": bool(get_crdp_client_key_pem_b64(props)),
+        "resolved_ca_cert_path": ca_cert_path,
+        "resolved_client_cert_path": client_cert_path,
+        "resolved_client_key_path": client_key_path,
+        "resolved_ca_cert_exists": bool(ca_cert_path and os.path.exists(ca_cert_path)),
+        "resolved_client_cert_exists": bool(client_cert_path and os.path.exists(client_cert_path)),
+        "resolved_client_key_exists": bool(client_key_path and os.path.exists(client_key_path)),
+        "resolved_ca_cert_size": os.path.getsize(ca_cert_path) if ca_cert_path and os.path.exists(ca_cert_path) else None,
+        "resolved_client_cert_size": os.path.getsize(client_cert_path) if client_cert_path and os.path.exists(client_cert_path) else None,
+        "resolved_client_key_size": os.path.getsize(client_key_path) if client_key_path and os.path.exists(client_key_path) else None,
+    }
+
+    verify_context = ssl.create_default_context()
+    try:
+        if ca_cert_path:
+            verify_context.load_verify_locations(cafile=ca_cert_path)
+            result["ca_load_ok"] = True
+        else:
+            result["ca_load_ok"] = None
+    except Exception as ex:
+        result["ca_load_ok"] = False
+        result["ca_load_error"] = f"{type(ex).__name__}: {ex}"
+
+    try:
+        if client_cert_path and client_key_path:
+            verify_context.load_cert_chain(certfile=client_cert_path, keyfile=client_key_path)
+            result["client_cert_chain_load_ok"] = True
+        else:
+            result["client_cert_chain_load_ok"] = None
+    except Exception as ex:
+        result["client_cert_chain_load_ok"] = False
+        result["client_cert_chain_load_error"] = f"{type(ex).__name__}: {ex}"
+
+    return result
 
 
 def _validate_properties(properties: Optional[dict]) -> Optional[dict]:
@@ -386,7 +669,7 @@ def thales_crdp_python_protect_with_external_header(
         "protection_policy_name": policy_name,
         "data_array": [normalized_value],
     }
-    response_json = post_json(url, payload)
+    response_json = post_json(url, payload, props)
     items = response_json.get("protected_data_array", [])
     if not items:
         return {"protected_value": normalized_value, "external_header": None}
@@ -472,7 +755,7 @@ def _thales_crdp_python_function_bulk_impl(
                 "protection_policy_name": policy_name,
                 "data_array": normalized_values,
             }
-            response_json = post_json(url, payload)
+            response_json = post_json(url, payload, props)
             return [item["protected_data"] for item in response_json.get("protected_data_array", [])]
 
         payload = prepare_reveal_input(
@@ -489,7 +772,7 @@ def _thales_crdp_python_function_bulk_impl(
             external_version=external_version_from_ext_source if policy_type == "external" else None,
             username=runtime_reveal_user,
         )
-        response_json = post_json(url, payload)
+        response_json = post_json(url, payload, props)
         return [item["data"] for item in response_json.get("data_array", [])]
     except Exception as ex:
         if return_ciphertext_for_user_without_key_access:

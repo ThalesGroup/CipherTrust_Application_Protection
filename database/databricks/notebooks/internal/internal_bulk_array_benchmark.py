@@ -4,7 +4,7 @@
 # MAGIC
 # MAGIC This is the primary high-control benchmark for the internal bulk-array path.
 # MAGIC It groups many values into arrays and calls
-# MAGIC `thales_protect_bulk_by_column(...)`.
+# MAGIC `thales_protect_bulk_by_object_and_column(...)`.
 # MAGIC
 # MAGIC This notebook provides the most control across the three key tuning layers:
 # MAGIC
@@ -48,8 +48,8 @@ CATALOG = "my_catalog"
 SCHEMA = "my_schema"
 
 ROW_COUNT = 350_000
-GENERATE_PARTITIONS = max(spark.sparkContext.defaultParallelism * 2, 16)
-TARGET_PARTITIONS = max(spark.sparkContext.defaultParallelism * 2, 16)
+GENERATE_PARTITIONS = max(spark.sparkContext.defaultParallelism * 2, 32)
+TARGET_PARTITIONS = max(spark.sparkContext.defaultParallelism * 2, 32)
 
 GROUP_SIZE_OVERRIDE = None
 GROUP_COUNT_OVERRIDE = 64
@@ -57,6 +57,8 @@ GROUP_SIZE_MULTIPLIER = 1.0
 
 SOURCE_TABLE = f"{CATALOG}.{SCHEMA}.plaintext_plaintext_bulk_parallelism_diag"
 TARGET_TABLE = f"{CATALOG}.{SCHEMA}.plaintext_protected_internal_bulk_parallelism_diag"
+PROTECTED_OBJECT_NAME = f"{CATALOG}.{SCHEMA}.plaintext_protected_internal_arrays"
+ROW_REVEAL_OBJECT_NAME = f"{CATALOG}.{SCHEMA}.plaintext_protected_internal"
 METRICS_TABLE = f"{CATALOG}.{SCHEMA}.thales_perf_test_metrics"
 METRICS_CSV_PATH = None
 RUN_NAME = "plaintext_internal_bulk_udf_parallelism_diagnostic"
@@ -66,6 +68,7 @@ SUMMARY_VIEW = f"{CATALOG}.{SCHEMA}.v_thales_perf_test_summary"
 COMPACT_SUMMARY_VIEW = f"{CATALOG}.{SCHEMA}.v_thales_perf_test_compact"
 METRICS_HELPERS_NOTEBOOK_PATH = "../utils/perf_metrics_helpers"
 LOAD_PATTERN = "bulk_array_parallelism_diagnostic"
+PROTECT_STEP_NAME = "protect_internal_table_bulk"
 
 # COMMAND ----------
 
@@ -77,23 +80,41 @@ CONFIG_PATH = spark.conf.get("spark.driverEnv.UDF_CONFIG_VOLUME_PATH", None)
 
 
 def load_batch_size_from_properties(config_path):
+    default_batch_size = 1000
+
     if not config_path:
-        return 1000
+        return default_batch_size, None, f"UDF_CONFIG_VOLUME_PATH not set; using fallback {default_batch_size}."
 
     path = Path(config_path)
     if not path.exists():
-        return 1000
+        return default_batch_size, None, f"Config file not found at {config_path}; using fallback {default_batch_size}."
 
-    batch_size = None
+    raw_batch_size = None
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
         if key.strip() == "BATCH_SIZE":
-            batch_size = int(value.strip())
+            raw_batch_size = value.strip()
             break
-    return batch_size if batch_size and batch_size > 0 else 1000
+
+    if raw_batch_size is None:
+        return default_batch_size, None, f"BATCH_SIZE not present in config file; using fallback {default_batch_size}."
+
+    try:
+        parsed_batch_size = int(raw_batch_size)
+    except ValueError:
+        return default_batch_size, raw_batch_size, (
+            f"Invalid BATCH_SIZE '{raw_batch_size}' in config file; using fallback {default_batch_size}."
+        )
+
+    if parsed_batch_size <= 0:
+        return default_batch_size, raw_batch_size, (
+            f"Invalid BATCH_SIZE '{raw_batch_size}' in config file; using fallback {default_batch_size}."
+        )
+
+    return parsed_batch_size, raw_batch_size, None
 
 
 def resolve_group_size(row_count, config_batch_size, group_size_override, group_count_override, group_size_multiplier):
@@ -106,7 +127,7 @@ def resolve_group_size(row_count, config_batch_size, group_size_override, group_
     return max(int(config_batch_size * group_size_multiplier), 1), "batch_size_multiplier"
 
 
-CONFIG_BATCH_SIZE = load_batch_size_from_properties(CONFIG_PATH)
+CONFIG_BATCH_SIZE, RAW_CONFIG_BATCH_SIZE, BATCH_SIZE_WARNING = load_batch_size_from_properties(CONFIG_PATH)
 GROUP_SIZE, GROUPING_STRATEGY = resolve_group_size(
     ROW_COUNT,
     CONFIG_BATCH_SIZE,
@@ -121,7 +142,10 @@ ESTIMATED_GROUP_COUNT = int(math.ceil(float(ROW_COUNT) / float(GROUP_SIZE)))
 print("Row count:", ROW_COUNT)
 print("Generate partitions:", GENERATE_PARTITIONS)
 print("Target partitions:", TARGET_PARTITIONS)
-print("Configured BATCH_SIZE:", CONFIG_BATCH_SIZE)
+print("Raw BATCH_SIZE setting in config file:", RAW_CONFIG_BATCH_SIZE if RAW_CONFIG_BATCH_SIZE is not None else "<missing>")
+print("Effective BATCH_SIZE used by notebook:", CONFIG_BATCH_SIZE)
+if BATCH_SIZE_WARNING:
+    print("WARNING:", BATCH_SIZE_WARNING)
 print("Group size override:", GROUP_SIZE_OVERRIDE)
 print("Group count override:", GROUP_COUNT_OVERRIDE)
 print("Group size multiplier:", GROUP_SIZE_MULTIPLIER)
@@ -131,6 +155,7 @@ print("Estimated grouped UDF rows:", ESTIMATED_GROUP_COUNT)
 print("Load pattern:", LOAD_PATTERN)
 print("Source table:", SOURCE_TABLE)
 print("Target table:", TARGET_TABLE)
+print("Protected object mapping:", PROTECTED_OBJECT_NAME)
 print("Metrics helpers notebook path:", METRICS_HELPERS_NOTEBOOK_PATH)
 
 # COMMAND ----------
@@ -208,13 +233,21 @@ if not config_path:
         "Configure the driver and executor env vars before running this benchmark."
     )
 
-if not spark.catalog.functionExists("thales_protect_bulk_by_column"):
+if not spark.catalog.functionExists("thales_protect_bulk_by_object_and_column"):
     spark.udf.registerJavaFunction(
-        "thales_protect_bulk_by_column",
-        "ThalesCrdpProtectBulkByColumnUdf",
+        "thales_protect_bulk_by_object_and_column",
+        "ThalesCrdpProtectBulkByObjectAndColumnUdf",
         "array<string>",
     )
-    print("Registered Java UDF: thales_protect_bulk_by_column -> ThalesCrdpProtectBulkByColumnUdf")
+    print("Registered Java UDF: thales_protect_bulk_by_object_and_column -> ThalesCrdpProtectBulkByObjectAndColumnUdf")
+
+if not spark.catalog.functionExists("thales_reveal_by_object_and_column_with_user"):
+    spark.udf.registerJavaFunction(
+        "thales_reveal_by_object_and_column_with_user",
+        "ThalesCrdpRevealByObjectAndColumnWithUserUdf",
+        "string",
+    )
+    print("Registered Java UDF: thales_reveal_by_object_and_column_with_user -> ThalesCrdpRevealByObjectAndColumnWithUserUdf")
 
 # COMMAND ----------
 
@@ -246,16 +279,26 @@ protected_grouped_df = grouped_df.select(
     "group_id",
     "custid_array",
     "name_array",
-    F.expr("thales_protect_bulk_by_column(address_array, 'char', 'address')").alias("address_array"),
+    F.expr(
+        f"thales_protect_bulk_by_object_and_column(address_array, 'char', '{PROTECTED_OBJECT_NAME}', 'address')"
+    ).alias("address_array"),
     "city_array",
     "state_array",
     "zip_array",
     "phone_array",
-    F.expr("thales_protect_bulk_by_column(email_array, 'char', 'email')").alias("email_array"),
+    F.expr(
+        f"thales_protect_bulk_by_object_and_column(email_array, 'char', '{PROTECTED_OBJECT_NAME}', 'email')"
+    ).alias("email_array"),
     "dob_array",
-    F.expr("thales_protect_bulk_by_column(creditcard_array, 'nbr', 'creditcard')").alias("creditcard_array"),
-    F.expr("thales_protect_bulk_by_column(creditcardcode_array, 'nbr', 'creditcardcode')").alias("creditcardcode_array"),
-    F.expr("thales_protect_bulk_by_column(ssn_array, 'nbr', 'ssn')").alias("ssn_array"),
+    F.expr(
+        f"thales_protect_bulk_by_object_and_column(creditcard_array, 'nbr', '{PROTECTED_OBJECT_NAME}', 'creditcard')"
+    ).alias("creditcard_array"),
+    F.expr(
+        f"thales_protect_bulk_by_object_and_column(creditcardcode_array, 'nbr', '{PROTECTED_OBJECT_NAME}', 'creditcardcode')"
+    ).alias("creditcardcode_array"),
+    F.expr(
+        f"thales_protect_bulk_by_object_and_column(ssn_array, 'nbr', '{PROTECTED_OBJECT_NAME}', 'ssn')"
+    ).alias("ssn_array"),
 )
 
 flattened_df = protected_grouped_df.select(
@@ -308,7 +351,7 @@ if target_count != ROW_COUNT:
 
 append_perf_metrics(
     run_name=RUN_NAME,
-    step_name="protect_internal_table_bulk",
+    step_name=PROTECT_STEP_NAME,
     row_count=ROW_COUNT,
     duration_seconds=bulk_end - bulk_start,
     extra_metrics={
@@ -332,8 +375,65 @@ append_perf_metrics(
 
 # COMMAND ----------
 
-display(spark.sql(f"SELECT COUNT(*) AS source_count FROM {SOURCE_TABLE}"))
-display(spark.sql(f"SELECT COUNT(*) AS protected_count FROM {TARGET_TABLE}"))
+display(spark.createDataFrame([(ROW_COUNT,)], ["source_count"]))
+display(spark.createDataFrame([(target_count,)], ["protected_count"]))
+display(spark.sql(f"SELECT * FROM {TARGET_TABLE} LIMIT 5"))
+
+spark.sql(
+    f"""
+    CREATE OR REPLACE TEMP VIEW v_internal_bulk_parallelism_diag_revealed AS
+    SELECT
+      custid,
+      name,
+      thales_reveal_by_object_and_column_with_user(
+        CAST(address AS STRING),
+        'char',
+        '{ROW_REVEAL_OBJECT_NAME}',
+        'address',
+        current_user()
+      ) AS address,
+      city,
+      state,
+      zip,
+      phone,
+      thales_reveal_by_object_and_column_with_user(
+        CAST(email AS STRING),
+        'char',
+        '{ROW_REVEAL_OBJECT_NAME}',
+        'email',
+        current_user()
+      ) AS email,
+      dob,
+      CAST(
+        thales_reveal_by_object_and_column_with_user(
+          CAST(creditcard AS STRING),
+          'nbr',
+          '{ROW_REVEAL_OBJECT_NAME}',
+          'creditcard',
+          current_user()
+        ) AS DECIMAL(25,0)
+      ) AS creditcard,
+      CAST(
+        thales_reveal_by_object_and_column_with_user(
+          CAST(creditcardcode AS STRING),
+          'nbr',
+          '{ROW_REVEAL_OBJECT_NAME}',
+          'creditcardcode',
+          current_user()
+        ) AS INT
+      ) AS creditcardcode,
+      thales_reveal_by_object_and_column_with_user(
+        CAST(ssn AS STRING),
+        'nbr',
+        '{ROW_REVEAL_OBJECT_NAME}',
+        'ssn',
+        current_user()
+      ) AS ssn
+    FROM {TARGET_TABLE}
+    """
+)
+
+display(spark.sql("SELECT * FROM v_internal_bulk_parallelism_diag_revealed LIMIT 5"))
 display(spark.sql(f"SELECT * FROM {METRICS_TABLE} ORDER BY metric_ts_utc DESC LIMIT 20"))
 
 create_perf_summary_view(SUMMARY_VIEW)
@@ -366,6 +466,17 @@ display(
 
 print("THALES_BULK_PARALLELISM_DIAGNOSTIC_FINISHED")
 
-display(spark.sql(f"SELECT * FROM my_catalog.my_schema.thales_perf_test_metrics where step_name = 'protect_internal_table_bulk' and row_count = 350000 ORDER BY duration_seconds LIMIT 20"))
+display(
+    spark.sql(
+        f"""
+        SELECT *
+        FROM {METRICS_TABLE}
+        WHERE step_name = '{PROTECT_STEP_NAME}'
+          AND row_count = {ROW_COUNT}
+        ORDER BY duration_seconds
+        LIMIT 20
+        """
+    )
+)
 
 

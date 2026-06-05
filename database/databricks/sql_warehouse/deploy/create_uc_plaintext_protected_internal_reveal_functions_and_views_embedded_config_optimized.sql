@@ -47,7 +47,7 @@ RETURNS STRING
 LANGUAGE PYTHON
 NOT DETERMINISTIC
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
@@ -56,14 +56,15 @@ import json
 from thales_databricks_udf.crdp_udfs import thales_crdp_python_function_bulk_by_object
 
 PROPERTIES = {
-    "CRDPIP": "yourip",
+    "CRDPIP": "your-crdp-ip",
     "CRDPPORT": "8090",
     "CRDPUSER": "admin",
     "DEFAULTREVEALUSER": "admin",
     "DEFAULTMETADATA": "1001000",
-    "DEFAULTMODE": "external",
+    "DEFAULTMODE": "internal",
+    "keymetadatalocation": "internal",
     "BADDATATAG": "999999999",
-    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "yes",
+    "RETURNCIPHERTEXTFORUSERWITHNOKEYACCESS": "no",
     "DEFAULTINTERNALCHARPOLICY": "char-internal",
     "DEFAULTINTERNALNBRNBRPOLICY": "nbr-nbr-internal",
     "DEFAULTEXTERNALCHARPOLICY": "char-external",

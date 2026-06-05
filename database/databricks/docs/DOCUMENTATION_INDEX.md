@@ -6,12 +6,14 @@ Use this index to find the current guide for each deployment path.
 
 - [README.md](E:\eclipse-workspace\thales.databricks.udf\README.md)
 - [DEPLOYMENT.md](E:\eclipse-workspace\thales.databricks.udf\DEPLOYMENT.md)
+- [DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md)
 
 ## Compute cluster
 
 - [TEST_RUNBOOK.md](E:\eclipse-workspace\thales.databricks.udf\TEST_RUNBOOK.md)
 - [COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\COMPUTE_CLUSTER_DEPLOYMENT_GUIDE.md)
 - [RUN_ORDER_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\RUN_ORDER_GUIDE.md)
+- [CRDP_TLS_SETUP_CHECKLIST.md](E:\eclipse-workspace\thales.databricks.udf\docs\CRDP_TLS_SETUP_CHECKLIST.md)
 - Init script:
   [copy_udf_config_init.sh](E:\eclipse-workspace\thales.databricks.udf\cluster_init_scripts\copy_udf_config_init.sh)
 
@@ -46,6 +48,7 @@ Debug / legacy:
 
 - [SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\docs\SQL_WAREHOUSE_DEPLOYMENT_GUIDE.md)
 - [SQL_WAREHOUSE_ROLLOUT_CHECKLIST.md](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\docs\SQL_WAREHOUSE_ROLLOUT_CHECKLIST.md)
+- [SQL_WAREHOUSE_INDEX.md](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\SQL_WAREHOUSE_INDEX.md)
 
 Current SQL Warehouse scripts:
 
@@ -72,10 +75,14 @@ Legacy / sample SQL Warehouse files:
 
 ## Reference material
 
+- [DATABRICKS_TLS_RUNTIME_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\DATABRICKS_TLS_RUNTIME_GUIDE.md)
+  Runtime-specific TLS configuration and troubleshooting map
 - [EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md](E:\eclipse-workspace\thales.databricks.udf\docs\EXECUTION_MODEL_MATRIX_PLAINTEXT_PROTECTED_INTERNAL.md)
 - [PLAINTEXT_PROTECTED_INTERNAL_COMMANDS.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\docs\PLAINTEXT_PROTECTED_INTERNAL_COMMANDS.md)
 - [EXTERNAL_HEADER_COLUMN_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\EXTERNAL_HEADER_COLUMN_GUIDE.md)
   External-header implementation guide for compute clusters and SQL Warehouse
+- [EXTERNAL_FUNCTION_DATASTRUCTURE_GUIDE.md](E:\eclipse-workspace\thales.databricks.udf\docs\EXTERNAL_FUNCTION_DATASTRUCTURE_GUIDE.md)
+  External protect/reveal return shapes, Java/JDBC consumption, and bulk array examples
 - [PROTECTION_PROFILE_OPTIONS.md](E:\eclipse-workspace\thales.databricks.udf\docs\PROTECTION_PROFILE_OPTIONS.md)
 - [PERFORMANCE_CONSIDERATIONS.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\docs\PERFORMANCE_CONSIDERATIONS.md)
 - [PARTITIONING_GUIDANCE.md](E:\eclipse-workspace\thales.databricks.udf\notebooks\docs\PARTITIONING_GUIDANCE.md)

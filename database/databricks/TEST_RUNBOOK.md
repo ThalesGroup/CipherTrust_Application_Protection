@@ -154,6 +154,17 @@ What this notebook does:
 - runs basic scalar and bulk protect/reveal smoke tests, including external scalar and external bulk reveal
 - does not require existing customer tables
 
+Java TLS note:
+
+- if `udfConfig.properties` contains:
+  - `CRDP_SSL_ENABLED=true`
+  - `CRDP_SSL_VERIFY_SERVER=true`
+  - `CRDP_CA_CERT_PATH=/tmp/thales_config/crdp-ca.pem`
+  - `CRDP_CLIENT_PKCS12_PATH=/tmp/thales_config/crdp-client.p12`
+  - `CRDP_CLIENT_PKCS12_PASSWORD=...`
+- then this same notebook is the recommended Java compute-cluster TLS smoke test
+- you do not need to pick a random customer-table notebook just to validate the Java HTTPS path
+
 Important:
 
 - this notebook is mainly for validation and troubleshooting

@@ -23,11 +23,13 @@ Primary deployment scripts to run in Databricks SQL / Unity Catalog.
 - [create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\deploy\create_uc_plaintext_protected_internal_reveal_functions_and_views_embedded_config_optimized.sql)
 - [create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\deploy\create_uc_plaintext_protected_internal_reveal_functions_and_views_wheel_includes_properties.sql)
 - [create_uc_plaintext_protected_external_reveal_functions_and_views_embedded_config.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\deploy\create_uc_plaintext_protected_external_reveal_functions_and_views_embedded_config.sql)
+- [create_uc_plaintext_protected_none_reveal_functions_and_views_embedded_config.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\deploy\create_uc_plaintext_protected_none_reveal_functions_and_views_embedded_config.sql)
 
 Use these when you want:
 
 - the main persistent UC function and view deployment path
 - internal or external protected-table SQL Warehouse rollout scripts
+- none-table SQL Warehouse rollout scripts
 
 ### samples
 
@@ -36,22 +38,32 @@ Reference examples and supporting SQL/Python patterns.
 - [sample_create_uc_secure_views.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_create_uc_secure_views.sql)
 - [sample_grant_uc_secure_views.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_grant_uc_secure_views.sql)
 - [sample_thales_crdp_python_udf_imports.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_thales_crdp_python_udf_imports.py)
+- [sample_tls_smoke_test.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_tls_smoke_test.py)
+- [sample_tls_smoke_test_compute_cluster.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_tls_smoke_test_compute_cluster.py)
+- [sample_tls_smoke_test_sql_warehouse.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_tls_smoke_test_sql_warehouse.py)
+- [sample_tls_debug_uc_function.sql](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\samples\sample_tls_debug_uc_function.sql)
 
 Use these when you want:
 
 - sample wrapper view patterns
 - sample grants
 - Python import/reference examples
+- TLS smoke testing for the Python wheel path on compute clusters
+- SQL Warehouse-style/base64 TLS smoke testing for the Python wheel path
+- SQL Warehouse TLS material diagnostics
 
 ### utils
 
 Helper and generator artifacts.
 
 - [generate_reveal_views_from_properties.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\utils\generate_reveal_views_from_properties.py)
+- [generate_embedded_config_sql_from_properties.py](E:\eclipse-workspace\thales.databricks.udf\sql_warehouse\utils\generate_embedded_config_sql_from_properties.py)
 
 Use this when you want:
 
 - help generating reveal-view SQL from properties-driven configuration
+- stamping embedded-config SQL files from `udfConfig.properties`
+- embedding SQL Warehouse TLS cert material as base64 properties
 
 ### legacy
 

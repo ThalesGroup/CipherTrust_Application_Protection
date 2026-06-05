@@ -34,7 +34,7 @@ CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_by_object_and_colu
 RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$
@@ -67,7 +67,7 @@ CREATE OR REPLACE FUNCTION my_catalog.my_schema.thales_reveal_bulk_by_object_and
 RETURNS ARRAY<STRING>
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.4-py3-none-any.whl"]',
+  dependencies = '["/Volumes/my_catalog/my_schema/volume_forjars/thales_databricks_udf-0.1.7-py3-none-any.whl"]',
   environment_version = 'None'
 )
 AS $$

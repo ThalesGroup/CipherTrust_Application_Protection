@@ -5,14 +5,21 @@
 # MAGIC This notebook registers the Java UDF adapters from the shaded jar and
 # MAGIC runs quick scalar and bulk smoke tests on a Databricks compute cluster.
 # MAGIC
+# MAGIC If `udfConfig.properties` has TLS enabled, this notebook is also the
+# MAGIC recommended Java compute-cluster TLS smoke test.
+# MAGIC
 # MAGIC Before running:
 # MAGIC
 # MAGIC - Attach `target/thales.databricks.udf-0.0.1-SNAPSHOT-all.jar` or the uploaded jar to the cluster
 # MAGIC - Set `spark.driverEnv.UDF_CONFIG_VOLUME_PATH`
 # MAGIC - Set `spark.executorEnv.UDF_CONFIG_VOLUME_PATH`
 # MAGIC - Ensure the path points to a valid `udfConfig.properties`
+# MAGIC - If testing TLS, ensure the init script copied the CA file and PKCS12
+# MAGIC   client certificate into `/tmp/thales_config`
 
 # COMMAND ----------
+
+from pathlib import Path
 
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
@@ -29,6 +36,51 @@ if not config_path:
         "Configure the driver and executor env vars before running the tests."
     )
 
+
+def load_batch_size_from_properties(config_path):
+    default_batch_size = 1000
+
+    if not config_path:
+        return default_batch_size, None, f"UDF_CONFIG_VOLUME_PATH not set; using fallback {default_batch_size}."
+
+    path = Path(config_path)
+    if not path.exists():
+        return default_batch_size, None, f"Config file not found at {config_path}; using fallback {default_batch_size}."
+
+    raw_batch_size = None
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() == "BATCH_SIZE":
+            raw_batch_size = value.strip()
+            break
+
+    if raw_batch_size is None:
+        return default_batch_size, None, f"BATCH_SIZE not present in config file; using fallback {default_batch_size}."
+
+    try:
+        parsed_batch_size = int(raw_batch_size)
+    except ValueError:
+        return default_batch_size, raw_batch_size, (
+            f"Invalid BATCH_SIZE '{raw_batch_size}' in config file; using fallback {default_batch_size}."
+        )
+
+    if parsed_batch_size <= 0:
+        return default_batch_size, raw_batch_size, (
+            f"Invalid BATCH_SIZE '{raw_batch_size}' in config file; using fallback {default_batch_size}."
+        )
+
+    return parsed_batch_size, raw_batch_size, None
+
+
+config_batch_size, raw_config_batch_size, batch_size_warning = load_batch_size_from_properties(config_path)
+print("Raw BATCH_SIZE setting in config file:", raw_config_batch_size if raw_config_batch_size is not None else "<missing>")
+print("Effective BATCH_SIZE used by notebook/runtime:", config_batch_size)
+if batch_size_warning:
+    print("WARNING:", batch_size_warning)
+
 # COMMAND ----------
 
 # Register scalar UDFs
@@ -41,6 +93,21 @@ external_protect_schema = T.StructType(
 
 spark.udf.registerJavaFunction("thales_protect", "ThalesCrdpProtectUdf", T.StringType())
 spark.udf.registerJavaFunction("thales_protect_by_column", "ThalesCrdpProtectByColumnUdf", T.StringType())
+spark.udf.registerJavaFunction(
+    "thales_protect_integer_by_column",
+    "ThalesCrdpProtectIntegerByColumnUdf",
+    T.StringType(),
+)
+spark.udf.registerJavaFunction(
+    "thales_protect_long_by_column",
+    "ThalesCrdpProtectLongByColumnUdf",
+    T.StringType(),
+)
+spark.udf.registerJavaFunction(
+    "thales_protect_decimal_by_column",
+    "ThalesCrdpProtectDecimalByColumnUdf",
+    T.StringType(),
+)
 spark.udf.registerJavaFunction(
     "thales_protect_by_object_and_column",
     "ThalesCrdpProtectByObjectAndColumnUdf",
@@ -59,6 +126,21 @@ spark.udf.registerJavaFunction(
 spark.udf.registerJavaFunction("thales_reveal", "ThalesCrdpRevealUdf", T.StringType())
 spark.udf.registerJavaFunction("thales_reveal_by_column", "ThalesCrdpRevealByColumnUdf", T.StringType())
 spark.udf.registerJavaFunction("thales_reveal_with_user", "ThalesCrdpRevealWithUserUdf", T.StringType())
+spark.udf.registerJavaFunction(
+    "thales_reveal_integer_by_column_with_user",
+    "ThalesCrdpRevealIntegerByColumnWithUserUdf",
+    T.StringType(),
+)
+spark.udf.registerJavaFunction(
+    "thales_reveal_long_by_column_with_user",
+    "ThalesCrdpRevealLongByColumnWithUserUdf",
+    T.StringType(),
+)
+spark.udf.registerJavaFunction(
+    "thales_reveal_decimal_by_column_with_user",
+    "ThalesCrdpRevealDecimalByColumnWithUserUdf",
+    T.StringType(),
+)
 spark.udf.registerJavaFunction(
     "thales_reveal_by_column_with_user",
     "ThalesCrdpRevealByColumnWithUserUdf",
@@ -90,6 +172,16 @@ spark.udf.registerJavaFunction(
     "thales_protect_bulk_by_column",
     "ThalesCrdpProtectBulkByColumnUdf",
     T.ArrayType(T.StringType()),
+)
+spark.udf.registerJavaFunction(
+    "thales_protect_bulk_by_object_and_column",
+    "ThalesCrdpProtectBulkByObjectAndColumnUdf",
+    T.ArrayType(T.StringType()),
+)
+spark.udf.registerJavaFunction(
+    "thales_protect_bulk_by_object_and_column_with_external_header",
+    "ThalesCrdpProtectBulkByObjectAndColumnWithExternalHeaderUdf",
+    T.ArrayType(external_protect_schema),
 )
 spark.udf.registerJavaFunction(
     "thales_reveal_bulk",
@@ -200,6 +292,23 @@ display(scalar_protect_df)
 # COMMAND ----------
 
 # Bulk protect smoke test
+# Note:
+# - This section intentionally keeps the legacy column-aware bulk path visible.
+# - The object-aware bulk signatures are exercised later in this notebook.
+# - `thales_bulk_protect_char(...)` and `thales_bulk_protect_nbr(...)` are
+#   legacy hardcoded convenience adapters:
+#   - they hardcode the datatype
+#   - they do not know the column name
+#   - they do not know the object/table name
+#   - they therefore resolve policy through the legacy datatype-default path
+# - `thales_protect_bulk(...)` is also legacy bulk:
+#   - it knows the datatype
+#   - it still does not know the column or object
+#   - it also resolves policy through the legacy datatype-default path
+# - `thales_protect_bulk_by_column(...)` is the older column-aware bulk path:
+#   - it knows the datatype and column name
+#   - it can resolve through `column.<column>.profile` or `COLUMN_PROFILES`
+#   - it still does not use `protect.object.<object>`
 bulk_protect_df = test_df.selectExpr(
     "email_batch",
     "thales_bulk_protect_char(email_batch) as email_batch_protected_hardcoded",
@@ -240,21 +349,21 @@ display(round_trip_scalar_df)
 
 # External scalar protect/reveal smoke test
 # Note:
-# - This example is proving the external-policy function signatures.
-# - If the returned `external_header` is null, reveal can still succeed by
-#   falling back to configured metadata from `udfConfig.properties`.
+# - This example uses the object-aware external mapping so it truly exercises
+#   the external policy path instead of falling back to global
+#   `COLUMN_PROFILES`.
 # - A real customer external-table pattern should persist a sibling header
 #   column and pass that real row-level value into reveal.
 external_round_trip_df = (
     test_df.selectExpr(
         "email",
-        "thales_protect_by_column_with_external_header(email, 'char', 'email') as email_external_token"
+        "thales_protect_by_object_and_column_with_external_header(email, 'char', 'my_catalog.my_schema.plaintext_protected_external', 'email') as email_external_token"
     )
     .selectExpr(
         "email",
         "email_external_token.protected_value as email_token",
         "email_external_token.external_header as email_header",
-        "thales_reveal_by_column_with_external_header_and_user(email_external_token.protected_value, email_external_token.external_header, 'char', 'email', current_user()) as email_revealed"
+        "thales_reveal_by_object_and_column_with_external_header_and_user(email_external_token.protected_value, email_external_token.external_header, 'char', 'my_catalog.my_schema.plaintext_protected_external', 'email', current_user()) as email_revealed"
     )
 )
 
@@ -286,21 +395,30 @@ display(round_trip_bulk_df)
 
 # External bulk reveal test
 # Note:
-# - This notebook example may still succeed even if `email_header_batch`
-#   contains nulls because external reveal falls back to configured metadata.
-# - That is useful for smoke testing, but it is not the preferred customer
-#   implementation for row-level external-versioned data.
+# - This now uses the true object-aware bulk external protect path so the same
+#   object-specific resolution model is exercised for protect and reveal.
 external_bulk_round_trip_df = (
     test_df.selectExpr(
         "email_batch",
-        "transform(email_batch, x -> thales_protect_by_column_with_external_header(x, 'char', 'email').protected_value) as email_token_batch",
-        "transform(email_batch, x -> thales_protect_by_column_with_external_header(x, 'char', 'email').external_header) as email_header_batch",
+        """thales_protect_bulk_by_object_and_column_with_external_header(
+            email_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_external_arrays',
+            'email'
+        ) as email_external_batch""",
     )
     .selectExpr(
         "email_batch",
-        "email_token_batch",
-        "email_header_batch",
-        "thales_reveal_bulk_by_column_with_external_header_and_user(email_token_batch, email_header_batch, 'char', 'email', current_user()) as email_revealed_batch",
+        "transform(email_external_batch, x -> x.protected_value) as email_token_batch",
+        "transform(email_external_batch, x -> x.external_header) as email_header_batch",
+        """thales_reveal_bulk_by_object_and_column_with_external_header_and_user(
+            transform(email_external_batch, x -> x.protected_value),
+            transform(email_external_batch, x -> x.external_header),
+            'char',
+            'my_catalog.my_schema.plaintext_protected_external_arrays',
+            'email',
+            current_user()
+        ) as email_revealed_batch""",
     )
 )
 
@@ -374,6 +492,60 @@ object_round_trip_df = (
 )
 
 display(object_round_trip_df)
+
+# COMMAND ----------
+
+# Object-aware bulk round-trip smoke test for internal, external, and none.
+object_bulk_round_trip_df = (
+    test_df.selectExpr(
+        "email_batch",
+        """thales_protect_bulk_by_object_and_column(
+            email_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_internal_arrays',
+            'email'
+        ) as internal_email_token_batch""",
+        """thales_protect_bulk_by_object_and_column_with_external_header(
+            email_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_external_arrays',
+            'email'
+        ) as external_email_token_batch""",
+        """thales_protect_bulk_by_object_and_column(
+            email_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_none_arrays',
+            'email'
+        ) as none_email_token_batch""",
+    )
+    .selectExpr(
+        "email_batch",
+        """thales_reveal_bulk_by_object_and_column_with_user(
+            internal_email_token_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_internal_arrays',
+            'email',
+            current_user()
+        ) as internal_email_revealed_batch""",
+        """thales_reveal_bulk_by_object_and_column_with_external_header_and_user(
+            transform(external_email_token_batch, x -> x.protected_value),
+            transform(external_email_token_batch, x -> x.external_header),
+            'char',
+            'my_catalog.my_schema.plaintext_protected_external_arrays',
+            'email',
+            current_user()
+        ) as external_email_revealed_batch""",
+        """thales_reveal_bulk_by_object_and_column_with_user(
+            none_email_token_batch,
+            'char',
+            'my_catalog.my_schema.plaintext_protected_none_arrays',
+            'email',
+            current_user()
+        ) as none_email_revealed_batch""",
+    )
+)
+
+display(object_bulk_round_trip_df)
 
 # COMMAND ----------
 

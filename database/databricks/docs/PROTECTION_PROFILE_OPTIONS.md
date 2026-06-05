@@ -1,15 +1,36 @@
 # Protection Profile Options
 
-This guide explains the two main protection-profile patterns supported in this repository:
+This guide explains the three protection-profile patterns supported in this repository:
 
-- global column-based profile mappings
-- object-specific table-based profile mappings
+- global-column based profiles using `column.<column>.profile`
+- global-column-legacy based profiles using `COLUMN_PROFILES`
+- table-column based profiles using `protect.object.<object>`
 
 It also explains when each option is a good fit and which mapping takes precedence if both are configured.
 
-## Two common customer use cases
+It also explains when each option is a good fit and which mapping takes precedence if more than one is configured.
 
-### Option 1: Global profile mapping
+## Three profile styles
+
+### Option 1: Global-column based profiles
+
+This is the newer structured global form.
+
+Example:
+
+```properties
+column.email.profile=tag.char.internal
+column.address.profile=tag.char.internal
+column.ssn.profile=tag.nbr.internal
+```
+
+This approach is best when:
+
+- one logical column name maps to one policy across the environment
+- teams want a structured per-column property model
+- future per-column options such as metadata or reveal-user overrides may also be needed
+
+### Option 2: Global-column-legacy based profiles
 
 This works well when customers use the same logical column names across many tables and want those columns to resolve to the same protection profile everywhere.
 
@@ -33,7 +54,9 @@ This approach is best when:
 - teams want simpler configuration
 - table-specific variation is not needed
 
-### Option 2: Object-specific profile mapping
+This is the older compact global form.
+
+### Option 3: Table-column based profiles
 
 This works better when organizations cannot apply the same profile to every table at the same time.
 
@@ -66,9 +89,9 @@ This approach is best when:
 - downstream systems are migrating at different speeds
 - customers want different profiles for different protected objects
 
-## How object-specific mappings work
+## How table-column based mappings work
 
-Object-specific mappings use this format:
+Table-column based mappings use this format:
 
 ```properties
 protect.object.<catalog>.<schema>.<table>=column|tag...,column|tag...
@@ -121,29 +144,35 @@ thales_protect_by_object_and_column(
 )
 ```
 
-## Which option takes precedence?
+## Order of precedence
 
-If both are configured, the practical rule is:
+If more than one mapping style is configured, the runtime resolves protection profiles in this order:
 
-1. object-specific mapping wins
-2. global mapping is the fallback
+1. `protect.object.<object>`
+2. `column.<column>.profile`
+3. `COLUMN_PROFILES`
+4. default datatype-based fallback policies
 
 That means:
 
-- if a matching `protect.object.<catalog>.<schema>.<table>` entry exists for the object and column, that mapping is used
-- if not, the runtime falls back to the shared global mappings such as `COLUMN_PROFILES`
+- if a matching `protect.object.<catalog>.<schema>.<table>` entry exists for the object and column, that mapping is used first
+- if not, the runtime looks for `column.<column>.profile`
+- if that is not present, the runtime falls back to `COLUMN_PROFILES`
+- if none of those are configured, the runtime falls back to the default internal or external datatype-based policy settings
 
-This is the key reason customers can safely define both:
+This is the key reason customers can safely define all three:
 
 - global defaults for broad reuse
 - object-specific overrides for exceptions and phased rollout
+- legacy compact mappings for backward compatibility
 
 ## Recommended mental model
 
 Think of it like this:
 
-- `COLUMN_PROFILES` = environment-wide default behavior
 - `protect.object...` = table-level override where needed
+- `column.<column>.profile` = structured global default
+- `COLUMN_PROFILES` = legacy global fallback
 
 That gives customers a clean rollout model:
 
@@ -204,13 +233,19 @@ The SQL Warehouse generator reads `protect.object.<catalog>.<schema>.<table>` en
 
 ## Practical recommendation
 
-Use global mappings when:
+Use `column.<column>.profile` when:
 
 - all tables should resolve the same profile for the same business column
-- protection is being rolled out consistently across the environment
-- operational simplicity is the main goal
+- you want the preferred structured global format
+- you may later want other per-column properties next to the profile mapping
 
-Use object-specific mappings when:
+Use `COLUMN_PROFILES` when:
+
+- you are maintaining older configurations
+- you want the compact legacy format for simple global defaults
+- backward compatibility matters more than structure
+
+Use `protect.object.<object>` when:
 
 - rollout is phased table by table
 - downstream systems are not all ready yet
@@ -219,15 +254,17 @@ Use object-specific mappings when:
 
 ## Operational summary
 
-If both global and object-specific mappings are present:
+If multiple mapping styles are present:
 
-- object-specific mapping takes precedence
-- global mapping remains the default fallback
+- `protect.object.<object>` takes precedence
+- `column.<column>.profile` is the next global fallback
+- `COLUMN_PROFILES` is the legacy global fallback after that
 
 That makes it safe to support both:
 
 - broad environment-wide defaults
 - targeted table-level overrides
+- older compact global mappings during migration
 
 This is the supported way in this repository to handle customer environments where protection policy selection is either:
 

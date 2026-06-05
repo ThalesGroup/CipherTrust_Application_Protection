@@ -1,3 +1,4 @@
 build>=1.2.2
 setuptools>=68
 wheel
+requests>=2.31.0
