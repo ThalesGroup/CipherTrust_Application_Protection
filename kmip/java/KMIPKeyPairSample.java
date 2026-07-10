@@ -7,11 +7,12 @@
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
 
 import com.ingrian.internal.kmip.api.CryptographicUsageMask.UsageMask;
-// CADP for JAVA class imports
+// CADP for JAVA KMIP and NAE class imports
 import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.KMIPAttributeNames.KMIPAttribute;
 import com.ingrian.security.nae.KMIPAttributes;
@@ -35,17 +36,23 @@ public class KMIPKeyPairSample
     static int length = 2048;
     static KeyFormatType keyFormat = KeyFormatType.PKCS1;
     
-    public static void main( String[] args ) throws Exception
+    public static void main( String[] args )
     {
 	    if (args.length != 4)
         {
                 usage();
         } 
 
+	    String privateKeyName = args[2];
+        String publicKeyName = args[3];
+        
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
-        String privateKeyName = args[2];
-        String publicKeyName = args[3];
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
         KMIPSession session=null;
         try {
             
@@ -109,7 +116,6 @@ public class KMIPKeyPairSample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         finally {
         	if(session!=null)

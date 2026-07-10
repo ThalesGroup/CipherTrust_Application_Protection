@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .bg { fill: #f7f4ee; }
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #1d2a33; }
+      .subtitle { font: 400 18px 'Segoe UI', Arial, sans-serif; fill: #44515a; }
+      .driver { fill: #20465b; }
+      .exec { fill: #d8e7ef; stroke: #5d7d91; stroke-width: 2; }
+      .crdp { fill: #e9f0d8; stroke: #7c9a4d; stroke-width: 2; }
+      .textW { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .textD { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #17384d; }
+      .small { font: 17px 'Segoe UI', Arial, sans-serif; fill: #31424d; }
+      .arrow { stroke: #4f6878; stroke-width: 4; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto">
+      <polygon points="0 0, 12 5, 0 10" fill="#4f6878"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1600" height="900"/>
+  <text class="title" x="70" y="70">Java Spark UDF Executor Flow</text>
+  <text class="subtitle" x="70" y="105">How a class like ThalesCrdpProtectByColumnUdf runs across Spark partitions and executors.</text>
+
+  <rect class="driver" x="80" y="180" width="320" height="150" rx="18"/>
+  <text class="textW" x="170" y="235">Spark Driver</text>
+  <text class="small" x="120" y="275" fill="#ffffff">Registers Java UDF once</text>
+  <text class="small" x="120" y="302" fill="#ffffff">Builds query plan</text>
+
+  <rect class="exec" x="520" y="150" width="300" height="180" rx="18"/>
+  <text class="textD" x="603" y="205">Executor 1</text>
+  <text class="small" x="560" y="245">Partition A task</text>
+  <text class="small" x="560" y="272">Calls ThalesCrdpProtectByColumnUdf</text>
+  <text class="small" x="560" y="299">Processes rows in this partition</text>
+
+  <rect class="exec" x="520" y="380" width="300" height="180" rx="18"/>
+  <text class="textD" x="603" y="435">Executor 2</text>
+  <text class="small" x="560" y="475">Partition B task</text>
+  <text class="small" x="560" y="502">Calls ThalesCrdpProtectByColumnUdf</text>
+  <text class="small" x="560" y="529">Processes rows in this partition</text>
+
+  <rect class="exec" x="520" y="610" width="300" height="180" rx="18"/>
+  <text class="textD" x="603" y="665">Executor 3</text>
+  <text class="small" x="560" y="705">Partition C task</text>
+  <text class="small" x="560" y="732">Calls ThalesCrdpProtectByColumnUdf</text>
+  <text class="small" x="560" y="759">Processes rows in this partition</text>
+
+  <rect class="crdp" x="1050" y="320" width="360" height="230" rx="18"/>
+  <text class="textD" x="1147" y="380">Thales CRDP</text>
+  <text class="small" x="1100" y="420">Protect / reveal API calls</text>
+  <text class="small" x="1100" y="447">Requests come from executor tasks</text>
+  <text class="small" x="1100" y="474">Parallelized across partitions</text>
+
+  <path class="arrow" d="M400 255 C450 255, 460 230, 520 230"/>
+  <path class="arrow" d="M400 255 C450 255, 460 470, 520 470"/>
+  <path class="arrow" d="M400 255 C450 255, 460 700, 520 700"/>
+
+  <path class="arrow" d="M820 230 C930 230, 930 390, 1050 390"/>
+  <path class="arrow" d="M820 470 C930 470, 930 435, 1050 435"/>
+  <path class="arrow" d="M820 700 C930 700, 930 480, 1050 480"/>
+
+  <text class="small" x="80" y="850">Summary: Spark distributes partitions to executors, and the Java UDF runs inside those executor tasks. For even higher throughput, the bulk UDF variants reduce per-row overhead.</text>
+</svg>

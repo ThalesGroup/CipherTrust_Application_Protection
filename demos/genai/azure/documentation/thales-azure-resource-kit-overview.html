@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thales Azure Resource Kit Overview</title>
+  <style>
+    :root {
+      --ink: #132238;
+      --muted: #58677d;
+      --brand: #005bbb;
+      --brand-dark: #003f82;
+      --accent: #00a8a8;
+      --surface: #f6f8fb;
+      --line: #d9e1ec;
+      --page-width: 8.5in;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: #dfe7f2;
+    }
+
+    .page {
+      width: min(var(--page-width), calc(100vw - 24px));
+      min-height: 11in;
+      margin: 0 auto 18px;
+      background: white;
+      padding: 0.72in;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(17, 32, 56, 0.12);
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at top right, rgba(0, 168, 168, 0.16), transparent 28%),
+        radial-gradient(circle at left 20% top 10%, rgba(0, 91, 187, 0.13), transparent 24%),
+        linear-gradient(135deg, #f8fbff 0%, #edf4fb 100%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--brand-dark);
+      background: rgba(0, 91, 187, 0.1);
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3 { margin: 0; line-height: 1.1; }
+    h1 { font-size: 30px; max-width: 6.8in; margin-bottom: 16px; }
+    h2 { font-size: 22px; margin-bottom: 14px; }
+    h3 { font-size: 15px; margin-bottom: 8px; }
+
+    p {
+      margin: 0 0 12px;
+      line-height: 1.5;
+      font-size: 13.2px;
+      color: var(--muted);
+    }
+
+    .lede {
+      font-size: 15px;
+      max-width: 6.9in;
+      color: #314157;
+      margin-bottom: 22px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .metric-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 22px 0 10px;
+    }
+
+    .metric {
+      padding: 14px 12px;
+      border-radius: 16px;
+      background: #0f2036;
+      color: white;
+    }
+
+    .metric .num {
+      display: block;
+      font-size: 25px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .metric .cap {
+      font-size: 11px;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.78);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card, .panel, .stack {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+
+    .card {
+      padding: 16px;
+      min-height: 140px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .panel {
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+    }
+
+    .stack { overflow: hidden; }
+    .stack .row {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .stack .row:last-child { border-bottom: 0; }
+
+    .row-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent);
+      background: #effbfb;
+      border-radius: 0 16px 16px 0;
+      color: #244049;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .platform {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .platform .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 91, 187, 0.08);
+      color: var(--brand-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .flow-wrap {
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+      border: 1px solid var(--line);
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .footer {
+      position: absolute;
+      left: 0.72in;
+      right: 0.72in;
+      bottom: 0.48in;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+      color: #71839a;
+    }
+
+    .page-break { page-break-after: always; }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .page { padding: 0.5in; }
+      .metric-band { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .story-grid, .platform-grid, .card-grid { grid-template-columns: 1fr; }
+    }
+
+    @media screen and (max-width: 700px) {
+      .metric-band { grid-template-columns: 1fr; }
+    }
+
+    @page {
+      size: letter;
+      margin: 0;
+    }
+
+    @media print {
+      body { background: white; }
+      .page {
+        width: var(--page-width);
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="page hero page-break">
+    <div class="eyebrow">Thales Azure Resource Kit</div>
+    <h1>Protect sensitive data across prompts, files, storage, and Azure SQL before it reaches AI and analytics workflows</h1>
+    <p class="lede">
+      The Thales Azure Resource Kit demonstrates how Microsoft Azure services and Thales CipherTrust can work together
+      to detect, protect, reveal, and govern sensitive data across multiple application and data paths. It includes local
+      file processing, prompt protection, Microsoft Purview-driven workflows, and preparation patterns for vector databases
+      and model fine tuning.
+    </p>
+
+    <div class="metric-band">
+      <div class="metric">
+        <span class="num">4</span>
+        <span class="cap">Primary solution patterns in one resource kit</span>
+      </div>
+      <div class="metric">
+        <span class="num">2</span>
+        <span class="cap">Thales protection paths for unstructured and structured data</span>
+      </div>
+      <div class="metric">
+        <span class="num">1</span>
+        <span class="cap">Governed story connecting Azure services with Thales control</span>
+      </div>
+      <div class="metric">
+        <span class="num">100%</span>
+        <span class="cap">Policy and key control retained in Thales CipherTrust Manager</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 8px;">
+      <div>
+        <h2>What the resource kit covers</h2>
+        <p>
+          This resource kit is broader than a single demo. It is a set of practical patterns that show how teams can protect
+          sensitive data before it is used in prompt workflows, retrieval pipelines, analytics extracts, and governed data movement.
+        </p>
+        <p>
+          Customers can use it to tell a complete story: detect sensitive values with Azure AI Language PII detection where needed,
+          use Purview to identify governed assets, and apply Thales protection before those assets are reused in downstream systems.
+        </p>
+
+        <div class="card-grid">
+          <div class="card">
+            <strong>Prompt protection</strong>
+            Protect prompt content before Azure OpenAI requests and inspect output content again for sensitive values.
+          </div>
+          <div class="card">
+            <strong>File-to-file protection</strong>
+            Detect PII in local files and write protected output for batch preparation and downstream reuse.
+          </div>
+          <div class="card">
+            <strong>Governed processing</strong>
+            Use Microsoft Purview to decide which storage assets and SQL columns should be processed.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Core capability areas</h2>
+        <div class="platform-grid">
+          <div class="platform">
+            <div class="label">Detection</div>
+            <h3>Azure AI Language PII detection</h3>
+            <p>Identify sensitive values in unstructured and semi-structured content before protection.</p>
+          </div>
+          <div class="platform">
+            <div class="label">Governance</div>
+            <h3>Microsoft Purview</h3>
+            <p>Discover and classify sensitive storage assets, tables, and columns.</p>
+          </div>
+          <div class="platform">
+            <div class="label">Protection</div>
+            <h3>Thales CipherTrust</h3>
+            <p>Protect and reveal sensitive data with policy-based control and centralized key management.</p>
+          </div>
+          <div class="platform">
+            <div class="label">AI Readiness</div>
+            <h3>RAG and fine tuning</h3>
+            <p>Prepare protected content for embeddings, vector stores, analytics, and model training workflows.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          The value of the kit is not just protection in isolation. It shows how to turn Azure data discovery and PII detection into a usable protection workflow.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Thales Azure Resource Kit Overview</span>
+      <span>Page 1</span>
+    </div>
+  </section>
+
+  <section class="page page-break">
+    <h2>Four solution patterns in the resource kit</h2>
+    <p>
+      The samples cover different entry points, but they work together as one narrative. Teams can start with a simple local
+      file-to-file example, move to prompt protection, and then expand into Purview-driven governed workflows for storage and Azure SQL.
+    </p>
+
+    <div class="story-grid">
+      <div class="panel">
+        <h3>1. Non-Purview local file-to-file batch flow</h3>
+        <p>
+          The local batch processor reads files from an input directory, uses Azure AI Language PII detection to identify sensitive values,
+          protects those values with Thales CipherTrust, and writes the protected output to a local destination directory.
+        </p>
+        <div class="tag-row">
+          <span class="tag">local input</span>
+          <span class="tag">pii detection api</span>
+          <span class="tag">protected output</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>2. Prompt protection for Azure OpenAI</h3>
+        <p>
+          The prompt example protects prompt content before it is sent to Azure OpenAI, demonstrates response handling, and optionally
+          checks returned content again for sensitive values. This is useful for showing application-layer protection around prompt workflows.
+        </p>
+        <div class="tag-row">
+          <span class="tag">prompt workflow</span>
+          <span class="tag">azure openai</span>
+          <span class="tag">output inspection</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>3. Purview-driven storage protection</h3>
+        <p>
+          Purview identifies sensitive storage assets. The application reads those same blobs or ADLS files directly from Azure Storage,
+          uses Azure AI Language PII detection for fine-grained in-content detection, and streams protected output back to a governed target path.
+        </p>
+        <div class="tag-row">
+          <span class="tag">purview</span>
+          <span class="tag">blob / adls</span>
+          <span class="tag">streaming</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>4. Purview-driven Azure SQL protection</h3>
+        <p>
+          Purview identifies sensitive tables and columns. The application protects only the classified columns and writes governed output
+          to a protected target table, creating a strong structured-data preparation path for analytics and AI.
+        </p>
+        <div class="tag-row">
+          <span class="tag">azure sql</span>
+          <span class="tag">column targeting</span>
+          <span class="tag">structured data</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      Together, these patterns let customers start simple and then move toward a stronger governed architecture without abandoning the same Thales protection model.
+    </div>
+
+    <div class="footer">
+      <span>Resource Kit Sample Patterns</span>
+      <span>Page 2</span>
+    </div>
+  </section>
+
+  <section class="page page-break">
+    <h2>How the kit supports vector DB and fine-tuning preparation</h2>
+    <p>
+      One of the strongest use cases for the resource kit is preparing data before it enters a vector database or a fine-tuning workflow.
+      The most direct path begins with file-based content and uses Azure AI Language PII detection to locate sensitive values before
+      Thales protection is applied.
+    </p>
+
+    <div class="flow-wrap">
+      <svg viewBox="0 0 980 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="File-to-file vector database and fine-tuning preparation flow">
+        <defs>
+          <linearGradient id="navyGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#2e327a"/>
+            <stop offset="100%" stop-color="#4957a7"/>
+          </linearGradient>
+          <linearGradient id="tealGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#35a9c1"/>
+            <stop offset="100%" stop-color="#73d3d3"/>
+          </linearGradient>
+          <linearGradient id="lightPanel" x1="0" x2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#eef4fb"/>
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b12b7f"/>
+          </marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3a8fd8"/>
+          </marker>
+        </defs>
+
+        <rect x="28" y="122" width="168" height="220" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <rect x="48" y="144" width="128" height="36" rx="10" fill="url(#navyGrad)"/>
+        <text x="112" y="167" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Input Files</text>
+        <text x="112" y="215" text-anchor="middle" font-size="12" fill="#31506e">TXT</text>
+        <text x="112" y="235" text-anchor="middle" font-size="12" fill="#31506e">CSV</text>
+        <text x="112" y="255" text-anchor="middle" font-size="12" fill="#31506e">NDJSON</text>
+        <text x="112" y="275" text-anchor="middle" font-size="12" fill="#31506e">Reports</text>
+
+        <rect x="260" y="102" width="214" height="260" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <rect x="290" y="124" width="154" height="34" rx="10" fill="url(#tealGrad)"/>
+        <text x="367" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Azure AI Language</text>
+        <text x="367" y="198" text-anchor="middle" font-size="13" fill="#31506e">PII detection API</text>
+        <text x="367" y="223" text-anchor="middle" font-size="12" fill="#58677d">Detect names, email, phone,</text>
+        <text x="367" y="243" text-anchor="middle" font-size="12" fill="#58677d">addresses, SSNs, dates, URLs</text>
+        <rect x="315" y="278" width="104" height="28" rx="9" fill="#4f8bd5"/>
+        <text x="367" y="297" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">PII Recognition</text>
+
+        <rect x="540" y="102" width="214" height="260" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <rect x="570" y="124" width="154" height="34" rx="10" fill="url(#navyGrad)"/>
+        <text x="647" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Thales Protection</text>
+        <text x="647" y="198" text-anchor="middle" font-size="13" fill="#31506e">Protect sensitive values</text>
+        <text x="647" y="223" text-anchor="middle" font-size="12" fill="#58677d">Tokenization or encryption</text>
+        <text x="647" y="243" text-anchor="middle" font-size="12" fill="#58677d">Policy-based control</text>
+        <rect x="595" y="278" width="104" height="28" rx="9" fill="#4f8bd5"/>
+        <text x="647" y="297" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">CADP / CRDP</text>
+
+        <rect x="806" y="84" width="150" height="120" rx="22" fill="url(#navyGrad)"/>
+        <text x="881" y="126" text-anchor="middle" font-size="18" fill="#ffffff">Protected</text>
+        <text x="881" y="153" text-anchor="middle" font-size="18" fill="#ffffff">File Output</text>
+        <text x="881" y="180" text-anchor="middle" font-size="11" fill="#edf4ff">Local or governed storage</text>
+
+        <rect x="786" y="248" width="190" height="190" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <text x="881" y="286" text-anchor="middle" font-size="16" font-weight="700" fill="#132238">Approved Next Step</text>
+        <rect x="816" y="312" width="130" height="28" rx="9" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="881" y="331" text-anchor="middle" font-size="11" fill="#31506e">Chunk and Embed</text>
+        <rect x="816" y="352" width="130" height="28" rx="9" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="881" y="371" text-anchor="middle" font-size="11" fill="#31506e">Load Vector DB</text>
+        <rect x="816" y="392" width="130" height="28" rx="9" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="881" y="411" text-anchor="middle" font-size="11" fill="#31506e">Prepare Fine Tuning</text>
+
+        <line x1="196" y1="232" x2="260" y2="232" stroke="#b12b7f" stroke-width="3.5" marker-end="url(#arrow)"/>
+        <line x1="474" y1="232" x2="540" y2="232" stroke="#b12b7f" stroke-width="3.5" marker-end="url(#arrow)"/>
+        <line x1="754" y1="170" x2="806" y2="170" stroke="#b12b7f" stroke-width="3.5" marker-end="url(#arrow)"/>
+        <line x1="881" y1="204" x2="881" y2="248" stroke="#3a8fd8" stroke-width="3.5" marker-end="url(#arrowBlue)"/>
+      </svg>
+    </div>
+
+    <div class="story-grid">
+      <div class="panel">
+        <h3>Vector database preparation</h3>
+        <p>
+          The file-to-file path is a practical way to create a protected corpus before chunking, embedding, and indexing.
+          The protected file becomes the approved source for vector-store ingestion rather than the original raw file.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>Fine-tuning preparation</h3>
+        <p>
+          The same pattern can prepare training or tuning data by reducing exposure to raw personal data while preserving
+          the broader structure and utility of the content.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Vector DB and Fine-Tuning Preparation</span>
+      <span>Page 3</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>Why this resource kit is useful in customer conversations</h2>
+    <p>
+      The full Azure resource kit gives you more than one demo. It gives you a progression: local file protection, prompt protection,
+      Purview-driven governance, structured-data protection, and AI-readiness use cases such as vector databases and fine-tuning preparation.
+    </p>
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div>
+        <div class="stack">
+          <div class="row">
+            <div class="row-title">For security teams</div>
+            <p>It shows that sensitive data can be protected before it reaches AI workflows rather than after exposure has already happened.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">For data-governance teams</div>
+            <p>It turns Purview classification and Azure AI Language PII detection into a concrete technical action instead of a passive finding.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">For AI and platform teams</div>
+            <p>It supports practical preparation patterns for prompts, vector indexes, retrieval pipelines, analytics extracts, and training data.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">For the field</div>
+            <p>It gives a credible story that connects Microsoft Azure capabilities with Thales CipherTrust protection in a way customers can act on.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          The strongest message is simple: discover sensitive data, identify precise values where needed, protect them with Thales, and build downstream AI on safer data.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Representative capabilities summary</h3>
+        <ul>
+          <li>Non-Purview local file-to-file protection and reveal processing</li>
+          <li>Prompt protection for Azure OpenAI request flows</li>
+          <li>Microsoft Purview-driven storage and Azure SQL targeting</li>
+          <li>Streaming protection for Purview-selected Azure Storage assets</li>
+          <li>Structured-data targeting for Azure SQL workflows</li>
+          <li>Preparation workflows for vector DB and fine-tuning scenarios</li>
+          <li>Centralized Thales policy and key control</li>
+        </ul>
+
+        <div class="tag-row">
+          <span class="tag">prompt protection</span>
+          <span class="tag">file batch processing</span>
+          <span class="tag">purview governance</span>
+          <span class="tag">vector db prep</span>
+          <span class="tag">fine tuning prep</span>
+          <span class="tag">structured + unstructured</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Customer Value Story</span>
+      <span>Page 4</span>
+    </div>
+  </section>
+</body>
+</html>

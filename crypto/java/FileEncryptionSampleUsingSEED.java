@@ -3,6 +3,7 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
 import java.security.Security;
 
 import javax.crypto.Cipher;
@@ -20,7 +21,7 @@ import com.ingrian.security.nae.NAESession;
  */
 
 public class FileEncryptionSampleUsingSEED {
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) {
 		if (args.length != 8) {
 			System.err
 					.println("Usage: java FileEncryptionSampleUsingSEED user password keyname fileToEncrypt "
@@ -42,7 +43,14 @@ public class FileEncryptionSampleUsingSEED {
 
 		String Algo = "SEED/CBC/PKCS5Padding";
 
+		// Add Ingrian provider to the list of JCE providers
 		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+
 		NAESession session = null;
 		try {
 			session = NAESession.getSession(username, password.toCharArray());
@@ -63,8 +71,6 @@ public class FileEncryptionSampleUsingSEED {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-                       System.out.println("The Cause is " + e.getMessage() + ".");
-	               throw e;
 		} finally {
 			if (session != null) {
 				session.closeSession();

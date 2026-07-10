@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thales + Azure Purview Data Protection Brochure</title>
+  <style>
+    :root {
+      --ink: #132238;
+      --muted: #58677d;
+      --brand: #005bbb;
+      --brand-dark: #003f82;
+      --accent: #00a8a8;
+      --surface: #f6f8fb;
+      --line: #d9e1ec;
+      --page-width: 8.5in;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: #dfe7f2;
+    }
+
+    .page {
+      width: min(var(--page-width), calc(100vw - 24px));
+      min-height: 11in;
+      margin: 0 auto 18px;
+      background: white;
+      padding: 0.72in;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(17, 32, 56, 0.12);
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at top right, rgba(0, 168, 168, 0.16), transparent 28%),
+        radial-gradient(circle at left 20% top 10%, rgba(0, 91, 187, 0.13), transparent 24%),
+        linear-gradient(135deg, #f8fbff 0%, #edf4fb 100%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--brand-dark);
+      background: rgba(0, 91, 187, 0.1);
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    h1 {
+      font-size: 30px;
+      max-width: 6.7in;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 12px;
+      line-height: 1.5;
+      font-size: 13.2px;
+      color: var(--muted);
+    }
+
+    .lede {
+      font-size: 15px;
+      max-width: 6.8in;
+      color: #314157;
+      margin-bottom: 22px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .card,
+    .panel,
+    .stack {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+
+    .card {
+      padding: 16px;
+      min-height: 145px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .panel {
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+    }
+
+    .stack {
+      overflow: hidden;
+    }
+
+    .stack .row {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stack .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    ul {
+      margin: 10px 0 0 18px;
+      padding: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .metric-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 22px 0 10px;
+    }
+
+    .metric {
+      padding: 14px 12px;
+      border-radius: 16px;
+      background: #0f2036;
+      color: white;
+    }
+
+    .metric .num {
+      display: block;
+      font-size: 25px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .metric .cap {
+      font-size: 11px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.78);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .platform {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .platform .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent);
+      background: #effbfb;
+      border-radius: 0 16px 16px 0;
+      color: #244049;
+    }
+
+    .flow-wrap {
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+      border: 1px solid var(--line);
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .solution-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .solution-item {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .solution-item .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 91, 187, 0.08);
+      color: var(--brand-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 16px 0 18px;
+    }
+
+    .page-break {
+      page-break-after: always;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .small {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .footer {
+      position: absolute;
+      left: 0.72in;
+      right: 0.72in;
+      bottom: 0.48in;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+      color: #71839a;
+    }
+
+    @page {
+      size: letter;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .page {
+        padding: 0.5in;
+      }
+
+      .metric-band {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid-2,
+      .story-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-grid,
+      .platform-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media screen and (max-width: 700px) {
+      .metric-band {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      .page {
+        width: var(--page-width);
+      }
+
+      body {
+        background: white;
+      }
+
+      .page {
+        margin: 0;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="page hero page-break">
+    <div class="eyebrow">Thales + Microsoft Purview + Azure AI Language PII Detection</div>
+    <h1>Discover sensitive data with Purview and protect it before it reaches AI, analytics, or vector stores</h1>
+    <p class="lede">
+      This solution connects Microsoft Purview discovery, Azure AI Language PII detection, and Thales CipherTrust protection
+      into one governed workflow for Azure Storage, ADLS Gen2, and Azure SQL. It helps teams identify sensitive assets,
+      protect the right data, and build downstream AI pipelines on safer content.
+    </p>
+
+    <div class="metric-band">
+      <div class="metric">
+        <span class="num">0</span>
+        <span class="cap">Need to inspect every asset blindly when Purview already found the risky ones</span>
+      </div>
+      <div class="metric">
+        <span class="num">1</span>
+        <span class="cap">Governed workflow linking discovery, detection, and protection</span>
+      </div>
+      <div class="metric">
+        <span class="num">2</span>
+        <span class="cap">Primary source patterns: Azure Storage / ADLS and Azure SQL</span>
+      </div>
+      <div class="metric">
+        <span class="num">100%</span>
+        <span class="cap">Key and policy control retained in Thales CipherTrust Manager</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 8px;">
+      <div>
+        <h2>Why this matters</h2>
+        <p>
+          Most AI projects focus on prompts, embeddings, and model orchestration before they solve the data problem.
+          This demo flips the order. It starts with sensitive-data discovery, narrows the processing scope to the assets
+          Purview already marked as risky, and applies Thales protection before that data flows into downstream AI and analytics systems.
+        </p>
+        <p>
+          The result is a stronger story for customers who need practical AI readiness: discover first, protect second,
+          then use data with more confidence.
+        </p>
+
+        <div class="card-grid">
+          <div class="card">
+            <strong>Target the right assets</strong>
+            Purview identifies sensitive files, folders, tables, and columns so the workflow can focus on high-risk content.
+          </div>
+          <div class="card">
+            <strong>Protect before AI ingestion</strong>
+            Azure AI Language PII detection identifies sensitive values in file content and Thales protects them before vectorization or prompt use.
+          </div>
+          <div class="card">
+            <strong>Preserve governance control</strong>
+            Thales CipherTrust Manager remains the system of record for protection policy and cryptographic control.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>What the solution covers</h2>
+        <div class="solution-grid">
+          <div class="solution-item">
+            <div class="label">Storage</div>
+            <h3>Blob and ADLS Gen2</h3>
+            <p>Read Purview-selected assets directly from Azure Storage and stream protected output to a governed destination path.</p>
+          </div>
+          <div class="solution-item">
+            <div class="label">SQL</div>
+            <h3>Azure SQL</h3>
+            <p>Use Purview classifications to protect only the sensitive columns and write protected rows to a target table.</p>
+          </div>
+          <div class="solution-item">
+            <div class="label">AI Readiness</div>
+            <h3>RAG and training prep</h3>
+            <p>Prepare governed content for embedding, search, model tuning, analytics extracts, and secure downstream reuse.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          Purview is the governance and discovery layer. Azure AI Language PII detection is the in-file detection layer. Thales CipherTrust is the protection and control layer.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Thales + Azure Purview Sensitive Data Protection</span>
+      <span>Page 1</span>
+    </div>
+  </section>
+
+  <section class="page page-break">
+    <h2>How the governed protection flow works</h2>
+    <p>
+      The workflow begins at the far left with Microsoft Purview discovery and classification. From there it branches
+      into file and database patterns. File content uses Azure AI Language PII detection for precise in-content detection before Thales
+      protection is applied. SQL uses Purview’s column classifications directly. Protected output becomes the approved
+      source for vector stores, analytics, and AI pipelines.
+    </p>
+
+    <div class="flow-wrap">
+      <svg viewBox="0 0 980 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Purview to Thales protection flow">
+        <defs>
+          <linearGradient id="navyGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#2e327a"/>
+            <stop offset="100%" stop-color="#4957a7"/>
+          </linearGradient>
+          <linearGradient id="lightPanel" x1="0" x2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#eef4fb"/>
+          </linearGradient>
+          <linearGradient id="tealGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#35a9c1"/>
+            <stop offset="100%" stop-color="#73d3d3"/>
+          </linearGradient>
+          <linearGradient id="dbGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#6c6fb1"/>
+            <stop offset="100%" stop-color="#50538f"/>
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b12b7f"/>
+          </marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3a8fd8"/>
+          </marker>
+        </defs>
+
+        <rect x="20" y="80" width="138" height="360" rx="26" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <rect x="34" y="96" width="110" height="42" rx="12" fill="url(#navyGrad)"/>
+        <text x="89" y="122" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Purview</text>
+        <text x="89" y="163" text-anchor="middle" font-size="12" fill="#31506e">Register and scan</text>
+        <text x="89" y="180" text-anchor="middle" font-size="12" fill="#31506e">data sources</text>
+        <text x="89" y="220" text-anchor="middle" font-size="11" fill="#305c9a" font-weight="700">Classifies</text>
+        <text x="89" y="239" text-anchor="middle" font-size="10.5" fill="#4a6078">Storage files</text>
+        <text x="89" y="256" text-anchor="middle" font-size="10.5" fill="#4a6078">Folders</text>
+        <text x="89" y="273" text-anchor="middle" font-size="10.5" fill="#4a6078">Tables</text>
+        <text x="89" y="290" text-anchor="middle" font-size="10.5" fill="#4a6078">Columns</text>
+        <rect x="36" y="320" width="106" height="84" rx="14" fill="#edf8fb" stroke="#b8dde4"/>
+        <text x="89" y="345" text-anchor="middle" font-size="10.5" fill="#265b66" font-weight="700">Output</text>
+        <text x="89" y="365" text-anchor="middle" font-size="10" fill="#41657a">Sensitive asset list</text>
+        <text x="89" y="381" text-anchor="middle" font-size="10" fill="#41657a">Qualified names</text>
+        <text x="89" y="397" text-anchor="middle" font-size="10" fill="#41657a">Classifications</text>
+
+        <rect x="205" y="70" width="250" height="170" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <rect x="222" y="88" width="120" height="28" rx="8" fill="url(#tealGrad)"/>
+        <text x="282" y="107" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Storage Path</text>
+        <text x="230" y="138" font-size="12" fill="#28425c">Blob Storage / ADLS Gen2</text>
+        <text x="230" y="157" font-size="11" fill="#58677d">Read the exact Purview-selected assets</text>
+        <text x="230" y="174" font-size="11" fill="#58677d">directly from Azure Storage.</text>
+        <rect x="226" y="188" width="205" height="34" rx="9" fill="#ffffff" stroke="#c8d5e4"/>
+        <text x="328" y="210" text-anchor="middle" font-size="10.5" fill="#31506e">Stream source blob content into processor</text>
+
+        <rect x="205" y="298" width="250" height="170" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <rect x="222" y="316" width="120" height="28" rx="8" fill="url(#navyGrad)"/>
+        <text x="282" y="335" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">SQL Path</text>
+        <text x="230" y="366" font-size="12" fill="#28425c">Azure SQL Database</text>
+        <text x="230" y="385" font-size="11" fill="#58677d">Use Purview-sensitive columns to</text>
+        <text x="230" y="402" font-size="11" fill="#58677d">protect only the right fields.</text>
+        <rect x="226" y="416" width="205" height="34" rx="9" fill="#ffffff" stroke="#c8d5e4"/>
+        <text x="328" y="438" text-anchor="middle" font-size="10.5" fill="#31506e">Read rows and protect classified columns</text>
+
+        <rect x="515" y="92" width="175" height="146" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="602" y="124" text-anchor="middle" font-size="15" font-weight="700" fill="#132238">Azure AI Language</text>
+        <text x="602" y="146" text-anchor="middle" font-size="11.5" fill="#58677d">PII detection API for</text>
+        <text x="602" y="163" text-anchor="middle" font-size="11.5" fill="#58677d">file-based content</text>
+        <rect x="542" y="182" width="120" height="26" rx="8" fill="#4f8bd5"/>
+        <text x="602" y="199" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">PII Recognition</text>
+
+        <rect x="515" y="286" width="180" height="184" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="605" y="318" text-anchor="middle" font-size="15" font-weight="700" fill="#132238">Thales Protection</text>
+        <text x="605" y="340" text-anchor="middle" font-size="11.5" fill="#58677d">CipherTrust policies protect</text>
+        <text x="605" y="357" text-anchor="middle" font-size="11.5" fill="#58677d">sensitive values and fields</text>
+        <rect x="541" y="380" width="127" height="24" rx="8" fill="url(#navyGrad)"/>
+        <text x="604" y="397" text-anchor="middle" font-size="10.8" font-weight="700" fill="#ffffff">CADP / CRDP</text>
+        <rect x="541" y="413" width="127" height="24" rx="8" fill="#4f8bd5"/>
+        <text x="604" y="430" text-anchor="middle" font-size="10.8" font-weight="700" fill="#ffffff">Policy Driven Protection</text>
+
+        <rect x="748" y="64" width="192" height="122" rx="24" fill="url(#dbGrad)"/>
+        <text x="844" y="100" text-anchor="middle" font-size="18" fill="#ffffff">Protected Output</text>
+        <text x="844" y="129" text-anchor="middle" font-size="12.5" fill="#edf4ff">Governed storage assets</text>
+        <text x="844" y="147" text-anchor="middle" font-size="12.5" fill="#edf4ff">Protected SQL tables</text>
+
+        <rect x="742" y="240" width="206" height="214" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="845" y="272" text-anchor="middle" font-size="16" font-weight="700" fill="#132238">Downstream AI and Data Use</text>
+        <rect x="770" y="296" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="314" text-anchor="middle" font-size="11" fill="#31506e">Vector DB / Search Index</text>
+        <rect x="770" y="336" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="354" text-anchor="middle" font-size="11" fill="#31506e">RAG and Prompt Pipelines</text>
+        <rect x="770" y="376" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="394" text-anchor="middle" font-size="11" fill="#31506e">Analytics and Data Sharing</text>
+        <rect x="770" y="416" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="434" text-anchor="middle" font-size="11" fill="#31506e">Fine Tuning / ML Prep</text>
+
+        <rect x="500" y="505" width="210" height="76" rx="18" fill="#ffffff" stroke="#c8d5e4"/>
+        <text x="605" y="529" text-anchor="middle" font-size="12" font-weight="700" fill="#132238">CipherTrust Manager</text>
+        <text x="605" y="548" text-anchor="middle" font-size="10.5" fill="#58677d">Central policy, key, and protection control plane</text>
+
+        <line x1="158" y1="188" x2="205" y2="145" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="158" y1="330" x2="205" y2="380" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="455" y1="155" x2="515" y2="165" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="603" y1="238" x2="603" y2="286" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="455" y1="380" x2="515" y2="380" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="695" y1="378" x2="742" y2="378" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="844" y1="186" x2="844" y2="240" stroke="#3a8fd8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+        <line x1="605" y1="470" x2="605" y2="505" stroke="#3a8fd8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+
+        <rect x="174" y="124" width="24" height="18" rx="3" fill="#ffffff" stroke="#bfc7d4"/>
+        <text x="186" y="137" text-anchor="middle" font-size="10" fill="#3e4a59">1</text>
+        <rect x="474" y="148" width="24" height="18" rx="3" fill="#ffffff" stroke="#bfc7d4"/>
+        <text x="486" y="161" text-anchor="middle" font-size="10" fill="#3e4a59">2</text>
+        <rect x="577" y="252" width="24" height="18" rx="3" fill="#ffffff" stroke="#bfc7d4"/>
+        <text x="589" y="265" text-anchor="middle" font-size="10" fill="#3e4a59">3</text>
+        <rect x="474" y="368" width="24" height="18" rx="3" fill="#ffffff" stroke="#bfc7d4"/>
+        <text x="486" y="381" text-anchor="middle" font-size="10" fill="#3e4a59">4</text>
+        <rect x="710" y="366" width="24" height="18" rx="3" fill="#ffffff" stroke="#bfc7d4"/>
+        <text x="722" y="379" text-anchor="middle" font-size="10" fill="#3e4a59">5</text>
+      </svg>
+    </div>
+
+    <div class="story-grid">
+      <div class="panel">
+        <h3>File-driven pattern</h3>
+        <p>
+          Purview identifies which blobs or ADLS files are sensitive. The application then streams those exact assets
+          from Azure Storage, uses the Azure AI Language PII detection API to identify precise PII in the content, and applies Thales protection
+          before writing governed output back to storage.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>SQL-driven pattern</h3>
+        <p>
+          Purview identifies which tables and columns contain sensitive data. The application protects only those columns,
+          producing a governed SQL target table for analytics, AI preparation, or downstream sharing.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Purview Discovery to Thales Protection Flow</span>
+      <span>Page 2</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>Customer use cases and value story</h2>
+    <p>
+      The strongest message for customers is that governance now drives a concrete security outcome. Instead of treating
+      Purview as a passive catalog, this solution turns Purview findings into action and prepares protected data for modern
+      AI, analytics, and data-sharing architectures.
+    </p>
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div>
+        <div class="stack">
+          <div class="row">
+            <div class="row-title">RAG and vector pipelines</div>
+            <p>Identify sensitive documents, protect high-risk values, and build embeddings or retrieval indexes on safer content.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">AI training data preparation</div>
+            <p>Reduce the presence of raw personal data before curated corpora move into model tuning and offline training workflows.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Governed SQL extracts</div>
+            <p>Protect sensitive columns before analytics, reporting, replication, or handoff to downstream systems.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Security and governance alignment</div>
+            <p>Show that classification is not the end state. It becomes the trigger for enforceable protection.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          This demo works because it gives security teams, data teams, and AI teams a shared operating model instead of three disconnected toolchains.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Why the story resonates</h3>
+        <ul>
+          <li>It shows Microsoft Purview producing a real technical decision point.</li>
+          <li>It demonstrates Thales CipherTrust as an active control, not just a policy concept.</li>
+          <li>It supports both unstructured and structured data journeys.</li>
+          <li>It gives customers a practical path from raw data to governed AI consumption.</li>
+          <li>It helps position AI readiness as a data-protection and governance discipline.</li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <h3>Representative message for the field</h3>
+        <p>
+          Find sensitive data with Purview. Detect exact sensitive values with Azure AI Language PII detection where needed. Protect them with
+          Thales. Then move forward with vector stores, analytics, and AI on a safer data foundation.
+        </p>
+
+        <div class="tag-row">
+          <span class="tag">Purview discovery</span>
+          <span class="tag">PII detection API</span>
+          <span class="tag">Thales protection</span>
+          <span class="tag">Vector DB readiness</span>
+          <span class="tag">Governed AI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>AI Readiness with Governed Protection</span>
+      <span>Page 3</span>
+    </div>
+  </section>
+</body>
+</html>

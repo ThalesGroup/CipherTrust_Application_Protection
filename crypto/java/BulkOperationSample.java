@@ -5,6 +5,7 @@
 */
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.security.Provider;
 import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.HashMap;
@@ -31,11 +32,7 @@ public class BulkOperationSample {
 	private static byte[][] data;
 	private static AlgorithmParameterSpec[] spec;
 
-	static {
-		Security.addProvider(new IngrianProvider());
-	}
-
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) {
 
 		if (args.length != 4) {
 			System.out.println("Usage: java BulkOperationSample <username>"
@@ -47,6 +44,14 @@ public class BulkOperationSample {
 		String password = args[1];
 		String keyName = args[2];
 		String fileName = args[3];
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
 
 		NAESession session = null;
 
@@ -93,9 +98,7 @@ public class BulkOperationSample {
 			// displaying the decrypted data
 			displayData(decryptedData, "Decrypted Data ");
 		} catch (Exception e) {
-		       e.printStackTrace();
-                       System.out.println("The Cause is " + e.getMessage() + ".");
-	               throw e;
+			e.printStackTrace();
 		} finally{
 			// releasing session
 			if(session!=null) {

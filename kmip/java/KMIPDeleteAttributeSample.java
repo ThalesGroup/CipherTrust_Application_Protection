@@ -4,6 +4,7 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 // Standard Java and JCE classes. 
+import java.security.Provider;
 import java.security.Security;
 import java.util.Set;
 
@@ -46,8 +47,13 @@ public class KMIPDeleteAttributeSample
                 usage();
         } 
  
-        // add Ingrian provider to the list of JCE providers
-        Security.addProvider(new IngrianProvider());
+       // add Ingrian provider to the list of JCE providers
+       Security.addProvider(new IngrianProvider());
+       // get the list of all registered JCE providers
+       Provider[] providers = Security.getProviders();
+       for (int i = 0; i < providers.length; i++)
+           System.out.println(providers[i].getInfo());
+       
         KMIPSession session=null;
         try {
             // create NAE Session: pass in NAE client certificate information - client key and
@@ -109,7 +115,6 @@ public class KMIPDeleteAttributeSample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         	finally {
         	if(session!=null)

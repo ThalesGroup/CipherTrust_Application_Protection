@@ -70,36 +70,31 @@ public class FileEncryptionSample {
 	    encryptCipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
 
 	    // create CipherInputStream that will read in data from file and encrypt it
-	    CipherInputStream cis = new CipherInputStream(new FileInputStream(srcName), encryptCipher);
-	    FileOutputStream fos  = new FileOutputStream(dstName);
-	    
-	    // Read the file as blocks of data
-	    byte[] inbuf = new byte[BUFSIZE];
-	    for ( int inlen = 0; (inlen = cis.read(inbuf)) != -1;  ) {
-		fos.write( inbuf, 0, inlen);
+	    try (CipherInputStream cis = new CipherInputStream(new FileInputStream(srcName), encryptCipher);
+	    	 FileOutputStream fos  = new FileOutputStream(dstName)) {
+		    // Read the file as blocks of data
+		    byte[] inbuf = new byte[BUFSIZE];
+		    for ( int inlen = 0; (inlen = cis.read(inbuf)) != -1;  ) {
+			fos.write( inbuf, 0, inlen);
+		    }
 	    }
 
 	    System.out.println("Done encrypting file.  Closing files");
-	    cis.close();
-	    fos.close();
-
 
 	    Cipher decryptCipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "IngrianProvider");
 	    // initialize cipher to decrypt.
 	    decryptCipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
 
 	    // create CipherInputStream that will read in data from file and decrypt it
-	    cis = new CipherInputStream(new FileInputStream(dstName), decryptCipher);
-	    fos = new FileOutputStream(decrName);
-
-	    for ( int inlen = 0; (inlen = cis.read(inbuf)) != -1;  ) {
-		fos.write( inbuf, 0, inlen);
+	    try (CipherInputStream cis = new CipherInputStream(new FileInputStream(dstName), decryptCipher);
+	    	 FileOutputStream fos = new FileOutputStream(decrName)) {
+		    byte[] inbuf = new byte[BUFSIZE];
+		    for ( int inlen = 0; (inlen = cis.read(inbuf)) != -1;  ) {
+			fos.write( inbuf, 0, inlen);
+		    }
 	    }
 	    System.out.println("Done decrypting file.  Closing files");
-	    cis.close();
-	    fos.close();
 
-	    
 	} catch (Exception e) {
 	    System.out.println("The Cause is " + e.getMessage() + ".");
 	    throw e;

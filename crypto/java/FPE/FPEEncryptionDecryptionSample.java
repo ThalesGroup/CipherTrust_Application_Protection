@@ -63,17 +63,17 @@ public class FPEEncryptionDecryptionSample
 			tweakData   = args[5];
 		}
 
-	// add Ingrian provider to the list of JCE providers
-	Security.addProvider(new IngrianProvider());
-
-	// get the list of all registered JCE providers
-	Provider[] providers = Security.getProviders();
-	for (Provider provider : providers) {
-		System.out.println(provider.getInfo());
-	}
-
 	String dataToEncrypt = "36253865463254715234987125394785127934571235487631254876512837451827635487123564875216384728347";
 	System.out.println("Data to encrypt \"" + dataToEncrypt + "\"");
+	
+	// Add Ingrian provider to the list of JCE providers
+	Security.addProvider(new IngrianProvider());
+
+	// Get the list of all registered JCE providers
+	Provider[] providers = Security.getProviders();
+	for (int i = 0; i < providers.length; i++)
+		System.out.println(providers[i].getInfo());
+
 	NAESession session  = null;
 	try {
 	    // create NAE Session: pass in Key Manager user name and password
@@ -98,7 +98,7 @@ public class FPEEncryptionDecryptionSample
 	    // encrypt data
 	    byte[] outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 	    
-	    System.out.println("Encrypted data   \"" + new String(outbuf) + "\"");
+	    System.out.println("Encrypted data  \"" + new String(outbuf) + "\"");
 	    
 	    Cipher decryptCipher = Cipher.getInstance("FPE/AES/CARD10", "IngrianProvider");
 	    // to decrypt data, initialize cipher to decrypt
@@ -113,7 +113,7 @@ public class FPEEncryptionDecryptionSample
 	     */
 	    
 		FPEFormat format = FPEFormat.getCustomFormat();
-		//initaialize start and end values
+		//initialize start and end values
 		format.setNumberOfElementsBeforeEnd(0);
 		format.setNumberOfElementsFromStart(6);
 		
@@ -126,7 +126,7 @@ public class FPEEncryptionDecryptionSample
 		// encrypt data
 		outbuf = encryptCipher.doFinal(dataToEncrypt.getBytes());
 
-		System.out.println("Encrypted data \"" + new String(outbuf) + "\"");
+		System.out.println("Encrypted data  \"" + new String(outbuf) + "\"");
 
 		// to decrypt data, initialize cipher to decrypt
 		decryptCipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
@@ -134,7 +134,7 @@ public class FPEEncryptionDecryptionSample
 		// decrypt data
 		newbuf = decryptCipher.doFinal(outbuf);
 		System.out.println("Decrypted data  \"" + new String(newbuf) + "\"");
-
+		
 	    // close the session
 	    session.closeSession();
 	} catch (Exception e) {
@@ -147,3 +147,4 @@ public class FPEEncryptionDecryptionSample
 	}
     }
 }
+    

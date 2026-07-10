@@ -3,6 +3,10 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
+import java.security.Security;
+
+import com.ingrian.security.nae.IngrianProvider;
 import com.ingrian.security.nae.ConjunctiveOperator;
 import com.ingrian.security.nae.CustomAttributes;
 import com.ingrian.security.nae.NAEKey;
@@ -54,6 +58,14 @@ public class KeyNameSample {
 			else if ("-max".equals(args[i]))
 				max = Integer.parseInt( args[i + 1]);
 		}
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
 
 		if (username != null && password != null) {
 			NAESession session = null;

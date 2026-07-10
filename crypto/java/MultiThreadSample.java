@@ -42,15 +42,16 @@ public class MultiThreadSample extends Thread{
 	// this sample will create 5 threads
 	int threadCount = 5;
 
-	// add Ingrian provider to the list of JCE providers
+	MultiThreadSample[] list = new MultiThreadSample[threadCount];
+	
+	// Add Ingrian provider to the list of JCE providers
 	Security.addProvider(new IngrianProvider());
 
-	// get the list of all registered JCE providers
+	// Get the list of all registered JCE providers
 	Provider[] providers = Security.getProviders();
 	for (int i = 0; i < providers.length; i++)
-	    System.out.println(providers[i].getInfo());
+		System.out.println(providers[i].getInfo());
 
-	MultiThreadSample[] list = new MultiThreadSample[threadCount];
 	NAESession session =null;
 	try { 
 	    // create NAE Session: pass in Key Manager user name and password

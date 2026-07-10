@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thales + BigID Sensitive Data Protection Brochure</title>
+  <style>
+    :root {
+      --ink: #132238;
+      --muted: #58677d;
+      --brand: #005bbb;
+      --brand-dark: #003f82;
+      --accent: #00a8a8;
+      --surface: #f6f8fb;
+      --line: #d9e1ec;
+      --page-width: 8.5in;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: #dfe7f2;
+    }
+
+    .page {
+      width: min(var(--page-width), calc(100vw - 24px));
+      min-height: 11in;
+      margin: 0 auto 18px;
+      background: white;
+      padding: 0.72in;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(17, 32, 56, 0.12);
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at top right, rgba(0, 168, 168, 0.16), transparent 28%),
+        radial-gradient(circle at left 20% top 10%, rgba(0, 91, 187, 0.13), transparent 24%),
+        linear-gradient(135deg, #f8fbff 0%, #edf4fb 100%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--brand-dark);
+      background: rgba(0, 91, 187, 0.1);
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    h1 {
+      font-size: 30px;
+      max-width: 6.8in;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 12px;
+      line-height: 1.5;
+      font-size: 13.2px;
+      color: var(--muted);
+    }
+
+    .lede {
+      font-size: 15px;
+      max-width: 6.85in;
+      color: #314157;
+      margin-bottom: 22px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .panel,
+    .card,
+    .stack {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+
+    .card {
+      padding: 16px;
+      min-height: 145px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .panel {
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+    }
+
+    .stack {
+      overflow: hidden;
+    }
+
+    .stack .row {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stack .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    ul {
+      margin: 10px 0 0 18px;
+      padding: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .metric-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 22px 0 10px;
+    }
+
+    .metric {
+      padding: 14px 12px;
+      border-radius: 16px;
+      background: #0f2036;
+      color: white;
+    }
+
+    .metric .num {
+      display: block;
+      font-size: 25px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .metric .cap {
+      font-size: 11px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.78);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .solution-grid,
+    .story-grid,
+    .platform-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .solution-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .story-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .platform-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .solution-item,
+    .platform {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent);
+      background: #effbfb;
+      border-radius: 0 16px 16px 0;
+      color: #244049;
+    }
+
+    .flow-wrap {
+      margin-top: 12px;
+      padding: 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fbff 0%, #edf5fb 100%);
+      border: 1px solid var(--line);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 91, 187, 0.08);
+      color: var(--brand-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 16px 0 18px;
+    }
+
+    .page-break {
+      page-break-after: always;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .footer {
+      position: absolute;
+      left: 0.72in;
+      right: 0.72in;
+      bottom: 0.48in;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+      color: #71839a;
+    }
+
+    @page {
+      size: letter;
+      margin: 0;
+    }
+
+    @media screen and (max-width: 1200px) {
+      .page {
+        padding: 0.5in;
+      }
+
+      .metric-band {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid-2,
+      .story-grid,
+      .platform-grid,
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media screen and (max-width: 700px) {
+      .metric-band {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      .page {
+        width: var(--page-width);
+        margin: 0;
+        box-shadow: none;
+      }
+
+      body {
+        background: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="page hero page-break">
+    <div class="eyebrow">Thales + BigID + Azure AI Language PII Detection</div>
+    <h1>Use BigID to discover sensitive assets and protect only the sensitive values before data moves into AI, analytics, or vector stores</h1>
+    <p class="lede">
+      This solution connects BigID discovery and classification, document-to-text conversion, Azure AI Language PII detection,
+      and Thales CipherTrust protection into one governed workflow for local files, Azure Blob and ADLS, Amazon S3, Google Cloud Storage,
+      and structured SQL. It helps teams identify risky assets first, then protect only the sensitive content that actually matters.
+    </p>
+
+    <div class="metric-band">
+      <div class="metric">
+        <span class="num">4</span>
+        <span class="cap">Unstructured source models: local, Azure Blob, S3, and GCS</span>
+      </div>
+      <div class="metric">
+        <span class="num">1</span>
+        <span class="cap">Governed flow linking BigID discovery, Azure detection, and Thales protection</span>
+      </div>
+      <div class="metric">
+        <span class="num">7</span>
+        <span class="cap">Supported document types across PDF, Word, Excel, text, and CSV</span>
+      </div>
+      <div class="metric">
+        <span class="num">100%</span>
+        <span class="cap">Policy and key control retained in Thales CipherTrust Manager</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 8px;">
+      <div>
+        <h2>Why this matters</h2>
+        <p>
+          BigID tells the workflow which assets are sensitive, but customers still need a clean path from discovered data to protected AI-ready content.
+          This demo bridges that gap. It uses BigID as the discovery layer, converts unstructured documents into text, detects exact sensitive spans,
+          and protects only the right values before downstream indexing, embedding, or model ingestion begins.
+        </p>
+        <p>
+          The result is a practical AI-readiness story: discover first, extract and normalize second, protect third, then move governed text into
+          vector databases, search indexes, and analytics pipelines.
+        </p>
+
+        <div class="card-grid">
+          <div class="card">
+            <strong>Target the right assets</strong>
+            BigID identifies the files, objects, tables, and columns that need attention so the application can avoid blind bulk processing.
+          </div>
+          <div class="card">
+            <strong>Protect only sensitive spans</strong>
+            Azure AI Language PII detection pinpoints the exact values inside document text so Thales protects only what is sensitive.
+          </div>
+          <div class="card">
+            <strong>Prepare AI-safe outputs</strong>
+            The output is already text-oriented, which makes it a strong fit for vector loading, search indexing, RAG pipelines, and governed reuse.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>What the solution covers</h2>
+        <div class="solution-grid">
+          <div class="solution-item">
+            <div class="label">Unstructured</div>
+            <h3>Documents and object stores</h3>
+            <p>Resolve BigID-selected assets from local files, Azure Blob, S3, or GCS, convert them to text, and produce protected text artifacts.</p>
+          </div>
+          <div class="solution-item">
+            <div class="label">Structured</div>
+            <h3>SQL tables and columns</h3>
+            <p>Use BigID-classified fields to protect only the sensitive database columns and write protected rows into a governed target table.</p>
+          </div>
+          <div class="solution-item">
+            <div class="label">Review</div>
+            <h3>Extracted text and findings</h3>
+            <p>Optionally emit extracted text, protected text, and PII findings JSON so teams can validate accuracy before downstream AI consumption.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          BigID is the discovery and classification layer. Azure AI Language is the exact-value detector for unstructured text. Thales CipherTrust is the protection and control layer.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Thales + BigID Sensitive Data Protection</span>
+      <span>Page 1</span>
+    </div>
+  </section>
+
+  <section class="page page-break">
+    <h2>How the BigID-governed protection flow works</h2>
+    <p>
+      The workflow begins with BigID catalog results and then branches into unstructured and structured paths. Unstructured assets are resolved from the
+      right storage system, converted to text, inspected with Azure AI Language PII detection, and protected with Thales. Structured assets use BigID field
+      classification directly to target sensitive SQL columns. The protected output becomes the approved source for vector stores, analytics, and governed AI use.
+    </p>
+
+    <div class="flow-wrap">
+      <svg viewBox="0 0 980 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="BigID to Thales protection flow">
+        <defs>
+          <linearGradient id="navyGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#2e327a"/>
+            <stop offset="100%" stop-color="#4957a7"/>
+          </linearGradient>
+          <linearGradient id="lightPanel" x1="0" x2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#eef4fb"/>
+          </linearGradient>
+          <linearGradient id="tealGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#35a9c1"/>
+            <stop offset="100%" stop-color="#73d3d3"/>
+          </linearGradient>
+          <linearGradient id="dbGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#6c6fb1"/>
+            <stop offset="100%" stop-color="#50538f"/>
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#b12b7f"/>
+          </marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3a8fd8"/>
+          </marker>
+        </defs>
+
+        <rect x="18" y="78" width="150" height="370" rx="26" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2.5"/>
+        <rect x="34" y="96" width="118" height="42" rx="12" fill="url(#navyGrad)"/>
+        <text x="93" y="122" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">BigID</text>
+        <text x="93" y="164" text-anchor="middle" font-size="12" fill="#31506e">Catalog query</text>
+        <text x="93" y="181" text-anchor="middle" font-size="12" fill="#31506e">classification filter</text>
+        <text x="93" y="222" text-anchor="middle" font-size="11" fill="#305c9a" font-weight="700">Returns</text>
+        <text x="93" y="241" text-anchor="middle" font-size="10.5" fill="#4a6078">Files and objects</text>
+        <text x="93" y="258" text-anchor="middle" font-size="10.5" fill="#4a6078">Tables and fields</text>
+        <text x="93" y="275" text-anchor="middle" font-size="10.5" fill="#4a6078">Paths and names</text>
+        <rect x="34" y="318" width="118" height="104" rx="14" fill="#edf8fb" stroke="#b8dde4"/>
+        <text x="93" y="343" text-anchor="middle" font-size="10.5" fill="#265b66" font-weight="700">Normalized Asset View</text>
+        <text x="93" y="363" text-anchor="middle" font-size="10" fill="#41657a">Azure / S3 / GCS hints</text>
+        <text x="93" y="379" text-anchor="middle" font-size="10" fill="#41657a">Local path candidates</text>
+        <text x="93" y="395" text-anchor="middle" font-size="10" fill="#41657a">Structured field inference</text>
+
+        <rect x="208" y="70" width="258" height="186" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <rect x="226" y="88" width="132" height="28" rx="8" fill="url(#tealGrad)"/>
+        <text x="292" y="107" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Unstructured Path</text>
+        <text x="232" y="138" font-size="12" fill="#28425c">Local / Azure Blob / S3 / GCS</text>
+        <text x="232" y="157" font-size="11" fill="#58677d">Resolve the exact BigID-selected asset</text>
+        <text x="232" y="174" font-size="11" fill="#58677d">from the right source system.</text>
+        <rect x="228" y="189" width="214" height="34" rx="9" fill="#ffffff" stroke="#c8d5e4"/>
+        <text x="335" y="211" text-anchor="middle" font-size="10.5" fill="#31506e">Download or open source file and convert to text</text>
+
+        <rect x="208" y="298" width="258" height="180" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <rect x="226" y="316" width="132" height="28" rx="8" fill="url(#navyGrad)"/>
+        <text x="292" y="335" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">Structured Path</text>
+        <text x="232" y="367" font-size="12" fill="#28425c">JDBC SQL processing</text>
+        <text x="232" y="386" font-size="11" fill="#58677d">Use BigID field and column metadata to</text>
+        <text x="232" y="403" font-size="11" fill="#58677d">protect only the sensitive database values.</text>
+        <rect x="228" y="417" width="214" height="34" rx="9" fill="#ffffff" stroke="#c8d5e4"/>
+        <text x="335" y="439" text-anchor="middle" font-size="10.5" fill="#31506e">Read rows and protect classified fields</text>
+
+        <rect x="520" y="86" width="180" height="150" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="610" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="#132238">Document Conversion</text>
+        <text x="610" y="143" text-anchor="middle" font-size="11.5" fill="#58677d">PDF, Word, Excel, text, CSV</text>
+        <text x="610" y="160" text-anchor="middle" font-size="11.5" fill="#58677d">normalized into text</text>
+        <rect x="546" y="182" width="128" height="26" rx="8" fill="#4f8bd5"/>
+        <text x="610" y="199" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">Text Extraction</text>
+
+        <rect x="520" y="270" width="182" height="160" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="611" y="302" text-anchor="middle" font-size="15" font-weight="700" fill="#132238">Azure AI Language</text>
+        <text x="611" y="324" text-anchor="middle" font-size="11.5" fill="#58677d">PII detection for exact</text>
+        <text x="611" y="341" text-anchor="middle" font-size="11.5" fill="#58677d">span-level targeting</text>
+        <rect x="548" y="365" width="126" height="26" rx="8" fill="#4f8bd5"/>
+        <text x="611" y="382" text-anchor="middle" font-size="11" font-weight="700" fill="#ffffff">PII Recognition</text>
+
+        <rect x="520" y="458" width="182" height="128" rx="24" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="611" y="490" text-anchor="middle" font-size="15" font-weight="700" fill="#132238">Thales Protection</text>
+        <text x="611" y="512" text-anchor="middle" font-size="11.5" fill="#58677d">Protect spans in unstructured text</text>
+        <text x="611" y="529" text-anchor="middle" font-size="11.5" fill="#58677d">or field values in SQL rows</text>
+        <rect x="548" y="548" width="126" height="24" rx="8" fill="url(#navyGrad)"/>
+        <text x="611" y="565" text-anchor="middle" font-size="10.8" font-weight="700" fill="#ffffff">CADP / CRDP</text>
+
+        <rect x="748" y="72" width="196" height="126" rx="24" fill="url(#dbGrad)"/>
+        <text x="846" y="108" text-anchor="middle" font-size="18" fill="#ffffff">Protected Output</text>
+        <text x="846" y="137" text-anchor="middle" font-size="12.5" fill="#edf4ff">Protected text artifacts</text>
+        <text x="846" y="155" text-anchor="middle" font-size="12.5" fill="#edf4ff">Protected SQL tables</text>
+
+        <rect x="742" y="242" width="206" height="214" rx="22" fill="url(#lightPanel)" stroke="#305c9a" stroke-width="2"/>
+        <text x="845" y="274" text-anchor="middle" font-size="16" font-weight="700" fill="#132238">Downstream AI and Data Use</text>
+        <rect x="770" y="298" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="316" text-anchor="middle" font-size="11" fill="#31506e">Vector DB / Search Index</text>
+        <rect x="770" y="338" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="356" text-anchor="middle" font-size="11" fill="#31506e">RAG and Prompt Pipelines</text>
+        <rect x="770" y="378" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="396" text-anchor="middle" font-size="11" fill="#31506e">Analytics and Data Sharing</text>
+        <rect x="770" y="418" width="150" height="28" rx="8" fill="#eff5fb" stroke="#cddbeb"/>
+        <text x="845" y="436" text-anchor="middle" font-size="11" fill="#31506e">Fine Tuning / ML Prep</text>
+
+        <line x1="168" y1="188" x2="208" y2="154" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="168" y1="350" x2="208" y2="392" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="466" y1="160" x2="520" y2="160" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="610" y1="236" x2="610" y2="270" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="610" y1="430" x2="610" y2="458" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="466" y1="392" x2="520" y2="522" stroke="#b12b7f" stroke-width="3" marker-end="url(#arrow)"/>
+        <line x1="702" y1="522" x2="748" y2="135" stroke="#3a8fd8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+        <line x1="846" y1="198" x2="846" y2="242" stroke="#3a8fd8" stroke-width="3" marker-end="url(#arrowBlue)"/>
+      </svg>
+    </div>
+
+    <div class="story-grid">
+      <div class="panel">
+        <h3>Unstructured path</h3>
+        <p>
+          BigID identifies which files or object-store assets are sensitive. The application resolves those exact assets,
+          converts them to text, finds exact PII spans with Azure AI Language, and applies Thales protection before writing
+          new text-based artifacts to the configured destination.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>Structured path</h3>
+        <p>
+          BigID identifies the sensitive table fields. The application maps those fields to JDBC-accessible SQL columns,
+          protects only those values, and writes a governed target table for analytics, AI preparation, or downstream sharing.
+        </p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>BigID Discovery to Thales Protection Flow</span>
+      <span>Page 2</span>
+    </div>
+  </section>
+
+  <section class="page page-break">
+    <h2>How unstructured parsing and review artifacts work</h2>
+    <p>
+      The BigID sample is designed for the common AI-preparation use case where the end result should be text or JSON rather than the original document format.
+      That means binary documents are intentionally normalized into text before sensitive-value detection and protection occur.
+    </p>
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div>
+        <div class="stack">
+          <div class="row">
+            <div class="row-title">PDF</div>
+            <p>PDF content is extracted into plain text with PDFBox so Azure AI Language can inspect readable content instead of raw binary bytes.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Word</div>
+            <p>Both `.doc` and `.docx` are normalized into paragraph text before PII detection and protection are applied.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Excel</div>
+            <p>`.xls` and `.xlsx` content is converted into CSV-like text rows so spreadsheet data can flow into the same text-based detection and protection path.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Text and CSV</div>
+            <p>Text-like content skips binary parsing and moves directly into the span-detection and protection stage.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          The original local source file is never overwritten. Remote source objects are never overwritten either. The workflow writes new extracted, protected, and findings artifacts to the configured target location.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Review-first output options</h3>
+        <p>
+          Customers often want to validate extraction and protection accuracy before loading downstream systems. The sample can optionally emit review artifacts for exactly that reason.
+        </p>
+
+        <div class="platform-grid" style="grid-template-columns: 1fr;">
+          <div class="platform">
+            <div class="label">Extracted Text</div>
+            See the normalized text that came out of the source document before any protection is applied.
+          </div>
+          <div class="platform">
+            <div class="label">Protected Text</div>
+            Inspect the final text that will move into a vector database, search index, prompt pipeline, or governed dataset.
+          </div>
+          <div class="platform">
+            <div class="label">Findings JSON</div>
+            Review offsets, entity categories, confidence, original text, and protected text for each detected sensitive span.
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>Why this approach fits AI pipelines</h3>
+        <ul>
+          <li>Vector databases and RAG pipelines usually want text, not binary documents.</li>
+          <li>Review artifacts make it easier to validate extraction quality and false-positive behavior.</li>
+          <li>One normalized text path simplifies policy enforcement across many document types.</li>
+          <li>Temp-file staging is limited to extraction only and the temp file is deleted immediately afterward.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Unstructured Parsing and Review Model</span>
+      <span>Page 3</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <h2>Cloud sources, operating model, and customer value</h2>
+    <p>
+      One of the strongest parts of the BigID story is that discovery and processing do not have to be tied to one storage platform.
+      If BigID catalog points to Azure Blob, S3, or GCS, the same protection flow can be applied as long as the matching source settings are configured.
+    </p>
+
+    <div class="grid-2" style="margin-top: 10px;">
+      <div>
+        <div class="stack">
+          <div class="row">
+            <div class="row-title">Azure Blob and ADLS</div>
+            <p>When BigID returns an Azure-style path, the application parses container and blob names, downloads the object temporarily, converts it to text, protects the sensitive spans, and writes protected output to a target container and prefix.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Amazon S3</div>
+            <p>When BigID returns an S3-style path, the application parses bucket and object key, downloads the object, converts it to text, protects the sensitive spans, and writes output to the configured target bucket and prefix.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Google Cloud Storage</div>
+            <p>When BigID returns a GCS-style path, the application parses bucket and object name, downloads the object, converts it to text, protects the sensitive spans, and writes output to the configured target bucket and prefix.</p>
+          </div>
+          <div class="row">
+            <div class="row-title">Auto Mode</div>
+            <p>In `source.mode=auto`, the application tries local resolution first and then any configured remote stores in order: Azure Blob, S3, and GCS.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>What operators need to provide</h3>
+        <ul>
+          <li>A BigID path format that the parser recognizes.</li>
+          <li>The right `source.mode` and provider-specific properties.</li>
+          <li>Credentials and target output settings for the chosen object store.</li>
+          <li>A supported file extension in `source.supportedExtensions`.</li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <h3>Recommended first run</h3>
+        <ul>
+          <li>Enable `bigid.debug.dumpAssets=true` and `bigid.debug.only=true`.</li>
+          <li>Inspect whether BigID asset paths parse into the expected Azure, S3, or GCS bucket and object values.</li>
+          <li>Turn on extracted text and findings JSON output for the first protection run.</li>
+          <li>Validate the protected text before connecting it to a vector database or search index.</li>
+        </ul>
+
+        <div class="tag-row">
+          <span class="tag">BigID discovery</span>
+          <span class="tag">Cloud storage resolution</span>
+          <span class="tag">Document conversion</span>
+          <span class="tag">Span protection</span>
+          <span class="tag">Vector DB readiness</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      BigID finds the risky assets, the application turns them into normalized text, Azure AI Language identifies the exact sensitive values, and Thales protects only what should be protected before downstream AI use begins.
+    </div>
+
+    <div class="footer">
+      <span>Cloud Source Resolution and AI Readiness</span>
+      <span>Page 4</span>
+    </div>
+  </section>
+</body>
+</html>

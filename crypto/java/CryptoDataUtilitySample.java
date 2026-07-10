@@ -3,6 +3,8 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
+import java.security.Security;
 import java.util.Random;
 
 import com.gemalto.ps.keysecure.crypto.CryptoDataUtility;
@@ -26,6 +28,14 @@ public class CryptoDataUtilitySample {
 		String transformation = args[3];
 		String text = args[4];		
 		byte[] plaintext = text.getBytes("UTF-8");
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
 		
 		NAESession session = NAESession.getSession(userName, password.toCharArray()); // change as needed
 

@@ -6,6 +6,7 @@
 // Standard JCE classes. 
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ import com.ingrian.security.nae.RSAKeyPairGenerator;
 public class KMIPGenKeys
 {
     static String format = "RSA";
-    public static void main( String[] args )throws Exception
+    public static void main( String[] args )
     {
         
         if (args.length != 4)
@@ -53,6 +54,11 @@ public class KMIPGenKeys
 
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
         // create KMIP Session - specify client X.509 certificate and keystore password
         KMIPSession session  = KMIPSession.getSession(new NAEClientCertificate( args[0],args[1].toCharArray()));
 
@@ -98,7 +104,6 @@ public class KMIPGenKeys
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         	finally{
         	if(session!=null)
@@ -107,12 +112,12 @@ public class KMIPGenKeys
     }
 
     public static String toHexString(byte[] bytes) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
-            result += (((b & 0xFF) < 0x10) ? "0" : "")
-                    + Integer.toHexString(b & 0xFF).toUpperCase();
+            result.append((((b & 0xFF) < 0x10) ? "0" : ""))
+                    .append(Integer.toHexString(b & 0xFF).toUpperCase());
         }
-        return result;
+        return result.toString();
     }
 
     public static boolean queryKeyGen(KMIPSession session) {

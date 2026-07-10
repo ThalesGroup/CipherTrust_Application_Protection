@@ -3,6 +3,9 @@
 * No warranty of any kind, either expressed or implied by fact or law.
 * Use of this item is not restricted by copyright or license terms.
 */
+import java.security.Provider;
+import java.security.Security;
+
 import javax.crypto.Cipher;
 import org.apache.commons.lang3.ArrayUtils;
 import com.ingrian.security.nae.GCMParameterSpec;
@@ -18,7 +21,7 @@ import com.ingrian.security.nae.NAESession;
  */
 public class AESGCMUpdateSample {
 
-	public static void main(String[] args)  throws Exception{
+	public static void main(String[] args) {
 		if (args.length != 7) {
 			System.err
 					.println("Usage: java AESGCMUpdateSample user password keyname "
@@ -37,11 +40,18 @@ public class AESGCMUpdateSample {
 		 * Note: For AES-GCM algorithm, same combination of nonce (IV) and key must not be reused 
 		 * during encryption/decryption operations.
 		 */
-		byte[] ivBytes = IngrianProvider.hex2ByteArray(iv);
-		byte[] aadBytes = IngrianProvider.hex2ByteArray(aad);
+		byte[] ivBytes = iv.getBytes();
+		byte[] aadBytes = aad.getBytes();
 		byte[] dataBytes = data.getBytes();
-		System.out.println("iv: " + IngrianProvider.byteArray2Hex(ivBytes));
-		System.out.println("AAD: " + IngrianProvider.byteArray2Hex(aadBytes));
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+		
 		NAESession session = null;
 		try {
 			session = NAESession.getSession(username, password.toCharArray(),"hello".toCharArray());
@@ -71,8 +81,6 @@ public class AESGCMUpdateSample {
 			System.out.println("data: " + new String(decryptedText));
 		} catch (Exception e) {
 			e.printStackTrace();
-                       System.out.println("The Cause is " + e.getMessage() + ".");
-	               throw e;
 		} finally {
 			// releasing session
 			if (session != null) {

@@ -4,6 +4,7 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 import java.io.IOException;
+import java.security.Provider;
 import java.security.Security;
 
 import com.ingrian.internal.xml.XMLException;
@@ -35,10 +36,6 @@ import com.ingrian.security.nae.NAESession;
  */
 public class CertSigningSample {
 
-	static {
-	 	Security.addProvider(new IngrianProvider());
-	}
-
 	public static void main(String[] args) {
 
 		 if (args.length != 8) {
@@ -65,6 +62,14 @@ public class CertSigningSample {
 			 }
 			 
 		 }
+		 
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
 
          NAESession session = null;
 		try {

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="920" viewBox="0 0 1800 920">
+  <defs>
+    <style>
+      .bg { fill: #f7f4ee; }
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #1d2a33; }
+      .subtitle { font: 400 18px 'Segoe UI', Arial, sans-serif; fill: #44515a; }
+      .header { fill: #23495f; }
+      .headerText { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .cellA { fill: #ffffff; }
+      .cellB { fill: #eef3f6; }
+      .num { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #17384d; }
+      .body { font: 18px 'Segoe UI', Arial, sans-serif; fill: #22313a; }
+      .small { font: 16px 'Segoe UI', Arial, sans-serif; fill: #36454f; }
+      .foot { font: 400 16px 'Segoe UI', Arial, sans-serif; fill: #4f5d66; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1800" height="920"/>
+  <text class="title" x="70" y="70">Structured Streaming and Lakeflow Capability Matrix</text>
+  <text class="subtitle" x="70" y="105">Recommended runtime patterns for Thales CRDP with Databricks streaming and incremental pipelines.</text>
+
+  <rect class="header" x="70" y="140" width="80" height="70" rx="10"/>
+  <rect class="header" x="160" y="140" width="360" height="70" rx="10"/>
+  <rect class="header" x="530" y="140" width="300" height="70" rx="10"/>
+  <rect class="header" x="840" y="140" width="360" height="70" rx="10"/>
+  <rect class="header" x="1210" y="140" width="520" height="70" rx="10"/>
+
+  <text class="headerText" x="102" y="184">#</text>
+  <text class="headerText" x="190" y="184">Option</text>
+  <text class="headerText" x="560" y="184">Where It Runs</text>
+  <text class="headerText" x="870" y="184">Best Use Case</text>
+  <text class="headerText" x="1240" y="184">Governance Note</text>
+
+  <rect class="cellA" x="70" y="225" width="80" height="120" rx="10"/>
+  <rect class="cellA" x="160" y="225" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="530" y="225" width="300" height="120" rx="10"/>
+  <rect class="cellA" x="840" y="225" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="1210" y="225" width="520" height="120" rx="10"/>
+  <text class="num" x="102" y="294">1</text>
+  <text class="body" x="190" y="274">Structured Streaming</text>
+  <text class="small" x="190" y="302">with Java UDFs</text>
+  <text class="body" x="560" y="286">Compute-cluster executors</text>
+  <text class="body" x="870" y="286">High-throughput streaming ETL</text>
+  <text class="body" x="1240" y="272">Primary high-throughput ETL streaming pattern.</text>
+  <text class="small" x="1240" y="302">Leverages Java UDF execution across executors for speed.</text>
+
+  <rect class="cellB" x="70" y="360" width="80" height="120" rx="10"/>
+  <rect class="cellB" x="160" y="360" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="530" y="360" width="300" height="120" rx="10"/>
+  <rect class="cellB" x="840" y="360" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="1210" y="360" width="520" height="120" rx="10"/>
+  <text class="num" x="102" y="429">2</text>
+  <text class="body" x="190" y="408">Streaming from secured</text>
+  <text class="small" x="190" y="436">Unity Catalog view</text>
+  <text class="body" x="560" y="408">Compute cluster reading</text>
+  <text class="small" x="560" y="436">UC view backed by Delta</text>
+  <text class="body" x="870" y="408">Governed downstream streaming</text>
+  <text class="body" x="1240" y="394">Preferred secured streaming pattern.</text>
+  <text class="small" x="1240" y="424">Consumers read the view, not the low-level function.</text>
+
+  <rect class="cellA" x="70" y="495" width="80" height="120" rx="10"/>
+  <rect class="cellA" x="160" y="495" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="530" y="495" width="300" height="120" rx="10"/>
+  <rect class="cellA" x="840" y="495" width="360" height="120" rx="10"/>
+  <rect class="cellA" x="1210" y="495" width="520" height="120" rx="10"/>
+  <text class="num" x="102" y="564">3</text>
+  <text class="body" x="190" y="551">Lakeflow / DLT SQL</text>
+  <text class="small" x="190" y="579">with UC functions</text>
+  <text class="body" x="560" y="551">Managed SQL / pipeline runtime</text>
+  <text class="body" x="870" y="551">SQL-defined incremental pipelines</text>
+  <text class="body" x="1240" y="542">Strong governed SQL model.</text>
+  <text class="small" x="1240" y="570">Good fit for materialized views and SQL-managed flows.</text>
+
+  <rect class="cellB" x="70" y="630" width="80" height="120" rx="10"/>
+  <rect class="cellB" x="160" y="630" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="530" y="630" width="300" height="120" rx="10"/>
+  <rect class="cellB" x="840" y="630" width="360" height="120" rx="10"/>
+  <rect class="cellB" x="1210" y="630" width="520" height="120" rx="10"/>
+  <text class="num" x="102" y="699">4</text>
+  <text class="body" x="190" y="686">Lakeflow / DLT reading</text>
+  <text class="small" x="190" y="714">secured views</text>
+  <text class="body" x="560" y="691">Managed SQL / pipeline runtime</text>
+  <text class="body" x="870" y="686">Shared governed pipeline consumption</text>
+  <text class="body" x="1240" y="675">Strongest reveal boundary in SQL pipelines.</text>
+  <text class="small" x="1240" y="703">Pipelines consume the view instead of low-level calls.</text>
+
+  <text class="foot" x="70" y="820">Recommended default: use compute-cluster Java UDFs for high-throughput streaming ETL, and secured UC views/functions for governed streaming or Lakeflow/DLT access.</text>
+</svg>

@@ -30,17 +30,17 @@ public class ECCSignSample {
 		String password = args[1];
 		String keyName =  args[2];
 		
-		//Add Ingrian provider to the list of JCE providers
-		Security.addProvider(new IngrianProvider());
-
-		//Get the list of all registered JCE providers
-		Provider[] providers = Security.getProviders();
-		for (int i = 0; i < providers.length; i++)
-			System.out.println(providers[i].getInfo());
-		
 		//Data to sign
 		String dataForSignature = "testdata for ECC Sign Test";
 		String signAlgo = "SHA256withECDSA";
+		
+		// Add Ingrian provider to the list of JCE providers
+		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
 
 		NAESession session = null;
 		try {

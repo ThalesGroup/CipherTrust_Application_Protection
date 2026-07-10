@@ -38,7 +38,8 @@ import com.ingrian.security.nae.MACValue;
 import com.ingrian.security.nae.NAEAESGCMCipher;
 import com.ingrian.security.nae.NAECipher;
 import com.ingrian.security.nae.NAEException;
-import com.ingrian.security.nae.NAEIvAndTweakDataParameter;
+import com.ingrian.security.nae.FPEParameterAndFormatSpec;
+import com.ingrian.security.nae.FPEParameterAndFormatSpec.FPEParameterAndFormatBuilder;
 import com.ingrian.security.nae.NAEKey;
 import com.ingrian.security.nae.NAEParameterSpec;
 import com.ingrian.security.nae.NAESession;
@@ -295,10 +296,9 @@ public final class CryptoTool {
             if (macFileName == null) {
                 return null;
             } else {
-                BufferedReader br = new BufferedReader(new FileReader(
-                    macFileName));
-                macString = br.readLine();
-                br.close();
+                try (BufferedReader br = new BufferedReader(new FileReader(macFileName))) {
+                    macString = br.readLine();
+                }
             }
         } else {
             macString = (String) arguments.get(MACVALUE);
@@ -321,10 +321,9 @@ public final class CryptoTool {
             if (sigFileName == null) {
                 return null;
             } else {
-                BufferedReader br = new BufferedReader(new FileReader(
-                    sigFileName));
-                sigString = br.readLine();
-                br.close();
+                try (BufferedReader br = new BufferedReader(new FileReader(sigFileName))) {
+                    sigString = br.readLine();
+                }
             }
         } else {
             sigString = (String) arguments.get(SIGNATURE);
@@ -549,15 +548,14 @@ public final class CryptoTool {
 		Key key = NAEKey.getSecretKey(keyName, session);
 
 		IvParameterSpec ivSpec = null;
-		NAEIvAndTweakDataParameter ivtweak = null;
+		FPEParameterAndFormatSpec ivtweak = null;
 		if (iv == null) {
-			ivtweak = new NAEIvAndTweakDataParameter(tweakData, tweakAlgo);
+			ivtweak = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).build();
 		} else {
 			ivSpec = new IvParameterSpec(iv);
 			// Initializes IV and tweak parameters
 
-			ivtweak = new NAEIvAndTweakDataParameter(ivSpec, tweakData,
-					tweakAlgo);
+			ivtweak = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_spec(ivSpec).build();
 		}
 		// get a cipher
 		Cipher cipher = null;
@@ -731,15 +729,14 @@ public final class CryptoTool {
 		Key key = NAEKey.getSecretKey(keyName, session);
 
 		IvParameterSpec ivSpec = null;
-		NAEIvAndTweakDataParameter ivtweak = null;
+		FPEParameterAndFormatSpec ivtweak = null;
 		if (iv == null) {
-			ivtweak = new NAEIvAndTweakDataParameter(tweakData, tweakAlgo);
+			ivtweak = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).build();
 		} else {
 			ivSpec = new IvParameterSpec(iv);
 			// Initializes IV and tweak parameters
 
-			ivtweak = new NAEIvAndTweakDataParameter(ivSpec, tweakData,
-					tweakAlgo);
+			ivtweak = new FPEParameterAndFormatBuilder(tweakData).set_tweakAlgorithm(tweakAlgo).set_spec(ivSpec).build();
 		}
 		// get a cipher
 		Cipher cipher = null;

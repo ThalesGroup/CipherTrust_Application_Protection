@@ -4,6 +4,7 @@
 * Use of this item is not restricted by copyright or license terms.
 */
 // Standard JCE classes. 
+import java.security.Provider;
 import java.security.Security;
 import java.util.Set;
 
@@ -41,13 +42,18 @@ public class KMIPCertLocateSample
 
         // add Ingrian provider to the list of JCE providers
         Security.addProvider(new IngrianProvider());
+        // get the list of all registered JCE providers
+        Provider[] providers = Security.getProviders();
+        for (int i = 0; i < providers.length; i++)
+            System.out.println(providers[i].getInfo());
+        
         KMIPSession session  =null;
         try {
 
             // create NAE Session: pass in NAE Client Certificate clicnt key and keystore password
             session  = KMIPSession.getSession(new NAEClientCertificate( args[0], args[1].toCharArray()));
             //import the certificate
-            NAEParameterSpec spec = new NAEParameterSpec( args[2], 1024, 
+            NAEParameterSpec spec = new NAEParameterSpec( args[2], 2048, 
                     (KMIPAttributes)null, session);
             byte[] c = Hex.decodeHex(certBytes.toCharArray());
             NAECertificate.importCertificate(c, null, spec);
@@ -99,7 +105,6 @@ public class KMIPCertLocateSample
         }  catch (Exception e) {
             System.out.println("The Cause is " + e.getMessage() + ".");
             e.printStackTrace();
-            throw e;
         }
         	finally {
         	if(session!=null)

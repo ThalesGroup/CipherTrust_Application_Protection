@@ -10,6 +10,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
 
@@ -35,7 +36,6 @@ import com.ingrian.security.nae.NAESession;
  */
 public class WrapKeySample {
     public static void main(String[] args)  {
-        Security.addProvider(new IngrianProvider());  
 
         if (args.length != 5)
         {
@@ -48,6 +48,15 @@ public class WrapKeySample {
         String keyToWrapName = "WrapSamplePair"+args[2];
         String wrappingKeyName = "WrapSampleKey"+args[3];
         String groupName = args[4];
+        
+    	// add Ingrian provider to the list of JCE providers
+    	Security.addProvider(new IngrianProvider());
+
+    	// get the list of all registered JCE providers
+    	Provider[] providers = Security.getProviders();
+    	for (int i = 0; i < providers.length; i++)
+    	    System.out.println(providers[i].getInfo());
+
         NAESession session =null;
 		try {
 			// Create an NAESession.

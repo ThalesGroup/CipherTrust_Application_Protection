@@ -6,6 +6,7 @@
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.Provider;
 import java.security.Security;
 import java.util.Arrays;
 
@@ -54,8 +55,14 @@ public class FileEncryptionDecryptionSampleUsingRSA {
 		String encryptedFile = args[4];
 		String decryptedFile = args[5];
 				
-		//Add Ingrian provider to the list of JCE providers
+		// Add Ingrian provider to the list of JCE providers
 		Security.addProvider(new IngrianProvider());
+
+		// Get the list of all registered JCE providers
+		Provider[] providers = Security.getProviders();
+		for (int i = 0; i < providers.length; i++)
+			System.out.println(providers[i].getInfo());
+
 		NAESession session = null;
 		try {
 			

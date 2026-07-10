@@ -20,8 +20,10 @@ Perform the following steps to run SQL script (`cakm_ekm_db_restoration.sql`):
  
 	Where, 
 	
-	* (-S): SQL Server name
-	
+	* (-S): SQL Server name (SQL Server name with DB instance name, if multiple instances are available)
+	        For example, consider Machine name is WIN-MACHINE and Instances name are DBinstance1 and DBinstance2, then correct detail will be passed as
+            -S WIN_MACHINE\DBinstance1
+
 	* (-d): Database name 
 
 	* (-U): SQL Login ID 
