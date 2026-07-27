@@ -1,0 +1,177 @@
+Metadata-Version: 2.4
+Name: ciphertrust-rest-api-shared-python-sample
+Version: 1.0.0
+Summary: Reusable CipherTrust Manager REST token and request helper sample
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.31.0
+
+# CipherTrust REST API Shared Python Sample
+
+This is a standalone Python sample project that mirrors the Java sample but keeps the Python implementation in its own separate project.
+
+Project location:
+
+`E:\codex\work\ciphertrust-rest-api-shared-python-sample`
+
+## What it includes
+
+- reusable REST support helper
+- optional Basic header support for `/api/v1/auth/tokens`
+- proactive JWT refresh before expiry
+- one retry on `401` or token-expiry responses
+- prototype trusted TLS mode for lab environments
+- simple encrypt-then-decrypt example
+- separate multithreaded shared-token refresh demo
+- launcher scripts for Windows and Linux
+- wheel-friendly Python package layout
+
+## Project layout
+
+```text
+ciphertrust-rest-api-shared-python-sample/
+  README.md
+  pyproject.toml
+  requirements.txt
+  run-simple.cmd
+  run-threaded.cmd
+  run-simple.sh
+  run-threaded.sh
+  src/
+    ciphertrust_rest_api_shared_sample/
+      __init__.py
+      models.py
+      rest_support.py
+      simple_main.py
+      threaded_demo_main.py
+```
+
+## Recommended for prototype use`r`n`r`nThe lowest-footprint and simplest option is to use the included launcher scripts.`r`n`r`nThat path:`r`n`r`n- does not require `pip install .``r`n- does not require building a wheel`r`n- reuses the local source tree directly`r`n- is the best choice for quick testing or demos`r`n`r`nWindows:`r`n`r`n```powershell`r`ncd E:\codex\work\ciphertrust-rest-api-shared-python-sample`r`n.\run-simple.cmd --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug`r`n``` `r`n`r`nLinux:`r`n`r`n```bash`r
+cd /path/to/ciphertrust-rest-api-shared-python-sample`r
+chmod +x run-simple.sh run-threaded.sh`r
+./run-simple.sh --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug`r
+``` `r`n`r`nUse `pip install .` only if you specifically want the `ciphertrust-rest-simple` and `ciphertrust-rest-threaded` commands available in your Python environment.`r`n`r`n## Install options
+
+### Option 1. Run directly from source
+
+From the project root:
+
+```powershell
+$env:PYTHONPATH="src"; python -m ciphertrust_rest_api_shared_sample.simple_main --help
+```
+
+### Option 2. Install locally`r`n`r`nThis is optional and is mainly for users who want package-style commands instead of the launcher scripts.
+
+```powershell
+pip install .
+```
+
+Then run:
+
+```powershell
+ciphertrust-rest-simple --help
+ciphertrust-rest-threaded --help
+```
+
+### Option 3. Build a wheel
+
+```powershell
+python -m pip install build
+python -m build
+```
+
+That creates artifacts under:
+
+- `dist\`
+
+## Common arguments
+
+- `--base-url` required
+- `--username` required
+- `--password` required
+- `--key-name` required
+- `--plaintext-base64` required
+- `--pad` optional, defaults to `oaep`
+- `--timeout-seconds` optional, defaults to `60`
+- `--insecure-tls` optional, defaults to enabled for prototype trusted mode
+- `--debug` optional flag
+- `--basic-auth` optional precomputed Base64 `username:password`
+- `--basic-username` optional helper input
+- `--basic-password` optional helper input
+- `--max-business-requests-per-token` demo-only
+- `--refresh-skew-seconds-override` demo-only override
+- `--no-insecure-tls` optional, use this when you want normal certificate validation
+
+## Simple example
+
+```powershell
+ciphertrust-rest-simple --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug
+```
+
+## Threaded example
+
+```powershell
+ciphertrust-rest-threaded --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug --threads 3 --iterations-per-thread 2 --sleep-seconds-before-decrypt 40
+```
+
+## Launcher scripts`r`n`r`nThis is the recommended path for prototype and low-storage use cases because it avoids installing the sample package into your Python environment.
+
+Windows:
+
+```powershell
+.\run-simple.cmd --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug
+.\run-threaded.cmd --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug --threads 3 --iterations-per-thread 2 --sleep-seconds-before-decrypt 40
+```
+
+Linux:
+
+```bash
+chmod +x run-simple.sh run-threaded.sh
+./run-simple.sh --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug
+./run-threaded.sh --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug --threads 3 --iterations-per-thread 2 --sleep-seconds-before-decrypt 40
+```
+
+## Reuse guidance
+
+The launcher scripts set `PYTHONPATH` to the local `src` folder automatically, so they work before installation.`r`n`r`nThis package is meant to be reused in three ways:
+
+- copy the helper into another Python application
+- install the package into an internal utility environment
+- build a wheel and hand it to another team
+
+For a desktop or thick client:
+
+- create one shared `requests.Session`
+- create one shared `AuthTokenProvider`
+- reuse them for the lifetime of the running process
+
+For a web service or backend worker:
+
+- create them once during startup
+- share them across worker threads in the same process
+- let each process or container own its own token lifecycle
+
+
+## Why you saw the SSL error
+
+The error you hit:
+
+- `SSLCertVerificationError: certificate verify failed: self-signed certificate in certificate chain`
+
+means Python tried to validate the CipherTrust Manager server certificate and did not trust the certificate chain.
+
+This is the same kind of issue we previously handled in the Java sample when using prototype trusted mode.
+
+The Python sample now defaults to prototype trusted mode as well.
+
+That means this works for prototype or lab environments without extra certificate setup:
+
+```powershell
+.\\run-simple.cmd --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug
+```
+
+If you want normal certificate validation instead, use:
+
+```powershell
+.\\run-simple.cmd --no-insecure-tls --base-url https://192.168.159.134 --username apiuser --password yourwd123! --key-name rsakey1 --plaintext-base64 VGhpcyBpcyBhIHRlc3Q= --debug
+```

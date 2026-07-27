@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ciphertrust-rest-api-shared-python-sample"
+version = "1.0.0"
+description = "Reusable CipherTrust Manager REST token and request helper sample"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "requests>=2.31.0"
+]
+
+[project.scripts]
+ciphertrust-rest-simple = "ciphertrust_rest_api_shared_sample.simple_main:main"
+ciphertrust-rest-threaded = "ciphertrust_rest_api_shared_sample.threaded_demo_main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

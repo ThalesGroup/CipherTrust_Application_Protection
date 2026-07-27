@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CipherTrust REST Token Refresh Pattern for Python</title>
+  <style>
+    :root {
+      --bg: #f7f3ef;
+      --panel: #fffdfa;
+      --ink: #1f2937;
+      --muted: #5b6470;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+      --line: #d9d1c3;
+      --good: #d1fae5;
+      --warn: #fef3c7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f7f3ef 0%, #efe4d6 100%);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 56px; }
+    h1, h2, h3 { line-height: 1.15; }
+    h1 { font-size: 2.4rem; margin: 0 0 12px; }
+    .lede { font-size: 1.1rem; color: var(--muted); max-width: 860px; margin-bottom: 24px; }
+    .hero, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(31, 41, 55, 0.06); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 18px; }
+    .card { background: white; border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+    .path-a { border-left: 8px solid var(--accent); }
+    .path-b { border-left: 8px solid var(--accent-2); }
+    .banner { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; }
+    .prevent { background: var(--good); color: #065f46; }
+    .recover { background: var(--warn); color: #92400e; }
+    ul { margin: 10px 0 0 20px; }
+    .flow { margin-top: 20px; display: grid; gap: 14px; }
+    .step { padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+    code { background: #f2eee5; padding: 2px 6px; border-radius: 6px; font-family: Consolas, monospace; font-size: 0.95em; }
+    .callout { margin-top: 18px; padding: 16px 18px; border-radius: 14px; background: #ecfeff; border: 1px solid #a5f3fc; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>CipherTrust REST Token Refresh Pattern for Python</h1>
+      <p class="lede">This document explains why the Python helper exists, why a short-lived JWT is a problem for long-running work, and how the sample protects applications in two different ways: preventing timeout before it happens and recovering if timeout still occurs.</p>
+      <div class="callout">
+        <strong>Typical problem:</strong> the auth token may be valid for only about <code>300</code> seconds. That is usually fine for a quick manual test, but it is not enough for many real batch, service, or multi-threaded workloads.
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card path-a">
+        <span class="banner prevent">Path 1</span>
+        <h2>Prevent timeout before it happens</h2>
+        <p>This is the proactive path. The helper reads the token lifetime from the auth response, derives a refresh buffer, and refreshes before the JWT reaches its effective expiry window.</p>
+        <ul>
+          <li>Best for long-running batch jobs</li>
+          <li>Reduces failed business calls</li>
+          <li>Handles the normal steady-state path</li>
+        </ul>
+      </article>
+
+      <article class="card path-b">
+        <span class="banner recover">Path 2</span>
+        <h2>Recover if timeout still occurs</h2>
+        <p>This is the reactive path. If a request still receives a <code>401</code> or token-expired-style response, the helper refreshes the token and retries the request once.</p>
+        <ul>
+          <li>Protects against clock skew and network delay</li>
+          <li>Helps when a request starts near expiry</li>
+          <li>Acts as a safety net, not the primary plan</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Why this is needed</h2>
+      <p>If an application simply authenticates once at startup and reuses the same JWT forever, it will eventually fail. That may happen after a few minutes in a proof of concept, or much later in a production utility, but the failure pattern is the same: the application keeps doing useful work until the auth token silently ages out.</p>
+      <p>A shared token helper gives the application one place to manage that lifecycle correctly instead of repeating token logic in every code path.</p>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>How the flow works</h2>
+      <div class="flow">
+        <div class="step"><strong>1.</strong> Application asks the shared token provider for a valid session.</div>
+        <div class="step"><strong>2.</strong> If there is no token yet, the helper authenticates and caches the JWT.</div>
+        <div class="step"><strong>3.</strong> If the token is nearing expiry, the helper refreshes it before sending the next business request.</div>
+        <div class="step"><strong>4.</strong> The helper sends the business request with <code>Authorization: Bearer ...</code>.</div>
+        <div class="step"><strong>5.</strong> If the response still indicates expiry, the helper refreshes and retries once.</div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Sequence View</h2>
+      <div class="flow">
+        <div class="step"><strong>Normal start:</strong> Application asks the shared token provider for a session. If no token exists yet, the helper authenticates and caches the JWT.</div>
+        <div class="step"><strong>Proactive path:</strong> Before the next business call, the helper checks whether the current token is inside the refresh window. If yes, it refreshes first and then sends the business request with the new token.</div>
+        <div class="step"><strong>Reactive path:</strong> If a business request still returns <code>401</code> or an expiry-style error, the helper refreshes immediately and retries that same request once.</div>
+      </div>
+      <div class="grid" style="margin-top:18px;">
+        <div class="card">
+          <h3>Proactive Timeline</h3>
+          <p><code>App -&gt; TokenProvider -&gt; Auth if needed -&gt; Refresh before expiry -&gt; REST call succeeds</code></p>
+          <p>This is the preferred steady-state behavior for long-running jobs.</p>
+        </div>
+        <div class="card">
+          <h3>Reactive Timeline</h3>
+          <p><code>App -&gt; TokenProvider -&gt; REST call -&gt; 401/expiry -&gt; Refresh -&gt; Retry once</code></p>
+          <p>This is the safety net when a request still slips into an expiry edge case.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Where this pattern fits</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Batch and scheduler jobs</h3>
+          <p>Good for nightly jobs, reprocessing utilities, ETL flows, and any decrypt or encrypt loop that may run longer than one token lifetime.</p>
+        </div>
+        <div class="card">
+          <h3>Queue and stream consumers</h3>
+          <p>Useful for Kafka, JMS, or similar consumers where the process is long-lived and work keeps arriving over time.</p>
+        </div>
+        <div class="card">
+          <h3>Backend services</h3>
+          <p>Useful for long-running services, internal APIs, worker pools, and multi-threaded containers that repeatedly call CipherTrust Manager.</p>
+        </div>
+        <div class="card">
+          <h3>Desktop or thick clients</h3>
+          <p>Useful when a client tool stays open for a long session and must keep working without asking the user to restart the app when the token expires.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <h2>Key design takeaway</h2>
+      <p>The goal is not just â€œrefresh the token.â€ The goal is to make token lifetime an infrastructure concern instead of a business-logic concern. Once that is centralized, any Python project can reuse the same approach and remain stable even when the JWT lifetime is short.</p>
+    </section>
+  </div>
+    <section class="panel" style="margin-top:20px;">
+      <h2>Packaging and Deployment Options</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Source-tree launch</h3>
+          <p>Best for prototypes and internal testing. Teams run the included launcher scripts directly from the project folder and avoid installing the sample package into Python.</p>
+          <p><code>run-simple.cmd</code>, <code>run-threaded.cmd</code>, <code>run-simple.sh</code>, and <code>run-threaded.sh</code> are the lightest-weight option.</p>
+        </div>
+        <div class="card">
+          <h3>Installed package</h3>
+          <p>Best when developers want reusable CLI commands in a Python environment. The project can be installed with <code>pip install .</code> and then used through package entry points.</p>
+          <p>This is convenient for developer machines, shared utility environments, and repeatable internal tooling.</p>
+        </div>
+        <div class="card">
+          <h3>Wheel artifact</h3>
+          <p>Best when another team needs a packaged deliverable. Build a wheel once, publish or copy it to the target environment, and install it there with <code>pip install yourfile.whl</code>.</p>
+          <p>This is the cleanest handoff model when the helper is meant to be reused across multiple Python applications.</p>
+        </div>
+      </div>
+      <div class="flow" style="margin-top:18px;">
+        <div class="step"><strong>Prototype path:</strong> use the source tree and launcher scripts directly.</div>
+        <div class="step"><strong>Internal reusable path:</strong> install the package into a managed Python environment.</div>
+        <div class="step"><strong>Shareable packaged path:</strong> build a wheel and distribute that artifact to downstream teams or hosts.</div>
+      </div>
+    </section>
+</body>
+</html>
