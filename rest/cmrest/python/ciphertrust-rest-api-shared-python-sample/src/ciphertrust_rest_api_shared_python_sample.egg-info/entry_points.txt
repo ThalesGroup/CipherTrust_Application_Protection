@@ -1,0 +1,3 @@
+[console_scripts]
+ciphertrust-rest-simple = ciphertrust_rest_api_shared_sample.simple_main:main
+ciphertrust-rest-threaded = ciphertrust_rest_api_shared_sample.threaded_demo_main:main
