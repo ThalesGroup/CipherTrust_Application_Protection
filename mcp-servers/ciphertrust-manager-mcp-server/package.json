@@ -9,7 +9,7 @@
     "test:python": "uv run python -m pytest tests/test_server.py -v"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.14.2"
+    "@modelcontextprotocol/inspector": "^0.21.1"
   },
   "keywords": ["mcp", "ciphertrust", "testing"],
   "author": "Your Name",
