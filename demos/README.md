@@ -14,3 +14,5 @@ This repository will hold code samples and/or integrations that you can use in y
 
 
 [GenAI](sample-ecommerce-app): Projects to help developers build GenAI applications that require policy-driven data protection to meet some compliance requirement, and protect sensitive data for GenAI.
+
+[CipherTrust Manager Metrics](ciphertrust-manager-metrics): Multi-appliance web UI for CipherTrust Manager Prometheus metrics, REST ops dashboards, interface/properties posture checks, and integrated healthcheck (ksctl). Includes a Docker image for quick deployment.

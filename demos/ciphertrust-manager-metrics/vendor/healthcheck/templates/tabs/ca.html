@@ -1,0 +1,124 @@
+{% from "macros.html" import section_title, badge_pill %}
+<div id="tab-ca" class="content-panel">
+    {{ section_title("fa-solid fa-file-shield", "Certificate Authorities (CAs)") }}
+
+    {{ section_title("fa-solid fa-shield", "Local CAs", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>CA Name</th>
+                    <th>Issuer / Subject</th>
+                    <th>Created / Updated At</th>
+                    <th>State</th>
+                    <th>Trusting Interfaces</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if local_cas %}
+                {% for ca in local_cas %}
+                <tr>
+                    <td><strong>{{ ca.get("name") or ca.get("id") }}</strong></td>
+                    <td style="font-size:0.75rem; color:var(--text-secondary);">
+                        <strong>Issuer:</strong> {{ ca.get("issuer") }}<br>
+                        <strong>Subject:</strong> {{ ca.get("subject") }}
+                    </td>
+                    <td style="font-size:0.75rem;">
+                        <strong>Created:</strong> {{ format_readable_date(ca.get("createdAt")) }}<br>
+                        <strong>Updated:</strong> {{ format_readable_date(ca.get("updatedAt")) }}
+                    </td>
+                    <td>
+                        {{ badge_pill(ca.get("state") or "N/A", "active" if ca.get("state") == "active" else "locked") }}
+                    </td>
+                    <td>
+                        {% set trusting = ca_to_interfaces.get(ca.get("uri"), []) %}
+                        {% if trusting %}{% for intf in trusting %}<span class="badge-pill active" style="font-size:0.7rem; background:rgba(59, 130, 246, 0.15); color:var(--accent-primary);">{{ intf }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% else %}<span style="color:var(--text-secondary); font-size:0.8rem;">None</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No local CAs configured.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-cloud", "External CAs", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1.5rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>CA Name</th>
+                    <th>Issuer / Subject</th>
+                    <th>Created / Updated At</th>
+                    <th>Purpose</th>
+                    <th>Trusting Interfaces</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if external_cas %}
+                {% for ca in external_cas %}
+                <tr>
+                    <td><strong>{{ ca.get("name") or ca.get("id") }}</strong></td>
+                    <td style="font-size:0.75rem; color:var(--text-secondary);">
+                        <strong>Issuer:</strong> {{ ca.get("issuer") }}<br>
+                        <strong>Subject:</strong> {{ ca.get("subject") }}
+                    </td>
+                    <td style="font-size:0.75rem;">
+                        <strong>Created:</strong> {{ format_readable_date(ca.get("createdAt")) }}<br>
+                        <strong>Updated:</strong> {{ format_readable_date(ca.get("updatedAt")) }}
+                    </td>
+                    <td style="font-size:0.8rem; line-height:1.4;">
+                        {% set purpose = ca.get("purpose") or {} %}
+                        <strong>Client Auth:</strong> <span style="color: {{ 'var(--pass-color)' if purpose.get('client_authentication') == 'Enabled' else 'var(--text-secondary)' }}">{{ purpose.get("client_authentication", "Disabled") }}</span><br>
+                        <strong>User Auth:</strong> <span style="color: {{ 'var(--pass-color)' if purpose.get('user_authentication') == 'Enabled' else 'var(--text-secondary)' }}">{{ purpose.get("user_authentication", "Disabled") }}</span>
+                    </td>
+                    <td>
+                        {% set trusting = ca_to_interfaces.get(ca.get("uri"), []) %}
+                        {% if trusting %}{% for intf in trusting %}<span class="badge-pill active" style="font-size:0.7rem; background:rgba(59, 130, 246, 0.15); color:var(--accent-primary);">{{ intf }}</span>{% if not loop.last %}, {% endif %}{% endfor %}{% else %}<span style="color:var(--text-secondary); font-size:0.8rem;">None</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No external CAs configured.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-file-invoice", "Trusted CA Certificates", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1.5rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>CA Name</th>
+                    <th>Issuer / Subject</th>
+                    <th>Service / Type</th>
+                    <th>Expiration Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if trusted_ca_certs %}
+                {% for ca in trusted_ca_certs %}
+                {% set ca_details = ca.get("ca_details") or {} %}
+                <tr>
+                    <td><strong>{{ ca_details.get("name") or ca.get("id") }}</strong></td>
+                    <td style="font-size:0.75rem; color:var(--text-secondary);">
+                        <strong>Issuer:</strong> {{ ca_details.get("issuer") }}<br>
+                        <strong>Subject:</strong> {{ ca_details.get("subject") }}
+                    </td>
+                    <td><code>{{ ca.get("service") }}</code> / <span class="badge-pill active" style="font-size:0.7rem; padding:0.1rem 0.3rem;">{{ ca.get("ca_type") }}</span></td>
+                    <td>{{ format_readable_date(ca_details.get("notAfter")) }}</td>
+                    <td>
+                        {{ badge_pill(ca_details.get("state"), "locked" if ca_details.get("state") != "active" else "active") }}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No trusted CAs found.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+{# Shared presentation macros used across report tabs. #}
+
+{% macro badge_pill(label, variant='active', style='') %}<span class="badge-pill {{ variant }}"{% if style %} style="{{ style }}"{% endif %}>{{ label }}</span>{% endmacro %}
+
+{% macro section_title(icon, text, level=2, extra_style='') %}<h{{ level }} class="section-title"{% if extra_style %} style="{{ extra_style }}"{% endif %}><i class="{{ icon }}"></i> {{ text }}</h{{ level }}>{% endmacro %}
+
+{# Renders pre-built <tr> row strings (already HTML, built in Python), or a single empty-state row
+   spanning `empty_colspan` columns with `empty_message` when `rows` is empty. #}
+{% macro table_rows(rows, empty_message, empty_colspan, empty_style='text-align:center; color:var(--text-secondary);') %}
+{% if rows %}{% for row in rows %}{{ row }}{% endfor %}{% else %}<tr><td colspan="{{ empty_colspan }}" style="{{ empty_style }}">{{ empty_message }}</td></tr>{% endif %}
+{% endmacro %}
+
+{% macro detail_item(label, value, value_style='') %}
+<div class="detail-item">
+    <div class="detail-label">{{ label }}</div>
+    <div class="detail-val"{% if value_style %} style="{{ value_style }}"{% endif %}>{{ value }}</div>
+</div>
+{% endmacro %}
+
+{# items: list of (label, value, value_style) tuples #}
+{% macro details_grid(items, grid_style='') %}
+<div class="details-grid"{% if grid_style %} style="{{ grid_style }}"{% endif %}>
+    {% for item in items %}
+    {{ detail_item(item[0], item[1], item[2] if item|length > 2 else '') }}
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{# Collapsible <details>-like severity group used on the Access tab. body_html is pre-rendered HTML
+   (either an include block's output or a raw string) placed inside the toggle content div. #}
+{% macro collapsible(id, summary_text, icon, body_html) %}
+<button class="severity-header neutral" onclick="toggleSeverityGroup('{{ id }}')">
+    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+    <i class="{{ icon }}" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+    <span>{{ summary_text }}</span>
+</button>
+<div id="{{ id }}" class="severity-content active">
+    {{ body_html }}
+</div>
+{% endmacro %}

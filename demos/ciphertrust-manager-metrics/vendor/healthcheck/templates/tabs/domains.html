@@ -1,0 +1,28 @@
+{% from "macros.html" import section_title, badge_pill %}
+<div id="tab-domains" class="content-panel">
+    {{ section_title("fa-solid fa-network-wired", "Managed Domains") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Domain Name</th>
+                    <th>Allow User Mgmt</th>
+                    <th>HSM Connection ID</th>
+                    <th>HSM KEK Label</th>
+                    <th>Syslog Redirection</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in domains %}
+                <tr>
+                    <td><strong>{{ d.get("name") }}</strong></td>
+                    <td>{{ badge_pill("Enabled" if d.get("allow_user_management") else "Disabled", "info" if d.get("allow_user_management") else "active") }}</td>
+                    <td>{{ d.get("hsm_connection_id") or "None" }}</td>
+                    <td>{{ d.get("hsm_kek_label") or "N/A" }}</td>
+                    <td>{{ "Enabled" if d.get("enable_syslog_redirection") else "Disabled" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

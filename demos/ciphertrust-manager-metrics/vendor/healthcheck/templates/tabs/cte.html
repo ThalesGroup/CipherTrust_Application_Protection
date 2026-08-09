@@ -1,0 +1,99 @@
+{% from "macros.html" import section_title, badge_pill %}
+<div id="tab-cte" class="content-panel">
+    {{ section_title("fa-solid fa-lock", "Transparent Encryption") }}
+
+    {{ section_title("fa-solid fa-laptop-code", "Enrolled CTE Clients", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1.5rem;") }}
+    <div class="table-container" style="margin-bottom: 1.5rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>OS Type</th>
+                    <th>Host Name / IP</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if cte_clients %}
+                {% for c in cte_clients %}
+                <tr>
+                    <td><strong>{{ c.get("name") }}</strong></td>
+                    <td>{{ c.get("os_type") or "N/A" }}</td>
+                    <td>{{ c.get("host_name") or c.get("ip_address") or "N/A" }}</td>
+                    <td>
+                        {{ badge_pill(c.get("client_health_status") or "Unknown", "active" if c.get("client_health_status") == "Healthy" else "inactive") }}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No CTE clients enrolled.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-shield-halved", "GuardPoints Not Active", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1.5rem;") }}
+    <div class="table-container" style="margin-bottom: 1.5rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>GuardPath</th>
+                    <th>Policy Name</th>
+                    <th>Type</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set has_inactive_gp = namespace(found=false) %}
+                {% for cname, gp_data in data.get("cte_guardpoints", {}).items() %}
+                {% for gp in gp_data.get("resources", []) if (gp.get("guard_point_state", "") | upper) != "ACTIVE" %}
+                {% set has_inactive_gp.found = true %}
+                <tr>
+                    <td><strong>{{ cname }}</strong></td>
+                    <td><code>{{ gp.get("guard_path") }}</code></td>
+                    <td>{{ gp.get("policy_name") }}</td>
+                    <td>{{ gp.get("guard_point_type") }}</td>
+                    <td>{{ badge_pill(gp.get("guard_point_state"), "inactive") }}</td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                {% if not has_inactive_gp.found %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">All GuardPoints are Active.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-list-check", "CTE Access Policies", 3, "font-size: 1.1rem; border: none; padding: 0; margin-top: 1.5rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Policy Name</th>
+                    <th>Type</th>
+                    <th>Version</th>
+                    <th>Learn Mode</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if cte_policies %}
+                {% for p in sorted_cte_policies %}
+                <tr>
+                    <td><strong>{{ p.get("name") }}</strong></td>
+                    <td><span class="badge-pill active" style="font-size:0.7rem; padding:0.1rem 0.3rem;">{{ p.get("policy_type") }}</span></td>
+                    <td>v{{ p.get("policy_version", 0) }}</td>
+                    <td>
+                        {{ badge_pill("Enabled" if p.get("never_deny") else "Disabled", "inactive" if p.get("never_deny") else "active") }}
+                    </td>
+                    <td style="color:var(--text-secondary); font-size:0.8rem;">{{ p.get("description") or "No description." }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No CTE policies configured.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
