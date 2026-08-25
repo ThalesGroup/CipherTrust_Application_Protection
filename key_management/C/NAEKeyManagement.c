@@ -32,14 +32,15 @@ void usage(void)
             "  conf_file - typically, CADP_CAPI.properties\n"
             "  user - NAE user, user can be in a root domain or in a specific domain. For domain user, specify domain||username\n"
             "  passwd - NAE user's password\n"
-            "  OPERATION - CREATE keyName algo Size CurveID(for ECC keys) [exportable deletable] \n"
+            "  OPERATION - CREATE keyName algo Size [exportable deletable] (for Symmetric/RSA keys)\n"
+            "            - CREATE keyName EC CurveID [exportable deletable] (for ECC keys)\n"
             "            - EXPORT keyName keytype [format] \n"
-            "  algo - algorithm name, for example, 'AES'\n"
+            "  algo - algorithm name, for example, 'AES', 'RSA', 'EC'\n"
             "  keyName - name of the key. To create a new versioned key append # to key name. To create a new version of a versioned key don't include #\n"
-            "  size - key size in bits\n"
-	    "  curveID - ID of the elliptic curve (valid only for ECC keys)\n"
+            "  size - key size in bits (for Symmetric/RSA keys)\n"
+	    "  curveID - ID of the elliptic curve e.g. secp224k1, prime256v1 (valid only for ECC keys)\n"
             "  exportable - true/false (optional)\n"
-            "  deletable - true/false(optional)\n"
+            "  deletable - true/false (optional)\n"
             "  keytype - 1 for public/ 2 for private/ 3 for Symmmetric Key\n"
             "  format - 1 for PEM-SEC1/ 2 for PEM-PKCS#8 .This is mandatory parameter for private key type\n"
             );
@@ -48,17 +49,17 @@ void usage(void)
 
 void usage_create(void)
 {
-    fprintf(stderr, "\n  usage: NAEKeyManagement conf_file user passwd CREATE keyName algo size curveID(for ECC keys) exportable deletable\n"
+    fprintf(stderr, "\n  usage: NAEKeyManagement conf_file user passwd CREATE keyName algo size [exportable] [deletable] (for Symmetric/RSA keys)\n"
+            "         NAEKeyManagement conf_file user passwd CREATE keyName EC curveID [exportable] [deletable] (for ECC keys)\n"
             "  conf_file - typically, CADP_CAPI.properties\n"
             "  user - NAE user, user can be in a root domain or in a specific domain. For domain user, specify domain||username\n"
             "  passwd - NAE user's password\n"
             "  keyName - name of the versioned key with # appended to it.Example 'abc#'\n"
-            "  algo - algorithm name, for example, 'AES'\n"
-            "  size - key size in bits\n"
-	    "  curveID - ID of the elliptic curve e.g. secp224k1,brainpoolP256r1(valid only for ECC keys)\n"
+            "  algo - algorithm name, for example, 'AES', 'RSA', 'EC'\n"
+            "  size - key size in bits (for Symmetric/RSA keys)\n"
+	    "  curveID - ID of the elliptic curve e.g. secp224k1, brainpoolP256r1, prime256v1 (valid only for ECC keys)\n"
             "  exportable - true/false (optional)\n"
-            "  deletable - true/false(optional)\n"
-
+            "  deletable - true/false (optional)\n\n"
             );
     exit(1);
 }
@@ -98,10 +99,10 @@ int func_create_Key(I_O_Session * handle, char *name, char *algo, char *size, I_
     keyDetails.curve_eq = curveID;
 
     if( !strncmp(algo ,"EC",2))
-    rc = I_C_CreateKeyInfo_KeyDetails(algo, atoi(size), exportable, deletable,               
+    rc = I_C_CreateKeyInfo_KeyDetails(algo, 0, exportable, deletable,               
             &keyinfo, &keyDetails);
     else
-    rc = I_C_CreateKeyInfo(algo, atoi(size), exportable, deletable,
+    rc = I_C_CreateKeyInfo(algo, size ? atoi(size) : 0, exportable, deletable,
             &keyinfo);
     if (rc != I_E_OK)
     {
@@ -158,7 +159,7 @@ enum operationType_t
 int main(int argc, char **argv)
 {
     I_O_Session sess;
-    char *path, *user, *pass, *keyname, *algo=NULL, *size, *operation, *groupname,*curvename = NULL;
+    char *path, *user, *pass, *keyname, *algo=NULL, *size=NULL, *operation, *groupname,*curvename = NULL;
     int argp,curveID = -1;
     I_T_RETURN rc = I_E_OK;
     I_T_BOOL exportable, deletable;
@@ -180,40 +181,41 @@ int main(int argc, char **argv)
 
     if (strcmp(operation, "CREATE") == 0)
     {
-            if (argc < 8)
-                usage_create();
+        if (argc < 8)
+            usage_create();
 
-	    keyname = argv[argp++];
-	    if(strncmp(keyname,"null",4)==0)
-	            keyname = NULL;
-            algo = argv[argp++];
-	    
-            if((!strncmp(algo, "EC",2) && (argc <9))|| (strncmp(algo,"EC",2) && (argc < 8)))
-            	usage_create(); // exit
-            
-	    size = argv[argp++];
-	    
-	    if(!strncmp(algo,"null",4))
-	    {
-		fprintf(stderr,"Invalid Algorithm\n");
-                exit(0);
-	    }
-	    if (!strncmp(algo,"EC",2))
-	    {
-		curvename = argv[argp++];	
-	    }    
-            operationType = CREATE;
-        
-        if ( (!strncmp(algo,"EC",2)  && argc > 10) || (strncmp(algo,"EC",2)) && argc > 9)
+        keyname = argv[argp++];
+        if (strncmp(keyname, "null", 4) == 0)
+            keyname = NULL;
+        algo = argv[argp++];
+
+        if (!strncmp(algo, "null", 4))
+        {
+            fprintf(stderr, "Invalid Algorithm\n");
+            exit(0);
+        }
+
+        if (!strncmp(algo, "EC", 2))
+        {
+            curvename = argv[argp++];
+            size = NULL;
+        }
+        else
+        {
+            size = argv[argp++];
+        }
+
+        operationType = CREATE;
+
+        if (argc > 9)
         {
             exportable = str2bool(argv[argp++]);
             deletable = str2bool(argv[argp++]);
         }
-        else if ((!strncmp(algo,"EC",2) && argc == 10) ||(strncmp(algo,"EC",2))&& (argc == 9))
+        else if (argc == 9)
         {
             exportable = str2bool(argv[argp++]);
         }
-
     }
     else if (strcmp(operation, "EXPORT") == 0)
     {
