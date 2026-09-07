@@ -25,7 +25,6 @@
 #include "pkcs11_sample_helper.h"
 #include <stdarg.h>
 
-
 /*
  **************************************************************************
  *   * Globals
@@ -1134,7 +1133,7 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     char        custom5[1024]= {0};
     unsigned int i, pubExponentIdx, privExponentIdx;
 
-    CK_BBOOL    bEncrypt,bUnwrap,bToken,bWrap,bVerify;
+    CK_BBOOL    bEncrypt,bUnwrap,bToken,bWrap,bVerify,bModifiable;
     CK_BBOOL    bCacheOnHost;
 
     CK_ULONG    attrValueLen;
@@ -1172,6 +1171,7 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
 
         {CKA_MODULUS_BITS, &modulusBits, sizeof(modulusBits)},
         {CKA_MODULUS, modulusBuf, *pModulusBufSize },
+        {CKA_MODIFIABLE, &bModifiable, sizeof(CK_BBOOL) },
         {CKA_EC_PARAMS, curveId, 64 },
         {CKA_PUBLIC_EXPONENT, pubExponentBuf, *ppubExponentBufSize },
         {CKA_PRIVATE_EXPONENT, privExponentBuf, *pprivExponentBufSize }
@@ -1185,6 +1185,11 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
     if(objClass == CKO_SECRET_KEY)
     {
         getAttrsTemplateSize -= 4;
+    } else if (objClass == CKO_PUBLIC_KEY) {
+        // Set CKA_EC_POINT in place of CKA_MODIFIABLE for public key only
+        getAttrsTemplate[getAttrsTemplateSize-4].type = CKA_EC_POINT;
+        getAttrsTemplate[getAttrsTemplateSize-4].ulValueLen = 0;
+        getAttrsTemplate[getAttrsTemplateSize-4].pValue = NULL;
     }
  
     rc = FunctionListFuncPtr->C_GetAttributeValue(hSession,
@@ -1212,8 +1217,36 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
 
     if(objClass != CKO_SECRET_KEY)
     {
-        if (keytype == CKK_EC) {
+        if (keytype == CKK_EC)
+        {
             printf("CKA_EC_PARAMS: '%.*s'\n", (int) getAttrsTemplate[getAttrsTemplateSize-3].ulValueLen, curveId);
+            if (objClass == CKO_PUBLIC_KEY && getAttrsTemplate[getAttrsTemplateSize-4].ulValueLen > 0
+                && getAttrsTemplate[getAttrsTemplateSize-4].ulValueLen != (CK_ULONG)-1)
+            {
+                CK_ATTRIBUTE ecPointTemplate = {CKA_EC_POINT, NULL_PTR, 0};
+                ecPointTemplate.ulValueLen = getAttrsTemplate[getAttrsTemplateSize-4].ulValueLen;
+                ecPointTemplate.pValue = (CK_BYTE_PTR) malloc(ecPointTemplate.ulValueLen);
+                if (ecPointTemplate.pValue == NULL) {
+                    printf("Error allocating memory for CKA_EC_POINT.\n");
+                    return CKR_HOST_MEMORY;
+                }
+                rc = FunctionListFuncPtr->C_GetAttributeValue(hSession, hKey, &ecPointTemplate, 1);
+                if (rc == CKR_OK) {
+                    char *ecPoint = (char *) calloc(sizeof(CK_BYTE), ecPointTemplate.ulValueLen * 2 + 1);
+                    if (ecPoint == NULL) {
+                        printf("Error allocating memory for ecPoint.\n");
+                        UTIL_FREE(ecPointTemplate.pValue);
+                        return CKR_HOST_MEMORY;
+                    }
+
+                    for (i = 0; i < ecPointTemplate.ulValueLen; i++)
+                        snprintf(ecPoint + i * 2, 3, "%02x", ((CK_BYTE_PTR)ecPointTemplate.pValue)[i]);
+                    ecPoint[i * 2] = '\0';
+                    printf("CKA_EC_POINT: '%.*s'\n", (int) ecPointTemplate.ulValueLen, ecPoint);
+                    UTIL_FREE(ecPoint);
+                } else printf("Error getting CKA_EC_POINT: %08x.\n", (unsigned int)rc);
+                UTIL_FREE(ecPointTemplate.pValue);
+            }
         } else {
             printf("CKA_MODULUS: ");
             attrValueLen = getAttrsTemplate[getAttrsTemplateSize-4].ulValueLen;
@@ -1317,6 +1350,8 @@ CK_RV getAsymAttributesValue(CK_OBJECT_HANDLE hKey, CK_OBJECT_CLASS	 objClass, C
             }
             printf("CKA_MODULUS_BITS: %u.\n", (unsigned int)modulusBits);
         }
+        if (objClass == CKO_PRIVATE_KEY)
+            printf("CKA_MODIFIABLE: %s\n", bModifiable ? "true" : "false");
     }
     printf("CKA_THALES_CUSTOM_1: %.*s\n", (int)getAttrsTemplate[7].ulValueLen, custom1);
     printf("CKA_THALES_CUSTOM_2: %.*s\n", (int)getAttrsTemplate[8].ulValueLen, custom2);

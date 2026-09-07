@@ -66,6 +66,7 @@ extern CK_SESSION_HANDLE    hSession;
 extern CK_BBOOL             bAlwaysSensitive;
 extern CK_BBOOL             bNeverExtractable;
 
+#define UTIL_FREE( x ) { if ( x != NULL ) { free( x ) ; x = NULL ; } }
 
 #define kp  ((int)'k' << 8 | (int)'p')
 #define kt  ((int)'k' << 8 | (int)'t')
