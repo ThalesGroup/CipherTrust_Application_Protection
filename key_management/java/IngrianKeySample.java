@@ -166,8 +166,11 @@ public class IngrianKeySample
 	    // import the key back. we can import the key only as a non-versioned key.
 	    NAEParameterSpec spec_import =
 		new NAEParameterSpec(keyName + "Import", true, true, session);
-	    NAEKey.importKey (IngrianProvider.hex2ByteArray(keyData[2].getKeyData()),
-			      "AES", spec_import);
+	    if (keyData != null && keyData.length >= 2)
+			NAEKey.importKey(IngrianProvider.hex2ByteArray(keyData[2].getKeyData()), "AES", spec_import);
+		else {
+			System.out.println("in persistance cache mode");
+		}
 	    NAESecretKey importKey = NAEKey.getSecretKey(keyName + "Import", session);
 	    System.out.println("Imported key data; Key " + 
 			       importKey.getName() + " was created on NAE Server.\n");
