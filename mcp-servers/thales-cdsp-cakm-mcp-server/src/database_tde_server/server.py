@@ -1,10 +1,12 @@
 """
-Main MCP server for Database TDE operations - CONSOLIDATED with unified tools
+Main MCP server for Database TDE operations
 
-AUTO-LOGIN TOOLS CONSOLIDATION:
-- All auto-login functionality is now consolidated in manage_oracle_autologin
-- Removed redundant tools: enable_oracle_autologin, configure_oracle_autologin_hsm
-- Use manage_oracle_autologin with appropriate operation parameter for all auto-login operations
+This module implements the Model Context Protocol (MCP) server for Database Transparent
+Data Encryption (TDE) operations. Database encryption and encryption key management are
+handled by Thales CipherTrust Application Key Management (CAKM) connector, which is
+integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Provides the main entry point for the server and handles tool registration and execution.
 """
 import asyncio
 import logging

@@ -1,5 +1,18 @@
 """
-Validation helpers for Database TDE operations
+Input validation utilities for Database TDE operations
+
+This module provides validation utilities for ensuring data integrity in Transparent Data Encryption (TDE) operations.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available validation functions:
+- validate_database_connection: Validates database connection parameters and configuration
+- validate_tde_parameters: Validates TDE-specific parameters and settings
+- validate_encryption_algorithm: Validates encryption algorithm specifications
+- validate_key_size: Validates encryption key size requirements
+- validate_container_name: Validates Oracle container database names
+- validate_wallet_path: Validates Oracle wallet path and accessibility
+- validate_ssh_config: Validates SSH configuration parameters
 """
 
 import re

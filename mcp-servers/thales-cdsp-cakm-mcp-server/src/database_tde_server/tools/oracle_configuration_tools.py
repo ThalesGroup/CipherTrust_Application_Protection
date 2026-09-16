@@ -1,5 +1,16 @@
 """
-Oracle TDE configuration tools with enhanced parameter management
+Oracle TDE configuration management tools
+
+This module provides tools for configuring Oracle Transparent Data Encryption (TDE) settings.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available tools:
+- manage_oracle_configuration: Manage Oracle TDE configuration parameters
+  - Operations: get, set, verify
+  - Manages TDE configuration parameters like wallet_root and tde_configuration
+  - Supports SPFILE and memory parameter management
+  - Provides configuration validation and recommendations
 """
 
 import json
