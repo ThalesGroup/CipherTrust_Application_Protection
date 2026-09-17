@@ -5,7 +5,10 @@ WORKDIR /app
 COPY thales-snow-scs-crdp-service-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8083
-ENV CRDPIP=http://thales-crdp-service.stuff.svc.spcs.internal
+ENV CRDPIP=thales-crdp-service.stuff.svc.spcs.internal
+ENV CRDP_PORT=8090
+ENV CRDP_SSL_ENABLED=false
+ENV CRDP_SSL_VERIFY_SERVER=false
 ENV BATCHSIZE=1000
 ENV DEFAULTMETADATA=1001000
 ENV DEFAULTMODE=internal

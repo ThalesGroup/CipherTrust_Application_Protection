@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Snowflake Cortex AI and Thales help reduce risk, improve compliance, and support data sovereignty.">
+  <title>Reduce Risk and Accelerate Value | Snowflake Cortex AI and Thales</title>
+  <style>
+    :root { --ink:#10243b; --muted:#53687e; --snow:#1d9fd3; --sky:#eaf7fc; --navy:#172c65; --mint:#dff3e8; --line:#d7e0e8; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#edf3f6; color:var(--ink); font:18px/1.62 Georgia, "Times New Roman", serif; }
+    main { width:min(100%,1060px); margin:34px auto; padding:58px 76px 72px; background:#fff; box-shadow:0 12px 38px rgba(16,36,59,.12); }
+    .eyebrow { margin:0 0 18px; color:var(--snow); font:800 .76rem/1 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; }
+    h1,h2 { margin:0; font-family:Arial,Helvetica,sans-serif; line-height:1.1; color:var(--ink); }
+    h1 { max-width:850px; font-size:clamp(2.45rem,6vw,4.7rem); letter-spacing:-.055em; }
+    h2 { margin-top:48px; font-size:1.7rem; letter-spacing:-.03em; }
+    .dek { max-width:820px; margin:24px 0 30px; color:var(--muted); font-size:1.26rem; line-height:1.45; }
+    .byline { display:flex; gap:12px; align-items:center; margin-bottom:36px; color:var(--muted); font: .82rem Arial,sans-serif; }
+    .byline::before { width:32px; height:3px; background:var(--snow); content:""; }
+    p { margin:20px 0; }
+    figure { margin:38px -30px; } figure img { display:block; width:100%; border:1px solid var(--line); border-radius:8px; }
+    figcaption { padding:10px 4px 0; color:var(--muted); font:.78rem/1.4 Arial,sans-serif; }
+    .value { margin:38px 0; padding:26px 30px; border-left:6px solid var(--snow); background:var(--sky); color:var(--navy); font:700 1.35rem/1.35 Arial,sans-serif; }
+    footer { margin-top:48px; padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font:.83rem/1.5 Arial,sans-serif; }
+    footer h2 { margin:0 0 13px; font-size:1rem; } footer ul { margin:0; padding-left:18px; } footer a { color:var(--navy); }
+    @media (max-width:720px) { body{background:#fff;font-size:17px} main{margin:0;padding:40px 24px 54px;box-shadow:none} figure{margin:32px 0} }
+    @media print { @page{margin:.55in} body{background:#fff;font-size:11pt} main{width:auto;margin:0;padding:0;box-shadow:none} h2{break-after:avoid} figure{break-inside:avoid} a{color:inherit;text-decoration:none} }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Data Protection in Snowflake with Cortex AI and Thales</p>
+    <h1>Reduce Risk and Accelerate Value</h1>
+    <p class="dek">Snowflake Cortex AI as a sensitive-data security enabler, with Thales protection, policy, and key control.</p>
+    <p class="byline">A business-value perspective</p>
+
+    <p>Data is now a core business asset, but sensitive data brings a difficult responsibility. Organizations must make data useful to analysts, developers, and AI initiatives while reducing exposure, demonstrating compliance, and retaining control over the encryption keys that protect their most valuable information.</p>
+    <p>The Thales and Snowflake partnership helps address this challenge without turning every data project into a security engineering project. Snowflake brings data discovery, classification, governance, and the scale of the AI Data Cloud. Thales brings policy-based data protection, centralized key management, and customer choice across deployment models. Together, they help organizations create a practical, defense-in-depth strategy for sensitive data.</p>
+    <p><strong>You cannot have a good analytics strategy without a good data strategy, and you cannot have a good data strategy without a good security strategy.</strong> The Thales and Snowflake partnership helps bring those strategies together, so organizations can use data with greater confidence instead of treating security as an afterthought.</p>
+
+    <aside class="value">Lower exposure risk. Stronger compliance evidence. More control over keys and policy. Faster progress from discovery to protection.</aside>
+
+    <figure><img src="assets/cortex-thales-protection-workflow.png" alt="Workflow from Cortex-assisted discovery through column tags, Snowpark Container Services, Thales CRDP, and CipherTrust policy and key management."><figcaption>Figure 1. Snowflake governance and Thales protection support a repeatable lifecycle for sensitive data.</figcaption></figure>
+
+    <h2>Reduce risk without slowing down the business</h2>
+    <p>Organizations increasingly need to use sensitive data in analytics, reporting, and AI workloads. The risk is not limited to storing the data: exposure can also occur when data is copied, shared, queried, or made available to the wrong user. Protection needs to follow the data and be enforced consistently.</p>
+    <p>Thales CipherTrust REST Data Protection (CRDP) provides policy-based options such as encryption, tokenization, masking, and controlled reveal. Teams call a central service while security administrators manage the policies, keys, and authorized access rules. This separation of duties can reduce the chance that controls drift as data products evolve.</p>
+    <p>For Snowflake customers, the result is a stronger defense-in-depth posture. Snowflake platform controls protect the environment, while Thales adds data-centric protection and independent policy control around sensitive fields. Protected values can limit the exposure of usable cleartext when data is accessed outside its intended context.</p>
+
+    <h2>Improve compliance with a visible, repeatable control model</h2>
+    <p>Compliance is difficult when organizations cannot show where sensitive data is located, how it was protected, and who can access it. Snowflake’s built-in sensitive-data classification can identify sensitive data at column level and apply semantic and privacy tags. That creates a governance signal that can drive consistent action rather than relying on manually maintained lists of tables and fields.</p>
+    <p>With Cortex-assisted workflows, security teams can describe a goal in plain language, such as identifying PII in a database and applying a protection tag. The workflow can still include human review and dry-run approval before data is changed. Once a column is tagged, the tag can trigger a consistent Thales protection workflow.</p>
+
+    <figure><img src="assets/governed-data-access.png" alt="Masked user sees protected tokens while an authorized user receives governed cleartext through a reveal view or JDBC Driver."><figcaption>Figure 2. Sensitive data remains useful while access to cleartext is governed by role and centrally managed policy.</figcaption></figure>
+
+    <h2>Support data sovereignty and customer key control</h2>
+    <p>For many organizations, data sovereignty is not simply about the region where data resides. It is also about who controls the keys and policies that govern access to sensitive information. Thales enables customers to retain control of encryption keys and data-protection policies, helping them meet internal requirements and demonstrate appropriate controls to auditors and regulators.</p>
+    <p>Customer choice matters because regulatory, operational, and risk requirements differ. Thales supports physical, virtual, cloud, hybrid-cloud, and multi-cloud deployment options. Where required, organizations can use FIPS-certified Thales hardware security modules and related key-management infrastructure as part of their broader cryptographic control strategy.</p>
+
+    <h2>Shorten the path from discovery to protection</h2>
+    <p>Separate tools for discovery, classification, ticketing, integration, and policy enforcement can increase operational complexity and slow down delivery. Snowflake reduces that complexity by bringing classification and governance close to the data. Cortex can make the operating experience more approachable by helping turn natural-language objectives into reviewable Snowflake work. Thales provides the protection engine and centralized policy layer.</p>
+    <p>Snowpark Container Services gives organizations a deployment model that can run the integration alongside Snowflake workloads. This can simplify deployment and lifecycle management and reduce unnecessary network hops compared with designs that route protection requests through an external integration point. Actual performance depends on workload shape, regional placement, policy, and service sizing, but bulk REST protection and local service-to-service communication create a strong foundation for efficient operation.</p>
+
+    <h2>A practical choice for modern data programs</h2>
+    <p>The Thales and Snowflake combination is about more than encryption. It gives organizations a way to discover sensitive data, apply the right protections, govern cleartext access, and retain control over keys and policy as their data estate grows. That translates into business value: lower exposure risk, clearer evidence for compliance, stronger sovereignty controls, and a faster route from data discovery to protection. In that sense, Cortex AI is not only a productivity tool: paired with Thales, it can be a practical sensitive-data security enabler for a modern data strategy.</p>
+
+    <footer><h2>Further reading</h2><ul>
+      <li><a href="https://cpl.thalesgroup.com/resources/encryption/snowflake-ai-data-cloud-data-protection-solution-brief">Thales: Data Protection for Snowflake AI Data Cloud</a></li>
+      <li><a href="https://cpl.thalesgroup.com/encryption/ciphertrust-restful-data-protection">Thales: CipherTrust RESTful Data Protection</a></li>
+      <li><a href="https://docs.snowflake.com/en/user-guide/classify-intro">Snowflake: Sensitive-data classification</a></li>
+      <li><a href="https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services">Snowflake: Snowpark Container Services</a></li>
+    </ul></footer>
+  </main>
+</body>
+</html>

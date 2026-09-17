@@ -8,3 +8,9 @@ snow --config-file snow.toml spcs image-registry login
 docker tag ghcr.io/yourgithubid/thales-snow-scs-crdp-service:latest yoursnowflakeaccount.registry.snowflakecomputing.com/yourdb/yourschema/your_repo/thales-snow-scs-crdp-service:latest
 docker push yoursnowflakeaccount.registry.snowflakecomputing.com/yourdb/yourschema/your_repo/thales-snow-scs-crdp-service:latest
 
+or
+
+snow --config-file snow.toml spcs image-registry login
+docker build -t thales-snow-scs-crdp-service -t yoursnowflake-account.registry.snowflakecomputing.com/thales-snow-scs-crdp-service:latest .
+docker push yoursnowflake-account.registry.snowflakecomputing.com/sf_tuts/public/my_repo/thales-snow-scs-crdp-service:latest
+
