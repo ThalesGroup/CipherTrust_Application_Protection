@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Snowflake Cortex and Thales can simplify sensitive data discovery, protection, and governed access.">
+  <title>From Discovery to Protection | Snowflake Cortex and Thales</title>
+  <style>
+    :root {
+      --ink: #10243b;
+      --muted: #53687e;
+      --snow: #1d9fd3;
+      --sky: #eaf7fc;
+      --navy: #172c65;
+      --mint: #dff3e8;
+      --line: #d7e0e8;
+      --paper: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #edf3f6;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.62;
+    }
+
+    .article {
+      width: min(100%, 1060px);
+      margin: 34px auto;
+      padding: 58px 76px 72px;
+      background: var(--paper);
+      box-shadow: 0 12px 38px rgba(16, 36, 59, 0.12);
+    }
+
+    .eyebrow {
+      margin: 0 0 20px;
+      color: var(--snow);
+      font-family: Arial, sans-serif;
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.1;
+    }
+
+    h1 {
+      max-width: 850px;
+      font-size: clamp(2.45rem, 6vw, 4.8rem);
+      letter-spacing: -0.055em;
+    }
+
+    h2 {
+      margin-top: 54px;
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+    }
+
+    .dek {
+      max-width: 820px;
+      margin: 24px 0 30px;
+      color: var(--muted);
+      font-size: 1.26rem;
+      line-height: 1.45;
+    }
+
+    .byline {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 36px;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: 0.82rem;
+    }
+
+    .byline::before {
+      width: 32px;
+      height: 3px;
+      background: var(--snow);
+      content: "";
+    }
+
+    p { margin: 20px 0; }
+
+    .pullquote {
+      margin: 42px 0;
+      padding: 26px 30px;
+      border-left: 6px solid var(--snow);
+      background: var(--sky);
+      color: var(--navy);
+      font-family: Arial, sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    figure {
+      margin: 40px -30px;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    figcaption {
+      padding: 10px 4px 0;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .callout {
+      margin: 36px 0;
+      padding: 25px 30px;
+      border-radius: 8px;
+      background: var(--mint);
+    }
+
+    .callout h3 {
+      color: #15573f;
+      font-size: 1.02rem;
+    }
+
+    .callout ol {
+      margin: 14px 0 0;
+      padding-left: 1.3em;
+    }
+
+    .callout li { margin: 8px 0; }
+
+    .sources {
+      margin-top: 54px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      font-size: 0.83rem;
+      line-height: 1.5;
+    }
+
+    .sources h2 {
+      margin: 0 0 13px;
+      font-size: 1rem;
+    }
+
+    .sources ul { margin: 0; padding-left: 18px; }
+    .sources a { color: var(--navy); }
+
+    @media (max-width: 720px) {
+      body { background: var(--paper); font-size: 17px; }
+      .article { margin: 0; padding: 40px 24px 54px; box-shadow: none; }
+      figure { margin: 34px 0; }
+    }
+
+    @media print {
+      @page { margin: 0.55in; }
+      body { background: white; font-size: 11pt; }
+      .article { width: auto; margin: 0; padding: 0; box-shadow: none; }
+      h2 { break-after: avoid; }
+      figure, .callout { break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="article">
+    <p class="eyebrow">Data Protection in Snowflake with Cortex AI and Thales</p>
+    <h1>From Discovery to Protection</h1>
+    <p class="dek">How Snowflake Cortex and Thales can help teams find sensitive data, apply policy-based protection, and deliver governed access with less operational friction.</p>
+    <p class="byline">A Snowflake and Thales security workflow</p>
+
+    <p>Sensitive data does not stay in one place. It moves from customer systems to analytics platforms, operational reports, data-science workloads, and AI-driven applications. The hard part of protection is often not the cryptography. It is knowing which columns need protection, applying the right controls consistently, and giving authorized users a practical way to work with the data without asking every team to rewrite its applications.</p>
+
+    <p>Snowflake and Thales can help organizations close that gap. Snowflake provides the data platform, governance foundation, and AI-assisted experience for finding and organizing sensitive data. Thales CipherTrust REST Data Protection (CRDP) provides policy-based protection and reveal services, backed by customer-managed key and encryption controls. Together, they support a repeatable workflow: find sensitive data, classify it at column level, protect it through centrally managed policy, and reveal it only to authorized people and applications.</p>
+
+    <aside class="pullquote">Cortex can make the workflow approachable in plain English; Thales supplies the security guardrail that applies protection and access policy at scale.</aside>
+
+    <figure>
+      <img src="assets/cortex-thales-protection-workflow.png" alt="Workflow from Cortex-assisted discovery through column tags, Snowpark Container Service, Thales CRDP, and key and policy management.">
+      <figcaption>Figure 1. A closed-loop sensitive-data workflow joining Snowflake governance with Thales policy-based protection.</figcaption>
+    </figure>
+
+    <h2>Start with what matters: identifying sensitive columns</h2>
+
+    <p>Security programs often begin with a spreadsheet and a difficult question: where is our personal data? That approach is slow, incomplete, and hard to maintain as schemas change. Snowflake sensitive-data classification offers a more durable foundation. It can identify sensitive attributes, apply system-defined semantic and privacy tags, and map the results to an organization’s own governance tags. The result is not just a list of tables; it is column-level context that can drive automation.</p>
+
+    <p>This is where Cortex can improve the operating experience for a Snowflake security administrator. Instead of beginning with a long series of manual commands, an administrator can describe an objective in plain English, such as: “Classify the NORTHSTAR_ANALYTICS database and apply a PII tag to detected columns.” Cortex Code can help turn that request into the appropriate Snowflake workflow, while the administrator reviews and approves the resulting changes.</p>
+
+    <p>Consider a simple Northstar Analytics environment. An <code>EMPLOYEES</code> table may contain names, email addresses, and salary information. A <code>CLIENTS</code> table may contain business contacts, emails, and phone numbers. Classification identifies the columns that merit heightened handling. Tags become the contract between governance and protection: they tell downstream automation which columns should be protected, without hard-coding a separate list into every pipeline.</p>
+
+    <h2>Turn tags into protection, with a review before execution</h2>
+
+    <p>Once sensitive columns are tagged, a Snowflake stored procedure can use the tag metadata to build the protection work. For character data, it calls a Thales CRDP bulk-protection function; for numeric data, it calls the appropriate numeric-aware function. The procedure can discover tagged columns across a schema, generate the required <code>UPDATE</code> statements, and apply them consistently.</p>
+
+    <p>The important operational detail is dry-run mode. Before changing a table, the procedure returns the generated SQL for review. A security administrator can ask Cortex to preview the planned transformation in plain language, inspect the statements, and approve execution only when the target tables and columns are correct. This creates a practical balance: automation eliminates repetitive work, while preview preserves change discipline.</p>
+
+    <p>Behind the Snowflake function, the integration can run as a Snowpark Container Services application that sends bulk REST requests to Thales CRDP. Protection policy stays centralized in Thales. The Snowflake workflow does not need to embed keys, algorithms, or policy logic in every SQL statement; it asks CRDP to protect or reveal data using a named policy, and CRDP enforces the configured controls.</p>
+
+    <h2>Make authorized access straightforward</h2>
+
+    <p>Protection is only half of the journey. The next challenge is making sure that people who are permitted to see cleartext can do so without forcing every report, dashboard, or application to implement a custom reveal call. One approach is to generate standard Snowflake views. A view can retain protected source columns and add a corresponding <code>_REVEALED</code> column that calls a Thales reveal function. As with protection, the view-generation procedure can first produce a dry-run preview of the <code>CREATE VIEW</code> statements.</p>
+
+    <figure>
+      <img src="assets/governed-data-access.png" alt="Masked user sees protected tokens while an authorized user receives governed cleartext through a reveal view or JDBC driver.">
+      <figcaption>Figure 2. The access experience stays familiar while Thales policy determines whether protected or authorized cleartext data is returned.</figcaption>
+    </figure>
+
+    <p>The access experience is clear. A user such as <code>maskuser</code> can query the protected table or a masked view and receive protected values. A user with the appropriate Thales authorization, such as <code>cleartext_user</code>, can query the governed reveal view and receive the original value in the <code>_REVEALED</code> column. The decision is policy-based rather than a scattered collection of application exceptions.</p>
+
+    <p>The Thales JDBC Driver for Snowflake provides another route for teams that want to minimize application changes. It can transform protected values for authorized users as data is read through the driver, allowing applications to continue using their existing JDBC access pattern. In both approaches, the goal is the same: security controls should not require every consuming team to become a data-protection specialist.</p>
+
+    <h2>Control that can evolve with the security landscape</h2>
+
+    <p>Thales supports several integration patterns for Snowflake, including REST-based protection through Snowpark Container Services and JDBC-based transparent transformation. Organizations can choose the model that fits their requirements, whether they prioritize SQL-native automation, transparent application access, or the greatest level of control over encryption and keys.</p>
+
+    <p>Bring Your Own Encryption (BYOE) is especially relevant for organizations that want more direct control over key custody and cryptographic choices. That control can matter as key-rotation policies mature and organizations prepare for future cryptographic transitions, including post-quantum cryptography planning. The right approach depends on security requirements, operating model, and the applications that consume the data.</p>
+
+    <aside class="callout">
+      <h3>Implementation at a glance</h3>
+      <ol>
+        <li>Classify sensitive data in Snowflake and map results to a PII-protection tag.</li>
+        <li>Use a dry-run stored procedure to preview protection statements for tagged columns.</li>
+        <li>Execute approved bulk-protection calls through Snowpark Container Services to Thales CRDP.</li>
+        <li>Generate governed reveal views, or use the Thales JDBC Driver for authorized transformation.</li>
+        <li>Maintain least-privilege Snowflake roles and Thales policies, and periodically review results.</li>
+      </ol>
+    </aside>
+
+    <h2>A practical security guardrail for modern data teams</h2>
+
+    <p>Snowflake Cortex can reduce the friction of finding and managing sensitive data with natural-language assistance. Snowflake classification and tags provide the column-level governance signal. Thales CRDP provides the protection engine, policy enforcement, and key-centric security controls. Snowpark Container Services brings the components together within the Snowflake environment.</p>
+
+    <p>The combination helps organizations move from “we think this table contains PII” to a repeatable, reviewable process for discovering, protecting, and governing it. That is the value of the Thales and Snowflake partnership: stronger control over sensitive data with less operational friction for the teams responsible for using it.</p>
+
+    <footer class="sources">
+      <h2>Further reading</h2>
+      <ul>
+        <li><a href="https://docs.snowflake.com/en/user-guide/classify-intro">Snowflake sensitive-data classification</a></li>
+        <li><a href="https://docs.snowflake.com/en/user-guide/classify-auto">Snowflake classification profiles and automatic tagging</a></li>
+        <li><a href="https://docs.snowflake.com/en/sql-reference/sql/create-function-spcs">Snowflake service functions for Snowpark Container Services</a></li>
+        <li><a href="https://docs.snowflake.com/en/developer-guide/snowpark-container-services/working-with-services">Snowpark Container Services overview</a></li>
+      </ul>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Business Value: Thales CRDP on Snowpark Container Services</title>
+  <style>
+    :root { --blue:#083c70; --sky:#0c5ea8; --cyan:#00a9ce; --orange:#f06a2b; --ink:#17324d; --muted:#5a6b7b; --mist:#eff7fb; --line:#cfe1ed; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#dfe9ef; color:var(--ink); font-family:"Segoe UI",Calibri,Arial,sans-serif; }
+    .page { width:8.5in; min-height:11in; margin:18px auto; padding:.56in .58in .48in; background:#fff; position:relative; overflow:hidden; box-shadow:0 3px 18px #71839355; }
+    .page::before { content:""; position:absolute; top:0; right:0; width:43%; height:6px; background:linear-gradient(90deg,var(--cyan),var(--sky),var(--orange)); }
+    .eyebrow { color:var(--sky); font-size:10px; letter-spacing:1.6px; font-weight:700; text-transform:uppercase; margin-bottom:12px; }
+    h1 { margin:0; color:var(--blue); font-size:31px; letter-spacing:-.8px; line-height:1.06; max-width:620px; }
+    h2 { margin:26px 0 10px; color:var(--blue); font-size:18px; }
+    h3 { margin:0 0 7px; color:var(--blue); font-size:14px; }
+    p { margin:8px 0; font-size:12px; line-height:1.55; }
+    .lead { font-size:16px; line-height:1.48; max-width:640px; color:#35536c; margin:17px 0 20px; }
+    .quote { margin:21px 0 18px; padding:15px 19px; border-left:5px solid var(--orange); background:#fff7f2; color:var(--blue); font:600 18px/1.38 Georgia,serif; }
+    .quote small { display:block; margin-top:7px; color:var(--muted); font:11px/1.3 "Segoe UI",sans-serif; }
+    .band { background:var(--blue); color:#fff; margin:23px -.58in; padding:17px .58in; display:flex; gap:22px; }
+    .band div { flex:1; font-size:11px; line-height:1.42; }
+    .band strong { color:#b9ebf8; display:block; font-size:14px; margin-bottom:3px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .card { border:1px solid var(--line); border-radius:7px; padding:15px; background:linear-gradient(145deg,#fff,var(--mist)); min-height:128px; }
+    .card .tag { color:var(--orange); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+    .decision { border-collapse:collapse; width:100%; margin-top:10px; font-size:11px; }
+    .decision th { text-align:left; color:#fff; background:var(--blue); padding:9px 10px; }
+    .decision td { padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.35; }
+    .decision tr:nth-child(even) td { background:var(--mist); }
+    .callout { margin-top:20px; border:1px solid #bddde9; background:#f0fbff; padding:13px 16px; font-size:12px; line-height:1.5; }
+    .footer { position:absolute; bottom:.2in; left:.58in; right:.58in; padding-top:8px; border-top:1px solid var(--line); color:#6c7d8d; font-size:8.5px; display:flex; justify-content:space-between; }
+    .footer a { color:var(--sky); text-decoration:none; }
+    .break { page-break-before:always; }
+    @media print { body { background:#fff; } .page { margin:0; box-shadow:none; page-break-after:always; } }
+    @media screen and (max-width:760px) { .page { width:100%; min-height:auto; margin:0; padding:34px 24px 55px; } .band { margin:22px -24px; padding:16px 24px; } .grid { grid-template-columns:1fr; } .footer { left:24px; right:24px; } }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <div class="eyebrow">Thales + Snowflake | Business Value Brief</div>
+    <h1>Protect sensitive Snowflake data without taking the protection service away from the data</h1>
+    <p class="lead">Thales CipherTrust RESTful Data Protection (CRDP) deployed on Snowpark Container Services gives teams a practical path to apply tokenization and encryption from SQL workflows while retaining centralized policy and key-management control.</p>
+    <div class="quote">"You cannot have a good analytics strategy without a good data strategy, and you cannot have a good data strategy unless you have a good security strategy."<small>Thales and Snowflake help turn that principle into an operating model for sensitive data.</small></div>
+    <div class="band">
+      <div><strong>Reduce risk</strong>Limit avoidable application-controlled hops for sensitive values while separating data protection policy and key governance from the consuming application.</div>
+      <div><strong>Improve compliance readiness</strong>Apply consistent protection controls and preserve an auditable Snowflake operating model based on roles, services, and governed configuration.</div>
+      <div><strong>Accelerate time to value</strong>Package the integration as a container image, deploy it as a Snowflake service, and call it through service functions from established SQL workflows.</div>
+    </div>
+
+    <h2>Why the deployment model matters</h2>
+    <p>Organizations frequently need to protect personally identifiable information, payment-related data, customer records, and other regulated fields while keeping those fields useful for analytics, AI, and operational reporting. A remote protection service can solve the cryptographic problem, but it also introduces another platform, network path, scaling model, and security boundary to operate.</p>
+    <p>With this design, the Thales CRDP integration is deployed as a containerized service in Snowflake. Queries call a controlled service-function endpoint; the integration sends protect or reveal requests to CRDP; and CipherTrust Manager remains the central authority for keys and protection policy. This gives security and data teams a shared pattern rather than separate, ad hoc implementations for each analytics workload.</p>
+
+    <div class="grid">
+      <div class="card"><div class="tag">Security posture</div><h3>Keep the control plane centralized</h3><p>Thales maintains the separation of duties that matters: applications do not own cryptographic keys or invent protection policy. Teams can use tokenization or encryption while key governance remains centralized.</p></div>
+      <div class="card"><div class="tag">Data sovereignty</div><h3>Support controlled key custody</h3><p>Organizations can align the location and management of encryption keys with their governance, privacy, and sovereignty requirements while using Snowflake for data processing.</p></div>
+      <div class="card"><div class="tag">Operational simplicity</div><h3>Use Snowflake-native controls</h3><p>Images, services, compute pools, role-based access, secrets, logging, and network egress controls are managed through the Snowflake platform rather than a separate application platform.</p></div>
+      <div class="card"><div class="tag">AI readiness</div><h3>Prepare data for governed AI use</h3><p>Protected data can support analytics and Snowflake Cortex-oriented use cases while the organization keeps a deliberate policy for who can see cleartext and when.</p></div>
+    </div>
+  </section>
+
+  <section class="page break">
+    <div class="eyebrow">Choosing the right integration pattern</div>
+    <h1 style="font-size:28px">SPCS is not simply "external functions, but faster"</h1>
+    <p class="lead">Both approaches extend Snowflake. The right choice depends on workload volume, operating model, security requirements, and where the custom service needs to run.</p>
+    <table class="decision">
+      <thead><tr><th>Decision lens</th><th>External Function</th><th>Thales CRDP on SPCS</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Service location</strong></td><td>A remote endpoint is operated outside Snowflake.</td><td>The application integration runs as a managed container service in Snowflake.</td></tr>
+        <tr><td><strong>Data path</strong></td><td>Values are sent to the remote endpoint and a result is returned.</td><td>The service runs in the Snowflake environment, avoiding an application-controlled external hop for the integration layer.</td></tr>
+        <tr><td><strong>Best fit</strong></td><td>Simple, stateless calls to an existing external API or small-volume enrichment.</td><td>Data-intensive protection operations, reusable SQL service functions, and teams that want a Snowflake-native operating model.</td></tr>
+        <tr><td><strong>Operations</strong></td><td>Scale, observe, patch, and secure the remote service and cloud integration separately.</td><td>Use a Snowflake image repository, compute pool, service specification, RBAC, event data, and service lifecycle controls.</td></tr>
+        <tr><td><strong>Cost evaluation</strong></td><td>Consider Snowflake usage plus remote compute, API, networking, and possible egress costs.</td><td>Consider compute-pool and container runtime costs; savings depend on workload shape and reduced external infrastructure needs.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What leaders gain</h2>
+    <p><strong>A repeatable control.</strong> Rather than embedding key access and protection logic in every downstream tool, teams expose approved protect and reveal patterns through Snowflake functions and roles.</p>
+    <p><strong>A practical governance boundary.</strong> The data platform team can operate the service in the same platform that hosts the data, while security teams retain policy and key-management accountability through Thales.</p>
+    <p><strong>A better path from discovery to action.</strong> Snowflake classification and Cortex capabilities can help identify or prioritize sensitive data. Thales then supplies a protection control that can be applied to the fields selected by that governance process.</p>
+
+    <div class="callout"><strong>Important design point:</strong> SPCS reduces integration-layer data movement and administrative complexity; it does not remove every network dependency. CRDP may still need approved outbound connectivity to CipherTrust Manager, and all deployments should be sized, secured, and validated for their own compliance obligations.</div>
+
+    <h2>Recommended next step</h2>
+    <p>Start with one high-value data domain and a small set of protect/reveal policies. Measure throughput, latency, operational ownership, role design, and key-governance evidence. Then expand the pattern to additional tables, Cortex workflows, or data products with the same reusable service and policy framework.</p>
+    <div class="footer"><span>Thales CRDP on Snowpark Container Services | Business Value Brief</span><span>Sources: <a href="https://docs.snowflake.com/en/developer-guide/snowpark-container-services/overview">Snowflake SPCS overview</a> | <a href="https://docs.snowflake.com/en/developer-guide/external-functions/introduction">External functions</a> | <a href="https://cpl.thalesgroup.com/encryption/ciphertrust-restful-data-protection">Thales CRDP</a></span></div>
+  </section>
+</body>
+</html>

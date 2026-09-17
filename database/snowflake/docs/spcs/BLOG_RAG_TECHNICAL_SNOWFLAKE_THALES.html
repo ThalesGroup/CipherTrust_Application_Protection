@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A technical design for protecting sensitive document values before they enter Snowflake Cortex Search RAG context with Thales CRDP.">
+  <title>Building Secure RAG | Snowflake Cortex Search and Thales CRDP</title>
+  <style>
+    :root{--ink:#10243b;--muted:#53687e;--teal:#087f8c;--navy:#172c65;--line:#d7e0e8}*{box-sizing:border-box}body{margin:0;background:#edf3f6;color:var(--ink);font:18px/1.62 Georgia,"Times New Roman",serif}main{width:min(100%,1060px);margin:34px auto;padding:58px 76px 72px;background:#fff;box-shadow:0 12px 38px rgba(16,36,59,.12)}.eyebrow{margin:0 0 18px;color:var(--teal);font:800 .76rem/1 Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}h1,h2,h3{margin:0;font-family:Arial,Helvetica,sans-serif;line-height:1.1;color:var(--ink)}h1{max-width:900px;font-size:clamp(2.45rem,6vw,4.7rem);letter-spacing:-.055em}h2{margin-top:48px;font-size:1.7rem;letter-spacing:-.03em}h3{margin:34px 0 0;font-size:1.22rem}.dek{max-width:850px;margin:24px 0 30px;color:var(--muted);font-size:1.26rem;line-height:1.45}.byline{display:flex;gap:12px;align-items:center;margin-bottom:36px;color:var(--muted);font:.82rem Arial,sans-serif}.byline:before{width:32px;height:3px;background:var(--teal);content:""}p{margin:20px 0}ul,ol{margin:20px 0;padding-left:27px}li{margin:8px 0}figure{margin:38px -30px}figure img{display:block;width:100%;border:1px solid var(--line);border-radius:8px}figcaption{padding:10px 4px 0;color:var(--muted);font:.78rem/1.4 Arial,sans-serif}pre{overflow:auto;margin:24px 0;padding:20px 22px;border:1px solid #c9dce4;border-radius:8px;background:#f4fafc;color:#15364b;font:14px/1.5 Consolas,"Courier New",monospace;white-space:pre-wrap}code{font:.9em Consolas,"Courier New",monospace}.access-example{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:24px 0;padding:22px;border:1px solid var(--line);border-radius:8px;background:#f4fafc}.access-example section{padding:16px;border-radius:6px;background:#fff}.access-example section:last-child{border-left:4px solid var(--teal)}.access-example h4{margin:0;color:var(--navy);font:700 1rem Arial,sans-serif}.access-example ul{margin:12px 0 0;padding-left:20px;font-size:.93rem}footer{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font:.83rem/1.5 Arial,sans-serif}footer h2{margin:0 0 13px;font-size:1rem}footer ul{margin:0;padding-left:18px}footer a{color:#172c65}@media(max-width:720px){body{background:#fff;font-size:17px}main{margin:0;padding:40px 24px 54px;box-shadow:none}figure{margin:32px 0}.access-example{grid-template-columns:1fr}}@media print{@page{margin:.55in}body{background:#fff;font-size:10.5pt}main{width:auto;margin:0;padding:0;box-shadow:none}h2{break-after:avoid}figure,pre,.access-example{break-inside:avoid}a{color:inherit;text-decoration:none}}
+  </style>
+</head>
+<body><main>
+  <p class="eyebrow">Technical Architecture | Snowflake Cortex Search and Thales CRDP</p>
+  <h1>Building Secure RAG with Snowflake Cortex Search and Thales CRDP</h1>
+  <p class="dek">A technical pattern for protecting PII before it enters retrieval context.</p>
+  <p class="byline">Architecture, controls, and implementation guidance</p>
+  <p>Retrieval Augmented Generation (RAG) lets an LLM answer from enterprise knowledge rather than from general training data alone. A user question retrieves relevant document passages, which are supplied to the LLM as grounded context. Internal documents can contain personal information, compensation data, contact information, and confidential business facts.</p>
+  <p>This defense-in-depth pattern uses Snowflake Cortex Search, Snowflake document processing, Snowpark Container Services, and Thales CipherTrust REST Data Protection (CRDP). Its central control is simple: protect sensitive values before the document becomes searchable RAG context, then reveal values only through a separately authorized path.</p>
+  <ol><li>Parse staged documents in Snowflake.</li><li>Identify candidate sensitive entities.</li><li>Protect values through Thales CRDP.</li><li>Persist and index only sanitized text.</li><li>Return protected answers by default and reveal only when policy permits.</li></ol>
+  <figure><img src="assets/secure-rag-cortex-search-thales.png" alt="Secure RAG flow from sensitive documents through sanitized search and policy-controlled response access."><figcaption>Figure 1. The protection boundary is placed before the searchable RAG corpus, not after an LLM has already received raw document content.</figcaption></figure>
+  <h2>Architecture and trust boundaries</h2>
+  <ul><li><strong>Snowflake internal stage and parsing.</strong> An internal stage with directory metadata holds documents; <code>PARSE_DOCUMENT</code> extracts text inside Snowflake.</li><li><strong>Sensitive-data identification.</strong> A Cortex LLM extraction prompt, deterministic detector, or both produces candidate entities. Validate LLM output before it drives an irreversible transformation.</li><li><strong>Thales protection service.</strong> A Snowpark Container Services endpoint calls CRDP bulk protection and reveal policies. The container does not contain data-protection keys.</li><li><strong>Sanitized RAG corpus.</strong> The Cortex Search source contains document metadata and sanitized text, not a convenience <code>RAW_TEXT</code> column.</li></ul>
+  <p>Snowflake roles control access to stages, tables, search services, and functions. Thales adds policy enforcement around the data values, including which caller or use case may request a reveal. These controls complement rather than replace one another.</p>
+  <h2>1. Stage documents and extract text</h2>
+  <p>An internal stage and directory metadata let the pipeline enumerate documents without a manually maintained file list.</p>
+  <pre><code>CREATE OR REPLACE STAGE DOCS
+  ENCRYPTION = (TYPE = 'SNOWFLAKE_SSE')
+  DIRECTORY = (ENABLE = TRUE);
+
+ALTER STAGE DOCS REFRESH;
+
+CREATE OR REPLACE TEMPORARY TABLE TEMP_PARSED_CHUNKS AS
+SELECT RELATIVE_PATH AS FILE_NAME,
+  SNOWFLAKE.CORTEX.PARSE_DOCUMENT('@DOCS', RELATIVE_PATH, {'mode': 'LAYOUT'}):content::STRING AS RAW_TEXT
+FROM DIRECTORY('@DOCS');</code></pre>
+  <p>The temporary table is a processing boundary, not the future RAG source. Apply least privilege to the stage and do not copy extracted cleartext to permanent diagnostics, query exports, or application logs. Define ingestion error handling, document-size limits, supported file types, and retention for source files.</p>
+  <h2>2. Detect and validate sensitive entities</h2>
+  <p>The proof of concept uses <code>SNOWFLAKE.CORTEX.COMPLETE</code> to return a JSON list of PII candidates. A prompt can request an extracted value and routing class, such as <code>char</code> for names, emails, and formatted phone numbers, or <code>number</code> for numeric values.</p>
+  <pre><code>SELECT SNOWFLAKE.CORTEX.COMPLETE('mistral-large2',
+  CONCAT('Extract PII from this text. Return JSON with entity_value and ',
+         'detected_type. Use number only for pure numeric values. Text: ', RAW_TEXT),
+  {'response_format': {'type': 'json_object'}})
+AS EXTRACTED_JSON FROM TEMP_PARSED_CHUNKS;</code></pre>
+  <p>Treat this as candidate metadata. Validate JSON shape, cap entity count and length, normalize duplicates, and verify each entity occurs in source text. For high-risk data types, combine LLM extraction with deterministic patterns, business dictionaries, or human approval. If an entity cannot be classified or protected, fail closed and move the document to a restricted exception queue.</p>
+  <h2>3. Protect values using Thales CRDP</h2>
+  <p>The Snowflake application does not perform encryption itself. It sends batches to CRDP through Snowpark Container Services, and CRDP applies the configured policy. This centralizes algorithm, key, and policy decisions while supporting separation of duties between Snowflake administrators and security teams.</p>
+  <p>The demonstration uses separate character and numeric protection functions. It prefixes each returned token with application-level routing metadata, so an authorized reveal function can choose the matching CRDP policy. The prototype's base64-encoded <code>char#</code> and <code>nbr#</code> headers are not cryptographic protection; they can disclose a broad value class. Use an opaque format if that classification is sensitive, and avoid logging full tokens.</p>
+  <pre><code>Y2hhciM=$&lt;protected-character-value&gt;
+bmJyIw==$&lt;protected-numeric-value&gt;</code></pre>
+  <p>Use TLS for CRDP service-to-service calls, with server verification and client certificates where required. Keep CA certificates, PKCS12 files, and passwords in Snowflake secrets or a cloud secrets manager, never in a Dockerfile, committed service specification, application defaults, or query history.</p>
+  <h2>4. Build the sanitized corpus, then create Cortex Search</h2>
+  <p>After protection, reconstruct each document by replacing raw entities with protected values. Persist sanitized text and non-sensitive metadata, then drop temporary cleartext tables.</p>
+  <pre><code>CREATE OR REPLACE TABLE PROCESSED_DOCUMENTS_RAG AS
+SELECT FILE_NAME, SANITIZED_TEXT, CURRENT_TIMESTAMP() AS INDEXED_AT,
+  'v1' AS PROTECTION_PIPELINE_VERSION
+FROM TEMP_SANITIZED_DOCUMENTS;
+
+CREATE OR REPLACE CORTEX SEARCH SERVICE RAG_SEARCH
+  ON SANITIZED_TEXT ATTRIBUTES FILE_NAME WAREHOUSE = RAG_WH TARGET_LAG = '1 hour'
+AS SELECT FILE_NAME, SANITIZED_TEXT FROM PROCESSED_DOCUMENTS_RAG;</code></pre>
+  <p>Manual embeddings with <code>EMBED_TEXT_768</code> and vector similarity are useful for a proof of concept. For a Cortex Search production pattern, use the sanitized table as the service source instead of maintaining an application-managed vector column. The important security property is that the source is sanitized before indexing.</p>
+  <h2>5. Generate a protected answer by default</h2>
+  <p>At query time, search sanitized content, build a bounded context window, and instruct the LLM to use only that context. The prompt should direct the model to preserve protected tokens exactly and not infer or fabricate values. The protection comes from the sanitized prompt context, not the instruction alone.</p>
+  <pre><code>Use only the supplied context. Preserve protected tokens exactly as written.
+Do not infer their values. If the answer is unavailable in the context, say so.</code></pre>
+  <p>Set maximum result counts and context sizes, record correlation IDs, and avoid storing full prompts or answers in broadly accessible logs.</p>
+  <h2>6. Reveal only through an authorized path</h2>
+  <p>The prototype's <code>REVEAL_TAGGED_TEXT</code> function scans a protected answer, reads routing metadata, and calls the matching Thales reveal function. Do not make it universally executable. Place it behind a dedicated Snowflake role and expose it through a controlled view, stored procedure, or application API. Log every reveal decision.</p>
+  <p>Evaluate more than a user name: include invoking role, application identity, data domain, request purpose, and time-bound approval. Align the Thales policy to the same model. If reveal fails, preserve the protected value rather than leaking context in an error or substituting a guessed value.</p>
+  <h3>Same question, two governed outcomes</h3>
+  <p>The following fictional example shows the desired default behavior. The RAG answer remains useful to any permitted user, but only an authorized role may invoke the reveal path to obtain cleartext values.</p>
+  <div class="access-example"><section><h4>Protected response (any permitted role)</h4><ul><li>Sarah Conner: total compensation package mapped to <code>bmJyIw==$71425 USD</code></li><li>Michael Scott: current salary established at <code>bmJyIw==$10015 USD</code></li></ul></section><section><h4>Revealed response (authorized roles only)</h4><ul><li>Sarah Conner: total compensation package mapped to <code>92000 USD</code></li><li>Michael Scott: current salary established at <code>88000 USD</code></li></ul></section></div>
+  <h2>Operational controls for production</h2>
+  <ul><li><strong>TLS and secrets:</strong> use mTLS where required, verify certificates, rotate credentials, and never disable verification outside controlled testing.</li><li><strong>Idempotency:</strong> store a document hash and pipeline version to avoid repeatedly protecting already protected content during retries.</li><li><strong>Least privilege:</strong> grant only required access to stages, source tables, Cortex Search, protection functions, and reveal functions.</li><li><strong>Observability:</strong> capture document ID, version, entity counts, logical policy route, status, and correlation ID, while keeping raw text and full tokens out of logs.</li><li><strong>Quality:</strong> test extraction recall and precision, replacement correctness, retrieval relevance, answer faithfulness, and reveal authorization with representative documents.</li><li><strong>Retention:</strong> define when source files, temporary parsed text, sanitized documents, and audit records are purged.</li></ul>
+  <h2>A reusable security pattern for enterprise AI</h2>
+  <p>Sensitive values are protected before documents become a retrieval corpus, so the default AI path works with information that remains useful but is less exposed. Snowflake Cortex Search provides managed retrieval, Snowpark Container Services hosts the CRDP integration close to Snowflake workloads, and Thales controls the protection and reveal policy around the values that require the most care.</p>
+  <footer><h2>Further reading</h2><ul><li><a href="https://www.snowflake.com/en/developers/guides/ask-questions-to-your-own-documents-with-snowflake-cortex-search/">Snowflake: Ask questions of your own documents with Cortex Search</a></li><li><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/overview">Snowflake Cortex Search overview</a></li><li><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/access-control">Snowflake Cortex Search access control</a></li><li><a href="https://docs.snowflake.com/en/sql-reference/functions/parse_document-snowflake-cortex">Snowflake PARSE_DOCUMENT</a></li><li><a href="https://cpl.thalesgroup.com/encryption/ciphertrust-restful-data-protection">Thales CipherTrust RESTful Data Protection</a></li></ul></footer>
+</main></body></html>

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestBody;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,17 +19,14 @@ public class SnowflakeCRDPController {
 
 	private static final Logger log = LoggerFactory.getLogger(SnowflakeCRDPController.class);
 
-	private final OkHttpClient client = new OkHttpClient();
+	private final OkHttpClient client;
+	private final CrdpProperties crdpProperties;
 	
 	private final MediaType jsonMediaType = MediaType.get("application/json; charset=utf-8");
 	private final ObjectMapper mapper = new ObjectMapper();
 
 	// Environment variables (as before)
 	private final int BATCH_SIZE = Integer.parseInt(System.getenv().getOrDefault("BATCHSIZE", "1000"));
-	private final String CRDPIP = System.getenv().getOrDefault("CRDPIP",
-			"http://thales-crdp-service.stuff.svc.spcs.internal");
-
-	private final String CRDPIPPORT = System.getenv().getOrDefault("CRDPIPPORT", "8090");
 	private final String BADDATATAG = System.getenv().getOrDefault("BADDATATAG", "999999999");
 	private final String DEFAULTREVEALUSER = System.getenv().getOrDefault("DEFAULTREVEALUSER", "admin");
 
@@ -56,11 +54,14 @@ public class SnowflakeCRDPController {
 	private final String DEFAULTEXTERNALNBRNBRPOLICY = System.getenv().getOrDefault("DEFAULTEXTERNALNBRNBRPOLICY",
 			"nbr-nbr-external");
 
+	public SnowflakeCRDPController(OkHttpClient client, CrdpProperties crdpProperties) {
+		this.client = client;
+		this.crdpProperties = crdpProperties;
+	}
+
 	// Only INPUT_FORMAT from properties file
 	@Value("${app.INPUT_FORMAT:external}")
 	private String INPUT_FORMAT;
-
-	private final String baseUrl = CRDPIP + ":" + CRDPIPPORT + "/v1/";
 
 	// === POJOs ===
 	// Updated to use Object to handle the mixed types [Integer, String] from
@@ -208,6 +209,7 @@ public class SnowflakeCRDPController {
 		case "nbrnbr-internal" -> DEFAULTINTERNALNBRNBRPOLICY;
 		default -> defaultPolicy;
 		};
+		logMetadataResolution("protect", mode, policy, metadata, headers, request.data.size());
 
    
 		
@@ -245,6 +247,7 @@ public class SnowflakeCRDPController {
 		case "nbrnbr-internal" -> DEFAULTINTERNALNBRNBRPOLICY;
 		default -> defaultPolicy;
 		};
+		logMetadataResolution("reveal", mode, policy, metadata, headers, request.data.size());
 
 		List<List<Object>> inputRows = request.data;
 		List<List<Object>> results = new ArrayList<>();
@@ -306,15 +309,15 @@ public class SnowflakeCRDPController {
 		log.debug("=== ======================= DEBUG ===");
 		log.debug("json: {}", json);
 		log.debug("endpoint: {}", endpoint);
-		log.debug("baseUrl: {}", baseUrl);
+		log.debug("baseUrl: {}", crdpProperties.getBaseUrl());
 		 
 
-		Request httpRequest = new Request.Builder().url(baseUrl + endpoint)
+		Request httpRequest = new Request.Builder().url(crdpProperties.getBaseUrl() + endpoint)
 				.post(okhttp3.RequestBody.create(json, jsonMediaType)).build();
 		
 	
 		try (Response response = client.newCall(httpRequest).execute()) {
-			ProtectResponse extResp = mapper.readValue(response.body().string(), ProtectResponse.class);
+			ProtectResponse extResp = mapper.readValue(readSuccessfulCrdpResponse(response, endpoint), ProtectResponse.class);
 
 			List<List<Object>> finalResult = new ArrayList<>();
 			if (extResp.protected_data_array != null && extResp.protected_data_array.size() == indexedValues.size()) {
@@ -399,15 +402,15 @@ public class SnowflakeCRDPController {
 		log.debug("=== ======================= DEBUG ===");
 		log.debug("json: {}", json);
 		log.debug("endpoint: {}", endpoint);
-		log.debug("baseUrl: {}", baseUrl);
+		log.debug("baseUrl: {}", crdpProperties.getBaseUrl());
 	 
 		log.debug("User: {}", revealUser);
 		
-		Request httpRequest = new Request.Builder().url(baseUrl + endpoint)
+		Request httpRequest = new Request.Builder().url(crdpProperties.getBaseUrl() + endpoint)
 				.post(okhttp3.RequestBody.create(json, jsonMediaType)).build();
 
 	try (Response response = client.newCall(httpRequest).execute()) {
-			RevealResponse extResp = mapper.readValue(response.body().string(), RevealResponse.class);
+			RevealResponse extResp = mapper.readValue(readSuccessfulCrdpResponse(response, endpoint), RevealResponse.class);
 
 			List<List<Object>> finalResult = new ArrayList<>();
 			if (extResp.data_array != null && extResp.data_array.size() == indexedValues.size()) {
@@ -440,6 +443,29 @@ public class SnowflakeCRDPController {
 
 	// === Helpers ===
 
+	private String readSuccessfulCrdpResponse(Response response, String endpoint) throws IOException {
+		if (!response.isSuccessful()) {
+			throw new IOException("CRDP " + endpoint + " request failed with HTTP " + response.code()
+					+ ". Verify the CRDP URL scheme, TLS mode, certificate trust, and CRDP service status.");
+		}
+
+		okhttp3.ResponseBody responseBody = response.body();
+		if (responseBody == null) {
+			throw new IOException("CRDP " + endpoint + " response did not include a body");
+		}
+		return responseBody.string();
+	}
+
+	private void logMetadataResolution(String operation, String mode, String policy, String metadata,
+			Map<String, String> headers, int rowCount) {
+		String suppliedMetadata = headers == null ? null : headers.get("metadata");
+		String metadataSource = suppliedMetadata == null || suppliedMetadata.isBlank()
+				? "DEFAULTMETADATA environment variable"
+				: "metadata request header";
+		log.debug("CRDP {} routing: mode={}, policy={}, metadataSource={}, metadataLength={}, rows={}",
+				operation, mode, policy, metadataSource, metadata == null ? 0 : metadata.length(), rowCount);
+	}
+
 
 	private String extractMode(Map<String, String> headers) {
 		String value = headers.get("mode");
@@ -469,14 +495,22 @@ public class SnowflakeCRDPController {
 	}
 	
 	private String extractRevealUser(Map<String, String> headers) {
-		String b64 = headers.get("sf-context-current_user");
-		if (b64 != null) {
-			try {
-				return new String(Base64.getDecoder().decode(b64), StandardCharsets.UTF_8);
-			} catch (Exception ignored) {
-			}
-		}
-		return DEFAULTREVEALUSER;
+	    if (headers == null || headers.isEmpty()) {
+	        return DEFAULTREVEALUSER != null ? DEFAULTREVEALUSER.toLowerCase() : null;
+	    }
+
+	    for (Map.Entry<String, String> entry : headers.entrySet()) {
+	        if ("sf-context-current-user".equalsIgnoreCase(entry.getKey())) {
+	            String user = entry.getValue();
+	            if (user != null && !user.trim().isEmpty()) {
+	                // Converting to lowercase guarantees consistency regardless of 
+	                // whether the user is native Snowflake, Okta, or Entra ID
+	                return user.trim().toLowerCase();
+	            }
+	        }
+	    }
+
+	    return DEFAULTREVEALUSER != null ? DEFAULTREVEALUSER.toLowerCase() : null;
 	}
 
 	// === Helpers ===

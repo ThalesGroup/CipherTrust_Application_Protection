@@ -1,0 +1,56 @@
+For setup
+This demo assumes you have deployed the two Thales containers in SPCS.  
+  
+Step 1: Populate Sample Data 
+Run demotables.sql
+
+Step 2: Data Classification & Tagging (via Cortex Code)
+Open Cortex Code (the white star icon on the blue background) and submit this prompt:
+
+
+"Run data classification on the NORTHSTAR_ANALYTICS database and apply a PII tag to all detected PII columns."
+
+Step 3: PII Encryption Workflow (With Dry-Run Review)
+Step 3A: Create the Encryption Stored Procedure
+Prompt Cortex Code to build the encryption procedure with DRY_RUN support:
+
+
+"Cortex, please create a Snowflake Scripting stored procedure named ENCRYPT_ALL_PII_TABLES(DRY_RUN BOOLEAN DEFAULT TRUE) in NORTHSTAR_ANALYTICS.PUBLIC. It should build dynamic UPDATE statements for PII-tagged columns using thales_crdp_scs_protectbulk_char and thales_crdp_scs_protectbulk_nbr_char. If DRY_RUN is TRUE, return the generated SQL statements in a table result without executing them. If DRY_RUN is FALSE, execute each statement.
+
+Step 3B: Review Output Before Executing
+Ask Cortex to run the preview mode:
+
+
+"Call CALL ENCRYPT_ALL_PII_TABLES(TRUE); so I can inspect the generated UPDATE statements."
+
+Step 3C: Execute the Encryption
+Once you confirm the SQL output is correct, ask Cortex to execute the live update:
+
+
+"The preview looks good. Please execute CALL ENCRYPT_ALL_PII_TABLES(FALSE);."
+
+Step 4: Unmasked View Creation Workflow (With Dry-Run Review)
+Step 4A: Create the View Generation Stored Procedure
+Prompt Cortex Code to build the view generation procedure with DRY_RUN support:
+
+
+"Cortex, please create a Snowflake Scripting stored procedure named CREATE_ALL_PII_REVEAL_VIEWS(DRY_RUN BOOLEAN DEFAULT TRUE) in NORTHSTAR_ANALYTICS.PUBLIC. It should generate CREATE OR REPLACE VIEW statements containing all original columns plus thales_crdp_scs_revealbulk_* transformed columns suffixed with _REVEALED. If DRY_RUN is TRUE, return the generated DDL statements without executing. If FALSE, execute the DDL statements.
+
+
+Step 4B: Review Output Before Executing
+Ask Cortex to preview the DDL:
+
+
+"Call CALL CREATE_ALL_PII_REVEAL_VIEWS(TRUE); so I can inspect the generated CREATE VIEW statements."
+
+Step 4C: Execute View Creation
+Execute the live view creation:
+
+
+"The view definitions look correct. Please execute CALL CREATE_ALL_PII_REVEAL_VIEWS(FALSE);."
+
+Step 5: Final Validation Query
+Ask Cortex to verify both the protected table state and unmasked view state:
+
+
+"Select 5 records from NORTHSTAR_ANALYTICS.PUBLIC.EMPLOYEES to show the encrypted columns, and select 5 records from NORTHSTAR_ANALYTICS.PUBLIC.EMPLOYEES_VW to show the unmasked _REVEALED columns side-by-side."
