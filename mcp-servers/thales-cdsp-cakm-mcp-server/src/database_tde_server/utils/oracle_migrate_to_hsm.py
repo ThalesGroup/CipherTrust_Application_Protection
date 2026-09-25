@@ -1,6 +1,17 @@
 """
-Oracle TDE Migration to HSM
-Migrate existing software wallet to HSM with or without auto-login
+Oracle TDE migration to HSM utilities
+
+This module provides utilities for migrating Oracle Transparent Data Encryption (TDE) from software keystores to HSM.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- migrate_to_hsm: Migrate Oracle TDE from software to HSM
+  - Migrates software keystores to HSM
+  - Handles wallet conversion and backup
+  - Configures HSM integration and settings
+  - Validates migration completion
+  - Supports auto-login preservation during migration
 """
 
 import logging

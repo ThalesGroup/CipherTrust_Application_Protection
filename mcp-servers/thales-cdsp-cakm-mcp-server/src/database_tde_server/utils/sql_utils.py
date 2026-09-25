@@ -1,5 +1,24 @@
 """
 SQL query building utilities for Database TDE operations
+
+This module provides utilities for building and managing SQL queries for Transparent Data Encryption (TDE) operations.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- build_connection_string: Builds database connection strings for SQL Server and Oracle
+- SQLServerQueryBuilder: SQL Server-specific query builder for TDE operations
+  - check_encryption_status: Builds queries to check SQL Server encryption status
+  - list_databases: Builds queries to list SQL Server databases
+  - create_master_key: Builds queries to create SQL Server master keys
+  - create_database_encryption_key: Builds queries to create database encryption keys
+  - encrypt_database: Builds queries to encrypt SQL Server databases
+- OracleQueryBuilder: Oracle-specific query builder for TDE operations
+  - list_containers: Builds queries to list Oracle containers (PDBs)
+  - check_tde_configuration: Builds queries to check Oracle TDE configuration
+  - generate_mek: Builds commands to generate Oracle Master Encryption Keys
+  - open_wallet: Builds commands to open Oracle wallets
+  - close_wallet: Builds commands to close Oracle wallets
 """
 
 import re
