@@ -1,0 +1,38 @@
+{% from "macros.html" import section_title, detail_item, badge_pill %}
+<div id="tab-clients" class="content-panel">
+    {{ section_title("fa-solid fa-address-card", "Registered Clients") }}
+
+    <div class="details-grid" style="margin-bottom: 1.5rem;">
+        {{ detail_item("Active Clients", analysis['clients']['metrics']['active_clients']) }}
+        {{ detail_item("Total Clients", analysis['clients']['metrics']['total_clients']) }}
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Connector</th>
+                    <th>IP/Hostname</th>
+                    <th>Created At</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in active_clients %}
+                <tr>
+                    <td><strong>{{ c.get("name") }}</strong></td>
+                    <td><code>{{ c.get("id") }}</code></td>
+                    <td>{{ c.get("client_metadata", {}).get("sub_client_type") or c.get("client_metadata", {}).get("client_type") or "N/A" }}</td>
+                    <td>{{ c.get("hostname") or "N/A" }}</td>
+                    <td>{{ format_readable_date(c.get("created_at")) }}</td>
+                    <td>{{ badge_pill(c.get("state"), "active") }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" style="text-align:center; color:var(--text-secondary);">No active clients found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

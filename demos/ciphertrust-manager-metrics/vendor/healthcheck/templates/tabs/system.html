@@ -1,0 +1,238 @@
+{% from "macros.html" import section_title, detail_item, badge_pill %}
+<div id="tab-system" class="content-panel">
+    {{ section_title("fa-solid fa-server", "System Information & Cluster") }}
+    <div class="details-grid">
+        {{ detail_item("Node Name", sys_info.get("name", "N/A")) }}
+        {{ detail_item("Model", sys_info.get("model", "N/A")) }}
+        {{ detail_item("Version", sys_info.get("version", "N/A") ~ " (" ~ sys_info.get("version_suffix", "N/A") ~ ")") }}
+        {{ detail_item("Uptime", sys_info.get("uptime", "N/A")) }}
+        {{ detail_item("Cluster Status", cluster_info.get("status", {}).get("description", "N/A")) }}
+        {{ detail_item("NTP Synced", "Yes" if analysis['system']['metrics']['ntp_synced'] else "No", "color: var(--pass-color)" if analysis['system']['metrics']['ntp_synced'] else "color: var(--fail-color)") }}
+        {{ detail_item("Disk Encryption", diskenc.get("encryptionStatus", "N/A")) }}
+        {{ detail_item("Attended Boot", "Enabled (Warning)" if diskenc.get("attendedBoot") else "Disabled", "color: var(--fail-color)" if diskenc.get('attendedBoot') else "color: var(--text-primary)") }}
+    </div>
+
+    {{ section_title("fa-solid fa-chart-pie", "Database & Domain Capacity Report", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="details-grid">
+        {{ detail_item("Keys (Current Domain)", cte_metrics.get("key_usage_count_this_domain", 0)) }}
+        {{ detail_item("Keys (Including Subdomains)", cte_metrics.get("key_usage_count_including_subdomains", 0)) }}
+        {{ detail_item("Direct Subdomains Count", cte_metrics.get("subdomain_count_this_domain", 0)) }}
+        {{ detail_item("Total Subdomains Count", cte_metrics.get("subdomain_count_including_subdomains", 0)) }}
+    </div>
+
+    {{ section_title("fa-solid fa-bars-progress", "System Services", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="details-grid" style="margin-bottom:1rem;">
+        {{ detail_item("Overall Services Status", services_status.get("status", "N/A"), "color: var(--pass-color)" if services_status.get('status') == 'started' else "color: var(--warn-color)") }}
+        {{ detail_item("Unhealthy/Disabled Services", (non_started_services | length | string) ~ " / " ~ (analysis['system']['metrics']['total_services_count'] | string), "color: var(--warn-color)" if non_started_services else "color: var(--pass-color)") }}
+    </div>
+    {% if non_started_services %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Service Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for svc in non_started_services %}
+                <tr>
+                    <td><strong>{{ svc.get("name") }}</strong></td>
+                    <td>{{ badge_pill(svc.get("status"), "inactive") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p style="color:var(--text-secondary); font-size:0.875rem;">All system services are in "started" state.</p>
+    {% endif %}
+
+    {{ section_title("fa-solid fa-chart-line", "Prometheus Metrics API", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="details-grid">
+        {{ detail_item("Status", "Enabled" if prom_enabled else "Disabled", "color: var(--pass-color)" if prom_enabled else "color: var(--warn-color)") }}
+        {% if prom_enabled %}
+        {{ detail_item("Token", metrics_status.get("token"), "font-family: monospace;") }}
+        {% endif %}
+    </div>
+
+    {{ section_title("fa-solid fa-vault", "Root-of-Trust Keys", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Key ID</th>
+                    <th>Created At</th>
+                    <th>Age (Days)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ rot_keys_html }}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_clustered %}
+    {{ section_title("fa-solid fa-network-wired", "Cluster Nodes", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Node ID</th>
+                    <th>Host/IP</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in cluster_nodes %}
+                <tr><td>{{ n.get("nodeID") }}</td><td>{{ n.get("host") }}</td><td>{{ n.get("role") }}</td></tr>
+                {% else %}
+                <tr><td colspan="3">Device is not running in a cluster.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if modified_properties %}
+    {{ section_title("fa-solid fa-gears", "Modified System Properties", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Property Name</th>
+                    <th>Current Value</th>
+                    <th>Default Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in modified_properties %}
+                <tr>
+                    <td><code>{{ p.get("name") }}</code></td>
+                    <td>{{ badge_pill(p.get("value"), "info") }}</td>
+                    <td><code>{{ p.get("default_value") if p.get("default_value") != "" else '""' }}</code></td>
+                    <td style="color:var(--text-secondary); font-size:0.8rem;">{{ p.get("description") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {{ section_title("fa-solid fa-globe", "Proxy Configurations", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="details-grid">
+        {{ detail_item("HTTP Proxy", masked_http) }}
+        {{ detail_item("HTTPS Proxy", masked_https) }}
+        {{ detail_item("No Proxy Exceptions", no_proxy_str) }}
+        {{ detail_item("Proxy Certificate Trusted", has_cert) }}
+    </div>
+
+    {{ section_title("fa-solid fa-clock", "NTP Peers status", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <pre class="json-pre" style="max-height: 200px;">{{ ntp_status.get("ntpq -p", "No NTP peers status info available.") }}</pre>
+
+    {{ section_title("fa-solid fa-database", "Backup History", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Backup ID</th>
+                    <th>Scope</th>
+                    <th>Created At</th>
+                    <th>Backup Key ID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in backups %}
+                <tr>
+                    <td>{{ b.get("id") }}</td>
+                    <td>{{ badge_pill(b.get("scope"), "active") }}</td>
+                    <td>{{ format_readable_date(b.get("createdAt")) }}</td>
+                    <td>{{ b.get("backupKey") }}</td>
+                    <td>{{ badge_pill(b.get("status"), "active") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-calendar-days", "Schedule Configurations", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Schedule Name</th>
+                    <th>Operation</th>
+                    <th>Schedule (Cron)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in scheduler_configs %}
+                <tr>
+                    <td><strong>{{ s.get("name") }}</strong></td>
+                    <td><code>{{ s.get("operation") }}</code></td>
+                    <td><code>{{ s.get("run_at") }}</code></td>
+                    <td>{{ badge_pill("Disabled" if s.get("disabled") else "Enabled", "info" if s.get("disabled") else "active") }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align:center;">No schedule configurations found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-bell", "Notification Configurations", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+
+    <h4 style="color:var(--text-primary); font-size:0.95rem; margin-top:1rem; margin-bottom:0.5rem;"><i class="fa-solid fa-envelope"></i> SMTP Server Settings</h4>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>SMTP Server</th>
+                    <th>Port</th>
+                    <th>Username</th>
+                    <th>Email From</th>
+                    <th>TCP Allowed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in smtp_servers %}
+                <tr>
+                    <td><strong>{{ s.get("server") or s.get("host") or "N/A" }}</strong></td>
+                    <td>{{ s.get("port") }}</td>
+                    <td>{{ s.get("username") or "None" }}</td>
+                    <td>{{ s.get("emailfrom") or "N/A" }}</td>
+                    <td>{{ "Yes" if s.get("allow-tcp") or s.get("allow_tcp") else "No" }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No SMTP servers configured.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h4 style="color:var(--text-primary); font-size:0.95rem; margin-top:1.5rem; margin-bottom:0.5rem;"><i class="fa-solid fa-users"></i> Recipient Email Addresses</h4>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Email Address</th>
+                    <th>Meta/Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in notification_emails %}
+                <tr>
+                    <td><strong>{{ e.get("emailaddr") }}</strong></td>
+                    <td>{{ e.get("meta") or "None" }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="2" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No notification email addresses configured.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

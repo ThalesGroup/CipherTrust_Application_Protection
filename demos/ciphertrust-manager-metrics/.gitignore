@@ -1,0 +1,48 @@
+# Python
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Secrets & local runtime state — never commit
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.db-*
+*.sqlite
+*.log
+*.pem
+*.key
+
+# Local deploy / scratch scripts (may contain host credentials)
+# Do not use _*.py — that also matches __init__.py
+_deploy*.py
+_redeploy*.py
+_push*.py
+_tmp*
+_*.txt
+_*.sh
+_*.json
+_res_out*
+
+# IDE
+.cursor/
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CipherTrust CLI binaries (large; Docker image bundles Linux ksctl)
+tools/ksctl
+tools/ksctl.exe
+tools/ksctl-linux-amd64
+tools/ksctl-*
+!tools/README.md

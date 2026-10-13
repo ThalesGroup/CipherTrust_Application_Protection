@@ -1,0 +1,72 @@
+{% from "macros.html" import section_title, detail_item, badge_pill %}
+<div id="tab-licensing" class="content-panel">
+    {{ section_title("fa-solid fa-file-invoice", "Appliance Licensing Details") }}
+    <div class="details-grid" style="margin-bottom: 1.5rem;">
+        {{ detail_item("Appliance Lock Code (called code)", analysis['licensing']['metrics']['lock_code'] or "N/A") }}
+        {{ detail_item("Connector Lock Code (called cluster_code)", analysis['licensing']['metrics']['cluster_lock_code'] or "N/A") }}
+        {{ detail_item("Active Trial Mode", "Yes (Trial Active)" if has_active_trial else "No", "color: var(--warn-color);" if has_active_trial else "color: var(--text-primary);") }}
+    </div>
+
+    {{ section_title("fa-solid fa-list-check", "Active Licensed Features", 3, "font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Friendly Name</th>
+                    <th>Product</th>
+                    <th>Status</th>
+                    <th>Days Remaining</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if features %}
+                {% for feat in features if feat.get("status") == "active" %}
+                <tr>
+                    <td><code>{{ feat.get("name") }}</code></td>
+                    <td>{{ feat.get("friendly_name") }}</td>
+                    <td>{{ feat.get("product") }}</td>
+                    <td>{{ badge_pill(feat.get("status"), "active") }}</td>
+                    <td>{{ (feat.get('trial_days_remaining') ~ " days") if feat.get("trial_days_remaining") is not none else "No expiration" }}</td>
+                    <td>{{ feat.get("license_count") }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="6" style="text-align:center; color:var(--text-secondary);">No active features found.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-receipt", "Installed Licenses (Active Only)", 3, "font-size: 1.1rem; margin-top: 1.5rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Feature</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>State</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set active_licenses = licenses | rejectattr("state", "equalto", "inactive") | list %}
+                {% for l in active_licenses %}
+                <tr>
+                    <td>{{ l.get("id") }}</td>
+                    <td><code>{{ l.get("feature") }}</code></td>
+                    <td>{{ l.get("friendly_name") }}</td>
+                    <td>{{ l.get("bind_type") }}</td>
+                    <td>{{ badge_pill(l.get("state"), "active") }}</td>
+                    <td>{{ l.get("license_count") }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" style="text-align:center; color:var(--text-secondary);">No active installed licenses found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

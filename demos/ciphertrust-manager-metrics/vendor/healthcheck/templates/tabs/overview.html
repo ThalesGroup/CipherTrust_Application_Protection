@@ -1,0 +1,7 @@
+{% from "macros.html" import section_title %}
+<div id="tab-overview" class="content-panel active">
+    {{ section_title("fa-solid fa-circle-info", "Healthcheck Findings Overview") }}
+    <div class="issues-list">
+        {{ findings_html }}
+    </div>
+</div>

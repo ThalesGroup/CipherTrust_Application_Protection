@@ -1,0 +1,63 @@
+{% from "macros.html" import section_title, detail_item, badge_pill %}
+<div id="tab-records" class="content-panel">
+    {{ section_title("fa-solid fa-scroll", "Recent Event Records (Severity Above Info, Last 7 Days)") }}
+
+    <div class="details-grid" style="margin-bottom: 1.5rem;">
+        {{ detail_item("Server Events (Error/Critical/Fatal)", analysis['records']['metrics']['significant_server_events']) }}
+        {{ detail_item("Client Events (Error/Critical/Fatal)", analysis['records']['metrics']['significant_client_events']) }}
+    </div>
+
+    {{ section_title("fa-solid fa-server", "Server Event Records", 3, "font-size: 1.1rem; border: none; padding: 0;") }}
+    <div class="table-container" style="margin-bottom: 1.5rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Created At</th>
+                    <th>Severity</th>
+                    <th>Service</th>
+                    <th>Source</th>
+                    <th>Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in server_records if (r.get("severity") or "").lower() in ("error", "critical", "fatal") %}
+                <tr>
+                    <td>{{ format_readable_date(r.get("created_at") or r.get("created") or r.get("time")) }}</td>
+                    <td>{{ badge_pill(r.get("severity"), "inactive") }}</td>
+                    <td>{{ r.get("service") or "N/A" }}</td>
+                    <td>{{ r.get("source") or "N/A" }}</td>
+                    <td>{{ r.get("message") or "N/A" }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No server events above Info severity in this window.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-laptop-code", "Client Event Records", 3, "font-size: 1.1rem; border: none; padding: 0;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Created At</th>
+                    <th>Severity</th>
+                    <th>Client</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in client_records if (r.get("severity") or "").lower() in ("error", "critical", "fatal") %}
+                <tr>
+                    <td>{{ format_readable_date(r.get("created_at") or r.get("created") or r.get("time")) }}</td>
+                    <td>{{ badge_pill(r.get("severity"), "inactive") }}</td>
+                    <td>{{ r.get("client") or "N/A" }}</td>
+                    <td>{{ r.get("event") or "N/A" }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align:center; color:var(--text-secondary);">No client events above Info severity in this window.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

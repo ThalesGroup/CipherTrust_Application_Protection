@@ -1,0 +1,110 @@
+{% from "macros.html" import section_title, badge_pill %}
+<div id="tab-network" class="content-panel">
+    {{ section_title("fa-solid fa-ethernet", "Service Interfaces & Network Integration") }}
+
+    {{ section_title("fa-solid fa-circle-nodes", "Interfaces", 3, "font-size: 1.1rem; border: none; padding: 0;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>NIC</th>
+                    <th>Port</th>
+                    <th>Mode</th>
+                    <th>Min TLS</th>
+                    <th>PQC Support</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in interfaces %}
+                <tr>
+                    <td><strong>{{ i.get("name") }}</strong></td>
+                    <td>{{ i.get("interface_type") }}</td>
+                    <td>{{ i.get("network_interface") }}</td>
+                    <td>{{ i.get("port") }}</td>
+                    <td><code style="color: {{ 'var(--fail-color)' if i.get('mode') in ['no-tls-pw-opt', 'no-tls-pw-req', 'unauth-tls-pw-opt', 'unauth-tls-pw-req'] else 'inherit' }}">{{ i.get("mode") or "N/A" }}</code></td>
+                    <td>{{ i.get("minimum_tls_version") or "N/A" }}</td>
+                    <td>
+                        {% set has_x25519 = i.get("tls_groups", []) | selectattr("group_name", "equalto", "X25519MLKEM768") | selectattr("enabled") | list %}
+                        {% set has_secp = i.get("tls_groups", []) | selectattr("group_name", "equalto", "SecP256r1MLKEM768") | selectattr("enabled") | list %}
+                        {% if has_x25519 and has_secp %}Yes (Hybrid){% elif i.get("tls_groups") %}No (Weak){% else %}N/A{% endif %}
+                    </td>
+                    <td>{{ badge_pill("Enabled" if i.get("enabled") else "Disabled", "active" if i.get("enabled") else "locked") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-file-shield", "Interface CAs", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>Trusted Local CAs</th>
+                    <th>Trusted External CAs</th>
+                    <th>Certificate User Field</th>
+                    <th>Local Auto Gen Attributes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ interface_ca_html }}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-list-check", "Log Forwarders", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Endpoint</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lf in log_forwarders %}
+                <tr>
+                    <td>{{ lf.get("name") }}</td>
+                    <td>{{ lf.get("type") }}</td>
+                    <td>{{ lf.get("endpoint") }}</td>
+                    <td>{{ badge_pill("Disabled" if lf.get("disabled") else "Active", "locked" if lf.get("disabled") else "active") }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">No external log forwarders configured.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-globe", "Custom DNS Entries (Host Records)", 3, "margin-top: 1.5rem; font-size: 1.1rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Host Name (FQDN)</th>
+                    <th>IP Addresses</th>
+                    <th>Type</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dns in dnshosts %}
+                <tr>
+                    <td><strong>{{ dns.get("name") }}</strong></td>
+                    <td>{{ dns.get("ips", []) | join(", ") }}</td>
+                    <td>{{ badge_pill(dns.get("type"), "active", "font-size:0.7rem;") }}</td>
+                    <td>{{ format_readable_date(dns.get("createdAt")) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No custom DNS host records configured.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
