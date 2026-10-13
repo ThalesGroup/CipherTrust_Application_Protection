@@ -10,10 +10,10 @@
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<azure.ai.textanalytics.version>5.2.2</azure.ai.textanalytics.version>
-		<json.version>20230227</json.version>
+		<json.version>20231013</json.version>
 		<commons.io.version>2.16.1</commons.io.version>
 		<pdfbox.version>2.0.29</pdfbox.version>
-		<poi.version>5.2.5</poi.version>
+		<poi.version>5.4.0</poi.version>
 		<cadp.version>8.18.0.001</cadp.version>
 	</properties>
 
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
-			<version>12.8.1.jre11</version>
+			<version>12.8.2.jre11</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.thalescpl-io.cadp</groupId>
