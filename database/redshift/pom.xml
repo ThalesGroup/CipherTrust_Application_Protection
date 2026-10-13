@@ -10,7 +10,7 @@
 		<properties>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
-		<commons-lang3.version>3.12.0</commons-lang3.version>
+		<commons-lang3.version>3.18.0</commons-lang3.version>
 		<commons-collections4.version>4.4</commons-collections4.version>
 		<bouncycastle.version>1.70</bouncycastle.version>
 		<org.apache.commons.codec.version>1.10
@@ -26,7 +26,7 @@
 			<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<version>${commons-lang3.version}</version>
 		</dependency>
 				<dependency>
 			<groupId>io.github.thalescpl-io.cadp</groupId>
