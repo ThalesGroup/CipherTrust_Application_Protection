@@ -47,7 +47,7 @@ class ServiceManagementTool(BaseTool):
             "required": ["action"],
         }
 
-    def execute(self, **kwargs: Any) -> Any:
+    async def execute(self, **kwargs: Any) -> Any:
         action = kwargs.get("action")
         params = kwargs.get("params", {})
         

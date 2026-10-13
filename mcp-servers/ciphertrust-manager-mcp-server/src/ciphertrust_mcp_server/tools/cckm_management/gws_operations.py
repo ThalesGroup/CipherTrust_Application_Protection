@@ -205,5 +205,6 @@ class GWSOperations(CCKMOperations):
             raise ValueError(f"Unsupported Google Workspace action: {action}")
         
         # Execute command
+        # Pass domain parameters to execute_command
         result = self.execute_command(cmd, params.get("domain"), params.get("auth_domain"))
         return result.get("data", result.get("stdout", "")) 

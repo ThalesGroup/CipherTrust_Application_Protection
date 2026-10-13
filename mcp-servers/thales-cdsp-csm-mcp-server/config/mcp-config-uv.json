@@ -1,0 +1,44 @@
+{
+  "mcpServers": {
+    "thales-cdsp-csm-stdio-cloud": {
+      "command": "uv",
+      "args": ["run", "python", "main.py", "--transport", "stdio"],
+      "env": {
+        "AKEYLESS_API_URL": "https://api.akeyless.io",
+        "AKEYLESS_ACCESS_ID": "your_access_id_here",
+        "AKEYLESS_ACCESS_KEY": "your_access_key_here",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "thales-cdsp-csm-stdio-onprem": {
+      "command": "uv",
+      "args": ["run", "python", "main.py", "--transport", "stdio"],
+      "env": {
+        "AKEYLESS_API_URL": "https://your-cm-hostname/akeyless-api/v2",
+        "AKEYLESS_ACCESS_ID": "your_access_id_here",
+        "AKEYLESS_ACCESS_KEY": "your_access_key_here",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "thales-cdsp-csm-http-cloud": {
+      "command": "uv",
+      "args": ["run", "python", "main.py", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000"],
+      "env": {
+        "AKEYLESS_API_URL": "https://api.akeyless.io",
+        "AKEYLESS_ACCESS_ID": "your_access_id_here",
+        "AKEYLESS_ACCESS_KEY": "your_access_key_here",
+        "LOG_LEVEL": "INFO"
+      }
+    },
+    "thales-cdsp-csm-http-onprem": {
+      "command": "uv",
+      "args": ["run", "python", "main.py", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8000"],
+      "env": {
+        "AKEYLESS_API_URL": "https://your-cm-hostname/akeyless-api/v2",
+        "AKEYLESS_ACCESS_ID": "your_access_id_here",
+        "AKEYLESS_ACCESS_KEY": "your_access_key_here",
+        "LOG_LEVEL": "INFO"
+      }
+    }
+  }
+} 

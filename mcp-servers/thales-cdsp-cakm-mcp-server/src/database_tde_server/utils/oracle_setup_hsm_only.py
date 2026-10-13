@@ -1,6 +1,20 @@
 """
-Oracle TDE Setup HSM Only
-Simple HSM-only TDE setup without auto-login
+Oracle TDE HSM-only setup utilities
+
+This module provides utilities for setting up Oracle Transparent Data Encryption (TDE) with HSM-only configuration.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- setup_oracle_hsm_only: Oracle TDE setup with HSM-only configuration
+  - Configures HSM provider and credentials
+  - Sets up HSM-only key management
+  - Creates HSM-enabled wallets without auto-login
+  - Validates HSM-only configuration
+- configure_hsm_provider: Configure HSM provider for Oracle TDE
+  - Sets up HSM provider configuration
+  - Configures HSM credentials and settings
+  - Validates HSM provider accessibility
 """
 
 import logging

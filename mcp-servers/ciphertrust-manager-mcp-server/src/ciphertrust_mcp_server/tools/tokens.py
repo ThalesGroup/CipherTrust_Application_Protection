@@ -30,24 +30,24 @@ class TokenListParams(BaseModel):
     revoked: bool = Field(False, description="Include revoked refresh tokens")
     user_id: Optional[str] = Field(None, description="ID of the user whose tokens to list")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to list tokens from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TokenGetParams(BaseModel):
     """Parameters for getting a token."""
     id: str = Field(..., description="Token ID")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to get token from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TokenDeleteParams(BaseModel):
     """Parameters for deleting a token."""
     id: str = Field(..., description="Token ID")
     # Domain support
-    domain: Optional[str] = Field(None, description="Domain to delete token from (defaults to global setting)")
-    auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    domain: Optional[str] = Field(None, description="The domain where the action/operation will be performed.")
+    auth_domain: Optional[str] = Field(None, description="The domain where the user is created. Defaults to 'root' if not specified.")
 
 
 class TokenRevokeParams(BaseModel):

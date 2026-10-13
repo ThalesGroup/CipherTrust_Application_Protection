@@ -58,8 +58,8 @@ class BaseTool(ABC):
         
         Args:
             args: Base command arguments (e.g., ["users", "list"])
-            domain: Optional domain override for this operation
-            auth_domain: Optional auth domain override for this operation
+            domain: The domain where the action/operation will be performed.
+            auth_domain: The domain where the user is created. Defaults to 'root' if not specified.
             
         Returns:
             Command execution result
@@ -118,13 +118,13 @@ class BaseTool(ABC):
             "domain": {
                 "anyOf": [{"type": "string"}, {"type": "null"}],
                 "default": None,
-                "description": "The CipherTrust Manager Domain that the command will operate in",
+                "description": "The CipherTrust Manager domain where the action, operation, or execution will be performed. This specifies the target environment for the command.",
                 "title": "Domain"
             },
             "auth_domain": {
                 "anyOf": [{"type": "string"}, {"type": "null"}],
                 "default": None,
-                "description": "The CipherTrust Manager Domain where the user is created",
+                "description": "The CipherTrust Manager domain where the user is created and authenticated. Unless explicitly specified, this defaults to 'root'. This is used for access control and does not affect the command's execution target.",
                 "title": "Auth Domain"
             }
         }

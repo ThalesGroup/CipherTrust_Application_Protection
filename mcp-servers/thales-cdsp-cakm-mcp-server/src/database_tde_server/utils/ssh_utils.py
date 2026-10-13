@@ -1,3 +1,21 @@
+"""
+SSH connectivity utilities for Database TDE operations
+
+This module provides SSH utilities for remote database operations in Transparent Data Encryption (TDE) implementations.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- OracleSSHManager: SSH manager for Oracle server operations with enhanced key handling
+  - connect: Establishes SSH connection to Oracle server
+  - disconnect: Closes SSH connection and cleans up resources
+  - execute_command: Executes commands on remote Oracle server
+  - upload_file: Uploads files to remote Oracle server
+  - download_file: Downloads files from remote Oracle server
+  - list_oracle_databases: Lists all Oracle container databases on the server
+  - ensure_connected: Ensures SSH connection is established
+  - is_connected: Checks if SSH connection is active
+"""
 import paramiko
 import logging
 import time

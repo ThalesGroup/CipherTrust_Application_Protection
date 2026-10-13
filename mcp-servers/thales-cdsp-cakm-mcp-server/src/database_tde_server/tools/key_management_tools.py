@@ -1,5 +1,21 @@
 """
-Unified key management tools for SQL Server and Oracle databases
+Database TDE key management tools
+
+This module provides tools for managing encryption keys for Transparent Data Encryption (TDE) operations.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available tools:
+- manage_sql_keys: Manage SQL Server cryptographic keys (create, list, drop, rotate)
+  - Operations: create, list, drop, drop_unused, rotate_master, rotate_dek
+  - Creates asymmetric keys in EKM providers
+  - Manages key lifecycle and rotation
+  - Handles key cleanup and validation
+- manage_oracle_keys: Manage Oracle Master Encryption Keys (generate, rotate, list)
+  - Operations: generate, rotate, list
+  - Generates Master Encryption Keys (MEK) for Oracle
+  - Rotates existing keys with backup creation
+  - Lists key information and status
 """
 
 import json

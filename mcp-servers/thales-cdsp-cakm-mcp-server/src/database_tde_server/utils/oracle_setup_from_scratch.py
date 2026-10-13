@@ -1,6 +1,22 @@
 """
-Oracle TDE Setup From Scratch
-Complete TDE setup with HSM + auto-login configuration
+Oracle TDE setup from scratch utilities
+
+This module provides utilities for complete Oracle Transparent Data Encryption (TDE) setup from scratch.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- setup_oracle_tde_from_scratch: Complete Oracle TDE setup from scratch
+  - Creates Oracle wallet directory and structure
+  - Generates Master Encryption Keys (MEK)
+  - Configures TDE parameters and settings
+  - Sets up auto-login functionality
+  - Validates complete TDE setup
+- setup_oracle_tde_with_hsm: Oracle TDE setup with HSM integration
+  - Configures HSM provider and credentials
+  - Sets up HSM-based key management
+  - Creates HSM-enabled wallets
+  - Validates HSM integration
 """
 
 import logging

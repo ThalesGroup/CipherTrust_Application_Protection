@@ -152,7 +152,7 @@ class KsctlManager:
         if settings.debug_mode:
             logger.debug(f"Executing: {' '.join(sanitize_command_args(cmd))}")
         else:
-            logger.info(f"Executing ksctl command: {args[0] if args else 'unknown'}")
+            logger.info(f"Executing ksctl command: {' '.join(sanitize_command_args(cmd))}")
         
         try:
             result = subprocess.run(
