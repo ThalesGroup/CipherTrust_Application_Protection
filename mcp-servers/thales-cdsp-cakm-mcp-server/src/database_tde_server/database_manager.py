@@ -1,5 +1,12 @@
 """
 Database manager for handling multiple database types and connections
+
+This module provides database connection management for Transparent Data Encryption (TDE)
+operations. Database encryption and encryption key management are handled by Thales CipherTrust
+Application Key Management (CAKM) connector, which is integrated with Thales CDSP
+(CipherTrust Data Security Platform).
+
+Manages connections to SQL Server and Oracle databases, providing unified interfaces for TDE operations.
 """
 
 import logging

@@ -1,6 +1,20 @@
 """
-Oracle TDE Setup Auto-login for Existing TDE
-Setup auto-login wallet for databases that already have TDE enabled
+Oracle TDE auto-login setup utilities
+
+This module provides utilities for setting up Oracle Transparent Data Encryption (TDE) auto-login functionality.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available utilities:
+- setup_oracle_autologin_existing: Setup auto-login for existing Oracle TDE
+  - Creates auto-login wallet from existing keystore
+  - Configures auto-login functionality
+  - Sets up wallet permissions and accessibility
+  - Validates auto-login configuration
+- setup_oracle_autologin_hsm: Setup auto-login for HSM migration
+  - Configures auto-login for HSM-based wallets
+  - Sets up HSM credentials in auto-login wallet
+  - Validates HSM auto-login configuration
 """
 
 import logging

@@ -1,5 +1,17 @@
 """
-Oracle TDE wallet management tools.
+Oracle TDE wallet management tools
+
+This module provides tools for managing Oracle Transparent Data Encryption (TDE) wallets.
+Database encryption and encryption key management are handled by Thales CipherTrust Application Key Management (CAKM)
+connector, which is integrated with Thales CDSP (CipherTrust Data Security Platform).
+
+Available tools:
+- manage_oracle_wallet: Comprehensive Oracle wallet management
+  - Operations: open, close, status, backup, merge, autologin
+  - Autologin operations: create, update, remove, setup, setup_hsm, update_secret
+  - Supports container-aware operations across CDB and PDBs
+  - Handles FILE and HSM wallet types
+  - Provides detailed wallet status and configuration management
 """
 
 import json

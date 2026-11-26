@@ -1,8 +1,10 @@
 """Key management tools for CipherTrust Manager with built-in domain support."""
 
+import base64
 import json
-import tempfile
 import os
+import secrets
+import tempfile
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field
@@ -46,7 +48,13 @@ class KeyCreateParams(BaseModel):
     aliases: Optional[str] = Field(None, description="Comma-separated list of aliases")
     
     # Key material and format
-    material: Optional[str] = Field(None, description="Key material (hex or base64)")
+    material: Optional[str] = Field(
+        None, 
+        description="Key material. Format depends on algorithm: "
+                   "AES/TDES/HMAC/SEED/ARIA: hex-encoded bytes; "
+                   "RSA/EC: PKCS8 PEM format; "
+                   "X.509: PEM certificate with \\n line breaks"
+    )
     format: Optional[str] = Field(None, description="Key format (pkcs1, pkcs8, base64, etc.)")
     encoding: Optional[str] = Field(None, description="Encoding for material (hex, base64)")
     include_material: bool = Field(False, description="Include key material in response")
@@ -82,7 +90,7 @@ class KeyCreateParams(BaseModel):
     cte_permissions_groups: Optional[str] = Field(None, description="Comma-separated groups for permissions (default: 'CTE Clients')")
     cte_encryption_mode: Optional[str] = Field(None, description="CTE encryption mode: CBC, CBC_CS1, or XTS (default: CBC)")
     
-    # ===== NEWLY ADDED PARAMETERS =====
+    # Additional parameters
     
     # Critical missing parameters
     ret: bool = Field(False, description="Return existing key with same name if it exists")
@@ -133,6 +141,168 @@ class KeyCreateParams(BaseModel):
     defaultiv: Optional[str] = Field(None, description="Deprecated: Default IV (hex encoded)")
     usage: Optional[str] = Field(None, description="Deprecated: Key usage (use usage_mask instead)")
 
+    def calculate_material_size(self) -> int:
+        """Calculate material size in bits."""
+        if not self.material:
+            return 0
+        
+        if self.encoding == 'hex':
+            return len(self.material) * 4  # 4 bits per hex char
+        elif self.encoding == 'base64':
+            return len(self.material) * 6  # 6 bits per base64 char
+        return len(self.material) * 8  # Assume bytes
+
+    def get_material_format_help(self) -> str:
+        """Return format guidance based on algorithm."""
+        help_text = {
+            'AES': "hex-encoded bytes (e.g., 'a1b2c3d4...')",
+            'TDES': "hex-encoded bytes (e.g., 'a1b2c3d4e5f6789012345678901234567890abcdef123456')",
+            'HMAC-SHA256': "hex-encoded bytes (e.g., 'deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678')",
+            'RSA': "PKCS8 PEM format (e.g., '-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----')",
+            'EC': "PKCS8 PEM format for private key",
+            'X.509': "PEM certificate format with \\n line breaks"
+        }
+        return help_text.get(self.algorithm.upper(), "Check algorithm documentation")
+
+    def validate_material_format(self) -> bool:
+        """Validate material format based on algorithm."""
+        if not self.material:
+            return True
+        
+        algorithm_upper = self.algorithm.upper()
+        
+        # Symmetric keys (AES, TDES, HMAC, SEED, ARIA)
+        if algorithm_upper in ['AES', 'TDES', 'HMAC-SHA1', 'HMAC-SHA256', 'HMAC-SHA384', 'HMAC-SHA512', 'SEED', 'ARIA']:
+            # Validate hex format
+            if not all(c in '0123456789abcdefABCDEF' for c in self.material):
+                raise ValueError(f"Material for {algorithm_upper} must be hex-encoded. {self.get_material_format_help()}")
+            
+            # Validate size
+            expected_bits = self.size or 256
+            actual_bits = len(self.material) * 4  # 4 bits per hex char
+            if actual_bits != expected_bits:
+                raise ValueError(f"Material length: {actual_bits} bits, expected: {expected_bits} bits. {self.get_material_format_help()}")
+        
+        # RSA keys
+        elif algorithm_upper == 'RSA':
+            if not self.material.startswith('-----BEGIN PRIVATE KEY-----'):
+                raise ValueError(f"RSA material must be PKCS8 PEM format. {self.get_material_format_help()}")
+            if '-----END PRIVATE KEY-----' not in self.material:
+                raise ValueError(f"RSA material must end with '-----END PRIVATE KEY-----'. {self.get_material_format_help()}")
+        
+        # EC keys
+        elif algorithm_upper == 'EC':
+            if not self.material.startswith('-----BEGIN PRIVATE KEY-----'):
+                raise ValueError(f"EC material must be PKCS8 PEM format. {self.get_material_format_help()}")
+            if '-----END PRIVATE KEY-----' not in self.material:
+                raise ValueError(f"EC material must end with '-----END PRIVATE KEY-----'. {self.get_material_format_help()}")
+        
+        # Certificates
+        elif self.object_type == 'Certificate':
+            if self.cert_type == 'x509-pem':
+                if not self.material.startswith('-----BEGIN CERTIFICATE-----'):
+                    raise ValueError(f"X.509 PEM certificate must start with '-----BEGIN CERTIFICATE-----'. {self.get_material_format_help()}")
+                if '-----END CERTIFICATE-----' not in self.material:
+                    raise ValueError(f"X.509 PEM certificate must end with '-----END CERTIFICATE-----'. {self.get_material_format_help()}")
+            
+            elif self.cert_type == 'x509-der':
+                if not all(c in '0123456789abcdefABCDEF' for c in self.material):
+                    raise ValueError(f"X.509 DER certificate must be hex-encoded. {self.get_material_format_help()}")
+        
+        return True
+
+    def convert_material_format(self) -> Optional[str]:
+        """Attempt to convert material to the expected format."""
+        print(f"DEBUG: Attempting to convert material: {self.material}")
+        if not self.material:
+            return None
+        
+        algorithm_upper = self.algorithm.upper()
+        
+        if algorithm_upper in ['AES', 'TDES', 'HMAC-SHA1', 'HMAC-SHA256', 'HMAC-SHA384', 'HMAC-SHA512', 'SEED', 'ARIA']:
+            material_clean = self.material.strip().replace(' ', '').replace('\\n', '').replace('\\r', '')
+            print(f"DEBUG: Cleaned material: {material_clean}")
+            if len(material_clean) % 4 == 0 and all(c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=' for c in material_clean):
+                try:
+                    decoded = base64.b64decode(material_clean)
+                    hex_material = decoded.hex()
+                    print(f"DEBUG: Converted from Base64 to Hex: {hex_material}")
+                    return hex_material
+                except Exception as e:
+                    print(f"DEBUG: Base64 decoding failed: {e}")
+                    pass
+            elif all(c in '0123456789abcdefABCDEF ' for c in material_clean):
+                hex_material = ''.join(c for c in material_clean if c in '0123456789abcdefABCDEF').lower()
+                print(f"DEBUG: Cleaned hex material: {hex_material}")
+                return hex_material
+
+        elif algorithm_upper in ['RSA', 'EC']:
+            material_clean = self.material.strip().replace('\\n', '\n')
+            print(f"DEBUG: Cleaned PEM material: {material_clean}")
+            if '-----BEGIN' in material_clean and '-----END' in material_clean and '\n' not in material_clean.strip():
+                 pem_type = "PRIVATE KEY" if "PRIVATE KEY" in material_clean else "CERTIFICATE"
+                 start_marker = f"-----BEGIN {pem_type}-----"
+                 end_marker = f"-----END {pem_type}-----"
+                 start_index = material_clean.find(start_marker) + len(start_marker)
+                 end_index = material_clean.find(end_marker)
+                 body = material_clean[start_index:end_index].replace(" ", "").replace("\n", "")
+                 formatted_body = '\n'.join([body[i:i+64] for i in range(0, len(body), 64)])
+                 pem_material = f"{start_marker}\n{formatted_body}\n{end_marker}"
+                 print(f"DEBUG: Formatted PEM material: {pem_material}")
+                 return pem_material
+            return material_clean
+
+        print("DEBUG: No conversion applied.")
+        return None
+
+    def validate_and_convert_material(self) -> dict:
+        """Validate material format and attempt conversion if needed."""
+        try:
+            self.validate_material_format()
+            return {"valid": True, "converted": False}
+        except ValueError as e:
+            original_error = str(e)
+            converted_material = self.convert_material_format()
+            if converted_material:
+                original_material_val = self.material
+                self.material = converted_material
+                try:
+                    self.validate_material_format()
+                    return {"valid": True, "converted": True, "new_material": self.material, "original_error": original_error}
+                except ValueError as e2:
+                    self.material = original_material_val
+                    return {"valid": False, "error": original_error, "conversion_error": str(e2)}
+            return {"valid": False, "error": original_error}
+
+    def generate_test_key_material(self) -> Optional[str]:
+        """Generate test key material for the specified algorithm."""
+        
+        algorithm_upper = self.algorithm.upper()
+        
+        if algorithm_upper == 'AES':
+            size_bytes = (self.size or 256) // 8
+            return secrets.token_hex(size_bytes)
+        
+        elif algorithm_upper == 'TDES':
+            return secrets.token_hex(24)  # 192 bits = 24 bytes
+        
+        elif algorithm_upper.startswith('HMAC'):
+            size_bytes = (self.size or 256) // 8
+            return secrets.token_hex(size_bytes)
+        
+        return None
+
+    def validate_import_parameters(self) -> dict:
+        """Validate import parameters without creating the key."""
+        result = self.validate_and_convert_material()
+        result.update({
+            "material_size_bits": self.calculate_material_size(),
+            "format_help": self.get_material_format_help(),
+            "algorithm": self.algorithm,
+            "size": self.size
+        })
+        return result
+
 
 class KeyGetParams(BaseModel):
     """Parameters for getting a key."""
@@ -163,10 +333,44 @@ class KeyModifyParams(BaseModel):
     labels: Optional[str] = Field(None, description="Labels to add/modify")
     remove_labels: Optional[str] = Field(None, description="Labels to remove")
     rotation_frequency_days: Optional[str] = Field(None, description="Auto-rotation frequency")
+    
+    # Key property flags
+    undeletable: Optional[bool] = Field(None, description="Set key as undeletable (true) or deletable (false)")
+    unexportable: Optional[bool] = Field(None, description="Set key as unexportable (true) or exportable (false)")
+    
+    # JSON file support
     jsonfile: Optional[str] = Field(None, description="JSON file with modification parameters")
+    json_content: Optional[str] = Field(None, description="JSON content for modification (alternative to jsonfile)")
+    
     # Domain support
     domain: Optional[str] = Field(None, description="Domain to modify key in (defaults to global setting)")
     auth_domain: Optional[str] = Field(None, description="Authentication domain (defaults to global setting)")
+    
+    def create_json_file(self) -> Optional[str]:
+        """Create a temporary JSON file with modification parameters."""
+        
+        mod_data = {}
+        
+        if self.description is not None:
+            mod_data["description"] = self.description
+        
+        if self.undeletable is not None:
+            mod_data["undeletable"] = self.undeletable
+            
+        if self.unexportable is not None:
+            mod_data["unexportable"] = self.unexportable
+            
+        if self.rotation_frequency_days is not None:
+            mod_data["rotationFrequencyDays"] = self.rotation_frequency_days
+        
+        if not mod_data:
+            return None
+            
+        temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(mod_data, temp_file, indent=2)
+        temp_file.close()
+        
+        return temp_file.name
 
 
 # Lifecycle Parameter Models
@@ -435,6 +639,19 @@ class KeyCreateTool(BaseTool):
         """Execute key create command with full parameter support."""
         params = KeyCreateParams(**kwargs)
         
+        # Pre-validate material format if material is provided
+        if params.material:
+            validation_result = params.validate_and_convert_material()
+            if not validation_result["valid"]:
+                return {
+                    "error": "Material format validation failed",
+                    "details": validation_result.get("error"),
+                    "format_help": params.get_material_format_help(),
+                    "conversion_error": validation_result.get("conversion_error")
+                }
+            if validation_result.get("converted"):
+                params.material = validation_result.get("new_material", params.material)
+        
         # Handle CTE key creation (existing logic preserved)
         if params.cte_key_type:
             # Build the full key JSON structure
@@ -456,92 +673,50 @@ class KeyCreateTool(BaseTool):
             if params.owner_id:
                 key_json["meta"] = key_json.get("meta", {})
                 key_json["meta"]["ownerId"] = params.owner_id
-            
-            # Build meta object for CTE keys
-            permissions_groups = params.cte_permissions_groups.split(",") if params.cte_permissions_groups else ["CTE Clients"]
-            if "meta" not in key_json:
-                key_json["meta"] = {}
+                
+            # Add CTE-specific attributes
+            key_json["meta"] = key_json.get("meta", {})
             key_json["meta"]["permissions"] = {
-                "ExportKey": permissions_groups,
-                "ReadKey": permissions_groups
+                "ExportKey": params.cte_permissions_groups.split(',') if params.cte_permissions_groups else ["CTE Clients"],
+                "ReadKey": params.cte_permissions_groups.split(',') if params.cte_permissions_groups else ["CTE Clients"]
             }
-            key_json["meta"]["cte"] = {}
+            key_json["meta"]["cte"] = {
+                "persistent_on_client": params.cte_persistent_on_client if params.cte_persistent_on_client is not None else True,
+                "encryption_mode": params.cte_encryption_mode.upper() if params.cte_encryption_mode else "CBC",
+                "cte_versioned": params.cte_key_type == 'ldt'
+            }
             
-            # Determine encryption mode
-            encryption_mode = params.cte_encryption_mode or "CBC"  # Default to CBC
-            
-            # Validate encryption mode based on xts flag
-            if encryption_mode in ["CBC_CS1", "XTS"] and not params.xts:
-                raise ValueError(f"Encryption mode '{encryption_mode}' requires xts flag to be true")
-            
-            # Configure based on CTE key type
-            if params.cte_key_type == "standard":
-                key_json["meta"]["cte"]["cte_versioned"] = False
-                key_json["meta"]["cte"]["encryption_mode"] = encryption_mode
-                key_json["xts"] = params.xts
-            elif params.cte_key_type == "ldt":
-                key_json["meta"]["cte"]["cte_versioned"] = True
-                key_json["meta"]["cte"]["encryption_mode"] = encryption_mode
-                key_json["xts"] = params.xts
-            elif params.cte_key_type == "xts":
-                key_json["meta"]["cte"]["cte_versioned"] = True
-                key_json["meta"]["cte"]["encryption_mode"] = "XTS"  # Force XTS for xts type
+            if params.cte_key_type == 'xts' or (params.cte_encryption_mode and params.cte_encryption_mode.upper() == 'XTS'):
                 key_json["xts"] = True
             
-            # Add optional CTE settings
-            if params.cte_persistent_on_client is not None:
-                key_json["meta"]["cte"]["persistent_on_client"] = params.cte_persistent_on_client
+            # Convert to JSON string and create temporary file
             
-            # Add other parameters if specified
-            if params.description:
-                key_json["description"] = params.description
-            if params.labels:
-                # Convert labels string to dictionary
-                labels_dict = {}
-                for label in params.labels.split(","):
-                    if "=" in label:
-                        key, value = label.split("=", 1)
-                        labels_dict[key.strip()] = value.strip()
-                key_json["labels"] = labels_dict
-            if params.aliases:
-                key_json["aliases"] = [{"alias": alias.strip(), "type": "string"} for alias in params.aliases.split(",")]
-            if params.usage_mask is not None:
-                key_json["usage_mask"] = params.usage_mask
+            temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+            json.dump(key_json, temp_file, indent=2)
+            temp_file.close()
             
-            # Write to temporary JSON file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                json.dump(key_json, f, indent=2)
-                temp_file = f.name
+            # Execute with jsonfile
+            args = ["keys", "create", "--jsonfile", temp_file.name]
+            result = self.execute_with_domain(args, params.domain, params.auth_domain)
             
-            try:
-                args = ["keys", "create", "--jsonfile", temp_file]
-                if params.include_material:
-                    args.append("--include-material")
-                if params.ret:
-                    args.append("--ret")
-                
-                result = self.execute_with_domain(args, params.domain, params.auth_domain)
-                return result.get("data", result.get("stdout", ""))
-            finally:
-                # Clean up temp file
-                os.unlink(temp_file)
-        
-        # Original implementation for non-CTE keys
+            # Clean up temporary file
+            os.unlink(temp_file.name)
+            
+            return result.get("data", result.get("stdout", ""))
+            
+        # Standard key creation (non-CTE)
         args = ["keys", "create"]
         
-        # Basic parameters
+        # Add all other parameters
         if params.name:
             args.extend(["--name", params.name])
-        if params.autoname:
+        elif params.autoname:
             args.append("--autoname")
         
-        # Only add algorithm and size if NOT using a template
-        # Templates define these attributes and adding them would override the template
-        if not params.template_id:
+        if params.algorithm:
             args.extend(["--alg", params.algorithm])
-            if params.size:
-                args.extend(["--size", str(params.size)])
-        
+        if params.size:
+            args.extend(["--size", str(params.size)])
         if params.curve_id:
             args.extend(["--curve-id", params.curve_id])
         if params.usage_mask is not None:
@@ -560,16 +735,18 @@ class KeyCreateTool(BaseTool):
             args.extend(["--format", params.format])
         if params.encoding:
             args.extend(["--encoding", params.encoding])
+        if params.include_material:
+            args.append("--include-material")
+        if params.empty_material:
+            args.append("--empty-material")
+        
+        # Key properties
         if params.xts:
             args.append("--xts")
         if params.undeletable:
             args.append("--nodelete")
         if params.unexportable:
             args.append("--noexport")
-        if params.include_material:
-            args.append("--include-material")
-        if params.empty_material:
-            args.append("--empty-material")
         
         # Object and certificate types
         if params.object_type:
@@ -583,7 +760,7 @@ class KeyCreateTool(BaseTool):
         if params.jsonfile:
             args.extend(["--jsonfile", params.jsonfile])
         
-        # Wrapping parameters
+        # Wrapping and encryption
         if params.wrap_key_name:
             args.extend(["--wrap-key-name", params.wrap_key_name])
         if params.wrap_public_key:
@@ -593,13 +770,10 @@ class KeyCreateTool(BaseTool):
         if params.rotation_frequency_days:
             args.extend(["--rotation-frequency-days", params.rotation_frequency_days])
         
-        # ===== NEW PARAMETERS =====
-        
         # Critical missing parameters
         if params.ret:
             args.append("--ret")
         if params.template_id:
-            # Use template name directly with ksctl --templateId
             args.extend(["--templateId", params.template_id])
         if params.owner_id:
             args.extend(["--ownerid", params.owner_id])
@@ -759,19 +933,35 @@ class KeyModifyTool(BaseTool):
         args = ["keys", "modify", "--name", params.name]
         if params.type:
             args.extend(["--type", params.type])
-        if params.description:
-            args.extend(["--description", params.description])
         if params.labels:
             args.extend(["--labels", params.labels])
         if params.remove_labels:
             args.extend(["--remove-labels", params.remove_labels])
-        if params.rotation_frequency_days:
-            args.extend(["--rotation-frequency-days", params.rotation_frequency_days])
-        if params.jsonfile:
-            args.extend(["--jsonfile", params.jsonfile])
         
-        result = self.execute_with_domain(args, params.domain, params.auth_domain)
-        return result.get("data", result.get("stdout", ""))
+        json_file_path = None
+        try:
+            if params.jsonfile:
+                json_file_path = params.jsonfile
+            elif params.json_content:
+                temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+                json.dump(json.loads(params.json_content), temp_file, indent=2)
+                temp_file.close()
+                json_file_path = temp_file.name
+            else:
+                json_file_path = params.create_json_file()
+            
+            if json_file_path:
+                args.extend(["--jsonfile", json_file_path])
+            
+            result = self.execute_with_domain(args, params.domain, params.auth_domain)
+            return result.get("data", result.get("stdout", ""))
+            
+        finally:
+            if json_file_path and json_file_path != params.jsonfile:
+                try:
+                    os.unlink(json_file_path)
+                except:
+                    pass
 
 
 # Lifecycle Tools
@@ -1174,35 +1364,6 @@ class KeyListLabelsTool(BaseTool):
 
 
 # Export all key tools
-KEY_TOOLS = [
-    # Core CRUD
-    KeyListTool,
-    KeyCreateTool,
-    KeyGetTool,
-    KeyDeleteTool,
-    KeyModifyTool,
-    
-    # Lifecycle
-    KeyArchiveTool,
-    KeyRecoverTool,
-    KeyRevokeTool,
-    KeyReactivateTool,
-    KeyDestroyTool,
-    
-    # Operations
-    KeyExportTool,
-    KeyCloneTool,
-    KeyGenerateKcvTool,
-    
-    # Aliases
-    KeyAliasAddTool,
-    KeyAliasDeleteTool,
-    KeyAliasModifyTool,
-    
-    # Advanced
-    KeyQueryTool,
-    KeyListLabelsTool,
-]
 
 class KeyManagementTool(BaseTool):
     name = "key_management"
@@ -1213,7 +1374,7 @@ class KeyManagementTool(BaseTool):
             "type": "object",
             "properties": {
                 "action": {"type": "string", "enum": [
-                    "list", "create", "get", "delete", "modify", "archive", "recover", "revoke", "reactivate", "destroy", "export", "clone", "generate_kcv", "alias_add", "alias_delete", "alias_modify", "query", "list_labels"
+                    "list", "create", "get", "delete", "modify", "archive", "recover", "revoke", "reactivate", "destroy", "export", "clone", "generate_kcv", "alias_add", "alias_delete", "alias_modify", "query", "list_labels", "validate_import", "generate_test_key_material"
                 ]},
                 # List parameters
                 "limit": {"type": "integer", "default": 10},
@@ -1283,7 +1444,7 @@ class KeyManagementTool(BaseTool):
                 # Modify parameters
                 "remove_labels": {"type": "string"},
                 
-                # ===== NEW PARAMETERS =====
+                # Additional parameters
                 
                 # Critical missing parameters
                 "ret": {"type": "boolean", "default": False, "description": "Return existing key with same name if it exists"},
@@ -1332,7 +1493,10 @@ class KeyManagementTool(BaseTool):
                 
                 # Deprecated but supported
                 "defaultiv": {"type": "string", "description": "Deprecated: Default IV (hex encoded)"},
-                "usage": {"type": "string", "description": "Deprecated: Key usage (use usage_mask instead)"}
+                "usage": {"type": "string", "description": "Deprecated: Key usage (use usage_mask instead)"},
+                # Test material generation parameters
+                "count": {"type": "integer", "default": 1, "description": "Number of test materials to generate"},
+                "format": {"type": "string", "enum": ["hex", "pem"], "description": "Output format"}
             },
             "required": ["action"]
         }
@@ -1472,10 +1636,17 @@ class KeyManagementTool(BaseTool):
             # Templates define these attributes and adding them would override the template
             if not params.template_id:
                 args.extend(["--alg", params.algorithm])
-                if params.size:
+                # For EC keys, use curve_id instead of size to avoid conflicts
+                if params.algorithm.upper() == "EC":
+                    if params.curve_id:
+                        args.extend(["--curve-id", params.curve_id])
+                    else:
+                        # Default to a standard curve if none specified
+                        args.extend(["--curve-id", "prime256v1"])
+                elif params.size:  # For non-EC keys, use size parameter
                     args.extend(["--size", str(params.size)])
             
-            if params.curve_id:
+            if params.curve_id and params.algorithm.upper() != "EC":
                 args.extend(["--curve-id", params.curve_id])
             if params.usage_mask is not None:
                 args.extend(["--usage-mask", str(params.usage_mask)])
@@ -1608,18 +1779,35 @@ class KeyManagementTool(BaseTool):
             args = ["keys", "modify", "--name", params.name]
             if params.type:
                 args.extend(["--type", params.type])
-            if params.description:
-                args.extend(["--description", params.description])
             if params.labels:
                 args.extend(["--labels", params.labels])
             if params.remove_labels:
                 args.extend(["--remove-labels", params.remove_labels])
-            if params.rotation_frequency_days:
-                args.extend(["--rotation-frequency-days", params.rotation_frequency_days])
-            if params.jsonfile:
-                args.extend(["--jsonfile", params.jsonfile])
-            result = self.execute_with_domain(args, params.domain, params.auth_domain)
-            return result.get("data", result.get("stdout", ""))
+            
+            json_file_path = None
+            try:
+                if params.jsonfile:
+                    json_file_path = params.jsonfile
+                elif params.json_content:
+                    temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+                    json.dump(json.loads(params.json_content), temp_file, indent=2)
+                    temp_file.close()
+                    json_file_path = temp_file.name
+                else:
+                    json_file_path = params.create_json_file()
+                
+                if json_file_path:
+                    args.extend(["--jsonfile", json_file_path])
+                
+                result = self.execute_with_domain(args, params.domain, params.auth_domain)
+                return result.get("data", result.get("stdout", ""))
+                
+            finally:
+                if json_file_path and json_file_path != params.jsonfile:
+                    try:
+                        os.unlink(json_file_path)
+                    except:
+                        pass
         elif action == "archive":
             params = KeyArchiveParams(**kwargs)
             args = ["keys", "archive", "--name", params.name]
@@ -1741,7 +1929,99 @@ class KeyManagementTool(BaseTool):
                 args.extend(["--label", params.label])
             result = self.execute_with_domain(args, params.domain, params.auth_domain)
             return result.get("data", result.get("stdout", ""))
+        elif action == "validate_import":
+            # Validate import parameters without creating the key
+            params = KeyCreateParams(**kwargs)
+            return params.validate_import_parameters()
+        elif action == "generate_test_key_material":
+            # Generate test key material by creating and then deleting a key
+            algorithm = (kwargs.get("algorithm") or kwargs.get("type", "AES")).upper()
+            size = kwargs.get("size")
+            curve_id = kwargs.get("curve_id")
+            count = kwargs.get("count", 1)
+            format_type = kwargs.get("format", "hex")
+            domain = kwargs.get("domain")
+            
+            results = []
+            
+            for i in range(count):
+                # Create a random key name to avoid conflicts
+                key_name = f"temp_test_material_{secrets.token_hex(8)}"
+                
+                # Prepare parameters based on key type
+                create_params = {
+                    "action": "create",
+                    "name": key_name,
+                    "algorithm": algorithm,
+                    "include_material": True,
+                    "domain": domain
+                }
+                
+                if algorithm in ["AES", "TDES", "HMAC-SHA256"] and size:
+                    create_params["size"] = size
+                elif algorithm == "RSA":
+                    create_params["size"] = size or 2048
+                elif algorithm == "EC":
+                    # EC keys require curve_id but not size
+                    # Valid curve IDs include: prime256v1, secp384r1, secp521r1, etc.
+                    create_params["curve_id"] = curve_id or "prime256v1"
+                    # Remove size for EC keys to avoid conflicts
+                    if "size" in create_params:
+                        del create_params["size"]
+                
+                try:
+                    # Create a temporary key to get its material
+                    result = await self.execute(**create_params)
+                    
+                    # Extract material and metadata
+                    material_info = {
+                        "algorithm": algorithm,
+                        "size_bits": result.get("size"),
+                        "material": result.get("material"),
+                        "format": result.get("format", "raw"),
+                        "description": f"{algorithm} key material"
+                    }
+                    
+                    # For EC keys, add curve ID
+                    if algorithm == "EC" and "curveid" in result:
+                        material_info["curve_id"] = result.get("curveid")
+                    
+                    # For RSA/EC keys, detect format
+                    if "BEGIN PRIVATE KEY" in str(result.get("material", "")):
+                        material_info["format"] = "pem"
+                    elif result.get("format") == "raw" and algorithm in ["AES", "TDES", "HMAC-SHA256"]:
+                        # Format is already raw, but for symmetric keys convert to hex if requested
+                        material_info["format"] = "hex"
+                    
+                    # If key material is in bytes, convert to hex
+                    if material_info["format"] == "raw":
+                        material_info["format"] = "hex"
+                    
+                    # Add to results
+                    results.append(material_info)
+                    
+                finally:
+                    # Always clean up by deleting the temporary key
+                    await self.execute(action="delete", name=key_name, domain=domain)
+                    
+                    # For asymmetric keys (RSA, EC), also delete the corresponding public key
+                    # which is automatically created with the naming convention {key_name}-pub
+                    if algorithm in ["RSA", "EC"]:
+                        try:
+                            pub_key_name = f"{key_name}-pub"
+                            await self.execute(action="delete", name=pub_key_name, domain=domain)
+                        except Exception as e:
+                            # Log but continue if public key deletion fails
+                            print(f"Warning: Could not delete public key {pub_key_name}: {e}")
+            
+            return {
+                "generated_materials": results,
+                "count": len(results),
+                "note": "Test key material generated using actual CipherTrust Manager key creation and deletion."
+            }
         else:
             raise ValueError(f"Unknown action: {action}")
+KEY_TOOLS = [KeyManagementTool]
 
+# Export all key tools
 KEY_TOOLS = [KeyManagementTool]
