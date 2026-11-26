@@ -1,0 +1,62 @@
+# Keep build context free of secrets, local state, and deploy helpers.
+# Dockerfile only COPYs explicit paths; this is defense-in-depth.
+
+# Virtualenvs / caches
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.git/
+.cursor/
+.idea/
+.vscode/
+
+# Secrets & local config (NEVER bake these)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+*credentials*
+*secrets*.json
+**/secrets.json
+
+# Runtime / local data (DB, certs, healthcheck outputs, tokens)
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.log
+
+# Local deploy / scratch scripts (may contain host passwords)
+_*.py
+_*.txt
+_*.sh
+_*.json
+_tmp*
+_push*
+_deploy*
+_redeploy*
+_res_out*
+
+# Windows-only / non-Linux tooling
+tools/ksctl.exe
+
+# Docs / compose (not needed in image; compose mounts at runtime)
+README.md
+.gitignore
+docker-compose*.yml
+Dockerfile*
+.dockerignore

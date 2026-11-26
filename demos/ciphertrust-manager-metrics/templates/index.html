@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CipherTrust Manager Metrics</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/thales-logo.png') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/thales-logo.png') }}" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("cm-metrics-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=20260720cmport2" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app workspace" id="app-shell">
+    <header class="workspace-top">
+      <div class="workspace-brand">
+        <img class="workspace-logo" src="{{ url_for('static', filename='img/thales-logo.png') }}" alt="Thales" width="40" height="40" />
+        <div class="workspace-brand-text">
+          <div class="brand-name">CM Metrics</div>
+        </div>
+      </div>
+
+      <div class="appliance-rail">
+        <div class="appliance-selector" id="appliance-selector">
+          <button type="button" class="appliance-current" id="btn-appliance-current" aria-haspopup="listbox" aria-expanded="false" title="Choose appliance">
+            <span class="appliance-current-dot" aria-hidden="true"></span>
+            <span class="appliance-current-text">
+              <span class="appliance-current-label" id="appliance-current-label">No appliance</span>
+              <span class="appliance-current-meta" id="appliance-current-meta">Add one to begin</span>
+            </span>
+            <span class="appliance-current-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="appliance-menu" id="appliance-menu" hidden role="listbox" aria-label="Quick appliance switch"></div>
+        </div>
+        <button type="button" class="btn btn-sm" id="btn-add" title="Add appliance">Add</button>
+      </div>
+
+      <div class="topbar-actions">
+        <div class="status-pill" id="status-pill">
+          <span class="dot"></span>
+          <span id="status-text">starting…</span>
+        </div>
+        <button type="button" class="btn btn-theme" id="btn-theme" aria-label="Switch to light mode" title="Switch to light mode">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0-5h1v3h-2V2h1zm0 17h1v3h-2v-3h1zM2 11h3v2H2v-2zm17 0h3v2h-3v-2zM4.2 4.2l2.1 2.1-1.4 1.4L2.8 5.6 4.2 4.2zm12.5 12.5 2.1 2.1-1.4 1.4-2.1-2.1 1.4-1.4zM4.2 19.8l1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1zm12.5-12.5 1.4-1.4 2.1 2.1-1.4 1.4-2.1-2.1z"/>
+          </svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M12.1 2a9.9 9.9 0 0 0-1.1.06A10 10 0 1 0 21.94 13a9.9 9.9 0 0 0 .06-1.1A8 8 0 0 1 12.1 2z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn" id="btn-refresh" title="Refresh metrics in the background (retries offline appliances; survives tab switches and browser reload)">Refresh</button>
+        <label class="auto-label">
+          <input type="checkbox" id="auto-refresh" checked />
+          Auto
+        </label>
+      </div>
+    </header>
+
+    <nav class="primary-tabs" id="primary-tabs" aria-label="Dashboard groups">
+      <button type="button" class="primary-tab active" data-group="appliances">Appliances</button>
+      {% for g in dashboard_groups %}
+      <button type="button" class="primary-tab" data-group="{{ g.id }}">{{ g.title }}</button>
+      {% endfor %}
+      <button type="button" class="primary-tab" data-group="healthcheck">Healthcheck</button>
+    </nav>
+
+    <div class="secondary-row is-hidden" id="secondary-row">
+      <div class="secondary-chips" id="secondary-chips" aria-label="Dashboards"></div>
+      <div class="dash-meta-row">
+        <div class="dash-meta">
+          <h1 id="dash-title">Overview</h1>
+          <p id="dash-desc" class="muted">Select or add a CipherTrust Manager appliance to begin.</p>
+        </div>
+        <div class="range-picker" id="range-picker" role="group" aria-label="Chart time range">
+          <button type="button" class="range-btn" data-range="5m">5m</button>
+          <button type="button" class="range-btn" data-range="15m">15m</button>
+          <button type="button" class="range-btn" data-range="30m">30m</button>
+          <button type="button" class="range-btn" data-range="1h">1h</button>
+          <button type="button" class="range-btn" data-range="6h">6h</button>
+          <button type="button" class="range-btn active" data-range="24h">24h</button>
+          <button type="button" class="range-btn" data-range="7d">7d</button>
+          <button type="button" class="range-btn" data-range="30d">30d</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="main">
+      <section class="appliances-view" id="appliances-view" aria-label="Appliance tree">
+        <div class="appliances-view-toolbar">
+          <div>
+            <h2 class="appliances-view-title">Fleet</h2>
+            <p class="muted appliances-view-sub">Clusters and standalone nodes. Click a node to open its Overview.</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-add-tree" title="Add appliance">Add appliance</button>
+        </div>
+        <div class="fleet-health" id="fleet-health" aria-label="Fleet health over time" hidden>
+          <div class="fleet-health-head">
+            <div>
+              <div class="fleet-health-title">Fleet health</div>
+              <div class="muted fleet-health-sub" id="fleet-health-summary">Online / offline over time</div>
+            </div>
+            <div class="range-picker fleet-range-picker" id="fleet-range-picker" role="group" aria-label="Fleet health time range">
+              <button type="button" class="range-btn" data-range="5m">5m</button>
+              <button type="button" class="range-btn" data-range="15m">15m</button>
+              <button type="button" class="range-btn" data-range="30m">30m</button>
+              <button type="button" class="range-btn" data-range="1h">1h</button>
+              <button type="button" class="range-btn" data-range="6h">6h</button>
+              <button type="button" class="range-btn active" data-range="24h">24h</button>
+              <button type="button" class="range-btn" data-range="7d">7d</button>
+              <button type="button" class="range-btn" data-range="30d">30d</button>
+            </div>
+          </div>
+          <div class="fleet-health-chart-wrap">
+            <canvas id="fleet-health-chart" aria-label="Online and offline appliance counts"></canvas>
+          </div>
+        </div>
+        <div class="appliance-tree" id="appliance-tree" role="tree" aria-label="Appliances"></div>
+      </section>
+      <section class="healthcheck-view" id="healthcheck-view" hidden aria-label="Healthcheck"></section>
+      <section class="panels" id="panels" hidden aria-live="polite"></section>
+    </main>
+  </div>
+
+  <!-- Add / connect appliance modal -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title">Connect CipherTrust Manager</h2>
+      <p class="muted">Enter appliance credentials. SSL/TLS verification is disabled. Cluster peers are discovered automatically. HTTPS defaults to port 443 — set a custom port when CM listens elsewhere.</p>
+      <form id="connect-form">
+        <div class="host-port-row">
+          <label class="host-field">IP / Hostname / URL
+            <input name="host" required placeholder="10.1.2.3 or cm.example.com" autocomplete="off" />
+          </label>
+          <label class="port-field">HTTPS port <span class="optional">(optional)</span>
+            <input name="port" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="443" autocomplete="off" />
+          </label>
+        </div>
+        <label>Username
+          <input name="username" required placeholder="admin" autocomplete="username" />
+        </label>
+        <label>Password
+          <input name="password" type="password" required autocomplete="current-password" />
+        </label>
+        <label>Display name <span class="optional">(optional)</span>
+          <input name="display_name" placeholder="Prod CM" />
+        </label>
+        <label>Location <span class="optional">(optional)</span>
+          <input name="location" placeholder="Ashburn, VA / Azure East US" autocomplete="off" />
+        </label>
+        <label class="check">
+          <input type="checkbox" name="discover_cluster" checked />
+          Auto-discover &amp; add clustered nodes
+        </label>
+        <div class="form-error" id="form-error" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn" id="btn-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-connect">Connect</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit appliance / cluster modal -->
+  <div class="modal-backdrop" id="edit-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+      <h2 id="edit-modal-title">Edit appliance</h2>
+      <p class="muted" id="edit-modal-sub">Update the display name and location.</p>
+      <form id="edit-form">
+        <input type="hidden" name="appliance_id" value="" />
+        <input type="hidden" name="edit_target" value="appliance" />
+        <label id="edit-name-label">Display name
+          <input name="display_name" placeholder="Prod CM" autocomplete="off" />
+        </label>
+        <label id="edit-location-wrap">Location <span class="optional">(optional)</span>
+          <input name="location" placeholder="Ashburn, VA / Azure East US" autocomplete="off" />
+        </label>
+        <div class="form-error" id="edit-form-error" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn" id="btn-edit-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-edit-save">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    window.CM_METRICS = {
+      scrapeInterval: {{ scrape_interval | int }} * 1000,
+      initialDashboard: "overview",
+      initialApplianceCount: {{ appliance_count | int }},
+      dashboardGroups: {{ dashboard_groups | tojson }}
+    };
+  </script>
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}?v=20260720cmport2"></script>
+</body>
+</html>

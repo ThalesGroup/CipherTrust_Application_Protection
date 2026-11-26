@@ -1,0 +1,127 @@
+{% from "macros.html" import section_title, detail_item, badge_pill %}
+<div id="tab-keys" class="content-panel">
+    {{ section_title("fa-solid fa-key", "Cryptographic Keys Dashboard") }}
+
+    <div class="details-grid" style="margin-bottom: 1.5rem;">
+        {{ detail_item("Total Unique Keys", key_metrics.get("total_unique_keys", 0)) }}
+        {{ detail_item("Total Key Versions", key_metrics.get("total_raw_keys", 0)) }}
+        {{ detail_item("Non-Active Keys", key_metrics.get("non_active_keys", 0), "color: var(--warn-color)" if key_metrics.get('non_active_keys', 0) > 0 else "color: var(--text-primary)") }}
+        {{ detail_item("Weak Key Settings", key_metrics.get("weak_keys", 0), "color: var(--fail-color)" if key_metrics.get('weak_keys', 0) > 0 else "color: var(--text-primary)") }}
+    </div>
+
+    <div class="details-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 1.5rem;">
+        <!-- Key Types breakdown -->
+        <div class="detail-item">
+            <div class="detail-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">Key Types Breakdown</div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.25rem;">
+                {% for k, v in key_metrics.get("key_types", {}).items() | sort %}
+                <li style="display:flex; justify-content:space-between; font-size:0.875rem;"><span>{{ k }}</span><strong style="color: var(--accent-primary);">{{ v }}</strong></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Key States breakdown -->
+        <div class="detail-item">
+            <div class="detail-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">Key States Breakdown</div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.25rem;">
+                {% for k, v in key_metrics.get("key_states", {}).items() | sort %}
+                <li style="display:flex; justify-content:space-between; font-size:0.875rem;"><span>{{ k }}</span><strong style="color: {{ 'var(--pass-color)' if k == 'Active' else 'var(--warn-color)' }};">{{ v }}</strong></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Key Labels breakdown -->
+        <div class="detail-item">
+            <div class="detail-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.25rem;">Key Labels (Key=Value counts)</div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.25rem; max-height: 120px; overflow-y: auto;">
+                {% if key_metrics.get("key_labels") %}
+                {% for k, v in key_metrics.get("key_labels", {}).items() | sort %}
+                <li style="display:flex; justify-content:space-between; font-size:0.875rem;"><span>{{ k }}</span><strong style="color: var(--text-primary);">{{ v }}</strong></li>
+                {% endfor %}
+                {% else %}
+                <li style="font-size:0.875rem; color: var(--text-secondary);">No labeled keys found.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    {{ section_title("fa-solid fa-triangle-exclamation", "Weak Keys", 3, "font-size: 1.1rem;") }}
+    <div class="table-container" style="margin-bottom: 1.5rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Object Type</th>
+                    <th>Algorithm</th>
+                    <th>Size</th>
+                    <th>Highest Version</th>
+                    <th>Versions (Count)</th>
+                    <th>Labels</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set weak_keys = collapsed_keys | selectattr("is_weak") | list %}
+                {% if weak_keys %}
+                {% for k in weak_keys %}
+                <tr>
+                    <td><strong>{{ k.get("name") }}</strong></td>
+                    <td>{{ k.get("objectType") }}</td>
+                    <td>{{ k.get("algorithm") }}</td>
+                    <td>{{ k.get("size") or "N/A" }}</td>
+                    <td>v{{ k.get("highest_version") }}</td>
+                    <td>{{ k.get("version_count") }}</td>
+                    <td>
+                        {% if k.get("labels") %}{% for lk, lv in k.get("labels", {}).items() %}<span class="badge-pill active" style="font-size:0.7rem; background:rgba(59, 130, 246, 0.15); color:var(--accent-primary);">{{ lk }}={{ lv }}</span>{% endfor %}{% else %}None{% endif %}
+                    </td>
+                    <td>
+                        {{ badge_pill(k.get("state"), "active" if k.get("state") == "Active" else "inactive") }}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="8" style="text-align:center; color:var(--text-secondary);">No weak keys detected.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {{ section_title("fa-solid fa-eye-slash", "Inactive Keys", 3, "font-size: 1.1rem; margin-top: 1.5rem;") }}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Object Type</th>
+                    <th>Algorithm</th>
+                    <th>Size</th>
+                    <th>Highest Version</th>
+                    <th>Versions (Count)</th>
+                    <th>Labels</th>
+                    <th>State</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set inactive_keys = collapsed_keys | rejectattr("state", "equalto", "Active") | list %}
+                {% if inactive_keys %}
+                {% for k in inactive_keys %}
+                <tr>
+                    <td><strong>{{ k.get("name") }}</strong></td>
+                    <td>{{ k.get("objectType") }}</td>
+                    <td>{{ k.get("algorithm") }}</td>
+                    <td>{{ k.get("size") or "N/A" }}</td>
+                    <td>v{{ k.get("highest_version") }}</td>
+                    <td>{{ k.get("version_count") }}</td>
+                    <td>
+                        {% if k.get("labels") %}{% for lk, lv in k.get("labels", {}).items() %}<span class="badge-pill active" style="font-size:0.7rem; background:rgba(59, 130, 246, 0.15); color:var(--accent-primary);">{{ lk }}={{ lv }}</span>{% endfor %}{% else %}None{% endif %}
+                    </td>
+                    <td>
+                        {{ badge_pill(k.get("state"), "inactive") }}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr><td colspan="8" style="text-align:center; color:var(--text-secondary);">No inactive keys detected.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherTrust Platform Healthcheck Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+{% include "style.css" %}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-logo"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="brand-text">
+                <h1>CipherTrust Platform Healthcheck</h1>
+                <p>Generated on {{ now_str }} (Local Time) • Server: {{ sys_info.get("name", "Unknown Node") }}</p>
+            </div>
+        </div>
+        <div class="overall-badge badge-{{ analysis['status'].lower() }}">
+            <i class="fa-solid fa-{{ 'circle-check' if analysis['status']=='PASS' else 'triangle-exclamation' if analysis['status']=='WARNING' else 'circle-xmark' }}"></i>
+            Overall Status: {{ analysis['status'] }}
+        </div>
+    </header>
+
+    <div class="main-layout">
+        <div class="sidebar">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-overview')">
+                <i class="fa-solid fa-gauge"></i> Overview
+            </button>
+            {% for tab in nav_tabs %}
+            <button class="tab-btn" onclick="switchTab(event, 'tab-{{ tab.id }}')">
+                <i class="{{ tab.icon }}"></i> <span class="tab-label">{{ tab.label }}</span>
+                <span class="badge" style="background: var(--{{ analysis[tab.id]['status'].lower() }}-color)">{{ analysis[tab.id]['status'] }}</span>
+            </button>
+            {% endfor %}
+
+            <a class="sidebar-footer-link" href="https://cpl.thalesgroup.com/support/professional-services/solution-consulting" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                <span>Contact Thales<br>Professional Services</span>
+            </a>
+        </div>
+
+        <div class="content-area">
+            <!-- OVERVIEW TAB -->
+{% include "tabs/overview.html" %}
+
+            <!-- SYSTEM TAB -->
+{% include "tabs/system.html" %}
+
+            <!-- LICENSING TAB -->
+{% include "tabs/licensing.html" %}
+
+            <!-- ACCESS TAB -->
+{% include "tabs/access.html" %}
+
+            <!-- DOMAINS TAB -->
+{% include "tabs/domains.html" %}
+
+            <!-- NETWORK TAB -->
+{% include "tabs/network.html" %}
+
+            <!-- KEYS TAB -->
+{% include "tabs/keys.html" %}
+
+            <!-- CERTIFICATE AUTHORITIES TAB -->
+{% include "tabs/ca.html" %}
+
+            <!-- TRANSPARENT ENCRYPTION TAB -->
+{% include "tabs/cte.html" %}
+
+            <!-- CLIENTS TAB -->
+{% include "tabs/clients.html" %}
+
+            <!-- EVENT RECORDS TAB -->
+{% include "tabs/records.html" %}
+
+        </div>
+    </div>
+
+    <script>
+{% include "script.js" %}
+    </script>
+</body>
+</html>

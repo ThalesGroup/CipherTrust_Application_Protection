@@ -1,0 +1,22 @@
+services:
+  ciphertrust-metrics:
+    image: sanyambassi/ciphertrust-metrics:latest
+    build: .
+    ports:
+      - "5050:5050"
+    environment:
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "5050"
+      FLASK_DEBUG: "false"
+      FLASK_HTTPS: "false"
+      # Persist encryption key across restarts (required if you already have appliances)
+      # SECRET_KEY: "replace-with-a-long-random-string"
+      SCRAPE_INTERVAL: "60"
+      OPS_SNAPSHOT_INTERVAL: "120"
+      HISTORY_KEEP_DAYS: "30"
+    volumes:
+      - ciphertrust-metrics-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ciphertrust-metrics-data:

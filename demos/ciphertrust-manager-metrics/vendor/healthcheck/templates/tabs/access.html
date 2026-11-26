@@ -1,0 +1,216 @@
+{% from "macros.html" import section_title, badge_pill %}
+<div id="tab-access" class="content-panel">
+    {{ section_title("fa-solid fa-user-shield", "User Accounts & Access Policies") }}
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-locked')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-user-slash" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Locked Accounts</span>
+    </button>
+    <div id="access-locked" class="severity-content active">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Last Login</th>
+                        <th>Logins Count</th>
+                        <th>Failed Logins</th>
+                        <th>Login Flags</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ locked_users_html }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-unused')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-user-clock" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Unused Accounts (0 logins or inactive &gt; 90 days)</span>
+    </button>
+    <div id="access-unused" class="severity-content active">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Last Login</th>
+                        <th>Logins Count</th>
+                        <th>Failed Logins</th>
+                        <th>Login Flags</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ unused_users_html }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-highrisk')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-triangle-exclamation" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>High Risk Accounts (failed logins &gt; 5)</span>
+    </button>
+    <div id="access-highrisk" class="severity-content active">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Last Login</th>
+                        <th>Logins Count</th>
+                        <th>Failed Logins</th>
+                        <th>Login Flags</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ high_risk_users_html }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-pwdpolicies')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-key" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Password Policies</span>
+    </button>
+    <div id="access-pwdpolicies" class="severity-content active">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Policy Name</th>
+                        <th>Min Length</th>
+                        <th>Max Length</th>
+                        <th>Min Upper</th>
+                        <th>Min Lower</th>
+                        <th>Min Digits</th>
+                        <th>Min Special</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pwd_policies %}
+                    <tr>
+                        <td><strong>{{ p.get("policy_name") }}</strong></td>
+                        <td>{{ p.get("inclusive_min_total_length") }}</td>
+                        <td>{{ p.get("inclusive_max_total_length") }}</td>
+                        <td>{{ p.get("inclusive_min_upper_case") }}</td>
+                        <td>{{ p.get("inclusive_min_lower_case") }}</td>
+                        <td>{{ p.get("inclusive_min_digits") }}</td>
+                        <td>{{ p.get("inclusive_min_other") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-quorum')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-people-group" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Active Quorum Policies</span>
+    </button>
+    <div id="access-quorum" class="severity-content active">
+        {% if active_quorum_policies %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Profile</th>
+                        <th>Operations</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for qp in active_quorum_policies %}
+                    <tr>
+                        <td><strong>{{ qp.get("profile") }}</strong></td>
+                        <td>{{ qp.get("operation", []) | join(" • ") }}</td>
+                        <td>{{ badge_pill("Active", "active") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-secondary); font-size:0.875rem; margin-top:0.5rem;">No active quorum policies configured.</p>
+        {% endif %}
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-groups')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-users-rectangle" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Custom Security Groups (Non-Builtin)</span>
+    </button>
+    <div id="access-groups" class="severity-content active">
+        {% if custom_groups %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Group Name</th>
+                        <th>Description</th>
+                        <th>Created At</th>
+                        <th>Users Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cg in custom_groups %}
+                    <tr>
+                        <td><strong>{{ cg.get("name") }}</strong></td>
+                        <td>{{ cg.get("description") or "None" }}</td>
+                        <td>{{ format_readable_date(cg.get("created_at")) }}</td>
+                        <td>{{ cg.get("users_count") or 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-secondary); font-size:0.875rem; margin-top:0.5rem;">No custom security groups detected.</p>
+        {% endif %}
+    </div>
+
+    <button class="severity-header neutral" onclick="toggleSeverityGroup('access-admin')">
+        <i class="fa-solid fa-chevron-down toggle-icon"></i>
+        <i class="fa-solid fa-user-lock" style="margin-left: 0.5rem; margin-right: 0.25rem;"></i>
+        <span>Builtin Admin Group Members (`admin`)</span>
+    </button>
+    <div id="access-admin" class="severity-content active">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for au in admin_users %}
+                    <tr>
+                        <td><strong>{{ au.get("username") }}</strong></td>
+                        <td>{{ au.get("name") or au.get("nickname") or "N/A" }}</td>
+                        <td>{{ au.get("email") or "N/A" }}</td>
+                        <td>{% if not au.get("last_login") %}<span style="color:var(--warn-color); font-weight:bold;">Never</span>{% else %}{{ format_readable_date(au.get("last_login")) }}{% endif %}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" style="text-align:center; color:var(--text-secondary); font-size:0.875rem;">No members in admin group.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
